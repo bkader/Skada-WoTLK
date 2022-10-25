@@ -208,7 +208,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 	local mod_cols = nil
 
 	local function log_ccdone(set)
-		local player = Skada:GetPlayer(set, cc_table.srcGUID, cc_table.srcName, cc_table.srcFlags)
+		local player = Skada:GetPlayer(set, cc_table.actorid, cc_table.actorname, cc_table.actorflags)
 		if not player then return end
 
 		-- increment the count.
@@ -236,13 +236,15 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 	local function aura_applied(t)
 		if t.spellid and cc_spells[t.spellid] or extra_spells[t.spellid] then
-			cc_table.srcGUID, cc_table.srcName, cc_table.srcFlags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
-			cc_table.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
+			cc_table.actorid = t.srcGUID
+			cc_table.actorname = t.srcName
+			cc_table.actorflags = t.srcFlags
+
 			cc_table.spellid = t.spellstring
+			cc_table.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
+			cc_table.srcName = nil
 
-			cc_table.dstGUID = nil
-			cc_table.dstFlags = nil
-
+			Skada:FixPets(cc_table)
 			Skada:DispatchSets(log_ccdone)
 		end
 	end
@@ -471,7 +473,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	}
 
 	local function log_cctaken(set)
-		local player = Skada:GetPlayer(set, cc_table.dstGUID, cc_table.dstName, cc_table.dstFlags)
+		local player = Skada:GetPlayer(set, cc_table.actorid, cc_table.actorname, cc_table.actorflags)
 		if not player then return end
 
 		-- increment the count.
@@ -499,15 +501,13 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 
 	local function aura_applied(t)
 		if t.spellid and cc_spells[t.spellid] or extra_spells[t.spellid] or raid_spells[t.spellid] then
-			cc_table.dstGUID = t.dstGUID
-			cc_table.dstName = t.dstName
-			cc_table.dstFlags = t.dstFlags
+			cc_table.actorid = t.dstGUID
+			cc_table.actorname = t.dstName
+			cc_table.actorflags = t.dstFlags
 
-			cc_table.srcName = t.srcName
 			cc_table.spellid = t.spellstring
-
-			cc_table.srcGUID = nil
-			cc_table.srcFlags = nil
+			cc_table.srcName = Skada:FixPetsName(t.srcGUID, t.srcName, t.srcFlags)
+			cc_table.dstName = nil
 
 			Skada:DispatchSets(log_cctaken)
 		end

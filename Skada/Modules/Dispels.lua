@@ -61,10 +61,15 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 
 	local function spell_dispel(t)
 		if t.spellid and not ignored_spells[t.spellid] and not ignored_spells[t.extraspellid] then
-			dispel.actorid, dispel.actorname, dispel.actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
+			dispel.actorid = t.srcGUID
+			dispel.actorname = t.srcName
+			dispel.actorflags = t.srcFlags
+
 			dispel.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
 			dispel.spellid = t.spellstring
 			dispel.extraspellid = t.extrastring
+
+			Skada:FixPets(dispel)
 			Skada:DispatchSets(log_dispel)
 		end
 	end

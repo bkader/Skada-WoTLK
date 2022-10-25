@@ -4,7 +4,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 
 -- frequently used global (sort of...)
 local pairs, format, uformat = pairs, string.format, Private.uformat
-local time, tonumber, min, floor = time, tonumber, math.min, math.floor
+local time, min, floor = time, math.min, math.floor
 local _
 
 -- common functions and locals
@@ -135,6 +135,7 @@ local special_buffs = {
 }
 
 do
+	local spell_split = Private.spell_split
 	local PercentToRGB = Private.PercentToRGB
 
 	-- formats value texts
@@ -260,7 +261,7 @@ do
 
 			local count, uptime = 0, 0
 			for id, spell in pairs(spells) do
-				local spellid = tonumber(id)
+				local spellid = spell_split(id)
 				if (auratype == "BUFF" and spellid > 0) or (auratype == "DEBUFF" and spellid < 0) then
 					count = count + 1
 					uptime = uptime + spell.uptime
@@ -326,7 +327,7 @@ do
 
 		local nr = 0
 		for id, spell in pairs(spells) do
-			local spellid = tonumber(id)
+			local spellid = spell_split(id)
 			if
 				(auratype == "BUFF" and spellid > 0 and spell.uptime > 0) or
 				(auratype == "DEBUFF" and spellid < 0 and spell.uptime > 0)
@@ -722,11 +723,14 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 	local function handle_debuff(t)
 		if t.auratype ~= "DEBUFF" or not t.spellid or ignored_debuffs[t.spellid] then return end
 
-		aura.actorid, aura.actorname, aura.actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
+		aura.actorid = t.srcGUID
+		aura.actorname = t.srcName
+		aura.actorflags = t.srcFlags
 		aura.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
 
 		aura.spellid = t.spellstring
 		aura.type = t.auratype
+		Skada:FixPets(aura)
 
 		if t.event == "SPELL_AURA_APPLIED" then
 			Skada:DispatchSets(log_auraapplied)

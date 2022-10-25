@@ -140,18 +140,21 @@ Skada:RegisterModule("Healing", function(L, P)
 	local function spell_heal(t)
 		if not t.spellid or ignored_spells[t.spellid] then return end
 
-		local srcQueued = get_temp_unit(t.srcGUID)
-		if srcQueued and srcQueued.spellid == t.spellid then
-			heal.actorid, heal.actorname, heal.actorflags = srcQueued.id, srcQueued.name, srcQueued.flag
-		else
-			heal.actorid, heal.actorname, heal.actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
-		end
 		heal.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
-
 		heal.spellid = t.spellstring
 		heal.amount = t.amount
 		heal.overheal = t.overheal
 		heal.critical = t.critical
+
+		local srcQueued = get_temp_unit(t.srcGUID)
+		if srcQueued and srcQueued.spellid == t.spellid then
+			heal.actorid, heal.actorname, heal.actorflags = srcQueued.id, srcQueued.name, srcQueued.flag
+		else
+			heal.actorid = t.srcGUID
+			heal.actorname = t.srcName
+			heal.actorflags = t.srcFlags
+			Skada:FixPets(heal)
+		end
 
 		Skada:DispatchSets(log_heal)
 	end

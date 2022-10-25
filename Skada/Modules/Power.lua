@@ -75,11 +75,15 @@ Skada:RegisterModule("Resources", function(L, P)
 
 	local function spell_energize(t)
 		if t.spellid and not ignored_spells[t.spellid] then
-			gain.actorid, gain.actorname, gain.actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
+			gain.actorid = t.srcGUID
+			gain.actorname = t.srcName
+			gain.actorflags = t.srcFlags
+
 			gain.spellid = t.spellstring
 			gain.amount = t.amount
 			gain.type = t.powertype
 
+			Skada:FixPets(gain)
 			Skada:DispatchSets(log_gain)
 		end
 	end
@@ -186,7 +190,7 @@ Skada:RegisterModule("Resources", function(L, P)
 		for spellid, amount in pairs(spells) do
 			nr = nr + 1
 
-			local d = win:spell(nr, spellid, true)
+			local d = win:spell(nr, spellid, false)
 			d.value = amount
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end

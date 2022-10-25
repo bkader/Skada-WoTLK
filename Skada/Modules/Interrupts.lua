@@ -67,12 +67,15 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		-- invalid/ignored spell?
 		if ignored_spells[spellid] or (t.extraspellid and ignored_spells[t.extraspellid]) then return end
 
-		data.actorid, data.actorname, data.actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
+		data.actorid = t.srcGUID
+		data.actorname = t.srcName
+		data.actorflags = t.srcFlags
 		data.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
 
 		data.spellid = t.spellstring
 		data.extraspellid = t.extrastring
 
+		Skada:FixPets(data)
 		Skada:DispatchSets(log_interrupt)
 
 		if not M.interruptannounce or t.srcGUID ~= Skada.userGUID then return end
