@@ -535,14 +535,14 @@ end
 ---------------------------------------------------------------------------
 -- Buffs Module
 
-Skada:RegisterModule("Buffs", function(_, P, _, C)
+Skada:RegisterModule("Buffs", function(_, P, G, C)
 	local mod = Skada:NewModule("Buffs")
 	local spellmod = mod:NewModule("Buff spell list")
 	local spelltargetmod = spellmod:NewModule("Players list")
 	local mod_cols = nil
 
 	local function handle_buff(t)
-		if t.spellid and not ignored_buffs[t.spellid] and (t.auratype == "BUFF" or special_buffs[t.spellid]) then
+		if t.spellid and not ignored_buffs[t.spellid] and t.spellstring and (t.auratype == "BUFF" or special_buffs[t.spellid]) then
 			aura.actorid = t.dstGUID
 			aura.actorname = t.dstName
 			aura.actorflags = t.dstFlags
@@ -636,14 +636,25 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 	end
 
 	do
-		local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
+		local UnitName, UnitGUID, UnitAura = UnitName, UnitGUID, UnitAura
 		local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
+
+		-- per-session spell strings cache
+		local spellstrings = G.spellstrings or {}
+		G.spellstrings = spellstrings
+
+		local cache_events = {SPELL_AURA_APPLIED = true, SPELL_AURA_REFRESH = true}
+		Skada:RegisterCallback("Skada_SpellString", function(_, t, spellid, spellstring)
+			if cache_events[t.event] and t.auratype == "BUFF" and not spellstrings[spellid] then
+				spellstrings[spellid] = spellstring
+			end
+		end)
 
 		local function check_unit_buffs(unit, owner)
 			if owner or UnitIsDeadOrGhost(unit) then return end
 			local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
 			for i = 1, 40 do
-				local _, rank, _, _, _, _, _, unitCaster, _, _, spellid = UnitBuff(unit, i)
+				local _, rank, _, _, _, _, _, unitCaster, _, _, spellid = UnitAura(unit, i, "HELPFUL")
 				if not spellid then
 					break -- nothing found!
 				elseif unitCaster and rank ~= SPELL_PASSIVE then
@@ -652,6 +663,7 @@ Skada:RegisterModule("Buffs", function(_, P, _, C)
 					t.dstGUID = dstGUID
 					t.dstName = dstName
 					t.spellid = spellid
+					t.spellstring = spellstrings[spellid]
 					t.auratype = "BUFF"
 					t.__temp = true
 					handle_buff(t)

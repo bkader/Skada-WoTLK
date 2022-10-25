@@ -31,7 +31,12 @@ ns.options = {
 }
 
 -- common weak table
-Private.weaktable = {__mode = "kv"}
+do
+	local weaktable = {__mode = "kv"}
+	function Private.WeakTable(t)
+		return setmetatable(t or {}, weaktable)
+	end
+end
 
 -------------------------------------------------------------------------------
 -- flags/bitmasks
@@ -62,7 +67,7 @@ end
 
 function Private.table_pool()
 	local pool = {tables = {}, new = true, del = true, clear = true}
-	local tables = setmetatable(pool.tables, Private.weaktable)
+	local tables = Private.WeakTable(pool.tables)
 
 	-- reuses or creates a table
 	pool.new = function()
@@ -1199,6 +1204,7 @@ do
 	local UnitIsPlayer = UnitIsPlayer
 
 	-- add extra bitmasks if needed
+	local BITMASK_GROUP = Private.BITMASK_GROUP
 	local BITMASK_PETS = Private.BITMASK_PETS
 	local BITMASK_FRIENDLY = Private.BITMASK_FRIENDLY
 	local BITMASK_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
@@ -1225,8 +1231,8 @@ do
 
 	do
 		-- tables used to cached results in order to speed up check
-		local __t1 = setmetatable({}, Private.weaktable) -- cached players
-		local __t2 = setmetatable({}, Private.weaktable) -- cached pets
+		local __t1 = Private.WeakTable() -- cached players
+		local __t2 = Private.WeakTable() -- cached pets
 
 		-- checks if the guid is a player (extra: helps is_pet)
 		function Private.is_player(guid, name, flags)
@@ -1311,6 +1317,36 @@ do
 	-- simply removes the pet from the table.
 	function Private.dismiss_pet(petGUID)
 		pets[petGUID] = del(pets[petGUID])
+	end
+
+	-- checks given flags retention/interet
+	function Private.check_flags_interest(guid, flags, nopets)
+		local is_interesting = (players[guid] ~= nil)
+		if not is_interesting and band(flags, BITMASK_GROUP) ~= 0 then
+			if nopets then
+				is_interesting = band(flags, BITMASK_PETS) == 0
+			else
+				is_interesting = true
+			end
+		end
+		if not is_interesting and not nopets and band(flags, BITMASK_PETS) ~= 0 and pets[guid] then
+			is_interesting = true
+		end
+		return is_interesting
+	end
+
+	-- checks whether the give guid/flags are pets
+	function Private.check_pet_flags(petGUID, petFlags, ownerFlags)
+		if band(ownerFlags, BITMASK_GROUP) ~= 0 then
+			return true -- owner is a group member?
+		end
+		if band(ownerFlags, BITMASK_PETS) ~= 0 then
+			return true -- summoned by another pet?
+		end
+		if band(petFlags, BITMASK_PETS) ~= 0 and pets[petGUID] then
+			return true -- already known pet
+		end
+		return false
 	end
 end
 

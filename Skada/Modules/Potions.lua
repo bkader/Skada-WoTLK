@@ -29,7 +29,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		end
 	end
 
-	local function log_potion(set, actorid, actorname, actorflags, spellid)
+	local function log_potion(set, actorid, actorname, actorflags, potionid)
 		local actor = Skada:GetPlayer(set, actorid, actorname, actorflags)
 		if not actor then return end
 
@@ -38,16 +38,15 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		set.potion = (set.potion or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
-		if (set == Skada.total and not P.totalidc) or not spellid then return end
+		if set == Skada.total and not P.totalidc then return end
 
-		local potionid = potion_ids[spellid]
 		actor.potionspells = actor.potionspells or {}
 		actor.potionspells[potionid] = (actor.potionspells[potionid] or 0) + 1
 	end
 
 	local function potion_used(t)
 		if t.spellid and potion_ids[t.spellid] then
-			Skada:DispatchSets(log_potion, t.srcGUID, t.srcName, t.srcFlags, t.spellid)
+			Skada:DispatchSets(log_potion, t.srcGUID, t.srcName, t.srcFlags, potion_ids[t.spellid])
 		end
 		if t.__temp then t = del(t) end
 	end

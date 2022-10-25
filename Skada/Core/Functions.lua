@@ -12,6 +12,7 @@ local UnitClass, GetPlayerInfoByGUID = UnitClass, GetPlayerInfoByGUID
 local GetClassFromGUID = Skada.GetClassFromGUID
 local new, del = Private.newTable, Private.delTable
 local clear, copy = Private.clearTable, Private.tCopy
+local callbacks = Skada.callbacks
 local userName = Skada.userName
 
 local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
@@ -809,7 +810,7 @@ do
 			self:RemoveAllComms()
 		end
 
-		self.callbacks:Fire("Skada_UpdateComms", enable)
+		callbacks:Fire("Skada_UpdateComms", enable)
 	end
 
 	function Skada.AddComm(self, const, func)
@@ -1155,10 +1156,10 @@ do
 	local GetUnitRole = Skada.GetUnitRole
 	local GetUnitSpec = Skada.GetUnitSpec
 	local players, pets = Private.players, Private.pets
-	local modes, callbacks = Skada.modes, Skada.callbacks
 	local playerPrototype = Skada.playerPrototype
 	local enemyPrototype = Skada.enemyPrototype
-	local userGUID = Skada.userGUID
+	local modes, userGUID = Skada.modes, Skada.userGUID
+	local BITMASK_FRIENDLY = Private.BITMASK_FRIENDLY
 
 	-- finds a player that was already recorded
 	local dummy_pet = {class = "PET"} -- used as fallback
@@ -1558,6 +1559,7 @@ do
 		end
 	end
 
+	local BITMASK_GROUP = Private.BITMASK_GROUP
 	local ARGS = {} -- reusable args table
 
 	-- combat log handler
@@ -1607,9 +1609,15 @@ do
 
 		if args.spellid and args.spellschool then
 			args.spellstring = format((args.is_dot or args.is_hot) and "-%s.%s" or "%s.%s", args.spellid, args.spellschool)
+			if band(args.srcFlags, BITMASK_GROUP) ~= 0 or band(args.dstFlags, BITMASK_GROUP) ~= 0 then
+				callbacks:Fire("Skada_SpellString", args, args.spellid, args.spellstring)
+			end
 		end
 		if args.extraspellid and args.extraschool then
 			args.extrastring = format("%s.%s", args.extraspellid, args.extraschool)
+			if band(args.srcFlags, BITMASK_GROUP) ~= 0 or band(args.dstFlags, BITMASK_GROUP) ~= 0 then
+				callbacks:Fire("Skada_SpellString", args, args.extraspellid, args.extrastring)
+			end
 		end
 
 		return self:OnCombatEvent(args)

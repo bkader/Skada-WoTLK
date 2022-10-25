@@ -3210,40 +3210,6 @@ do
 		end
 	end
 
-	local function check_pet_flags(petGUID, petFlags, ownerFlags)
-		if band(ownerFlags, BITMASK_GROUP) ~= 0 then
-			return true -- owner is a group member?
-		end
-
-		if band(ownerFlags, BITMASK_PETS) ~= 0 then
-			return true -- summoned by another pet?
-		end
-
-		if band(petFlags, BITMASK_PETS) ~= 0 and pets[petGUID] then
-			return true -- already known pet
-		end
-
-		return false
-	end
-
-	local function check_flags_interest(guid, flags, nopets)
-		local is_interesting = (players[guid] ~= nil)
-
-		if not is_interesting and band(flags, BITMASK_GROUP) ~= 0 then
-			if nopets then
-				is_interesting = band(flags, BITMASK_PETS) == 0
-			else
-				is_interesting = true
-			end
-		end
-
-		if not is_interesting and not nopets and band(flags, BITMASK_PETS) ~= 0 and pets[guid] then
-			is_interesting = true
-		end
-
-		return is_interesting
-	end
-
 	local BITMASK_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
 	local function check_boss_fight(set, t, src_is_interesting, dst_is_interesting)
 		-- set mobname
@@ -3307,6 +3273,9 @@ do
 			end
 		end
 	end
+
+	local check_flags_interest = Private.check_flags_interest
+	local check_pet_flags = Private.check_pet_flags
 
 	local function check_autostop(set, event, guid, flags)
 		if event == "UNIT_DIED" and check_flags_interest(guid, flags, true) then
