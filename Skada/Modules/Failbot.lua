@@ -33,15 +33,9 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		set.fail = (set.fail or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
-		if set == Skada.total and not P.totalidc then return end
-
-		local count = actor.failspells and actor.failspells[spellid]
-		if not count then
-			actor.failspells = actor.failspells or {}
-			actor.failspells[spellid] = 1
-		else
-			count = count + 1
-		end
+		if (set == Skada.total and not P.totalidc) or not spellid then return end
+		actor.failspells = actor.failspells or {}
+		actor.failspells[spellid] = (actor.failspells[spellid] or 0) + 1
 	end
 
 	local function on_fail(failname, actorname, failtype, ...)

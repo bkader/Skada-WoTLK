@@ -70,8 +70,8 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 		win.title = uformat(L["%s's parry targets"], win.actorname)
 		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		local total = (actor and not enemy) and actor.parry
+		local actor = set:GetActor(win.actorname, win.actorid)
+		local total = (actor and not actor.enemy) and actor.parry
 		local targets = (total and total > 0) and actor.parrytargets
 
 		if not targets then

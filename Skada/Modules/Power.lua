@@ -174,8 +174,8 @@ Skada:RegisterModule("Resources", function(L, P)
 		win.title = uformat(L["%s's gained %s"], win.actorname, L[self.powername])
 		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if enemy then return end -- unavailable for enemies yet
+		local actor = set:GetActor(win.actorname, win.actorid)
+		if not actor or actor.enemy then return end -- unavailable for enemies yet
 
 		local total = actor and self.power and actor[self.power]
 		local spells = (total and total > 0) and actor[self.spells]

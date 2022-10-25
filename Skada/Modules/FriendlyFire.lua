@@ -32,7 +32,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		local actor = Skada:GetPlayer(set, dmg.actorid, dmg.actorname, dmg.actorflags)
 		if not actor then
 			return
-		elseif not passive_spells[dmg.spellid] then
+		elseif not passive_spells[dmg.spell] then
 			Skada:AddActiveTime(set, actor, dmg.dstName)
 		end
 
@@ -64,6 +64,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 			dmg.actorname = t.srcName
 			dmg.actorflags = t.srcFlags
 
+			dmg.spell = t.spellid
 			dmg.spellid = t.spellstring
 			dmg.amount = t.amount
 

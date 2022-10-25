@@ -13,10 +13,10 @@ local DBI = LibStub("LibDBIcon-1.0", true)
 -- cache frequently used globals
 local _G, GetAddOnMetadata = _G, GetAddOnMetadata
 local new, del, clear, copy = Private.newTable, Private.delTable, Private.clearTable, Private.tCopy
-local tsort, tinsert, tremove, tconcat, wipe = table.sort, table.insert, Private.tremove, table.concat, wipe
-local next, pairs, ipairs, unpack, type, setmetatable = next, pairs, ipairs, unpack, type, setmetatable
+local tsort, tinsert, tremove, wipe = table.sort, table.insert, Private.tremove, wipe
+local next, pairs, type, setmetatable = next, pairs, type, setmetatable
 local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostring, strmatch, string.format, string.gsub, string.lower, string.find
-local floor, max, min, abs, band = math.floor, math.max, math.min, math.abs, bit.band
+local max, min, abs, band = math.max, math.min, math.abs, bit.band
 local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction
 local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 local UnitExists, UnitGUID, UnitName, UnitClass = UnitExists, UnitGUID, UnitName, UnitClass
@@ -25,8 +25,7 @@ local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
 local SecondsToTime, time, GetTime = SecondsToTime, time, GetTime
 local IsInGroup, IsInRaid, IsInPvP = Skada.IsInGroup, Skada.IsInRaid, Skada.IsInPvP
 local GetNumGroupMembers, GetGroupTypeAndCount = Skada.GetNumGroupMembers, Skada.GetGroupTypeAndCount
-local GetCreatureId, GetUnitSpec, GetUnitRole = Skada.GetCreatureId, Skada.GetUnitSpec, Skada.GetUnitRole
-local UnitIterator, IsGroupDead = Skada.UnitIterator, Skada.IsGroupDead
+local GetCreatureId, UnitIterator, IsGroupDead = Skada.GetCreatureId, Skada.UnitIterator, Skada.IsGroupDead
 local prevent_duplicate, uformat, EscapeStr = Private.prevent_duplicate, Private.uformat, Private.EscapeStr
 local is_player, is_pet, assign_pet = Private.is_player, Private.is_pet, Private.assign_pet
 local callbacks = Skada.callbacks
@@ -2653,6 +2652,11 @@ function Skada:ApplySettings(name, hidemenu)
 	Private.set_numeral_format(P.numbersystem)
 	Private.set_value_format(P.brackets, P.separator)
 
+	-- unset the global combat flag.
+	if G.inCombat and not InCombatLockdown() and not IsGroupInCombat() then
+		G.inCombat = false
+	end
+
 	Skada:UpdateDisplay(true)
 end
 
@@ -2801,6 +2805,14 @@ function Skada:OnEnable()
 	-- SharedMedia is sometimes late, we wait few seconds then re-apply settings.
 	self:ScheduleTimer("ApplySettings", 2)
 	self:ScheduleTimer("CheckMemory", 3)
+	self:ScheduleTimer("CleanGarbage", 4)
+end
+
+local collectgarbage = collectgarbage
+function Skada:CleanGarbage()
+	if InCombatLockdown() then return end
+	collectgarbage("collect")
+	self:Debug("CleanGarbage")
 end
 
 -- called on boss defeat
@@ -2947,7 +2959,8 @@ function combat_end()
 
 	Skada.last = Skada.current
 	Skada.current = nil
-	Skada.inCombat = nil
+	Skada.inCombat = false
+	G.inCombat = false
 	_targets = del(_targets)
 
 	clean_sets()
@@ -3133,7 +3146,6 @@ do
 	end
 
 	local function combat_tick()
-		Skada.inCombat = true
 		if not Skada.disabled and Skada.current and not InCombatLockdown() and not IsGroupInCombat() and Skada.insType ~= "pvp" and Skada.insType ~= "arena" then
 			Skada:Debug("EndSegment: combat tick")
 			combat_end()
@@ -3154,6 +3166,7 @@ do
 			combat_end()
 		end
 
+		Skada.inCombat = true
 		Skada:Wipe()
 
 		if Skada.current == nil then
@@ -3340,6 +3353,7 @@ do
 			end
 			self.current.started = true
 			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, t)
+			G.inCombat = true
 		end
 
 		-- autostop on wipe enabled?

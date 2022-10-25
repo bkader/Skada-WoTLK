@@ -475,7 +475,7 @@ do
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
 
-				local d = win:spell(nr, spellid, true)
+				local d = win:spell(nr, spellid, false)
 				d.value = spell.uptime
 				format_valuetext(d, cols, spell.count, maxtime, win.metadata, true)
 			end
@@ -486,7 +486,7 @@ do
 		local set = win:GetSelectedSet()
 		local settime = set and set:GetTime()
 		if not settime or settime == 0 then return end
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local spell = actor and actor.auras and actor.auras[id]
 		if not spell then return end
 
@@ -510,7 +510,7 @@ do
 
 		-- display aura uptime in colored percent
 		local uptime = 100 * (spell.uptime / actor:GetTime(set))
-		tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), nil, nil, nil, PercentToRGB(uptime, enemy))
+		tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), nil, nil, nil, PercentToRGB(uptime, actor.enemy))
 	end
 
 	function spelltarget_tooltip(win, id, label, tooltip)
@@ -636,7 +636,7 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 	end
 
 	do
-		local UnitName, UnitGUID, UnitAura = UnitName, UnitGUID, UnitAura
+		local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
 		local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
 
 		-- per-session spell strings cache
@@ -654,7 +654,7 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 			if owner or UnitIsDeadOrGhost(unit) then return end
 			local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
 			for i = 1, 40 do
-				local _, rank, _, _, _, _, _, unitCaster, _, _, spellid = UnitAura(unit, i, "HELPFUL")
+				local _, rank, _, _, _, _, _, unitCaster, _, _, spellid = UnitBuff(unit, i)
 				if not spellid then
 					break -- nothing found!
 				elseif unitCaster and rank ~= SPELL_PASSIVE then
@@ -672,7 +672,7 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 		end
 
 		function mod:CombatEnter(_, set)
-			if set and not set.stopped and not self.checked then
+			if not G.inCombat and set and not set.stopped and not self.checked then
 				GroupIterator(check_unit_buffs)
 				self.checked = true
 			end

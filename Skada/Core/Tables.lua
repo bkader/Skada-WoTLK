@@ -2,6 +2,7 @@
 -- Contains all tables used by different files and modules.
 local folder, ns = ...
 local L = LibStub("AceLocale-3.0"):GetLocale(folder)
+local setmetatable = setmetatable
 
 -------------------------------------------------------------------------------
 -- table we need.
@@ -72,7 +73,7 @@ ignored_spells.buffs = {
 -- [[ debuffs module ]] --
 ignored_spells.debuffs = {
 	[57723] = true, -- Exhaustion (Heroism)
-	[57724] = true -- Sated (Bloodlust)
+	[57724] = true, -- Sated (Bloodlust)
 }
 
 -- [[ damage / enemy damage taken modules ]] --
@@ -108,7 +109,7 @@ ignored_spells.firsthit = {
 	[53338] = true, -- Hunter's Mark (rank 5)
 	[56190] = true, -- Shadow Jade Focusing Lens
 	[56191] = true, -- Shadow Jade Focusing Lens
-	[60122] = true -- Baby Spice
+	[60122] = true, -- Baby Spice
 }
 
 -- [[ no active time spells ]] --
@@ -299,7 +300,7 @@ ns.missTypes = {
 	MISS = "mis_n",
 	PARRY = "par_n",
 	REFLECT = "ref_n",
-	RESIST = "res_n"
+	RESIST = "res_n",
 }
 
 -- resurrect spells
@@ -324,5 +325,184 @@ ns.ress_spells = {
 	[20760] = 0x01,
 	[20761] = 0x01,
 	[27240] = 0x01,
-	[47882] = 0x01
+	[47882] = 0x01,
 }
+
+-- list of crowd control spells
+ns.cc_spells = {
+	[118] = 0x40, -- Polymorph (rank 1)
+	[676] = 0x01, -- Disarm
+	[710] = 0x20, -- Banish (Rank 1)
+	[2070] = 0x01, -- Sap (rank 2)
+	[2637] = 0x08, -- Hibernate (rank 1)
+	[3355] = 0x10, -- Freezing Trap Effect (rank 1)
+	[6358] = 0x20, -- Seduction (succubus)
+	[6770] = 0x01, -- Sap (rank 1)
+	[9485] = 0x02, -- Shackle Undead (rank 2)
+	[9484] = 0x02, -- Shackle Undead (rank 1)
+	[10955] = 0x02, -- Shackle Undead (rank 3)
+	[11297] = 0x01, -- Sap (rank 3)
+	[12809] = 0x01, -- Concussion Blow
+	[12824] = 0x40, -- Polymorph (rank 2)
+	[12825] = 0x40, -- Polymorph (rank 3)
+	[12826] = 0x40, -- Polymorph (rank 4)
+	[14308] = 0x10, -- Freezing Trap Effect (rank 2)
+	[14309] = 0x10, -- Freezing Trap Effect (rank 3)
+	[18647] = 0x20, -- Banish (Rank 2)
+	[18657] = 0x08, -- Hibernate (rank 2)
+	[18658] = 0x08, -- Hibernate (rank 3)
+	[20066] = 0x02, -- Repentance
+	[28271] = 0x40, -- Polymorph (rank 1:turtle)
+	[28272] = 0x40, -- Polymorph (rank 1:pig)
+	[33786] = 0x08, -- Cyclone
+	[45524] = 0x10, -- Chains of Ice
+	[51722] = 0x01, -- Dismantle
+	[53308] = 0x08, -- Entangling Roots
+	[60210] = 0x10, -- Freezing Arrow (rank 1)
+}
+
+-- extended list of crowd control spells
+ns.extra_cc_spells = setmetatable({
+	-- Death Knight
+	[47476] = 0x20, -- Strangulate
+	[47481] = 0x01, -- Gnaw
+	[49203] = 0x10, -- Hungering Cold
+	[49560] = 0x01, -- Death Grip
+	-- Druid
+	[339] = 0x08, -- Entangling Roots (rank 1)
+	[1062] = 0x08, -- Entangling Roots (rank 2)
+	[5195] = 0x08, -- Entangling Roots (rank 3)
+	[5196] = 0x08, -- Entangling Roots (rank 4)
+	[8983] = 0x01, -- Bash
+	[9852] = 0x08, -- Entangling Roots (rank 5)
+	[9853] = 0x08, -- Entangling Roots (rank 6)
+	[16979] = 0x01, -- Feral Charge - Bear
+	[19970] = 0x08, -- Entangling Roots (Nature's Grasp rank 6)
+	[19971] = 0x08, -- Entangling Roots (Nature's Grasp rank 5)
+	[19972] = 0x08, -- Entangling Roots (Nature's Grasp rank 4)
+	[19973] = 0x08, -- Entangling Roots (Nature's Grasp rank 3)
+	[19974] = 0x08, -- Entangling Roots (Nature's Grasp rank 2)
+	[19975] = 0x08, -- Entangling Roots (Nature's Grasp rank 1)
+	[22570] = 0x01, -- Maim (rank 1)
+	[26989] = 0x08, -- Entangling Roots (rank 7)
+	[27010] = 0x08, -- Entangling Roots (Nature's Grasp rank 7)
+	[45334] = 0x01, -- Feral Charge Effect
+	[49802] = 0x01, -- Maim (rank 2)
+	[49803] = 0x01, -- Pounce
+	[53313] = 0x08, -- Entangling Roots (Nature's Grasp)
+	[66070] = 0x08, -- Entangling Roots (Force of Nature)
+	-- Hunter
+	[1513] = 0x08, -- Scare Beast
+	[4167] = 0x01, -- Web (Spider)
+	[5116] = 0x01, -- Concussive Shot
+	[19386] = 0x08, -- Wyvern Sting (rank 1)
+	[19503] = 0x01, -- Scatter Shot
+	[19577] = 0x08, -- Intimidation (stun)
+	[24132] = 0x08, -- Wyvern Sting (rank 2)
+	[24133] = 0x08, -- Wyvern Sting (rank 3)
+	[24394] = 0x01, -- Intimidation
+	[26090] = 0x08, -- Pummel (Gorilla)
+	[27068] = 0x08, -- Wyvern Sting (rank 4)
+	[49011] = 0x08, -- Wyvern Sting (rank 5)
+	[49012] = 0x08, -- Wyvern Sting (rank 6)
+	[50541] = 0x01, -- Clench (Scorpid)
+	[53543] = 0x01, -- Snatch (Bird of Prey)
+	[53548] = 0x01, -- Pin (Crab)
+	[53562] = 0x01, -- Ravage (Ravager)
+	[53568] = 0x08, -- Sonic Blast (Bat)
+	[53575] = 0x01, -- Tendon Rip (Hyena)
+	[53589] = 0x20, -- Nether Shock (Nether Ray)
+	[55492] = 0x10, -- Froststorm Breath (Chimaera)
+	[55509] = 0x08, -- Venom Web Spray (Silithid)
+	[64803] = 0x01, -- Entrapment
+	-- Mage
+	[122] = 0x10, -- Frost Nova (rank 1)
+	[865] = 0x10, -- Frost Nova (rank 2)
+	[6131] = 0x10, -- Frost Nova (rank 3)
+	[10230] = 0x10, -- Frost Nova (rank 4)
+	[27088] = 0x10, -- Frost Nova (rank 5)
+	[31661] = 0x04, -- Dragon's Breath
+	[33395] = 0x10, -- Freeze (Frost Water Elemental)
+	[42917] = 0x10, -- Frost Nova (rank 6)
+	[44572] = 0x10, -- Deep Freeze
+	[55021] = 0x40, -- Silenced - Improved Counterspell
+	[61305] = 0x40, -- Polymorph Cat
+	[61721] = 0x40, -- Polymorph Rabbit
+	[61780] = 0x40, -- Polymorph Turkey
+	-- Paladin
+	[853] = 0x02, -- Hammer of Justice (rank 1)
+	[2812] = 0x02, -- Holy Wrath (rank 1)
+	[5588] = 0x02, -- Hammer of Justice (rank 2)
+	[5589] = 0x02, -- Hammer of Justice (rank 3)
+	[10308] = 0x02, -- Hammer of Justice (rank 4)
+	[10318] = 0x02, -- Holy Wrath (rank 2)
+	[10326] = 0x02, -- Turn Evil
+	[27319] = 0x02, -- Holy Wrath (rank 3)
+	[31935] = 0x02, -- Avengers Shield
+	[48816] = 0x02, -- Holy Wrath (rank 4)
+	[48817] = 0x02, -- Holy Wrath (rank 5)
+	-- Priest
+	[605] = 0x20, -- Dominate Mind (Mind Control)
+	[8122] = 0x20, -- Psychic Scream (rank 1)
+	[8124] = 0x20, -- Psychic Scream (rank 2)
+	[10888] = 0x20, -- Psychic Scream (rank 3)
+	[10890] = 0x20, -- Psychic Scream (rank 4)
+	[15487] = 0x20, -- Silence
+	[64044] = 0x20, -- Psychic Horror
+	-- Rogue
+	[408] = 0x01, -- Kidney Shot (rank 1)
+	[1330] = 0x01, -- Garrote - Silence
+	[1776] = 0x01, -- Gouge
+	[1833] = 0x01, -- Cheap Shot
+	[2094] = 0x01, -- Blind
+	[8643] = 0x01, -- Kidney Shot (rank 2)
+	[51724] = 0x01, -- Sap
+	-- Shaman
+	[3600] = 0x08, -- Earthbind (Earthbind Totem)
+	[8034] = 0x10, -- Frostbrand Weapon (rank 1)
+	[8037] = 0x10, -- Frostbrand Weapon (rank 2)
+	[8056] = 0x10, -- Frost Shock (rank 1)
+	[8058] = 0x10, -- Frost Shock (rank 2)
+	[10458] = 0x10, -- Frostbrand Weapon (rank 3)
+	[10472] = 0x10, -- Frost Shock (rank 3)
+	[10473] = 0x10, -- Frost Shock (rank 4)
+	[16352] = 0x10, -- Frostbrand Weapon (rank 4)
+	[16353] = 0x10, -- Frostbrand Weapon (rank 5)
+	[25464] = 0x10, -- Frost Shock (rank 5)
+	[25501] = 0x10, -- Frostbrand Weapon (rank 6)
+	[39796] = 0x01, -- Stoneclaw Stun (Stoneclaw Totem)
+	[49235] = 0x10, -- Frost Shock (rank 6)
+	[49236] = 0x10, -- Frost Shock (rank 7)
+	[51514] = 0x08, -- Hex
+	[58797] = 0x10, -- Frostbrand Weapon (rank 7)
+	[58798] = 0x10, -- Frostbrand Weapon (rank 8)
+	[58799] = 0x10, -- Frostbrand Weapon (rank 9)
+	[64695] = 0x08, -- Earthgrab (Earthbind Totem with Storm, Earth and Fire talent)
+	-- Warlock
+	[5484] = 0x20, -- Howl of Terror
+	[6215] = 0x20, -- Fear
+	[6789] = 0x20, -- Death Coil (rank 1)
+	[17925] = 0x20, -- Death Coil (rank 2)
+	[17926] = 0x20, -- Death Coil (rank 3)
+	[22703] = 0x04, -- Infernal Awakening
+	[24259] = 0x20, -- Spell Lock
+	[27223] = 0x20, -- Death Coil (rank 4)
+	[30283] = 0x20, -- Shadowfury
+	[47859] = 0x20, -- Death Coil (rank 5)
+	[47860] = 0x20, -- Death Coil (rank 6)
+	-- Warrior
+	[5246] = 0x01, -- Initmidating Shout
+	[6552] = 0x01, -- Pummel
+	[7922] = 0x01, -- Charge
+	[12323] = 0x01, -- Piercing Howl
+	[46968] = 0x01, -- Shockwave
+	[47995] = 0x01, -- Intercept (Stun)--needs review
+	[58357] = 0x01, -- Heroic Throw silence
+	-- Racials
+	[20549] = 0x01, -- War Stomp (Tauren)
+	[28730] = 0x40, -- Arcane Torrent (Bloodelf)
+	[47779] = 0x40, -- Arcane Torrent (Bloodelf)
+	[50613] = 0x40, -- Arcane Torrent (Bloodelf)
+	-- Engineering
+	[67890] = 0x04, -- Cobalt Frag Bomb
+}, {__index = ns.cc_spells})

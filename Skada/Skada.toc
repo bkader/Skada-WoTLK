@@ -16,7 +16,7 @@
 ## DefaultState: enabled
 ## Author: Kader (|cff808080bkader#5341|r)
 ## Version: 1.8.83
-## X-Date: 2022-10-25 @ 09:16 |cff808080UTC|r
+## X-Date: 2022-10-25 @ 13:26 |cff808080UTC|r
 ## X-Credits: Zarnivoop
 ## X-Curse-Project-ID: 623633
 ## X-Category: Combat

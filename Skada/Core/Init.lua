@@ -133,7 +133,7 @@ function Private.register_classes()
 	local classcolors, validclass = {}, {}
 	for class, info in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
 		classcolors[class] = {r = info.r, g = info.g, b = info.b, colorStr = info.colorStr}
-		classcolors[class].colorStr = classcolors[class].colorStr or Private.RGBPercToHex(info.r, info.g, info.b, true)
+		classcolors[class].colorStr = info.colorStr or Private.RGBPercToHex(info.r, info.g, info.b, true)
 		L[class] = LOCALIZED_CLASS_NAMES_MALE[class]
 		validclass[class] = true
 	end

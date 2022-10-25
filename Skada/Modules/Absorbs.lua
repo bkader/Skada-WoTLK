@@ -13,7 +13,7 @@ local hits_perc = "%s (\124cffffffff%s\124r)"
 -- Absorbs module --
 -- ============== --
 
-Skada:RegisterModule("Absorbs", function(L, P)
+Skada:RegisterModule("Absorbs", function(L, P, G)
 	local mod = Skada:NewModule("Absorbs")
 	local spellmod = mod:NewModule("Absorb spell list")
 	local targetmod = mod:NewModule("Absorbed target list")
@@ -86,11 +86,11 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		[25218] = {school = 0x02, dur = 30, avg = 7175, cap = 8444}, -- Power Word: Shield (rank 12)
 		[48065] = {school = 0x02, dur = 30, avg = 9596, cap = 11293}, -- Power Word: Shield (rank 13)
 		[48066] = {school = 0x02, dur = 30, avg = 10000, cap = 11769}, -- Power Word: Shield (rank 14)
-		[47509] = {school = 0x01, dur = 12}, -- Divine Aegis (rank 1)
-		[47511] = {school = 0x01, dur = 12}, -- Divine Aegis (rank 2)
-		[47515] = {school = 0x01, dur = 12}, -- Divine Aegis (rank 3)
-		[47753] = {school = 0x01, dur = 12, cap = 10000}, -- Divine Aegis (rank 1)
-		[54704] = {school = 0x01, dur = 12, cap = 10000}, -- Divine Aegis (rank 1)
+		[47509] = {school = 0x02, dur = 12}, -- Divine Aegis (rank 1)
+		[47511] = {school = 0x02, dur = 12}, -- Divine Aegis (rank 2)
+		[47515] = {school = 0x02, dur = 12}, -- Divine Aegis (rank 3)
+		[47753] = {school = 0x02, dur = 12, cap = 10000}, -- Divine Aegis (rank 1)
+		[54704] = {school = 0x02, dur = 12, cap = 10000}, -- Divine Aegis (rank 1)
 		[47788] = {school = 0x02, dur = 10}, -- Guardian Spirit
 		[7812] = {school = 0x20, dur = 30, cap = 305}, -- Sacrifice (rank 1)
 		[19438] = {school = 0x20, dur = 30, cap = 510}, -- Sacrifice (rank 2)
@@ -280,7 +280,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		local actor = Skada:GetPlayer(set, absorb.actorid, absorb.actorname)
 		if not actor then
 			return
-		elseif actor.role ~= "DAMAGER" and not passive_spells[absorb.spellid] and not nocount then
+		elseif actor.role ~= "DAMAGER" and not passive_spells[absorb.spell] and not nocount then
 			Skada:AddActiveTime(set, actor, absorb.dstName)
 		end
 
@@ -331,13 +331,8 @@ Skada:RegisterModule("Absorbs", function(L, P)
 
 		-- record the target
 		if not absorb.dstName then return end
-		local target = spell.targets and spell.targets[absorb.dstName]
-		if not target then
-			spell.targets = spell.targets or {}
-			spell.targets[absorb.dstName] = 0
-			target = spell.targets[absorb.dstName]
-		end
-		target = target + absorb.amount
+		spell.targets = spell.targets or {}
+		spell.targets[absorb.dstName] = (spell.targets[absorb.dstName] or 0) + absorb.amount
 	end
 
 	-- https://github.com/TrinityCore/TrinityCore/blob/5d82995951c2be99b99b7b78fa12505952e86af7/src/server/game/Spells/Auras/SpellAuraEffects.h#L316
@@ -680,12 +675,13 @@ Skada:RegisterModule("Absorbs", function(L, P)
 					absorb.actorname = pshield.srcName
 					absorb.actorflags = pshield.srcFlags
 					absorb.dstName = dstName
+					absorb.spell = pshield.spellid
 					absorb.spellid = pshield.string
 					absorb.amount = unqueue_amount(dstName, absorbed)
 					absorb.critical = t.critical
 
 					-- always increment the count of passive shields.
-					Skada:DispatchSets(log_absorb, passive_shields[absorb.spellid] == nil)
+					Skada:DispatchSets(log_absorb, passive_shields[pshield.spellid] == nil)
 				end
 				break
 			end
@@ -708,6 +704,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				absorb.actorname = s.srcName
 				absorb.actorflags = s.srcFlags
 				absorb.dstName = dstName
+				absorb.spell = s.spellid
 				absorb.spellid = s.string
 				absorb.amount = unqueue_amount(dstName, absorbed)
 				absorb.critical = t.critical
@@ -728,6 +725,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 				absorb.actorname = s.srcName
 				absorb.actorflags = s.srcFlags
 				absorb.dstName = dstName
+				absorb.spell = s.spellid
 				absorb.spellid = s.string
 				absorb.amount = unqueue_amount(dstName, s.amount)
 				absorb.critical = t.critical
@@ -831,8 +829,8 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		win.title = L["actor absorb spells"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
 		if not set or not win.targetname then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if not actor or enemy then return end -- unavailable for enemies yet
+		local actor = set:GetActor(win.actorname, win.actorid)
+		if not actor or actor.enemy then return end -- unavailable for enemies yet
 
 		local total = actor.absorb
 		local spells = (total and total > 0) and actor.absorbspells
@@ -866,8 +864,8 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		win.title = L["actor absorb spells"](win.actorname or L["Unknown"])
 		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if not actor or enemy then return end -- unavailable for enemies yet
+		local actor = set:GetActor(win.actorname, win.actorid)
+		if not actor or actor.enemy then return end -- unavailable for enemies yet
 
 		local total = actor.absorb
 		local spells = (total and total > 0) and actor.absorbspells
@@ -898,8 +896,8 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		win.title = uformat(L["%s's absorbed targets"], win.actorname)
 		if not set or not win.actorname then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if not actor or enemy then return end -- unavailable for enemies yet
+		local actor = set:GetActor(win.actorname, win.actorid)
+		if not actor or actor.enemy then return end -- unavailable for enemies yet
 
 		local total = actor and actor.absorb or 0
 		local targets = (total > 0) and actor:GetAbsorbTargets(set)
@@ -999,7 +997,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 					t.dstGUID = dstGUID
 					t.dstName = dstName
 					t.spellid = spellid
-					t.spellstring = format("%s.%s", spellid, absorbspells[t.spellid].school)
+					t.spellstring = format("%s.%s", spellid, absorbspells[spellid].school)
 					t.__temp = true
 					handle_shield(t)
 				end
@@ -1021,6 +1019,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 					t.dstGUID = dstGUID
 					t.dstName = dstName
 					t.spellid = spellid
+					t.spellstring = format("%s.%s", spellid, absorbspells[spellid].school)
 					t.__temp = true
 					handle_shield(t, points)
 				end
@@ -1028,7 +1027,7 @@ Skada:RegisterModule("Absorbs", function(L, P)
 		end
 
 		function mod:CombatEnter(_, set, args)
-			if set and not set.stopped and not self.checked then
+			if not G.inCombat and set and not set.stopped and not self.checked then
 				self:ZoneModifier()
 				GroupIterator(check_unit_shields, args.timestamp, set.last_time or GetTime())
 				self.checked = true
@@ -1263,7 +1262,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		win.title = L["actor absorb and heal spells"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
 		if not set or not win.targetname then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor:GetAbsorbHealOnTarget(win.targetname)
 
 		if not total or total == 0 or not (actor.healspells or actor.absorbspells) then
@@ -1279,7 +1278,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		if spells then
 			for spellid, spell in pairs(spells) do
 				local amount = spell.targets and spell.targets[win.targetname]
-				amount = amount and (enemy and amount or amount.amount)
+				amount = amount and (actor.enemy and amount or amount.amount)
 				if amount then
 					nr = nr + 1
 

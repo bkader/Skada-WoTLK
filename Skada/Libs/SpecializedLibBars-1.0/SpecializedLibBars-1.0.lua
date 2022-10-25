@@ -896,7 +896,7 @@ do
 		btn:SetHeight(14)
 
 		btn:SetNormalTexture(normaltex)
-		btn:SetHighlightTexture(highlighttex or normaltex, 1.0)
+		btn:SetHighlightTexture(highlighttex or normaltex, "ADD")
 		btn.normalTex = btn:GetNormalTexture()
 		btn.highlightTex = btn:GetHighlightTexture()
 

@@ -843,7 +843,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		if not e then
 			return
 		elseif (set.type == "arena" or set.type == "pvp") and dmg.amount > 0 then
-			add_actor_time(set, e, dmg.spellid, dmg.dstName)
+			add_actor_time(set, e, dmg.spell, dmg.dstName)
 		end
 
 		e.damage = (e.damage or 0) + dmg.amount
@@ -916,6 +916,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 			dmg.actorname = t.srcName
 			dmg.actorflags = t.srcFlags
 
+			dmg.spell = t.spellid
 			dmg.spellid = t.spellstring
 			dmg.amount = t.amount
 			dmg.overkill = t.overkill
@@ -1165,7 +1166,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	---------------------------------------------------------------------------
 
 	function setPrototype:GetEnemyDamage(class)
-		return self:GetTotal(class, nil, P.absdamage and "etotaldamage" or "edamage")
+		return P.absdamage and self:GetTotal(class, nil, "etotaldamage") or self:GetTotal(class, nil, "edamage")
 	end
 
 	function setPrototype:GetEnemyDPS(class)
@@ -1266,7 +1267,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		if not e then
 			return
 		elseif (set.type == "arena" or set.type == "pvp") then
-			add_actor_time(set, e, heal.spellid, heal.dstName)
+			add_actor_time(set, e, heal.spell, heal.dstName)
 		end
 
 		set.eheal = (set.eheal or 0) + heal.amount
@@ -1294,6 +1295,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 			heal.actorflags = t.srcFlags
 			heal.dstName = t.dstName
 
+			heal.spell = t.spellid
 			heal.spellid = t.spellstring
 			heal.amount = max(0, t.amount - t.overheal)
 

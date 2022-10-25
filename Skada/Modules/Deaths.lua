@@ -532,8 +532,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		win.title = uformat(L["%s's deaths"], win.actorname)
 		if not set or not win.actorid then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
-		if not actor or enemy then return end
+		local actor = set:GetActor(win.actorname, win.actorid)
+		if not actor or actor.enemy then return end
 
 		local deathlog = (actor.death or WATCH) and actor.deathlog
 		if not deathlog then

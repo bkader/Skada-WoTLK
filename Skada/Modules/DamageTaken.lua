@@ -189,7 +189,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		local set = win:GetSelectedSet()
 		if not set then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local spell = actor and actor.damagedspells and actor.damagedspells[id]
 		if not spell then return end
 
@@ -335,15 +335,15 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		win.title = uformat("%s: %s", win.actorname, uformat(L["%s's damage breakdown"], win.spellname))
 		if not set or not win.spellid then return end
 
-		local actor, enemy = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local spell = actor and actor.damagedspells and actor.damagedspells[win.spellid]
 		if not spell then
 			return
 		elseif win.metadata then
-			win.metadata.maxvalue = enemy and (P.absdamage and spell.total or spell.amount or 0) or spell.count
+			win.metadata.maxvalue = actor.enemy and (P.absdamage and spell.total or spell.amount or 0) or spell.count
 		end
 
-		if enemy then
+		if actor.enemy then
 			local amount = P.absdamage and spell.total or spell.amount
 			local nr = add_detail_bar(win, 0, L["Damage"], amount, nil, nil, true)
 

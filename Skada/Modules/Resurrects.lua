@@ -30,15 +30,9 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		set.ress = (set.ress or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
-		if (set ~= Skada.total or P.totalidc) and ress.dstName then
-			local target = actor.resstargets and actor.resstargets[ress.dstName]
-			if not target then
-				actor.resstargets = actor.resstargets or {}
-				actor.resstargets[ress.dstName] = 1
-			else
-				target = target + 1
-			end
-		end
+		if (set == Skada.total and not P.totalidc) or not ress.dstName then return end
+		actor.resstargets = actor.resstargets or {}
+		actor.resstargets[ress.dstName] = (actor.resstargets[ress.dstName] or 0) + 1
 	end
 
 	local function spell_resurrect(t)

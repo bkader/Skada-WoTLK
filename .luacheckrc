@@ -50,6 +50,7 @@ ignore = {
 	"312/self", -- Value assigned is overwritten
 --	"431", -- shadowing upvalue
 	"43.", -- Shadowing an upvalue, an upvalue argument, an upvalue loop variable.
+	"512", -- loop is executed at most once
 	"542", -- An empty if branch
 	"581", -- Negation of a relational operator- operator can be flipped
 	"582", -- Error prone negation: negation has a higher priority than equality

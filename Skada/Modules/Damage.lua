@@ -29,7 +29,6 @@ Skada:RegisterModule("Damage", function(L, P)
 	local tdetailmod = targetmod:NewModule("Damage spell list")
 
 	local wipe = wipe
-	local GetSpellInfo = Private.spell_info or GetSpellInfo
 	local PercentToRGB = Private.PercentToRGB
 	local tooltip_school = Skada.tooltip_school
 	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
@@ -72,7 +71,7 @@ Skada:RegisterModule("Damage", function(L, P)
 		if not actor then
 			return
 		elseif dmg.amount > 0 and not dmg.petname then
-			add_actor_time(set, actor, dmg.spellid, dmg.dstName)
+			add_actor_time(set, actor, dmg.spell, dmg.dstName)
 		end
 
 		actor.damage = (actor.damage or 0) + dmg.amount
@@ -215,6 +214,8 @@ Skada:RegisterModule("Damage", function(L, P)
 			dmg.actorname = t.srcName
 			dmg.actorflags = t.srcFlags
 			dmg.dstName = t.dstName
+
+			dmg.spell = t.spellid
 			dmg.spellid = t.spellstring
 
 			dmg.amount = t.amount
@@ -228,7 +229,7 @@ Skada:RegisterModule("Damage", function(L, P)
 			dmg.misstype = t.misstype
 
 			Skada:FixPets(dmg)
-			Skada:DispatchSets(log_damage, t.event == "SPELL_PERIODIC_DAMAGE" or t.event == "SPELL_PERIODIC_MISSED")
+			Skada:DispatchSets(log_damage, t.is_dot)
 		end
 	end
 

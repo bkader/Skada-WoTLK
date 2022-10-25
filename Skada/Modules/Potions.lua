@@ -6,12 +6,9 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	local playermod = spellmod:NewModule("Players list")
 	local get_actors_by_potion = nil
 
-	-- cache frequently used globals
 	local pairs, tconcat, format, strsub, uformat = pairs, table.concat, string.format, string.sub, Private.uformat
-	local GetItemInfo, UnitIsDeadOrGhost, GroupIterator = GetItemInfo, UnitIsDeadOrGhost, Skada.GroupIterator
-	local UnitGUID, UnitName, UnitClass, UnitBuff = UnitGUID, UnitName, UnitClass, UnitBuff
+	local GetItemInfo, classcolors = GetItemInfo, Skada.classcolors
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
-	local classcolors = Skada.classcolors
 	local potion_ids = {}
 	local mod_cols = nil
 
@@ -52,6 +49,9 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	end
 
 	do
+		local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
+		local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
+
 		local function check_unit_potions(unit, owner, prepot)
 			if owner or UnitIsDeadOrGhost(unit) then return end
 

@@ -62,7 +62,7 @@ Skada:RegisterModule("Healing", function(L, P)
 
 		-- get rid of overheal
 		local amount = max(0, heal.amount - heal.overheal)
-		if player.role == "HEALER" and amount > 0 and not heal.petname and not passive_spells[heal.spellid] then
+		if player.role == "HEALER" and amount > 0 and not heal.petname and not passive_spells[heal.spell] then
 			Skada:AddActiveTime(set, player, heal.dstName)
 		end
 
@@ -141,6 +141,7 @@ Skada:RegisterModule("Healing", function(L, P)
 		if not t.spellid or ignored_spells[t.spellid] then return end
 
 		heal.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
+		heal.spell = t.spellid
 		heal.spellid = t.spellstring
 		heal.amount = t.amount
 		heal.overheal = t.overheal

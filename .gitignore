@@ -1,6 +1,6 @@
 _dev
 Makefile
-*_bak.*
+*_bak*.*
 *.zip
 *.7z
 *.sublime-project
