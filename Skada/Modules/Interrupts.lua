@@ -5,7 +5,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	local extraspellmod = mod:NewModule("Interrupted spells")
 	local targetmod = mod:NewModule("Interrupted targets")
 	local spellmod = mod:NewModule("Interrupt spells")
-	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.ignored_spells.interrupt -- Edit Skada\Core\Tables.lua
 	local get_actor_interrupted_spells = nil
 	local get_actor_interrupt_targets = nil
 
@@ -220,11 +220,6 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 
 		Skada:RegisterForCL(spell_interrupt, {src_is_interesting = true}, "SPELL_INTERRUPT")
 		Skada:AddMode(self)
-
-		-- table of ignored spells:
-		if Skada.ignored_spells and Skada.ignored_spells.interrupts then
-			ignored_spells = Skada.ignored_spells.interrupts
-		end
 	end
 
 	function mod:OnDisable()

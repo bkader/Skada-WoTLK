@@ -2,7 +2,6 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Tweaks", function(L, P)
 	local mod = Skada:NewModule("Tweaks", "AceHook-3.0")
-	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
 	local band, format = bit.band, string.format
 	local UnitClass, GetTime = UnitClass, GetTime
@@ -72,6 +71,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			end
 		end
 
+		local ignored_spells = Skada.ignored_spells.firsthit -- Edit Skada\Core\Tables.lua
 		local function firsthit_check(args)
 			-- src or dst must be in a group
 			if band(args.srcFlags, BITMASK_GROUP) == 0 and band(args.dstFlags, BITMASK_GROUP) == 0 then
@@ -433,6 +433,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 		-- combatlog fix
 		self:CombatLogFix()
 	end
+	mod.OnEnable = mod.ApplySettings
 
 	do
 		local function set_value(i, val)
@@ -569,15 +570,6 @@ Skada:RegisterModule("Tweaks", function(L, P)
 				}
 			}
 		end
-	end
-
-	function mod:OnEnable()
-		-- table of ignored spells (first hit):
-		if Skada.ignored_spells and Skada.ignored_spells.firsthit then
-			ignored_spells = Skada.ignored_spells.firsthit
-		end
-
-		self:ApplySettings()
 	end
 
 	function mod:OnDisable()

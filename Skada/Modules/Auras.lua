@@ -8,8 +8,7 @@ local time, min, floor = time, math.min, math.floor
 
 -- common functions and locals
 local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
-local ignored_buffs = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-local ignored_debuffs = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+local ignored_buffs, ignored_debuffs -- Edit Skada\Core\Tables.lua
 local aura, tooltip_school
 
 ---------------------------------------------------------------------------
@@ -40,10 +39,8 @@ do
 		player_clear = (band(main_flag, player_flag) ~= 0)
 		enemy_clear = (band(main_flag, enemy_flag) ~= 0)
 
-		if Skada.ignored_spells then
-			ignored_buffs = Skada.ignored_spells.buffs or ignored_buffs
-			ignored_debuffs = Skada.ignored_spells.debuffs or ignored_debuffs
-		end
+		ignored_buffs = Skada.ignored_spells.buff
+		ignored_debuffs = Skada.ignored_spells.debuff
 	end
 
 	function main:OnDisable()

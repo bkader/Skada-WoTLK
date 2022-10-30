@@ -29,7 +29,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	local sourcemod = mod:NewModule("Damage source list")
 	local tdetailmod = sourcemod:NewModule("Damage spell list")
 	local tooltip_school = Skada.tooltip_school
-	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
 	local missTypes = Skada.missTypes
 	local min, wipe = math.min, wipe
 	local mod_cols = nil
@@ -568,11 +568,6 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Damage Taken"])
-
-		-- table of ignored spells:
-		if Skada.ignored_spells and Skada.ignored_spells.damaged then
-			ignored_spells = Skada.ignored_spells.damaged
-		end
 	end
 
 	function mod:OnDisable()

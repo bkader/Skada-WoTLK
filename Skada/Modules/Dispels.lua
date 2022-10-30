@@ -5,7 +5,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	local extraspellmod = mod:NewModule("Dispelled spell list")
 	local targetmod = mod:NewModule("Dispelled target list")
 	local spellmod = mod:NewModule("Dispel spell list")
-	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.ignored_spells.dispel -- Edit Skada\Core\Tables.lua
 	local get_actor_dispelled_spells = nil
 	local get_actor_dispelled_targets = nil
 
@@ -210,13 +210,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		spellmod.nototal = true
 
 		Skada:RegisterForCL(spell_dispel, {src_is_interesting = true}, "SPELL_DISPEL", "SPELL_STOLEN")
-
 		Skada:AddMode(self)
-
-		-- table of ignored spells:
-		if Skada.ignored_spells and Skada.ignored_spells.dispels then
-			ignored_spells = Skada.ignored_spells.dispels
-		end
 	end
 
 	function mod:OnDisable()

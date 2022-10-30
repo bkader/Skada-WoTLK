@@ -43,7 +43,7 @@ Skada:RegisterModule("Resources", function(L, P)
 		[SPELL_POWER_RUNIC_POWER] = "runicspells"
 	}
 
-	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.ignored_spells.power -- Edit Skada\Core\Tables.lua
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -219,11 +219,6 @@ Skada:RegisterModule("Resources", function(L, P)
 		Skada:AddMode(ragemod, L["Resources"])
 		Skada:AddMode(energymod, L["Resources"])
 		Skada:AddMode(runicmod, L["Resources"])
-
-		-- table of ignored spells:
-		if Skada.ignored_spells and Skada.ignored_spells.power then
-			ignored_spells = Skada.ignored_spells.power
-		end
 	end
 
 	function mod:OnDisable()

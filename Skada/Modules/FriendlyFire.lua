@@ -5,8 +5,8 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local targetmod = mod:NewModule("Damage target list")
 	local spellmod = mod:NewModule("Damage spell list")
 	local spelltargetmod = spellmod:NewModule("Damage spell targets")
-	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local passive_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
+	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
 	local get_actor_friendfire_targets = nil
 
 	local pairs, wipe, format, uformat = pairs, wipe, string.format, Private.uformat
@@ -247,16 +247,6 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Damage Done"])
-
-		-- table of ignored spells:
-		if Skada.ignored_spells then
-			if Skada.ignored_spells.friendfire then
-				ignored_spells = Skada.ignored_spells.friendfire
-			end
-			if Skada.ignored_spells.activeTime then
-				passive_spells = Skada.ignored_spells.activeTime
-			end
-		end
 	end
 
 	function mod:OnDisable()

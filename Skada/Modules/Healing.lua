@@ -28,8 +28,8 @@ Skada:RegisterModule("Healing", function(L, P)
 	local spellmod = mod:NewModule("Healing spell list")
 	local targetmod = mod:NewModule("Healed target list")
 	local targetspellmod = targetmod:NewModule("Healing spell list")
-	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local passive_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.ignored_spells.heal -- Edit Skada\Core\Tables.lua
+	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
 	tooltip_school = tooltip_school or Skada.tooltip_school
 	local new, del = Private.newTable, Private.delTable
 	local wipe, clear = wipe, Private.clearTable
@@ -423,16 +423,6 @@ Skada:RegisterModule("Healing", function(L, P)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Absorbs and Healing"])
-
-		-- table of ignored spells:
-		if Skada.ignored_spells then
-			if Skada.ignored_spells.heals then
-				ignored_spells = Skada.ignored_spells.heals
-			end
-			if Skada.ignored_spells.activeTime then
-				passive_spells = Skada.ignored_spells.activeTime
-			end
-		end
 	end
 
 	function mod:OnDisable()

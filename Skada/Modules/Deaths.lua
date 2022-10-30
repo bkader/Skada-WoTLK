@@ -4,9 +4,13 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Deaths")
 	local playermod = mod:NewModule("Player's deaths")
 	local deathlogmod = mod:NewModule("Death log")
-	-- local ignored_buffs = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local ignored_debuffs = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local WATCH = nil -- true to watch those alive
+
+	-- Edit Skada\Core\Tables.lua
+	local ignored_damage = Skada.ignored_spells.damage
+	local ignored_heal = Skada.ignored_spells.heal
+	-- local ignored_buffs = Skada.ignored_spells.buff
+	local ignored_debuffs = Skada.ignored_spells.debuff
 
 	local tinsert, tremove, tsort, tconcat = table.insert, Private.tremove, table.sort, table.concat
 	local strmatch, format, uformat = strmatch, string.format, Private.uformat
@@ -125,7 +129,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	end
 
 	local function spell_damage(t)
-		if t.spellid and t.amount then
+		if t.spellid and t.amount and not ignored_damage[t.spellid] then
 			data.srcName = t.srcName
 			data.actorid = t.dstGUID
 			data.actorname = t.dstName
@@ -153,7 +157,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 	local missTypes = {RESIST = true, BLOCK = true, ABSORB = true}
 	local function spell_missed(t)
-		if t.spellid and t.misstype and missTypes[t.misstype] then
+		if t.spellid and not ignored_damage[t.spellid] and t.misstype and missTypes[t.misstype] then
 			data.srcName = t.srcName
 			data.actorid = t.dstGUID
 			data.actorname = t.dstName
@@ -188,7 +192,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	end
 
 	local function spell_heal(t)
-		if t.spellid and t.amount and (not M.deathlogthreshold or t.amount > M.deathlogthreshold) then
+		if t.spellid and not ignored_heal[t.spellid] and t.amount and t.amount >= M.deathlogthreshold then
 			local _, srcName = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
 			local dstGUID, dstName, dstFlags = Skada:FixMyPets(t.dstGUID, t.dstName, t.dstFlags)
 
@@ -284,20 +288,20 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	end
 
 	local ress_spells = Skada.ress_spells
-	local function spell_resurrect(_, event, srcGUID, srcName, srcFlags, dstGUID, dstName, dstFlags, spellid)
-		if spellid and (event == "SPELL_RESURRECT" or ress_spells[spellid]) then
-			data.spellid = spellid
+	local function spell_resurrect(t)
+		if t.spellid and (t.event == "SPELL_RESURRECT" or ress_spells[t.spellid]) then
+			data.spellid = t.spellid
 
-			if event == "SPELL_RESURRECT" then
-				data.srcName = srcName
-				data.actorid = dstGUID
-				data.actorname = dstName
-				data.actorflags = dstFlags
+			if t.event == "SPELL_RESURRECT" then
+				data.srcName = t.srcName
+				data.actorid = t.dstGUID
+				data.actorname = t.dstName
+				data.actorflags = t.dstFlags
 			else
-				data.srcName = srcName
-				data.actorid = srcGUID
-				data.actorname = srcName
-				data.actorflags = srcFlags
+				data.srcName = t.srcName
+				data.actorid = t.srcGUID
+				data.actorname = t.srcName
+				data.actorflags = t.srcFlags
 			end
 
 			data.school = nil
@@ -338,16 +342,24 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		Skada:DispatchSets(log_deathlog)
 	end
 
-	-- local function handle_buff(_, event, _, srcName, _, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
-	-- 	if auratype == "BUFF" and spellid and not ignored_buffs[spellid] and dstGUID and not dead[dstGUID] then
-	-- 		handle_aura(dstGUID, dstName, dstFlags, srcName, spellid, spellschool, event == "SPELL_AURA_REMOVED")
-	-- 	end
+	-- local function handle_buff(t)
+	-- 	-- not a debuff or an ignored one?
+	-- 	if t.auratype ~= "BUFF" or not t.spellid or ignored_buffs[t.spellid] then return end
+	-- 	-- invalid destination or already dead?
+	-- 	if not t.dstGUID or dead[t.dstGUID] then return end
+
+	-- 	-- all tests passed.
+	-- 	handle_aura(t.dstGUID, t.dstName, t.dstFlags, t.srcName, t.spellid, t.spellschool, t.event == "SPELL_AURA_REMOVED")
 	-- end
 
-	local function handle_debuff(_, event, _, srcName, _, dstGUID, dstName, dstFlags, spellid, _, spellschool, auratype)
-		if auratype == "DEBUFF" and spellid and not ignored_debuffs[spellid] and dstGUID and not dead[dstGUID] then
-			handle_aura(dstGUID, dstName, dstFlags, srcName, -spellid, spellschool, event == "SPELL_AURA_REMOVED")
-		end
+	local function handle_debuff(t)
+		-- not a debuff or an ignored one?
+		if t.auratype ~= "DEBUFF" or not t.spellid or ignored_debuffs[t.spellid] then return end
+		-- invalid destination or already dead?
+		if not t.dstGUID or dead[t.dstGUID] then return end
+
+		-- all tests passed.
+		handle_aura(t.dstGUID, t.dstName, t.dstFlags, t.srcName, -t.spellid, t.spellschool, t.event == "SPELL_AURA_REMOVED")
 	end
 
 	function deathlogmod:Enter(win, id, label)
@@ -852,11 +864,6 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self)
-
-		if Skada.ignored_spells then
-			-- ignored_buffs = Skada.ignored_spells.buffs or ignored_buffs
-			ignored_debuffs = Skada.ignored_spells.debuffs or ignored_debuffs
-		end
 	end
 
 	function mod:OnDisable()

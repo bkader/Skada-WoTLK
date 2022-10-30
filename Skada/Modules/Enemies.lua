@@ -16,7 +16,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	local spellmod = mod:NewModule("Damage spell list")
 	local spellsourcemod = spellmod:NewModule("Damage spell sources")
 	local usefulmod = mod:NewModule("Useful Damage")
-	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
 	local mod_cols = nil
 
 	local instanceDiff, customGroupsTable, customUnitsTable, customUnitsInfo
@@ -658,11 +658,6 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Enemies"])
-
-		-- table of ignored spells:
-		if Skada.ignored_spells and Skada.ignored_spells.damage then
-			ignored_spells = Skada.ignored_spells.damage
-		end
 	end
 
 	function mod:OnDisable()
@@ -806,8 +801,8 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	local targetspellmod = targetmod:NewModule("Damage spell targets")
 	local spellmod = mod:NewModule("Damage spell list")
 	local spelltargetmod = spellmod:NewModule("Damage spell targets")
-	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local passive_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
+	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
 	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, dps, metadata, subview)
@@ -1142,16 +1137,6 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Enemies"])
-
-		-- table of ignored damage/time spells:
-		if Skada.ignored_spells then
-			if Skada.ignored_spells.damaged then
-				ignored_spells = Skada.ignored_spells.damaged
-			end
-			if Skada.ignored_spells.activeTime then
-				passive_spells = Skada.ignored_spells.activeTime
-			end
-		end
 	end
 
 	function mod:OnDisable()
@@ -1232,8 +1217,8 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	local mod = Skada:NewModule("Enemy Healing Done")
 	local targetmod = mod:NewModule("Healed target list")
 	local spellmod = mod:NewModule("Healing spell list")
-	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local passive_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.ignored_spells.heal -- Edit Skada\Core\Tables.lua
+	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
 	local mod_cols = nil
 
 	local function format_valuetext(d, columns, total, dps, metadata, subview)
@@ -1427,16 +1412,6 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, L["Enemies"])
-
-		-- table of ignored heal/time spells:
-		if Skada.ignored_spells then
-			if Skada.ignored_spells.heals then
-				ignored_spells = Skada.ignored_spells.heals
-			end
-			if Skada.ignored_spells.activeTime then
-				passive_spells = Skada.ignored_spells.activeTime
-			end
-		end
 	end
 
 	function mod:OnDisable()

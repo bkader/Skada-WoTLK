@@ -7,7 +7,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Fails")
 	local spellmod = mod:NewModule("Player's failed events")
 	local playermod = spellmod:NewModule("Event's failed players")
-	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.ignored_spells.fail -- Edit Skada\Core\Tables.lua
 	local count_fails_by_spell = nil
 
 	local pairs, tostring, format, UnitGUID = pairs, tostring, string.format, UnitGUID
@@ -160,11 +160,6 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self)
-
-		-- table of ignored spells:
-		if Skada.ignored_spells and Skada.ignored_spells.fails then
-			ignored_spells = Skada.ignored_spells.fails
-		end
 	end
 
 	function mod:OnDisable()

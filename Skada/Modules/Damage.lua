@@ -31,8 +31,8 @@ Skada:RegisterModule("Damage", function(L, P)
 	local wipe = wipe
 	local PercentToRGB = Private.PercentToRGB
 	local tooltip_school = Skada.tooltip_school
-	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
-	local passive_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
+	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
 	local missTypes = Skada.missTypes
 	local mod_cols = nil
 
@@ -673,16 +673,6 @@ Skada:RegisterModule("Damage", function(L, P)
 		Skada:AddFeed(L["Damage: Personal DPS"], feed_personal_dps)
 		Skada:AddFeed(L["Damage: Raid DPS"], feed_raid_dps)
 		Skada:AddMode(self, L["Damage Done"])
-
-		-- table of ignored damage/time spells:
-		if Skada.ignored_spells then
-			if Skada.ignored_spells.damage then
-				ignored_spells = Skada.ignored_spells.damage
-			end
-			if Skada.ignored_spells.activeTime then
-				passive_spells = Skada.ignored_spells.activeTime
-			end
-		end
 	end
 
 	function mod:OnDisable()
