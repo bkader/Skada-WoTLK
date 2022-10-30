@@ -1,4 +1,4 @@
-local L = LibStub("AceLocale-3.0"):NewLocale(..., "enUS", true, true)
+local L = LibStub("AceLocale-3.0"):NewLocale(..., "enUS", true--[[, true]])
 if not L then return end
 
 L["A damage meter."] = true
@@ -800,8 +800,6 @@ L["Show modes icons on bars and menus."] = true
 L["Combat Log"] = _G["COMBAT_LOG"]
 L["opt_tweaks_combatlogfix_desc"] = "Keeps the combat log from breaking without munging it completely."
 L["Conservative Mode"] = true
-L["Aggressive Mode"] = true
-L["opt_tweaks_combatlogfixalt_desc"] = "Constantly clear the combat log instead of only when it breaks."
 L["Enable this if you want to ignore \124cffffbb00%s\124r."] = true
 L["Colors"] = _G["COLORS"]
 L["Custom Colors"] = true

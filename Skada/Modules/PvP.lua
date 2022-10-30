@@ -4,7 +4,7 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 
 	local format, wipe, GetTime = string.format, wipe, GetTime
 	local UnitGUID, UnitClass, UnitBuff, UnitIsPlayer = UnitGUID, UnitClass, UnitBuff, UnitIsPlayer
-	local GetSpellInfo, UnitCastingInfo = GetSpellInfo, UnitCastingInfo
+	local spellnames, UnitCastingInfo = Skada.spellnames, UnitCastingInfo
 
 	local specsCache, specsRoles = nil, nil
 	local spellsTable, aurasTable = nil, nil
@@ -25,54 +25,54 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 		if not aurasTable then
 			aurasTable = {
 				WARRIOR = {
-					[GetSpellInfo(56638)] = 71, -- Taste for Blood
-					[GetSpellInfo(64976)] = 71, -- Juggernaut
-					[GetSpellInfo(29801)] = 72, -- Rampage
-					[GetSpellInfo(50227)] = 73 -- Sword and Board
+					[spellnames[56638]] = 71, -- Taste for Blood
+					[spellnames[64976]] = 71, -- Juggernaut
+					[spellnames[29801]] = 72, -- Rampage
+					[spellnames[50227]] = 73 -- Sword and Board
 				},
 				PALADIN = {
-					[GetSpellInfo(68020)] = 70, -- Seal of Command
-					[GetSpellInfo(31801)] = 70 -- Seal of Vengeance
+					[spellnames[68020]] = 70, -- Seal of Command
+					[spellnames[31801]] = 70 -- Seal of Vengeance
 				},
 				ROGUE = {
-					[GetSpellInfo(58427)] = 259, -- Overkill
-					[GetSpellInfo(36554)] = 261, -- Shadowstep
-					[GetSpellInfo(31223)] = 261 -- Master of Subtlety
+					[spellnames[58427]] = 259, -- Overkill
+					[spellnames[36554]] = 261, -- Shadowstep
+					[spellnames[31223]] = 261 -- Master of Subtlety
 				},
 				PRIEST = {
-					[GetSpellInfo(52795)] = 256, -- Borrowed Time
-					[GetSpellInfo(47788)] = 257, -- Guardian Spirit
-					[GetSpellInfo(15473)] = 258, -- Shadowform
-					[GetSpellInfo(15286)] = 258 -- Vampiric Embrace
+					[spellnames[52795]] = 256, -- Borrowed Time
+					[spellnames[47788]] = 257, -- Guardian Spirit
+					[spellnames[15473]] = 258, -- Shadowform
+					[spellnames[15286]] = 258 -- Vampiric Embrace
 				},
 				DEATHKNIGHT = {
-					[GetSpellInfo(49016)] = 250, -- Hysteria
-					[GetSpellInfo(53138)] = 250, -- Abomination's Might
-					[GetSpellInfo(55610)] = 251, -- Imp. Icy Talons
-					[GetSpellInfo(49222)] = 252 -- Bone Shield
+					[spellnames[49016]] = 250, -- Hysteria
+					[spellnames[53138]] = 250, -- Abomination's Might
+					[spellnames[55610]] = 251, -- Imp. Icy Talons
+					[spellnames[49222]] = 252 -- Bone Shield
 				},
 				MAGE = {
-					[GetSpellInfo(11426)] = 62, -- Ice Barrier
-					[GetSpellInfo(11129)] = 63, -- Combustion
-					[GetSpellInfo(31583)] = 64 -- Arcane Empowerment
+					[spellnames[11426]] = 62, -- Ice Barrier
+					[spellnames[11129]] = 63, -- Combustion
+					[spellnames[31583]] = 64 -- Arcane Empowerment
 				},
 				WARLOCK = {
-					[GetSpellInfo(30299)] = 267 -- Nether Protection
+					[spellnames[30299]] = 267 -- Nether Protection
 				},
 				SHAMAN = {
-					[GetSpellInfo(51470)] = 262, -- Elemental Oath
-					[GetSpellInfo(30802)] = 263, -- Unleashed Rage
-					[GetSpellInfo(974)] = 264 -- Earth Shield
+					[spellnames[51470]] = 262, -- Elemental Oath
+					[spellnames[30802]] = 263, -- Unleashed Rage
+					[spellnames[974]] = 264 -- Earth Shield
 				},
 				HUNTER = {
-					[GetSpellInfo(20895)] = 253, -- Spirit Bond
-					[GetSpellInfo(19506)] = 254 -- Trueshot Aura
+					[spellnames[20895]] = 253, -- Spirit Bond
+					[spellnames[19506]] = 254 -- Trueshot Aura
 				},
 				DRUID = {
-					[GetSpellInfo(24907)] = 102, -- Moonkin Aura
-					[GetSpellInfo(24932)] = 103, -- Leader of the Pack
-					[GetSpellInfo(33891)] = 105, -- Tree of Life
-					[GetSpellInfo(48438)] = 105 -- Wild Growth
+					[spellnames[24907]] = 102, -- Moonkin Aura
+					[spellnames[24932]] = 103, -- Leader of the Pack
+					[spellnames[33891]] = 105, -- Tree of Life
+					[spellnames[48438]] = 105 -- Wild Growth
 				}
 			}
 		end
@@ -80,83 +80,83 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 		if not spellsTable then
 			spellsTable = {
 				WARRIOR = {
-					[GetSpellInfo(12294)] = 71, -- Mortal Strike
-					[GetSpellInfo(46924)] = 71, -- Bladestorm
-					[GetSpellInfo(1680)] = 72, -- Whirlwind
-					[GetSpellInfo(23881)] = 72, -- Bloodthirst
-					[GetSpellInfo(47475)] = 72, -- Slam
-					[GetSpellInfo(12809)] = 73, -- Concussion Blow
-					[GetSpellInfo(47498)] = 73 -- Devastate
+					[spellnames[12294]] = 71, -- Mortal Strike
+					[spellnames[46924]] = 71, -- Bladestorm
+					[spellnames[1680]] = 72, -- Whirlwind
+					[spellnames[23881]] = 72, -- Bloodthirst
+					[spellnames[47475]] = 72, -- Slam
+					[spellnames[12809]] = 73, -- Concussion Blow
+					[spellnames[47498]] = 73 -- Devastate
 				},
 				PALADIN = {
-					[GetSpellInfo(20473)] = 65, -- Holy Shock
-					[GetSpellInfo(53563)] = 65, -- Beacon of Light
-					[GetSpellInfo(31935)] = 66, -- Avenger's Shield
-					[GetSpellInfo(35395)] = 70, -- Crusader Strike
-					[GetSpellInfo(53385)] = 70, -- Divine Storm
-					[GetSpellInfo(20066)] = 70 -- Repentance
+					[spellnames[20473]] = 65, -- Holy Shock
+					[spellnames[53563]] = 65, -- Beacon of Light
+					[spellnames[31935]] = 66, -- Avenger's Shield
+					[spellnames[35395]] = 70, -- Crusader Strike
+					[spellnames[53385]] = 70, -- Divine Storm
+					[spellnames[20066]] = 70 -- Repentance
 				},
 				ROGUE = {
-					[GetSpellInfo(1329)] = 259, -- Mutilate
-					[GetSpellInfo(51662)] = 259, -- Hunger For Blood
-					[GetSpellInfo(51690)] = 260, -- Killing Spree
-					[GetSpellInfo(13877)] = 260, -- Blade Flurry
-					[GetSpellInfo(13750)] = 260, -- Adrenaline Rush
-					[GetSpellInfo(16511)] = 261, -- Hemorrhage
-					[GetSpellInfo(51713)] = 261 -- Shadow Dance
+					[spellnames[1329]] = 259, -- Mutilate
+					[spellnames[51662]] = 259, -- Hunger For Blood
+					[spellnames[51690]] = 260, -- Killing Spree
+					[spellnames[13877]] = 260, -- Blade Flurry
+					[spellnames[13750]] = 260, -- Adrenaline Rush
+					[spellnames[16511]] = 261, -- Hemorrhage
+					[spellnames[51713]] = 261 -- Shadow Dance
 				},
 				PRIEST = {
-					[GetSpellInfo(47540)] = 256, -- Penance
-					[GetSpellInfo(10060)] = 256, -- Power Infusion
-					[GetSpellInfo(33206)] = 256, -- Pain Suppression
-					[GetSpellInfo(34861)] = 257, -- Circle of Healing
-					[GetSpellInfo(15487)] = 258, -- Silence
-					[GetSpellInfo(34914)] = 258 -- Vampiric Touch
+					[spellnames[47540]] = 256, -- Penance
+					[spellnames[10060]] = 256, -- Power Infusion
+					[spellnames[33206]] = 256, -- Pain Suppression
+					[spellnames[34861]] = 257, -- Circle of Healing
+					[spellnames[15487]] = 258, -- Silence
+					[spellnames[34914]] = 258 -- Vampiric Touch
 				},
 				DEATHKNIGHT = {
-					[GetSpellInfo(45902)] = 250, -- Heart Strike
-					[GetSpellInfo(49203)] = 251, -- Hungering Cold
-					[GetSpellInfo(49143)] = 251, -- Frost Strike
-					[GetSpellInfo(49184)] = 251, -- Howling Blast
-					[GetSpellInfo(55090)] = 252 -- Scourge Strike
+					[spellnames[45902]] = 250, -- Heart Strike
+					[spellnames[49203]] = 251, -- Hungering Cold
+					[spellnames[49143]] = 251, -- Frost Strike
+					[spellnames[49184]] = 251, -- Howling Blast
+					[spellnames[55090]] = 252 -- Scourge Strike
 				},
 				MAGE = {
-					[GetSpellInfo(44425)] = 62, -- Arcane Barrage
-					[GetSpellInfo(44457)] = 63, -- Living Bomb
-					[GetSpellInfo(42859)] = 63, -- Scorch
-					[GetSpellInfo(31661)] = 63, -- Dragon's Breath
-					[GetSpellInfo(11113)] = 63, -- Blast Wave
-					[GetSpellInfo(44572)] = 64 -- Deep Freeze
+					[spellnames[44425]] = 62, -- Arcane Barrage
+					[spellnames[44457]] = 63, -- Living Bomb
+					[spellnames[42859]] = 63, -- Scorch
+					[spellnames[31661]] = 63, -- Dragon's Breath
+					[spellnames[11113]] = 63, -- Blast Wave
+					[spellnames[44572]] = 64 -- Deep Freeze
 				},
 				WARLOCK = {
-					[GetSpellInfo(48181)] = 265, -- Haunt
-					[GetSpellInfo(30108)] = 265, -- Unstable Affliction
-					[GetSpellInfo(59672)] = 266, -- Metamorphosis
-					[GetSpellInfo(50769)] = 267, -- Chaos Bolt
-					[GetSpellInfo(30283)] = 267 -- Shadowfury
+					[spellnames[48181]] = 265, -- Haunt
+					[spellnames[30108]] = 265, -- Unstable Affliction
+					[spellnames[59672]] = 266, -- Metamorphosis
+					[spellnames[50769]] = 267, -- Chaos Bolt
+					[spellnames[30283]] = 267 -- Shadowfury
 				},
 				SHAMAN = {
-					[GetSpellInfo(51490)] = 262, -- Thunderstorm
-					[GetSpellInfo(16166)] = 262, -- Elemental Mastery
-					[GetSpellInfo(51533)] = 263, -- Feral Spirit
-					[GetSpellInfo(30823)] = 263, -- Shamanistic Rage
-					[GetSpellInfo(17364)] = 263, -- Stormstrike
-					[GetSpellInfo(61295)] = 264, -- Riptide
-					[GetSpellInfo(51886)] = 264 -- Cleanse Spirit
+					[spellnames[51490]] = 262, -- Thunderstorm
+					[spellnames[16166]] = 262, -- Elemental Mastery
+					[spellnames[51533]] = 263, -- Feral Spirit
+					[spellnames[30823]] = 263, -- Shamanistic Rage
+					[spellnames[17364]] = 263, -- Stormstrike
+					[spellnames[61295]] = 264, -- Riptide
+					[spellnames[51886]] = 264 -- Cleanse Spirit
 				},
 				HUNTER = {
-					[GetSpellInfo(19577)] = 253, -- Intimidation
-					[GetSpellInfo(34490)] = 254, -- Silencing Shot
-					[GetSpellInfo(53209)] = 254, -- Chimera Shot
-					[GetSpellInfo(53301)] = 255, -- Explosive Shot
-					[GetSpellInfo(19386)] = 255 -- Wyvern Sting
+					[spellnames[19577]] = 253, -- Intimidation
+					[spellnames[34490]] = 254, -- Silencing Shot
+					[spellnames[53209]] = 254, -- Chimera Shot
+					[spellnames[53301]] = 255, -- Explosive Shot
+					[spellnames[19386]] = 255 -- Wyvern Sting
 				},
 				DRUID = {
-					[GetSpellInfo(48505)] = 102, -- Starfall
-					[GetSpellInfo(50516)] = 102, -- Typhoon
-					[GetSpellInfo(33876)] = 103, -- Mangle (Cat)
-					[GetSpellInfo(33878)] = 104, -- Mangle (Bear)
-					[GetSpellInfo(18562)] = 105 -- Swiftmend
+					[spellnames[48505]] = 102, -- Starfall
+					[spellnames[50516]] = 102, -- Typhoon
+					[spellnames[33876]] = 103, -- Mangle (Cat)
+					[spellnames[33878]] = 104, -- Mangle (Bear)
+					[spellnames[18562]] = 105 -- Swiftmend
 				}
 			}
 		end

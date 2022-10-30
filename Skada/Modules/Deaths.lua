@@ -14,10 +14,10 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 	local UnitHealthInfo = Skada.UnitHealthInfo
 	local UnitIsFeignDeath = UnitIsFeignDeath
-	local GetSpellInfo = Private.spell_info or GetSpellInfo
 	local GetSpellLink = Private.spell_link or GetSpellLink
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 	local GetTime, time, date, wipe = GetTime, time, date, wipe
+	local spellnames, spellicons = Skada.spellnames, Skada.spellicons
 	local mod_cols, submod_cols = nil, nil
 
 	-- cache colors
@@ -429,7 +429,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 					if log.id then
 						d.spellid = log.id
-						d.label, _, d.icon = GetSpellInfo(abs(log.id))
+						local spellid = abs(log.id)
+						d.label = spellnames[spellid]
+						d.icon = spellicons[spellid]
 					else
 						d.label = L["Unknown"]
 						d.spellid = nil
@@ -554,7 +556,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 				d.id = i
 
 				if death.id then -- spell id
-					d.label, _, d.icon = GetSpellInfo(death.id)
+					local spellid = abs(death.id)
+					d.label = spellnames[spellid]
+					d.icon = spellicons[spellid]
 					d.spellschool = death.sch
 				end
 
@@ -908,7 +912,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			(channel == "SELF") and "%s > %s (%s) %s" or "Skada: %s > %s (%s) %s",
 			log.src or L["Unknown"], -- source name
 			playername or L["Unknown"], -- player name
-			log.id and GetSpellInfo(log.id) or L["Unknown"], -- spell name
+			log.id and spellnames[abs(log.id)] or L["Unknown"], -- spell name
 			log.amt and Skada:FormatNumber(0 - log.amt, 1) or 0 -- spell amount
 		)
 

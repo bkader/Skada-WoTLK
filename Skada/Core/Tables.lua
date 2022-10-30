@@ -1,7 +1,7 @@
 -- Tables.lua
 -- Contains all tables used by different files and modules.
-local folder, ns = ...
-local L = LibStub("AceLocale-3.0"):GetLocale(folder)
+local _, ns = ...
+local L = ns.Locale
 local setmetatable = setmetatable
 
 -------------------------------------------------------------------------------

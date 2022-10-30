@@ -5,7 +5,6 @@ local Private = Skada.Private
 local pairs, tostring, format, uformat = pairs, tostring, string.format, Private.uformat
 local min, floor = math.min, math.floor
 local new, del = Private.newTable, Private.delTable
-local GetSpellInfo = Private.spell_info or GetSpellInfo
 local tooltip_school = Skada.tooltip_school
 local hits_perc = "%s (\124cffffffff%s\124r)"
 
@@ -20,6 +19,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 	local targetspellmod = targetmod:NewModule("Absorb spell list")
 	local ignored_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 	local passive_spells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
+	local spellnames = Skada.spellnames
 
 	local GetTime, band, tsort, max = GetTime, bit.band, table.sort, math.max
 	local GetCurrentMapAreaID, UnitBuff, UnitHealthInfo = GetCurrentMapAreaID, UnitBuff, Skada.UnitHealthInfo
@@ -1010,7 +1010,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 			if not _passive[class] then return end
 
 			for spellid, _ in pairs(_passive[class]) do
-				local points = LGT:GUIDHasTalent(dstGUID, GetSpellInfo(spellid), LGT:GetActiveTalentGroup(unit))
+				local points = LGT:GUIDHasTalent(dstGUID, spellnames[spellid], LGT:GetActiveTalentGroup(unit))
 				if points then
 					local t = new()
 					t.timestamp = timestamp - 60
@@ -1130,7 +1130,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 		elseif IsActiveBattlefieldArena() then
 			zoneModifier = 0.9
 		elseif GetCurrentMapAreaID() == 605 then
-			zoneModifier = (UnitBuff("player", GetSpellInfo(73822)) or UnitBuff("player", GetSpellInfo(73828))) and 1.3 or 1
+			zoneModifier = (UnitBuff("player", spellnames[73822]) or UnitBuff("player", spellnames[73828])) and 1.3 or 1
 		else
 			zoneModifier = 1
 		end

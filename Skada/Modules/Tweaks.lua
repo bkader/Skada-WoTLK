@@ -337,11 +337,10 @@ Skada:RegisterModule("Tweaks", function(L, P)
 	-- CombatLog Fix
 
 	do
-		local setmetatable, rawset, rawget = setmetatable, rawset, rawget
 		local CombatLogClearEntries = CombatLogClearEntries
-		local frame, playerspells
+		local frame = nil
 
-		local function aggressive_OnUpdate(self, elapsed)
+		local function frame_OnUpdate(self, elapsed)
 			self.timeout = self.timeout + elapsed
 			if self.timeout >= P.combatlogfixtime then
 				CombatLogClearEntries()
@@ -349,81 +348,27 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			end
 		end
 
-		local function default_OnUpdate(self, elapsed)
-			self.timeout = (self.timeout or 0) - elapsed
-			if self.timeout > 0 then return end
-			self:Hide()
-
-			-- was the last combat event within a second of cast succeeding?
-			if self.lastEvent and (GetTime() - self.lastEvent) <= 1 then return end
-
+		function mod:CombatEnter()
+			if not P.combatlogfix then return end
 			Skada:ScheduleTimer(CombatLogClearEntries, 0.1)
 		end
 
-		local function frame_OnEvent(self, event, unit, spellname)
-			if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-				self.lastEvent = unit -- timestamp
-			elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-				if unit == "player" and spellname and playerspells[spellname] then
-					self.timeout = 0.5
-					self:Show()
-				end
-			elseif event == "ZONE_CHANGED_NEW_AREA" then
-				local _, zt = IsInInstance()
-				if self.zonetype and zt ~= self.zonetype then
-					Skada:ScheduleTimer(CombatLogClearEntries, 0.1)
-				end
-				self.zonetype = zt
-			end
-		end
-
-		function mod:CombatEnter()
-			if P.combatlogfix then
-				Skada:ScheduleTimer(CombatLogClearEntries, 0.1)
-			end
-		end
-
 		function mod:CombatLogFix()
-			if not P.combatlogfix then
+			if P.combatlogfix then
+				Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
+
+				frame = frame or CreateFrame("Frame")
+				frame.timeout = 0
+				frame:SetScript("OnUpdate", frame_OnUpdate)
+				frame:Show()
+			else
+				Skada.UnregisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
 				if frame then
 					frame:UnregisterAllEvents()
 					frame:SetScript("OnUpdate", nil)
-					frame:SetScript("OnEvent", nil)
 					frame:Hide()
-					frame = nil
 				end
-
-				Skada.UnregisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
-				return
 			end
-
-			frame = frame or CreateFrame("Frame")
-			if P.combatlogfixalt then
-				frame:UnregisterAllEvents()
-				frame.timeout = 0
-				frame:SetScript("OnUpdate", aggressive_OnUpdate)
-				frame:SetScript("OnEvent", nil)
-				frame:Show()
-			else
-				-- construct player's spells
-				if playerspells == nil then
-					playerspells = setmetatable({}, {__index = function(t, name)
-						local _, _, _, cost = GetSpellInfo(name)
-						rawset(t, name, not (not (cost and cost > 0)))
-						return rawget(t, name)
-					end})
-				end
-
-				frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-				frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-				frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-				frame.timeout = 0
-				frame:SetScript("OnUpdate", default_OnUpdate)
-				frame:SetScript("OnEvent", frame_OnEvent)
-				frame:Hide()
-			end
-
-			Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
 		end
 	end
 
@@ -508,13 +453,14 @@ Skada:RegisterModule("Tweaks", function(L, P)
 				P.smartwait = 3
 			end
 			-- combatlog fix
-			if P.combatlogfix == nil then
-				P.combatlogfix = true
-			end
-			if P.combatlogfixtime then
+			if P.combatlogfixtime == nil then
 				P.combatlogfixtime = 2
 			end
-			-- old spamage module
+
+			-- old unused data
+			if P.combatlogfixalt then
+				P.combatlogfixalt = nil
+			end
 			if type(P.spamage) == "table" then
 				P.spamage = nil
 			end
@@ -609,15 +555,6 @@ Skada:RegisterModule("Tweaks", function(L, P)
 						name = L["Enable"],
 						order = 20
 					},
-					combatlogfixalt = {
-						type = "toggle",
-						name = L["Aggressive Mode"],
-						desc = L["opt_tweaks_combatlogfixalt_desc"],
-						disabled = function()
-							return not P.combatlogfix
-						end,
-						order = 30
-					},
 					combatlogfixtime = {
 						type = "range",
 						name = L["Duration"],
@@ -625,12 +562,9 @@ Skada:RegisterModule("Tweaks", function(L, P)
 						max = 60,
 						step = 1,
 						disabled = function()
-							return not (P.combatlogfix and P.combatlogfixalt)
+							return not P.combatlogfix
 						end,
-						hidden = function()
-							return not P.combatlogfixalt
-						end,
-						order = 40
+						order = 30
 					}
 				}
 			}

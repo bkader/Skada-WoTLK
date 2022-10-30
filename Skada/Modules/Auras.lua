@@ -1,11 +1,10 @@
-local folder, Skada = ...
+local _, Skada = ...
 local Private = Skada.Private
-local L = LibStub("AceLocale-3.0"):GetLocale(folder)
+local L = Skada.Locale
 
 -- frequently used global (sort of...)
 local pairs, format, uformat = pairs, string.format, Private.uformat
 local time, min, floor = time, math.min, math.floor
-local _
 
 -- common functions and locals
 local new, del, clear = Private.newTable, Private.delTable, Private.clearTable

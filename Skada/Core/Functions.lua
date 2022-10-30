@@ -7,12 +7,11 @@ local setmetatable, wipe, band = setmetatable, wipe, bit.band
 local next, print, GetTime = next, print, GetTime
 local _
 
-local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 local UnitClass, GetPlayerInfoByGUID = UnitClass, GetPlayerInfoByGUID
 local GetClassFromGUID = Skada.GetClassFromGUID
 local new, del = Private.newTable, Private.delTable
 local clear, copy = Private.clearTable, Private.tCopy
-local callbacks = Skada.callbacks
+local L, callbacks = Skada.Locale, Skada.callbacks
 local userName = Skada.userName
 
 local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800

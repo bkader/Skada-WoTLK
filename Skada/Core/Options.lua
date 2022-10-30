@@ -1,14 +1,14 @@
 local folder, Skada = ...
 local Private = Skada.Private
 
-local L = LibStub("AceLocale-3.0"):GetLocale(folder)
+local L = Skada.Locale
 local ACD = LibStub("AceConfigDialog-3.0")
 local ACR = LibStub("AceConfigRegistry-3.0")
 
 local min, max = math.min, math.max
 local next, format = next, format or string.format
 local del = Private.delTable
-local collectgarbage = collectgarbage
+local _
 
 -- references: windows, modes
 local windows = Skada.windows
@@ -1409,7 +1409,7 @@ end
 
 do
 	local ipairs, strmatch, uformat = ipairs, strmatch, Private.uformat
-	local UnitName, GetRealmName = UnitName, GetRealmName
+	local UnitName, GetRealmName, collectgarbage = UnitName, GetRealmName, collectgarbage
 	local copy, open_window = Private.tCopy, Private.open_import_export
 	local serialize_profile = nil
 

@@ -1,5 +1,4 @@
 local folder, ns = ...
-local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 
 local GetAddOnMetadata = GetAddOnMetadata
 ns.version = GetAddOnMetadata(folder, "Version")
@@ -7,10 +6,8 @@ ns.website = GetAddOnMetadata(folder, "X-Website")
 ns.discord = GetAddOnMetadata(folder, "X-Discord")
 ns.logo = [[Interface\ICONS\spell_lightning_lightningbolt01]]
 ns.revisited = true -- Skada-Revisited flag
-
--- holds private stuff
-local Private = ns.Private or {}
-ns.Private = Private
+ns.Private = {} -- holds private stuff
+ns.Locale = LibStub("AceLocale-3.0"):GetLocale(folder)
 
 -- cache frequently used globals
 local pairs, ipairs = pairs, ipairs
@@ -19,6 +16,7 @@ local band, tonumber, type = bit.band, tonumber, type
 local strsplit, format, strmatch, gsub = strsplit, string.format, string.match, string.gsub
 local setmetatable, rawset, wipe = setmetatable, rawset, wipe
 local EmptyFunc = Multibar_EmptyFunc
+local Private, L = ns.Private, ns.Locale
 local new, del, _
 
 -- options table
@@ -1194,6 +1192,21 @@ do
 		end
 		return spellid
 	end
+
+	-- spell icon and name to speed up things
+	local spell_info = Private.spell_info
+	ns.spellnames = setmetatable({}, {__index = function(t, spellid)
+		local name, _, icon = spell_info(spellid)
+		ns.spellicons[spellid] = icon
+		t[spellid] = name
+		return name
+	end})
+	ns.spellicons = setmetatable({}, {__index = function(t, spellid)
+		local name, _, icon = spell_info(spellid)
+		ns.spellnames[spellid] = name
+		t[spellid] = icon
+		return icon
+	end})
 end
 
 -------------------------------------------------------------------------------

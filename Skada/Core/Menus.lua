@@ -1,7 +1,7 @@
 local folder, Skada = ...
 local Private = Skada.Private
 
-local L = LibStub("AceLocale-3.0"):GetLocale(folder)
+local L = Skada.Locale
 local AceGUI = LibStub("AceGUI-3.0")
 
 local pairs, next, type, tsort = pairs, next, type, table.sort

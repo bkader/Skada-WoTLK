@@ -5,7 +5,6 @@ local Skada = LibStub("AceAddon-3.0"):NewAddon(ns, folder, "AceEvent-3.0", "AceT
 Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 _G[folder] = ns
 
-local L = LibStub("AceLocale-3.0"):GetLocale(folder)
 local ACD = LibStub("AceConfigDialog-3.0")
 local ACR = LibStub("AceConfigRegistry-3.0")
 local DBI = LibStub("LibDBIcon-1.0", true)
@@ -21,14 +20,14 @@ local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, 
 local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 local UnitExists, UnitGUID, UnitName, UnitClass = UnitExists, UnitGUID, UnitName, UnitClass
 local GameTooltip, ReloadUI, GetScreenWidth = GameTooltip, ReloadUI, GetScreenWidth
-local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
+local GetSpellLink, spellnames, spellicons = GetSpellLink, Skada.spellnames, Skada.spellicons
 local SecondsToTime, time, GetTime = SecondsToTime, time, GetTime
 local IsInGroup, IsInRaid, IsInPvP = Skada.IsInGroup, Skada.IsInRaid, Skada.IsInPvP
 local GetNumGroupMembers, GetGroupTypeAndCount = Skada.GetNumGroupMembers, Skada.GetGroupTypeAndCount
 local GetCreatureId, UnitIterator, IsGroupDead = Skada.GetCreatureId, Skada.UnitIterator, Skada.IsGroupDead
 local prevent_duplicate, uformat, EscapeStr = Private.prevent_duplicate, Private.uformat, Private.EscapeStr
 local is_player, is_pet, assign_pet = Private.is_player, Private.is_pet, Private.assign_pet
-local callbacks = Skada.callbacks
+local L, callbacks = Skada.Locale, Skada.callbacks
 local P, G, _
 
 local LDB = LibStub("LibDataBroker-1.1")
@@ -729,8 +728,11 @@ do
 
 			local spellid, school, petname = spell_split(spell)
 			d.spellid = spellid
-			d.label, _, d.icon = GetSpellInfo(abs(spellid))
 			d.spellschool = school
+
+			local abs_id = abs(spellid)
+			d.label = spellnames[abs_id]
+			d.icon = spellicons[abs_id]
 
 			-- hots and dots?
 			if spellid < 0 and is_hot ~= false then
@@ -2753,7 +2755,6 @@ function Skada:OnInitialize()
 	self.maxmeme = min(60, max(30, self.maxsets + 10))
 
 	-- update references
-	GetSpellInfo = Private.spell_info or GetSpellInfo
 	GetSpellLink = Private.spell_link or GetSpellLink
 	classcolors = self.classcolors
 
