@@ -4,9 +4,8 @@ local Private = Skada.Private
 local L = Skada.Locale
 local AceGUI = LibStub("AceGUI-3.0")
 
-local pairs, next, type, tsort = pairs, next, type, table.sort
-local format, sbyte = string.format, string.byte
-local min, max = math.min, math.max
+local pairs, next, type = pairs, next, type
+local format, min, max = string.format, math.min, math.max
 local GetCursorPosition = GetCursorPosition
 local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
 
@@ -737,16 +736,9 @@ function Skada:SegmentMenu(window)
 end
 
 do
+	local tContains, tsort = tContains, table.sort
 	local categories -- list of mode categories.
 	local categorized -- modes organized by category.
-
-	local function sort_categories(a, b)
-		local a_score = (a == L["Other"]) and 1000 or 0
-		local b_score = (b == L["Other"]) and 1000 or 0
-		a_score = a_score + (sbyte(a, 1) * 10) + sbyte(a, 1)
-		b_score = b_score + (sbyte(b, 1) * 10) + sbyte(b, 1)
-		return a_score < b_score
-	end
 
 	local function construct_categories()
 		if categories then return end
@@ -754,8 +746,12 @@ do
 		categories = {}
 		categorized = {}
 
-		for i = 1, #modes do
-			local mode = modes[i]
+		-- alphabetical order of modes!
+		tsort(modes, function(a, b)
+			return a and b and a.localeName and b.localeName and a.localeName < b.localeName
+		end)
+
+		for _, mode in pairs(modes) do
 			categorized[mode.category] = categorized[mode.category] or {}
 			categorized[mode.category][#categorized[mode.category] + 1] = mode
 			if not tContains(categories, mode.category) then
@@ -763,7 +759,16 @@ do
 			end
 		end
 
-		tsort(categories, sort_categories)
+		-- alphabetical order of categories (Other is left last)!
+		tsort(categories, function(a, b)
+			if a == "Other" then
+				return false
+			elseif b == "Other" then
+				return true
+			else
+				return a < b
+			end
+		end)
 	end
 
 	local function build_large_menu()
@@ -833,7 +838,7 @@ do
 		local function create_header(text, index, modules)
 			local header = menu:CreateFontString(nil, "ARTWORK", "GameFontNormalSmallLeft")
 			header:SetWordWrap(false)
-			header:SetText(text)
+			header:SetText(L[text])
 			menu.headers[index] = header
 			header.buttons = header.buttons or {}
 
@@ -957,7 +962,7 @@ do
 					for i = 1, #categories do
 						local category = categories[i]
 						wipe(info)
-						info.text = category
+						info.text = L[category]
 						info.value = category
 						info.hasArrow = 1
 						info.notCheckable = 1
@@ -1123,8 +1128,8 @@ do
 			modebox:SetLabel(L["Mode"])
 			modebox:SetList({})
 
-			for i = 1, #modes do
-				modebox:AddItem(modes[i].moduleName, modes[i].localeName)
+			for _, mode in pairs(modes)do
+				modebox:AddItem(mode.moduleName, mode.localeName)
 			end
 			modebox:SetCallback("OnValueChanged", function(f, e, value) Skada.db.report.mode = value end)
 			modebox:SetValue(Skada.db.report.mode or modes[1])

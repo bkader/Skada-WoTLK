@@ -213,7 +213,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 			"SPELL_AURA_REFRESH"
 		)
 
-		Skada:AddMode(self, L["Crowd Control"])
+		Skada:AddMode(self, "Crowd Control")
 	end
 
 	function mod:OnDisable()
@@ -478,7 +478,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 			"SPELL_AURA_REFRESH"
 		)
 
-		Skada:AddMode(self, L["Crowd Control"])
+		Skada:AddMode(self, "Crowd Control")
 	end
 
 	function mod:OnDisable()
@@ -735,7 +735,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 			"SPELL_AURA_BROKEN_SPELL"
 		)
 
-		Skada:AddMode(self, L["Crowd Control"])
+		Skada:AddMode(self, "Crowd Control")
 	end
 
 	function mod:OnDisable()

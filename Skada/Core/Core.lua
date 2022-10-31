@@ -104,8 +104,7 @@ local set_active, start_watching, stop_watching
 local new_window, reset_window, add_window_options
 local set_window_child, set_window_mode_title
 local restore_view, restore_window_view
-local sort_modes, check_group
-local combat_end, combat_start
+local check_group, combat_end, combat_start
 
 -- verifies a set
 local function verify_set(mode, set)
@@ -915,6 +914,17 @@ function Window:DisplayMode(mode, class)
 end
 
 do
+	local function default_sort_func(a, b)
+		return a.localeName < b.localeName
+	end
+
+	local function user_sort_func(a, b)
+		if P.sortmodesbyusage and P.modeclicks then
+			return (P.modeclicks[a.moduleName] or 0) > (P.modeclicks[b.moduleName] or 0)
+		end
+		return a.localeName < b.localeName
+	end
+
 	local function click_on_mode(win, id, _, button)
 		if button == "LeftButton" then
 			local mode = find_mode(id)
@@ -922,29 +932,13 @@ do
 				if P.sortmodesbyusage then
 					P.modeclicks = P.modeclicks or {}
 					P.modeclicks[id] = (P.modeclicks[id] or 0) + 1
-					sort_modes()
 				end
 				win:DisplayMode(mode)
 			end
+			tsort(modes, default_sort_func)
 		elseif button == "RightButton" then
 			win:RightClick()
 		end
-	end
-
-	local function default_sort_func(a, b)
-		return a.name < b.name
-	end
-
-	local function sort_func(a, b)
-		if P.sortmodesbyusage and P.modeclicks then
-			return (P.modeclicks[a.moduleName] or 0) > (P.modeclicks[b.moduleName] or 0)
-		else
-			return a.moduleName < b.moduleName
-		end
-	end
-
-	function sort_modes()
-		tsort(modes, sort_func)
 	end
 
 	function Window:DisplayModes(settime)
@@ -975,10 +969,9 @@ do
 			end
 		end
 
+		tsort(modes, user_sort_func)
 		self.metadata.click = click_on_mode
 		self.metadata.maxvalue = 1
-		self.metadata.sortfunc = default_sort_func
-
 		self.changed = true
 		self.display:SetTitle(self, self.metadata.title)
 
@@ -1335,7 +1328,7 @@ do
 		end
 
 		mode.Reload = mode.Reload or reload_mode
-		mode.category = category or L["Other"]
+		mode.category = category or "Other"
 		modes[#modes + 1] = mode
 
 		if selected_feed == nil and P.feed ~= "" then
@@ -1343,7 +1336,6 @@ do
 		end
 
 		scan_for_columns(mode)
-		sort_modes()
 
 		local modename = mode.moduleName
 		for i = 1, #windows do

@@ -246,7 +246,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
-		Skada:AddMode(self, L["Damage Done"])
+		Skada:AddMode(self, "Damage Done")
 	end
 
 	function mod:OnDisable()

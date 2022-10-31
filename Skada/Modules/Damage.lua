@@ -672,7 +672,7 @@ Skada:RegisterModule("Damage", function(L, P)
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddFeed(L["Damage: Personal DPS"], feed_personal_dps)
 		Skada:AddFeed(L["Damage: Raid DPS"], feed_raid_dps)
-		Skada:AddMode(self, L["Damage Done"])
+		Skada:AddMode(self, "Damage Done")
 	end
 
 	function mod:OnDisable()
@@ -818,11 +818,11 @@ Skada:RegisterModule("DPS", function(L, P)
 			self.metadata.click4_label = parentmod.metadata.click4_label
 		end
 
-		Skada:AddMode(self, L["Damage Done"])
+		Skada:AddMode(self, "Damage Done")
 	end
 
 	function mod:OnDisable()
-		Skada:RemoveMode(self, L["Damage Done"])
+		Skada:RemoveMode(self)
 	end
 end, "Damage")
 
@@ -971,7 +971,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C)
 
 		mod_cols = self.metadata.columns
 
-		Skada:AddMode(self, L["Damage Done"])
+		Skada:AddMode(self, "Damage Done")
 	end
 
 	function mod:OnDisable()
@@ -1156,7 +1156,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 		playermod.nototal = true
 		targetmod.nototal = true
 
-		Skada:AddMode(self, L["Damage Done"])
+		Skada:AddMode(self, "Damage Done")
 	end
 
 	function mod:OnDisable()
@@ -1356,11 +1356,11 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 		spellmod.nototal = true
 		targetmod.nototal = true
 
-		Skada:AddMode(self, L["Damage Done"])
+		Skada:AddMode(self, "Damage Done")
 	end
 
 	function mod:OnDisable()
-		Skada:RemoveMode(self, L["Damage Done"])
+		Skada:RemoveMode(self)
 	end
 
 	---------------------------------------------------------------------------

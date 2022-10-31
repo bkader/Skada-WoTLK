@@ -262,7 +262,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
-		Skada:AddMode(self, L["Buffs and Debuffs"])
+		Skada:AddMode(self, "Buffs and Debuffs")
 	end
 
 	function mod:OnDisable()

@@ -422,7 +422,7 @@ Skada:RegisterModule("Healing", function(L, P)
 		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
-		Skada:AddMode(self, L["Absorbs and Healing"])
+		Skada:AddMode(self, "Absorbs and Healing")
 	end
 
 	function mod:OnDisable()
@@ -626,7 +626,7 @@ Skada:RegisterModule("Overhealing", function(L)
 		spellmod.nototal = true
 		targetmod.nototal = true
 
-		Skada:AddMode(self, L["Absorbs and Healing"])
+		Skada:AddMode(self, "Absorbs and Healing")
 	end
 
 	function mod:OnDisable()
@@ -859,7 +859,7 @@ Skada:RegisterModule("Total Healing", function(L)
 		spellmod.nototal = true
 		targetmod.nototal = true
 
-		Skada:AddMode(self, L["Absorbs and Healing"])
+		Skada:AddMode(self, "Absorbs and Healing")
 	end
 
 	function mod:OnDisable()
@@ -1071,7 +1071,7 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 
 		mod_cols = self.metadata.columns
 
-		Skada:AddMode(self, L["Absorbs and Healing"])
+		Skada:AddMode(self, "Absorbs and Healing")
 	end
 
 	function mod:OnDisable()

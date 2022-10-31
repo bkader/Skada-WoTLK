@@ -215,10 +215,10 @@ Skada:RegisterModule("Resources", function(L, P)
 		energymod.metadata.icon = [[Interface\Icons\spell_holy_circleofrenewal]]
 		runicmod.metadata.icon = [[Interface\Icons\inv_sword_62]]
 
-		Skada:AddMode(manamod, L["Resources"])
-		Skada:AddMode(ragemod, L["Resources"])
-		Skada:AddMode(energymod, L["Resources"])
-		Skada:AddMode(runicmod, L["Resources"])
+		Skada:AddMode(manamod, "Resources")
+		Skada:AddMode(ragemod, "Resources")
+		Skada:AddMode(energymod, "Resources")
+		Skada:AddMode(runicmod, "Resources")
 	end
 
 	function mod:OnDisable()

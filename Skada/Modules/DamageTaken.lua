@@ -567,7 +567,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
-		Skada:AddMode(self, L["Damage Taken"])
+		Skada:AddMode(self, "Damage Taken")
 	end
 
 	function mod:OnDisable()
@@ -673,7 +673,7 @@ Skada:RegisterModule("DTPS", function(L, P)
 			self.metadata.click2 = parentmod.metadata.click2
 		end
 
-		Skada:AddMode(self, L["Damage Taken"])
+		Skada:AddMode(self, "Damage Taken")
 	end
 
 	function mod:OnDisable()
@@ -883,7 +883,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 
 		mod_cols = self.metadata.columns
 
-		Skada:AddMode(self, L["Damage Taken"])
+		Skada:AddMode(self, "Damage Taken")
 	end
 
 	function mod:OnDisable()
@@ -1007,7 +1007,7 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 
 		mod_cols = self.metadata.columns
 
-		Skada:AddMode(self, L["Damage Taken"])
+		Skada:AddMode(self, "Damage Taken")
 	end
 
 	function mod:OnDisable()

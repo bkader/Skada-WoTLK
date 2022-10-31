@@ -1106,7 +1106,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
-		Skada:AddMode(self, L["Absorbs and Healing"])
+		Skada:AddMode(self, "Absorbs and Healing")
 	end
 
 	function mod:OnDisable()
@@ -1458,7 +1458,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		Skada:AddFeed(L["Healing: Personal HPS"], feed_personal_hps)
 		Skada:AddFeed(L["Healing: Raid HPS"], feed_raid_hps)
 
-		Skada:AddMode(self, L["Absorbs and Healing"])
+		Skada:AddMode(self, "Absorbs and Healing")
 	end
 
 	function mod:OnDisable()
@@ -1559,7 +1559,7 @@ Skada:RegisterModule("HPS", function(L, P)
 			self.metadata.click2 = parentmod.metadata.click2
 		end
 
-		Skada:AddMode(self, L["Absorbs and Healing"])
+		Skada:AddMode(self, "Absorbs and Healing")
 	end
 
 	function mod:OnDisable()
@@ -1710,7 +1710,7 @@ Skada:RegisterModule("Healing Done By Spell", function(L, _, _, C)
 			icon = [[Interface\Icons\spell_nature_healingwavelesser]]
 		}
 		mod_cols = self.metadata.columns
-		Skada:AddMode(self, L["Absorbs and Healing"])
+		Skada:AddMode(self, "Absorbs and Healing")
 	end
 
 	function mod:OnDisable()

@@ -216,6 +216,10 @@ options.set = function(info, value)
 	elseif key == "setstokeep" or key == "setslimit" then
 		Skada.maxsets = Skada.db.setstokeep + Skada.db.setslimit
 		Skada.maxmeme = min(60, max(30, Skada.maxsets + 10))
+	elseif key == "sortmodesbyusage" then
+		if not value then -- clear the table.
+			Skada.db.modeclicks = del(Skada.db.modeclicks)
+		end
 	end
 end
 
@@ -923,10 +927,10 @@ do
 		if not columns then return end
 
 		local db = self.db.columns
-		local category = mod.category or L["Other"]
+		local category = mod.category or "Other"
 
 		if not options.args.columns.args[category] then
-			options.args.columns.args[category] = {type = "group", name = category, args = {}}
+			options.args.columns.args[category] = {type = "group", name = L[category], args = {}}
 		end
 
 		local moduleName = mod.localeName

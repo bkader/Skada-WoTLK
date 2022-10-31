@@ -707,7 +707,7 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
-		Skada:AddMode(self, L["Buffs and Debuffs"])
+		Skada:AddMode(self, "Buffs and Debuffs")
 	end
 
 	function mod:OnDisable()
@@ -873,7 +873,7 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 			"SPELL_AURA_APPLIED_DOSE"
 		)
 
-		Skada:AddMode(self, L["Buffs and Debuffs"])
+		Skada:AddMode(self, "Buffs and Debuffs")
 	end
 
 	function mod:OnDisable()
@@ -951,7 +951,7 @@ Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 			"SPELL_PERIODIC_ENERGIZE"
 		)
 
-		Skada:AddMode(self, L["Enemies"])
+		Skada:AddMode(self, "Enemies")
 	end
 
 	function mod:OnDisable()
@@ -1063,7 +1063,7 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 			"SPELL_AURA_APPLIED_DOSE"
 		)
 
-		Skada:AddMode(self, L["Enemies"])
+		Skada:AddMode(self, "Enemies")
 	end
 
 	function mod:OnDisable()
