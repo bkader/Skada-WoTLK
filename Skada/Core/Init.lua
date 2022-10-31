@@ -36,6 +36,11 @@ do
 	end
 end
 
+-- some tables we need
+ns.dummyTable = {} -- a dummy table used as fallback
+ns.cacheTable = {} -- primary cache table
+ns.cacheTable2 = {} -- secondary cache table
+
 -------------------------------------------------------------------------------
 -- flags/bitmasks
 
@@ -684,8 +689,11 @@ do
 		return ok and str or gsub(gsub(fstr, "(%%+)([^%%%s<]+)", replace), "%%%%", "%%")
 	end
 
-	function Private.WrapTextInColorCode(text, colorHexString)
-		return format("\124c%s%s\124r", colorHexString, text)
+	Private.WrapTextInColorCode = _G.WrapTextInColorCode
+	if not Private.WrapTextInColorCode then
+		Private.WrapTextInColorCode = function(text, colorHexString)
+			return format("\124c%s%s\124r", colorHexString, text)
+		end
 	end
 end
 
