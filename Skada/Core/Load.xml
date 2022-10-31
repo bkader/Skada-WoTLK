@@ -5,10 +5,10 @@
 	<!-- Core Files -->
 	<Script file="Tables.lua"/>
 	<Script file="Core.lua"/>
-	<Script file="Prototypes.lua"/>
-	<Script file="Functions.lua"/>
 	<Script file="Options.lua"/>
 	<Script file="Menus.lua"/>
+	<Script file="Prototypes.lua"/>
+	<Script file="Functions.lua"/>
 
 	<!-- Display Systems -->
 	<Script file="Display\Bar.lua"/>

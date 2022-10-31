@@ -3,7 +3,7 @@ local Private = Skada.Private
 
 local select, pairs, type = select, pairs, type
 local tonumber, format = tonumber, string.format
-local setmetatable, wipe, band = setmetatable, wipe, bit.band
+local setmetatable, wipe = setmetatable, wipe
 local next, print, GetTime = next, print, GetTime
 local _
 
@@ -1158,7 +1158,6 @@ do
 	local playerPrototype = Skada.playerPrototype
 	local enemyPrototype = Skada.enemyPrototype
 	local modes, userGUID = Skada.modes, Skada.userGUID
-	local BITMASK_FRIENDLY = Private.BITMASK_FRIENDLY
 
 	-- finds a player that was already recorded
 	local dummy_pet = {class = "PET"} -- used as fallback
@@ -1200,7 +1199,7 @@ do
 
 		-- search friendly enemies
 		local enemy = self:FindEnemy(set, name, id)
-		if enemy and enemy.flag and band(enemy.flag, BITMASK_FRIENDLY) ~= 0 then
+		if enemy and enemy.flag and self:IsFriendly(enemy.flag) then
 			set._actoridx[id] = enemy
 			return enemy
 		end
@@ -1249,7 +1248,7 @@ do
 		end
 
 		-- not all modules provide flags
-		if actor.flag == nil and flag then
+		if (actor.flag == nil or actor.flag == 0) and flag and flag ~= 0 then
 			actor.flag = flag
 			actor.__mod = true
 		end
@@ -1355,7 +1354,7 @@ do
 		end
 
 		-- not all modules provide flags
-		if actor.flag == nil and flag then
+		if (actor.flag == nil or actor.flag == 0) and flag and flag ~= 0 then
 			actor.flag = flag
 			actor.__mod = true
 		end
@@ -1608,13 +1607,13 @@ do
 
 		if args.spellid and args.spellschool then
 			args.spellstring = format((args.is_dot or args.is_hot) and "-%s.%s" or "%s.%s", args.spellid, args.spellschool)
-			if band(args.srcFlags, BITMASK_GROUP) ~= 0 or band(args.dstFlags, BITMASK_GROUP) ~= 0 then
+			if self:InGroup(args.srcFlags) or self:InGroup(args.dstFlags) then
 				callbacks:Fire("Skada_SpellString", args, args.spellid, args.spellstring)
 			end
 		end
 		if args.extraspellid and args.extraschool then
 			args.extrastring = format("%s.%s", args.extraspellid, args.extraschool)
-			if band(args.srcFlags, BITMASK_GROUP) ~= 0 or band(args.dstFlags, BITMASK_GROUP) ~= 0 then
+			if self:InGroup(args.srcFlags) or self:InGroup(args.dstFlags) then
 				callbacks:Fire("Skada_SpellString", args, args.extraspellid, args.extrastring)
 			end
 		end

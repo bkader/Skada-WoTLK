@@ -45,24 +45,79 @@ ns.cacheTable2 = {} -- secondary cache table
 -- flags/bitmasks
 
 do
+	local bit_bor = bit.bor
+
+	------------------------------------------------------
 	-- self-affilation
+	------------------------------------------------------
 	local BITMASK_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001
 	Private.BITMASK_MINE = BITMASK_MINE
 
-	-- party/raid affiliation
+	function ns:IsMine(flags)
+		return (band(flags, BITMASK_MINE) ~= 0)
+	end
+
+	------------------------------------------------------
+	-- group affilation
+	------------------------------------------------------
 	local BITMASK_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY or 0x00000002
 	local BITMASK_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID or 0x00000004
-	Private.BITMASK_GROUP = BITMASK_MINE + BITMASK_PARTY + BITMASK_RAID
+	local BITMASK_GROUP = bit_bor(BITMASK_MINE, BITMASK_PARTY, BITMASK_RAID)
+	Private.BITMASK_GROUP = BITMASK_GROUP
 
-	-- pets and guardians
+	function ns:InGroup(flags)
+		return (band(flags, BITMASK_GROUP) ~= 0)
+	end
+
+	------------------------------------------------------
+	-- pets and guardiands
+	------------------------------------------------------
 	local BITMASK_TYPE_PET = COMBATLOG_OBJECT_TYPE_PET or 0x00001000
 	local BITMASK_TYPE_GUARDIAN = COMBATLOG_OBJECT_TYPE_GUARDIAN or 0x00002000
-	Private.BITMASK_PETS = BITMASK_TYPE_PET + BITMASK_TYPE_GUARDIAN
+	local BITMASK_PETS = bit_bor(BITMASK_TYPE_PET, BITMASK_TYPE_GUARDIAN)
+	Private.BITMASK_PETS = BITMASK_PETS
 
-	-- friendly and hostile units
-	Private.BITMASK_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
-	Private.BITMASK_NEUTRAL = COMBATLOG_OBJECT_REACTION_NEUTRAL or 0x00000020
-	Private.BITMASK_HOSTILE = COMBATLOG_OBJECT_REACTION_HOSTILE or 0x00000040
+	function ns:IsPet(flags)
+		return (band(flags, BITMASK_PETS) ~= 0)
+	end
+
+	------------------------------------------------------
+	-- reactions: friendly, neutral and hostile
+	------------------------------------------------------
+	local BITMASK_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010
+	local BITMASK_NEUTRAL = COMBATLOG_OBJECT_REACTION_NEUTRAL or 0x00000020
+	local BITMASK_HOSTILE = COMBATLOG_OBJECT_REACTION_HOSTILE or 0x00000040
+	Private.BITMASK_FRIENDLY = BITMASK_FRIENDLY
+	Private.BITMASK_NEUTRAL = BITMASK_NEUTRAL
+	Private.BITMASK_HOSTILE = BITMASK_HOSTILE
+
+	function ns:IsFriendly(flags)
+		return (band(flags, BITMASK_FRIENDLY) ~= 0)
+	end
+
+	function ns:IsNeutral(flags)
+		return (band(flags, BITMASK_NEUTRAL) ~= 0)
+	end
+
+	function ns:IsHostile(flags)
+		return (band(flags, BITMASK_HOSTILE) ~= 0)
+	end
+
+	------------------------------------------------------
+	-- object type: player and npc
+	------------------------------------------------------
+	local BITMASK_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER or 0x00000400
+	local BITMASK_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
+	Private.BITMASK_PLAYER = BITMASK_PLAYER
+	Private.BITMASK_NPC = BITMASK_NPC
+
+	function ns:IsPlayer(flags)
+		return (band(flags, BITMASK_PLAYER) == BITMASK_PLAYER)
+	end
+
+	function ns:IsNPC(flags)
+		return (band(flags, BITMASK_NPC) == BITMASK_NPC)
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -595,14 +650,17 @@ function Private.tremove(t, index)
 end
 
 -- returns the length of the given table
-function Private.tLength(t)
-	local len = 0
-	if t then
-		for _ in pairs(t) do
-			len = len + 1
+Private.tLength = _G.tLength
+if not Private.tLength then
+	Private.tLength = function(t)
+		local len = 0
+		if t then
+			for _ in pairs(t) do
+				len = len + 1
+			end
 		end
+		return len
 	end
-	return len
 end
 
 -- copies a table from another
@@ -1228,10 +1286,8 @@ do
 	local BITMASK_GROUP = Private.BITMASK_GROUP
 	local BITMASK_PETS = Private.BITMASK_PETS
 	local BITMASK_FRIENDLY = Private.BITMASK_FRIENDLY
-	local BITMASK_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
-	Private.BITMASK_TYPE_NPC = BITMASK_TYPE_NPC
-	local BITMASK_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER or 0x00000400
-	Private.BITMASK_TYPE_PLAYER = BITMASK_PLAYER
+	local BITMASK_NPC = Private.BITMASK_NPC
+	local BITMASK_PLAYER = Private.BITMASK_PLAYER
 
 	-- checks if the given guid/flags are those of a creature.
 	function Private.is_creature(guid, flags)
@@ -1239,7 +1295,7 @@ do
 			return (band(strsub(guid, 1, 5), 0x00F) == 3 or band(strsub(guid, 1, 5), 0x00F) == 5)
 		end
 		if tonumber(flags) then
-			return (band(flags, BITMASK_TYPE_NPC) ~= 0)
+			return (band(flags, BITMASK_NPC) ~= 0)
 		end
 		return false
 	end
@@ -1284,7 +1340,7 @@ do
 			end
 
 			-- player by flgs?
-			if tonumber(flags) and band(flags, BITMASK_PLAYER) ~= 0 then
+			if tonumber(flags) and band(flags, BITMASK_PLAYER) == BITMASK_PLAYER then
 				__t1[guid] = true
 				__t2[guid] = (__t2[guid] == nil) and false or __t2[guid]
 				return __t1[guid]

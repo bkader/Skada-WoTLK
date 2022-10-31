@@ -3,7 +3,7 @@ local Private = Skada.Private
 Skada:RegisterModule("Tweaks", function(L, P)
 	local mod = Skada:NewModule("Tweaks", "AceHook-3.0")
 
-	local band, format = bit.band, string.format
+	local format, uformat = string.format, Private.uformat
 	local UnitClass, GetTime = UnitClass, GetTime
 	local GetSpellInfo = Private.spell_info or GetSpellInfo
 	local GetSpellLink = Private.spell_link or GetSpellLink
@@ -58,7 +58,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 							target = classcolors.format(class, target)
 						end
 
-						targettable[#targettable + 1] = format("%s > %s", UnitName(boss) or L["Unknown"], target)
+						targettable[#targettable + 1] = uformat("%s > %s", UnitName(boss), target)
 					end
 				end
 
@@ -74,7 +74,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 		local ignored_spells = Skada.ignored_spells.firsthit -- Edit Skada\Core\Tables.lua
 		local function firsthit_check(args)
 			-- src or dst must be in a group
-			if band(args.srcFlags, BITMASK_GROUP) == 0 and band(args.dstFlags, BITMASK_GROUP) == 0 then
+			if not Skada:InGroup(args.srcFlags) and not Skada:InGroup(args.dstFlags) then
 				return
 			end
 
@@ -85,9 +85,9 @@ Skada:RegisterModule("Tweaks", function(L, P)
 
 			local output = nil -- initial output
 
-			if band(args.dstFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(args.srcGUID) then -- boss started?
+			if Skada:IsBoss(args.srcGUID) then -- boss started?
 				if is_pet(args.dstGUID, args.dstFlags) then
-					output = format(firsthit_fmt[1], args.srcName, args.dstName or L["Unknown"])
+					output = uformat(firsthit_fmt[1], args.srcName, args.dstName)
 				elseif args.dstName then
 					local _, class = UnitClass(args.dstName)
 					if class and classcolors[class] then
@@ -98,7 +98,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 				else
 					output = args.srcName
 				end
-			elseif band(args.srcFlags, BITMASK_GROUP) ~= 0 and Skada:IsBoss(args.dstGUID) then -- a player started?
+			elseif Skada:IsBoss(args.dstGUID) then -- a player started?
 				local owner = Skada:GetPetOwner(args.srcGUID)
 				if owner then
 					local _, class = UnitClass(owner.name)
@@ -120,7 +120,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			if output then
 				local spell = GetSpellLink(args.spellid) or args.spellname
 				firsthit = firsthit or new()
-				firsthit.hitline, firsthit.targetline = who_pulled(format(L["\124cffffff00First Hit\124r: %s from %s"], spell or "", output))
+				firsthit.hitline, firsthit.targetline = who_pulled(uformat(L["\124cffffff00First Hit\124r: %s from %s"], spell, output))
 				firsthit.checked = true -- once only
 			end
 		end

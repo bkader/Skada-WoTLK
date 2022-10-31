@@ -658,6 +658,7 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 					t.event = "SPELL_AURA_APPLIED"
 					t.dstGUID = dstGUID
 					t.dstName = dstName
+					t.dstFlags = 0
 					t.spellid = spellid
 					t.spellstring = spellstrings[spellid]
 					t.auratype = "BUFF"

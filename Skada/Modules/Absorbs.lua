@@ -994,6 +994,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 					t.timestamp = timestamp + max(0, expires - curtime)
 					t.srcGUID = UnitGUID(unitCaster)
 					t.srcName = UnitName(unitCaster)
+					t.srcFlags = 0
 					t.dstGUID = dstGUID
 					t.dstName = dstName
 					t.spellid = spellid

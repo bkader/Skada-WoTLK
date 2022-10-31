@@ -15,7 +15,7 @@ local new, del, clear, copy = Private.newTable, Private.delTable, Private.clearT
 local tsort, tinsert, tremove, wipe = table.sort, table.insert, Private.tremove, wipe
 local next, pairs, type, setmetatable = next, pairs, type, setmetatable
 local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostring, strmatch, string.format, string.gsub, string.lower, string.find
-local max, min, abs, band = math.max, math.min, math.abs, bit.band
+local max, min, abs = math.max, math.min, math.abs
 local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction
 local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 local UnitExists, UnitGUID, UnitName, UnitClass = UnitExists, UnitGUID, UnitName, UnitClass
@@ -85,13 +85,6 @@ ns.modes = modes
 
 -- flags for party, instance and ovo
 local was_in_party = nil
-
--- bitmasks
-local BITMASK_MINE = Private.BITMASK_MINE
-local BITMASK_GROUP = Private.BITMASK_GROUP
-local BITMASK_PETS = Private.BITMASK_PETS
-local BITMASK_FRIENDLY = Private.BITMASK_FRIENDLY
-local BITMASK_TYPE_PLAYER = Private.BITMASK_TYPE_PLAYER
 
 -- prototypes and references
 local setPrototype = ns.setPrototype
@@ -1495,7 +1488,7 @@ do
 		end
 
 		-- flag is provided and it is mine.
-		if guid and flag and band(flag, BITMASK_MINE) ~= 0 then
+		if guid and flag and Skada:IsMine(flag) then
 			assign_pet(userGUID, userName, guid)
 			return pets[guid]
 		end
@@ -3217,6 +3210,7 @@ do
 	end
 
 	local BITMASK_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
+	local bit_band = bit.band
 	local function check_boss_fight(set, t, src_is_interesting, dst_is_interesting)
 		-- set mobname
 		if not set.mobname then
@@ -3228,15 +3222,15 @@ do
 				if set.type == "arena" then
 					Skada:SendMessage("COMBAT_ARENA_START", set, set.mobname)
 				end
-			elseif src_is_interesting and band(t.dstFlags, BITMASK_FRIENDLY) == 0 then
+			elseif src_is_interesting and not Skada:IsFriendly(t.dstFlags) then
 				set.mobname = t.dstName
-				if band(t.dstFlags, BITMASK_CONTROL_PLAYER) ~= 0 then
+				if bit_band(t.dstFlags, BITMASK_CONTROL_PLAYER) ~= 0 then
 					set.type = "pvp"
 					set.gotboss = false
 				end
-			elseif dst_is_interesting and band(t.srcFlags, BITMASK_FRIENDLY) == 0 then
+			elseif dst_is_interesting and not Skada:IsFriendly(t.srcFlags) then
 				set.mobname = t.srcName
-				if band(t.srcFlags, BITMASK_CONTROL_PLAYER) ~= 0 then
+				if bit_band(t.srcFlags, BITMASK_CONTROL_PLAYER) ~= 0 then
 					set.type = "pvp"
 					set.gotboss = false
 				end
@@ -3258,7 +3252,7 @@ do
 		end
 
 		-- marking set as boss fights relies only on src_is_interesting
-		if not spellcast_events[t.event] and src_is_interesting and band(t.dstFlags, BITMASK_FRIENDLY) == 0 then
+		if not spellcast_events[t.event] and src_is_interesting and not Skada:IsFriendly(t.dstFlags) then
 			if set.gotboss == nil then
 				if not _targets or not _targets[t.dstName] then
 					local isboss, bossid, bossname = Skada:IsEncounter(t.dstGUID, t.dstName)

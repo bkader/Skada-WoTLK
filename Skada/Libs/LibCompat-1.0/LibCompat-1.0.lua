@@ -4,13 +4,14 @@
 -- @author: Kader B (https://github.com/bkader/LibCompat-1.0)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0-Skada", 35
+local MAJOR, MINOR = "LibCompat-1.0-Skada", 36
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
 lib.embeds = lib.embeds or {}
 lib.EmptyFunc = Multibar_EmptyFunc
 
+local _G = _G
 local pairs, type, max = pairs, type, math.max
 local format, tonumber = format or string.format, tonumber
 local setmetatable, wipe = setmetatable, wipe
@@ -49,30 +50,45 @@ end
 -------------------------------------------------------------------------------
 
 do
-	local GetNumRaidMembers, GetNumPartyMembers = GetNumRaidMembers, GetNumPartyMembers
-	local UnitExists, UnitAffectingCombat, UnitIsDeadOrGhost = UnitExists, UnitAffectingCombat, UnitIsDeadOrGhost
-	local UnitHealth, UnitHealthMax = UnitHealth, UnitHealthMax
-	local UnitPower, UnitPowerMax = UnitPower, UnitPowerMax
+	local UnitExists, UnitAffectingCombat, UnitIsDeadOrGhost = _G.UnitExists, _G.UnitAffectingCombat, _G.UnitIsDeadOrGhost
+	local UnitHealth, UnitHealthMax, UnitPower, UnitPowerMax = _G.UnitHealth, _G.UnitHealthMax, _G.UnitPower, _G.UnitPowerMax
+	local GetNumRaidMembers, GetNumPartyMembers = _G.GetNumRaidMembers, _G.GetNumPartyMembers
 
-	local function IsInRaid()
-		return (GetNumRaidMembers() > 0)
+	local IsInRaid = _G.IsInRaid
+	if not IsInRaid then
+		IsInRaid = function()
+			return (GetNumRaidMembers() > 0)
+		end
 	end
 
-	local function IsInGroup()
-		return (GetNumRaidMembers() > 0 or GetNumPartyMembers() > 0)
+	local IsInGroup = _G.IsInGroup
+	if not IsInGroup then
+		IsInGroup = function()
+			return (GetNumRaidMembers() > 0 or GetNumPartyMembers() > 0)
+		end
 	end
 
-	local function GetNumGroupMembers()
-		return IsInRaid() and GetNumRaidMembers() or GetNumPartyMembers()
+	local GetNumGroupMembers = _G.GetNumGroupMembers
+	if not GetNumGroupMembers then
+		GetNumGroupMembers = function()
+			return IsInRaid() and GetNumRaidMembers() or GetNumPartyMembers()
+		end
+	end
+
+	local GetNumSubgroupMembers = _G.GetNumSubgroupMembers
+	if not GetNumSubgroupMembers then
+		GetNumSubgroupMembers = function()
+			return GetNumPartyMembers()
+		end
 	end
 
 	local function GetGroupTypeAndCount()
 		if IsInRaid() then
-			return "raid", 1, GetNumRaidMembers()
+			return "raid", 1, GetNumGroupMembers()
 		elseif IsInGroup() then
-			return "party", 0, GetNumPartyMembers()
+			return "party", 0, GetNumSubgroupMembers()
 		else
-			return nil, 0, 0
+			return "solo", 0, 0
 		end
 	end
 
@@ -137,17 +153,15 @@ do
 		end
 
 		function UnitIterator(excPets)
-			nmem, step = GetNumRaidMembers(), 1
+			nmem, step = GetNumGroupMembers(), 1
 			if nmem == 0 then
-				nmem = GetNumPartyMembers()
-				if nmem == 0 then
-					return SelfIterator, excPets
-				end
-				count = 1
-				return PartyIterator, excPets
+				return SelfIterator, excPets
 			end
 			count = 1
-			return RaidIterator, excPets
+			if IsInRaid() then
+				return RaidIterator, excPets
+			end
+			return PartyIterator, excPets
 		end
 	end
 
@@ -267,6 +281,7 @@ do
 	lib.IsInRaid = IsInRaid
 	lib.IsInGroup = IsInGroup
 	lib.GetNumGroupMembers = GetNumGroupMembers
+	lib.GetNumSubgroupMembers = GetNumSubgroupMembers
 	lib.GetGroupTypeAndCount = GetGroupTypeAndCount
 	lib.IsGroupDead = IsGroupDead
 	lib.IsGroupInCombat = IsGroupInCombat
@@ -442,6 +457,7 @@ local mixins = {
 	"IsInGroup",
 	"IsInPvP",
 	"GetNumGroupMembers",
+	"GetNumSubgroupMembers",
 	"GetGroupTypeAndCount",
 	"IsGroupDead",
 	"IsGroupInCombat",
