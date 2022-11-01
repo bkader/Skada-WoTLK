@@ -738,7 +738,7 @@ do
 	end
 
 	local function replace(cap1)
-		return cap1 == "%" and UNKNOWN
+		return cap1 == "%" and L["Unknown"]
 	end
 
 	local pcall = pcall
@@ -909,7 +909,7 @@ do
 				test = {
 					type = "execute",
 					name = L["Test Notifications"],
-					func = function() Skada:Notify() end,
+					func = function() ns:Notify() end,
 					disabled = function() return ns.db.toast.hide_toasts end,
 					width = "double",
 					order = 60
@@ -1016,7 +1016,7 @@ do
 	end
 
 	local function total_record(set)
-		local totalflag = Skada.total and set and ns.db.totalflag
+		local totalflag = ns.total and set and ns.db.totalflag
 
 		-- something missing
 		if not totalflag then
@@ -1112,8 +1112,8 @@ function Private.confirm_dialog(text, accept, cancel, override)
 
 	t.preferredIndex = STATICPOPUP_NUMDIALOGS
 	t.text = text
-	t.button1 = ACCEPT
-	t.button2 = CANCEL
+	t.button1 = L["Accept"]
+	t.button2 = L["Cancel"]
 	t.timeout = 0
 	t.whileDead = 1
 	t.hideOnEscape = 1

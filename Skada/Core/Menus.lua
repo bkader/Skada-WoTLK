@@ -240,7 +240,7 @@ function Skada:OpenMenu(window)
 
 			-- Close menu item
 			wipe(info)
-			info.text = CLOSE
+			info.text = L["Close"]
 			info.func = function()
 				CloseDropDownMenus()
 			end
@@ -980,7 +980,7 @@ do
 
 				-- Close menu item
 				wipe(info)
-				info.text = CLOSE
+				info.text = L["Close"]
 				info.func = function()
 					CloseDropDownMenus()
 				end
@@ -1151,11 +1151,11 @@ do
 		local channellist = {
 			whisper = {L["Whisper"], "whisper", true},
 			target = {L["Whisper Target"], "whisper"},
-			say = {CHAT_MSG_SAY, "preset"},
-			raid = {CHAT_MSG_RAID, "preset"},
-			party = {CHAT_MSG_PARTY, "preset"},
-			guild = {CHAT_MSG_GUILD, "preset"},
-			officer = {CHAT_MSG_OFFICER, "preset"},
+			say = {L["Say"], "preset"},
+			raid = {L["Raid"], "preset"},
+			party = {L["Party"], "preset"},
+			guild = {L["Guild"], "preset"},
+			officer = {L["Officer"], "preset"},
 			self = {L["Self"], "self"}
 		}
 

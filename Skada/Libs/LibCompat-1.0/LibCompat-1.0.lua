@@ -11,10 +11,8 @@ if not lib then return end
 lib.embeds = lib.embeds or {}
 lib.EmptyFunc = Multibar_EmptyFunc
 
-local _G = _G
-local pairs, type, max = pairs, type, math.max
+local _G, pairs, type, max = _G, pairs, type, math.max
 local format, tonumber = format or string.format, tonumber
-local setmetatable, wipe = setmetatable, wipe
 local _
 
 local Dispatch
@@ -252,7 +250,7 @@ do
 		return guid and tonumber(guid:sub(9, 12), 16) or 0
 	end
 
-	local unknownUnits = {[UKNOWNBEING] = true, [UNKNOWNOBJECT] = true}
+	local unknownUnits = {[_G.UKNOWNBEING] = true, [_G.UNKNOWNOBJECT] = true}
 
 	local function UnitHealthInfo(unit, guid, filter)
 		unit = (unit and not unknownUnits[unit]) and unit or (guid and GetUnitIdFromGUID(guid, filter))
@@ -298,9 +296,10 @@ end
 -- Specs and Roles
 
 do
+	local setmetatable, rawset = setmetatable, rawset
 	local UnitClass, GetSpellInfo = UnitClass, GetSpellInfo
 	local UnitGroupRolesAssigned = UnitGroupRolesAssigned
-	local MAX_TALENT_TABS = MAX_TALENT_TABS or 3
+	local MAX_TALENT_TABS = _G.MAX_TALENT_TABS or 3
 
 	local LGT = LibStub("LibGroupTalents-1.0")
 	local LGTRoleTable = {melee = "DAMAGER", caster = "DAMAGER", healer = "HEALER", tank = "TANK"}
@@ -363,7 +362,7 @@ do
 		end
 
 		local spec = specsTable[class][index]
-		self[guid] = spec
+		rawset(self, guid, spec)
 		return spec
 	end})
 
@@ -392,7 +391,7 @@ do
 			end
 		end
 
-		self[guid] = role
+		rawset(self, guid, role)
 		return role
 	end})
 

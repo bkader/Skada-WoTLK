@@ -185,7 +185,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 				parrychannel = {
 					type = "select",
 					name = L["Channel"],
-					values = {AUTO = INSTANCE, SELF = L["Self"]},
+					values = {AUTO = L["Instance"], SELF = L["Self"]},
 					order = 20,
 					width = "double"
 				}

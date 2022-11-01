@@ -1,13 +1,13 @@
-local Skada = Skada
+local Skada = _G.Skada
 if not Skada then return end
 
 local AddOnName = ...
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
 local function SetupStorage(self)
-	self.char = self.char or SkadaStorageDB
+	self.char = self.char or _G.SkadaStorageDB
 	self.char.sets = self.char.sets or {}
-	self.char.version = self.char.version or SkadaCharDB and SkadaCharDB.version or 0
+	self.char.version = self.char.version or _G.SkadaCharDB and _G.SkadaCharDB.version or 0
 end
 
 local function CheckMemory(self)

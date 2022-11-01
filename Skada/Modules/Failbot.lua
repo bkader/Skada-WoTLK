@@ -206,7 +206,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 						failschannel = {
 							type = "select",
 							name = L["Channel"],
-							values = {AUTO = INSTANCE, GUILD = GUILD, OFFICER = CHAT_MSG_OFFICER, SELF = L["Self"]},
+							values = {AUTO = L["Instance"], GUILD = L["Guild"], OFFICER = L["Officer"], SELF = L["Self"]},
 							order = 20,
 							width = "double"
 						}

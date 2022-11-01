@@ -20,6 +20,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 	local WrapTextInColorCode = Private.WrapTextInColorCode
 	local RGBPercToHex = Private.RGBPercToHex
 	local classcolors = Skada.classcolors
+	local ElvUI = _G.ElvUI
 
 	local FONT_FLAGS = Skada.fontFlags
 	if not FONT_FLAGS then

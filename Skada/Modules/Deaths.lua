@@ -728,7 +728,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 	function mod:AddToTooltip(set, tooltip)
 		if set.death and set.death > 0 then
-			tooltip:AddDoubleLine(DEATHS, set.death, 1, 1, 1)
+			tooltip:AddDoubleLine(L["Deaths"], set.death, 1, 1, 1)
 		end
 	end
 
@@ -747,7 +747,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 
 		if entry.hp and entry.hp ~= 0 then
-			tooltip:AddDoubleLine(HEALTH, Skada:FormatNumber(entry.hp), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Health"], Skada:FormatNumber(entry.hp), 1, 1, 1)
 		end
 
 		local c = nil
@@ -1048,7 +1048,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 								deathchannel = {
 									type = "select",
 									name = L["Channel"],
-									values = {AUTO = INSTANCE, SELF = L["Self"], GUILD = GUILD},
+									values = {AUTO = L["Instance"], SELF = L["Self"], GUILD = L["Guild"]},
 									order = 30,
 									disabled = function()
 										return not M.deathannounce

@@ -266,7 +266,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 				interruptchannel = {
 					type = "select",
 					name = L["Channel"],
-					values = {AUTO = INSTANCE, SAY = CHAT_MSG_SAY, YELL = CHAT_MSG_YELL, SELF = L["Self"]},
+					values = {AUTO = L["Instance"], SAY = L["Say"], YELL = L["Yell"], SELF = L["Self"]},
 					order = 20,
 					width = "double"
 				}

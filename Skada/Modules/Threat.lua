@@ -425,7 +425,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 							desc = L["Choose where warning messages should be displayed."],
 							order = 50,
 							width = "double",
-							values = {DEFAULT, RAID_WARNING, L["Blizzard Error Frame"], L["Chat Frame"]},
+							values = {L["Default"], L["Raid Warning"], L["Blizzard Error Frame"], L["Chat Frame"]},
 							hidden = function()
 								return not mod.db.message
 							end,

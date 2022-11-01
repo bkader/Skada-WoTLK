@@ -1,4 +1,4 @@
-local Skada = Skada
+local Skada = _G.Skada
 if not Skada then return end
 Skada:RegisterModule("Improvement", function(L)
 	local mod = Skada:NewModule("Improvement")
@@ -295,8 +295,8 @@ Skada:RegisterModule("Improvement", function(L)
 	local function ask_for_reset()
 		StaticPopupDialogs["ResetImprovementDialog"] = {
 			text = L["Do you want to reset your improvement data?"],
-			button1 = ACCEPT,
-			button2 = CANCEL,
+			button1 = L["Accept"],
+			button2 = L["Cancel"],
 			timeout = 30,
 			whileDead = 0,
 			hideOnEscape = 1,

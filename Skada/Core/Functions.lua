@@ -14,8 +14,6 @@ local clear, copy = Private.clearTable, Private.tCopy
 local L, callbacks = Skada.Locale, Skada.callbacks
 local userName = Skada.userName
 
-local COMBATLOG_OBJECT_TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
-
 -------------------------------------------------------------------------------
 -- debug function
 
