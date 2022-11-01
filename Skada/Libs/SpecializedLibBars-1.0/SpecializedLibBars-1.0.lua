@@ -2,7 +2,7 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90016
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90017
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
@@ -12,15 +12,17 @@ local CallbackHandler = LibStub("CallbackHandler-1.0")
 -- cache frequently used lua and game functions
 
 local GetTime = GetTime
-local sin, cos, rad = math.sin, math.cos, math.rad
-local abs, min, max, floor = math.abs, math.min, math.max, math.floor
-local tsort, tinsert, tremove, tconcat, wipe = table.sort, tinsert, tremove, table.concat, wipe
-local next, pairs, error, type, xpcall = next, pairs, error, type, xpcall
+local min, max, floor = math.min, math.max, math.floor
+local tsort, tinsert, tremove, wipe = table.sort, tinsert, tremove, wipe
+local next, pairs, error, type = next, pairs, error, type
 local CreateFrame = CreateFrame
 local GameTooltip = GameTooltip
 local setmetatable = setmetatable
 local GetScreenWidth = GetScreenWidth
 local GetScreenHeight = GetScreenHeight
+local IsAltKeyDown = IsAltKeyDown
+local IsControlKeyDown = IsControlKeyDown
+local IsShiftKeyDown = IsShiftKeyDown
 
 -------------------------------------------------------------------------------
 -- localization
@@ -33,15 +35,15 @@ local L_LOCK_WINDOW = "Lock Window"
 local L_UNLOCK_WINDOW = "Unlock Window"
 
 if LOCALE_deDE then
-	L_RESIZE_HEADER = "Größe ändern"
-	L_RESIZE_CLICK = "\124cff00ff00Klicken\124r, um die Fenstergröße frei zu ändern."
-	L_RESIZE_SHIFT_CLICK = "\124cff00ff00Umschalt-Klick\124r, um die Breite zu ändern."
-	L_RESIZE_ALT_CLICK = "\124cff00ff00Alt-Klick\124r, um die Höhe zu ändern."
+	L_RESIZE_HEADER = "Gr\195\182\195\159e \195\164ndern"
+	L_RESIZE_CLICK = "\124cff00ff00Klicken\124r, um die Fenstergr\195\182\195\159e frei zu \195\164ndern."
+	L_RESIZE_SHIFT_CLICK = "\124cff00ff00Umschalt-Klick\124r, um die Breite zu \195\164ndern."
+	L_RESIZE_ALT_CLICK = "\124cff00ff00Alt-Klick\124r, um die H\195\182he zu \195\164ndern."
 	L_LOCK_WINDOW = "Fenster sperren"
 	L_UNLOCK_WINDOW = "Fenster entsperren"
 elseif LOCALE_esES or LOCALE_esMX then
 	L_RESIZE_HEADER = "Redimensionar"
-	L_RESIZE_CLICK = "\124cff00ff00Haga clic\124r para cambiar el tamaño de la ventana."
+	L_RESIZE_CLICK = "\124cff00ff00Haga clic\124r para cambiar el tama\195\177o de la ventana."
 	L_RESIZE_SHIFT_CLICK = "\124cff00ff00Shift-Click\124r para cambiar el ancho de la ventana."
 	L_RESIZE_ALT_CLICK = "\124cff00ff00Alt-Click\124r para cambiar la altura de la ventana."
 	L_LOCK_WINDOW = "Bloquear ventana"
@@ -51,8 +53,8 @@ elseif LOCALE_frFR then
 	L_RESIZE_CLICK = "\124cff00ff00Clic\124r pour redimensionner."
 	L_RESIZE_SHIFT_CLICK = "\124cff00ff00Shift clic\124r pour changer la largeur."
 	L_RESIZE_ALT_CLICK = "\124cff00ff00Alt clic\124r pour changer la hauteur."
-	L_LOCK_WINDOW = "Verrouiller la fenêtre"
-	L_UNLOCK_WINDOW = "Déverrouiller la fenêtre"
+	L_LOCK_WINDOW = "Verrouiller la fen\195\170tre"
+	L_UNLOCK_WINDOW = "D\195\169verrouiller la fen\195\170tre"
 elseif LOCALE_koKR then
 	L_RESIZE_HEADER = "크기 조정"
 	L_RESIZE_CLICK = "\124cff00ff00클릭\124r하여 창 크기를 자유롭게 조정합니다."
@@ -162,7 +164,6 @@ local barListPrototype = lib.barListPrototype
 local listOnEnter, listOnLeave
 local anchorOnEnter, anchorOnLeave
 local stretchOnMouseDown, stretchOnMouseUp
-local SetTextureValue
 
 lib.bars = lib.bars or {}
 lib.barLists = lib.barLists or {}
@@ -184,11 +185,6 @@ local ICON_STRETCH = [[Interface\MINIMAP\ROTATING-MINIMAPGUIDEARROW.blp]]
 
 -------------------------------------------------------------------------------
 -- local functions
-
--- compares flaots
-local function equal_floats(a, b, epsilon)
-	return abs(a - b) <= ((abs(a) < abs(b) and abs(b) or abs(a)) * 0.000001)
-end
 
 -- table pool
 local new, del
@@ -265,13 +261,13 @@ do
 	end
 
 	local function listOnMouseDown(self, button)
-		if button == "LeftButton" and not self.locked then
+		if button == "LeftButton" and IsAltKeyDown() then
 			anchorOnMouseDown(self.button, button)
 		end
 	end
 
 	local function listOnMouseUp(self, button)
-		if button == "LeftButton" and not self.locked then
+		if button == "LeftButton" then
 			anchorOnMouseUp(self.button, button)
 		end
 	end
@@ -480,31 +476,27 @@ end
 
 -- individual bars functions
 
--- lib:NewBarFromPrototype - creates a new bar
-function lib:NewBarFromPrototype(prototype, name, ...)
+-- lib:CreateBar - creates a new bar
+function lib:CreateBar(name, ...)
 	if self == lib then
 		error("You may only call :NewBar as an embedded function")
 	end
 
-	if type(prototype) ~= "table" or type(prototype.mt) ~= "table" then
-		error("Invalid bar prototype")
-	end
-
 	bars[self] = bars[self] or {}
 	local bar = bars[self][name]
-	local isNew = false
+	local isNew = nil
 	if not bar then
 		self.numBars = self.numBars + 1
 		bar = tremove(recycledBars)
 		if not bar then
-			bar = prototype:Bind(createFrame("Frame"))
+			bar = barPrototype:Bind(createFrame("Frame"))
 		else
 			bar:Show()
 		end
 		isNew = true
 	end
 	bar.name = name
-	bar:Create(...)
+	lib.Create(bar, ...)
 	bar:SetFont(self.font, self.fontSize, self.fontFlags, self.numfont, self.numfontSize, self.numfontFlags)
 
 	bars[self][name] = bar
@@ -553,7 +545,6 @@ function lib:SetScrollSpeed(speed)
 end
 
 local function SavePosition(self)
-
 	wipe(posix) -- always wipe
 	posix.width = self:GetWidth()
 	posix.height = self:GetHeight()
@@ -639,48 +630,6 @@ local function SetShown(self, show)
 end
 barListPrototype.SetShown = SetShown
 barPrototype.SetShown = SetShown
-
--- barListPrototype:AddOnUpdate
--- barPrototype:AddOnUpdate
-
-do
-	local function OnUpdate(self, elapsed)
-		if not self.updateFuncs or next(self.updateFuncs) == nil then
-			self:SetScript("OnUpdate", nil)
-			return
-		end
-		for func in pairs(self.updateFuncs) do
-			func(self, elapsed)
-		end
-	end
-
-	local function AddOnUpdate(self, func)
-		if self == lib then return end
-		if type(func) == "function" then
-			self.updateFuncs = self.updateFuncs or new()
-			self.updateFuncs[func] = true
-			self:SetScript("OnUpdate", self.OnUpdate)
-		end
-	end
-
-	local function RemoveOnUpdate(self, func)
-		if self == lib then return end
-		if self.updateFuncs then
-			self.updateFuncs[func] = nil
-			if next(self.updateFuncs) == nil then
-				self.updateFuncs = del(self.updateFuncs)
-			end
-		end
-	end
-
-	barListPrototype.OnUpdate = OnUpdate
-	barListPrototype.AddOnUpdate = AddOnUpdate
-	barListPrototype.RemoveOnUpdate = RemoveOnUpdate
-
-	barPrototype.OnUpdate = OnUpdate
-	barPrototype.AddOnUpdate = AddOnUpdate
-	barPrototype.RemoveOnUpdate = RemoveOnUpdate
-end
 
 -------------------------------------------------------------------------------
 -- bar lists/groups functions
@@ -780,36 +729,8 @@ function barListPrototype:UpdateOrientationLayout()
 end
 
 -- barListPrototype:SetSmoothing - bars animation
-do
-	local function smoothUpdate(self, elapsed)
-		if bars[self] then
-			for _, bar in pairs(bars[self]) do
-				if bar:IsShown() and bar.targetamount then
-					local amt
-					if bar.targetamount > bar.lastamount then
-						amt = min(((bar.targetamount - bar.lastamount) / 10) + bar.lastamount, bar.targetamount)
-					else
-						amt = max(bar.lastamount - ((bar.lastamount - bar.targetamount) / 10), bar.targetamount)
-					end
-
-					bar.lastamount = amt
-					if amt == bar.targetamount then
-						bar.targetamount = nil
-					end
-					SetTextureValue(bar, amt, bar.targetdist)
-				end
-			end
-		end
-	end
-
-	function barListPrototype:SetSmoothing(smoothing)
-		self.smoothing = smoothing or nil
-		if self.smoothing then
-			self:AddOnUpdate(smoothUpdate)
-		else
-			self:RemoveOnUpdate(smoothUpdate)
-		end
-	end
+function barListPrototype:SetSmoothing(smoothing)
+	self.smoothing = smoothing or nil
 end
 
 -- changes group grow direction
@@ -1110,8 +1031,8 @@ function barListPrototype:SetButtonsOpacity(opacity)
 end
 
 -- creates a new bar from prototype
-function barListPrototype:NewBarFromPrototype(prototype, ...)
-	local bar, isNew = lib.NewBarFromPrototype(self, prototype, ...)
+function barListPrototype:CreateBar(...)
+	local bar, isNew = lib.CreateBar(self, ...)
 	bar:SetTexture(self.texture)
 
 	if self.showIcon then
@@ -1139,7 +1060,7 @@ end
 
 -- creates a new bar
 function barListPrototype:NewBar(name, text, value, maxVal, icon)
-	local bar, isNew = self:NewBarFromPrototype(barPrototype, name, text, value, maxVal, icon, self.orientation, self.length, self.thickness)
+	local bar, isNew = self:CreateBar(name, text, value, maxVal, icon, self.orientation, self.length, self.thickness)
 
 	if self.bgcolor then
 		bar.bg:SetVertexColor(self.bgcolor[1], self.bgcolor[2], self.bgcolor[3], self.bgcolor[4])
@@ -1435,16 +1356,13 @@ end
 
 -- changes group width
 function barListPrototype:SetLength(length)
-	if not equal_floats(self.length, length) then
-		self.length = length
-		if bars[self] then
-			for _, bar in pairs(bars[self]) do
-				bar:SetLength(length)
-				bar:OnSizeChanged()
-			end
+	self.length = length
+	if bars[self] then
+		for _, bar in pairs(bars[self]) do
+			bar:SetLength(length)
 		end
-		self:UpdateOrientationLayout()
 	end
+	self:UpdateOrientationLayout()
 end
 
 -- changes group height
@@ -1814,6 +1732,39 @@ do
 	end
 end
 
+-- barListPrototype:AddOnUpdate
+do
+	-- handles OnUpdate
+	local function listOnUpdate(self, elapsed)
+		if not self.updateFuncs or next(self.updateFuncs) == nil then
+			self:SetScript("OnUpdate", nil)
+			return
+		end
+		for func in pairs(self.updateFuncs) do
+			func(self, elapsed)
+		end
+	end
+
+	-- adds OnUpdate function
+	function barListPrototype:AddOnUpdate(func)
+		if type(func) == "function" then
+			self.updateFuncs = self.updateFuncs or new()
+			self.updateFuncs[func] = true
+			self:SetScript("OnUpdate", listOnUpdate)
+		end
+	end
+end
+
+-- removes OnUpdate function
+function barListPrototype:RemoveOnUpdate(func)
+	if self.updateFuncs then
+		self.updateFuncs[func] = nil
+		if next(self.updateFuncs) == nil then
+			self.updateFuncs = del(self.updateFuncs)
+		end
+	end
+end
+
 -------------------------------------------------------------------------------
 -- bar functions
 
@@ -1849,7 +1800,7 @@ do
 	end
 
 	local DEFAULT_ICON = [[Interface\Icons\INV_Misc_QuestionMark]]
-	function barPrototype:Create(text, value, maxVal, icon, orientation, length, thickness)
+	function lib.Create(self, text, value, maxVal, icon, orientation, length, thickness)
 		self:SetScript("OnMouseDown", barOnMouseDown)
 		self:SetScript("OnEnter", barOnEnter)
 		self:SetScript("OnLeave", barOnLeave)
@@ -1922,7 +1873,6 @@ end
 function barPrototype:OnBarReleased()
 	self.ownerGroup = nil
 	self.colors = del(self.colors)
-	self.updateFuncs = del(self.updateFuncs)
 
 	self.fg:SetVertexColor(1, 1, 1, 0)
 	self:SetScript("OnEnter", nil)
@@ -1956,13 +1906,13 @@ function barPrototype:SetIcon(icon, ...)
 	if icon then
 		self.icon:SetTexture(icon)
 		if self.showIcon then
-			self.icon:Show()
+			self.iconFrame:Show()
 		end
 		if ... then
 			self.icon:SetTexCoord(...)
 		end
 	else
-		self.icon:Hide()
+		self.iconFrame:Hide()
 	end
 end
 
@@ -1970,7 +1920,7 @@ end
 function barPrototype:ShowIcon()
 	self.showIcon = true
 	if self.icon then
-		self.icon:Show()
+		self.iconFrame:Show()
 	end
 end
 
@@ -1978,7 +1928,7 @@ end
 function barPrototype:HideIcon()
 	self.showIcon = nil
 	if self.icon then
-		self.icon:Hide()
+		self.iconFrame:Hide()
 	end
 end
 
@@ -2118,17 +2068,16 @@ function barPrototype:UpdateOrientationLayout(orientation)
 		t:ClearAllPoints()
 		t:SetPoint("RIGHT", self, "LEFT")
 
+		t = self.fg
+		t:ClearAllPoints()
+		t:SetPoint("TOPLEFT", self, "TOPLEFT")
+		t:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT")
+
 		t = self.spark
 		t:ClearAllPoints()
 		t:SetPoint("TOP", self.fg, "TOPRIGHT", 0, 7)
 		t:SetPoint("BOTTOM", self.fg, "BOTTOMRIGHT", 0, -7)
 		t:SetTexCoord(0, 1, 0, 1)
-
-		t = self.fg
-		t.SetValue = t.SetWidth
-		t:ClearAllPoints()
-		t:SetPoint("TOPLEFT", self, "TOPLEFT")
-		t:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT")
 
 		t = self.timerLabel
 		t:ClearAllPoints()
@@ -2149,17 +2098,16 @@ function barPrototype:UpdateOrientationLayout(orientation)
 		t:ClearAllPoints()
 		t:SetPoint("LEFT", self, "RIGHT")
 
+		t = self.fg
+		t:ClearAllPoints()
+		t:SetPoint("TOPRIGHT", self, "TOPRIGHT")
+		t:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
+
 		t = self.spark
 		t:ClearAllPoints()
 		t:SetPoint("TOP", self.fg, "TOPLEFT", 0, 7)
 		t:SetPoint("BOTTOM", self.fg, "BOTTOMLEFT", 0, -7)
 		t:SetTexCoord(0, 1, 0, 1)
-
-		t = self.fg
-		t.SetValue = t.SetWidth
-		t:ClearAllPoints()
-		t:SetPoint("TOPRIGHT", self, "TOPRIGHT")
-		t:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
 
 		t = self.timerLabel
 		t:ClearAllPoints()
@@ -2181,20 +2129,44 @@ end
 
 -- barPrototype:SetValue - changes bar's value
 do
-	local function SetTextureTarget(self, amt, dist)
-		self.targetamount = amt
-		self.targetdist = dist
-	end
-
-	function SetTextureValue(self, amt, dist)
+	local function SetTextureValue(self, amt, dist)
 		dist = max(0.0001, dist - (self.showIcon and self.thickness or 0))
-		self.fg:SetValue(amt * dist)
+		self.fg:SetWidth(amt * dist)
 
-		if self.orientation == 1 then
+		if self.ownerGroup.orientation == 1 then
 			self.fg:SetTexCoord(0, amt, 0, 1)
-		elseif self.orientation == 2 then
+		elseif self.ownerGroup.orientation == 2 then
 			self.fg:SetTexCoord(1 - amt, 1, 0, 1)
 		end
+	end
+
+	local function calc_last_amt(targetamt, lastamt)
+		if targetamt > lastamt then
+			return min(((targetamt - lastamt) / 4) + lastamt, targetamt)
+		end
+		return max(lastamt - ((lastamt - targetamt) / 4), targetamt)
+	end
+
+	local function animate(self, elapsed)
+		local t = self.lastanimated + elapsed
+		if t >= 0.25 then
+			SetTextureValue(self, self.targetamt, self.targetdist)
+			self.lastamt = self.targetamt
+			self:SetScript("OnUpdate", nil)
+			t = 0
+		else
+			self.lastamt = calc_last_amt(self.targetamt, self.lastamt)
+			SetTextureValue(self, self.lastamt, self.targetdist)
+		end
+		self.lastanimated = t
+	end
+
+	local function SetTextureTarget(self, amt, dist)
+		self.targetamt = amt
+		self.targetdist = dist
+
+		self.lastanimated = 0
+		self:SetScript("OnUpdate", animate)
 	end
 
 	function barPrototype:SetValue(val)
@@ -2208,29 +2180,29 @@ do
 		end
 
 		local ownerGroup = self.ownerGroup
-		if ownerGroup then
-			local amt = max(0.000001, min(1, val / max(self.maxValue, 0.000001)))
-			local dist = (ownerGroup and ownerGroup:GetLength()) or self.length
+		if not ownerGroup then return end
 
-			-- smoothing
-			if ownerGroup.smoothing and self.lastamount then
-				SetTextureTarget(self, amt, dist)
-			else
-				self.lastamount = amt
-				SetTextureValue(self, amt, dist)
-			end
+		local amt = max(0.000001, min(1, val / max(self.maxValue, 0.000001)))
+		local dist = ownerGroup:GetLength()
 
-			-- spark
-			if ownerGroup.usespark and self.spark then
-				if amt == 1 or amt <= 0.000001 then
-					self.spark:Hide()
-				else
-					self.spark:Show()
-				end
-			end
-
-			self:UpdateColor()
+		-- smoothing
+		if ownerGroup.smoothing and self.lastamt then
+			SetTextureTarget(self, amt, dist)
+		else
+			self.lastamt = amt
+			SetTextureValue(self, amt, dist)
 		end
+
+		-- spark
+		if ownerGroup.usespark and self.spark then
+			if amt == 1 or amt <= 0.000001 then
+				self.spark:Hide()
+			else
+				self.spark:Show()
+			end
+		end
+
+		self:UpdateColor()
 	end
 end
 

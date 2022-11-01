@@ -124,13 +124,12 @@ end
 -- creates a table pool
 
 function Private.table_pool()
-	local pool = {tables = {}, new = true, del = true, clear = true}
-	local tables = Private.WeakTable(pool.tables)
+	local pool = {tables = Private.WeakTable()}
 
 	-- reuses or creates a table
 	pool.new = function()
-		local t = next(tables)
-		if t then tables[t] = nil end
+		local t = next(pool.tables)
+		if t then pool.tables[t] = nil end
 		return t or {}
 	end
 
@@ -148,7 +147,7 @@ function Private.table_pool()
 		t[""] = true
 		t[""] = nil
 		setmetatable(t, nil)
-		tables[t] = true
+		pool.tables[t] = true
 
 		return nil
 	end
@@ -163,17 +162,56 @@ function Private.table_pool()
 		return t
 	end
 
+	-- creates a table a fills it with args passed
+	pool.acquire = function(...)
+		local t, n = pool.new(), select("#", ...)
+		for i = 1, n do t[i] = select(i, ...) end
+		return t
+	end
+
+	-- creates a table and fills it with key-value args
+	pool.acquireHash = function(...)
+		local t, n = pool.new(), select("#", ...)
+		for i = 1, n, 2 do
+			local k, v = select(i, ...)
+			t[k] = v
+		end
+		return t
+	end
+
+	-- populates the given table with args passed
+	pool.populate = function(t, ...)
+		if type(t) == "table" then
+			for i = 1, select("#", ...) do
+				t[#t + 1] = select(i, ...)
+			end
+		end
+		return t
+	end
+
+	-- populates the given table with key-value args
+	pool.populateHash = function(t, ...)
+		if type(t) == "table" then
+			for i = 1, select("#", ...), 2 do
+				local k, v = select(i, ...)
+				t[k] = v
+			end
+		end
+		return t
+	end
+
 	return pool
 end
 
 -- create addon's default table pool
 do
-	local _pool = Private.table_pool()
-	new = _pool.new
-	del = _pool.del
-	Private.newTable = _pool.new
-	Private.delTable = _pool.del
-	Private.clearTable = _pool.clear
+	local tablePool = Private.table_pool()
+	ns.tablePool = tablePool
+
+	new, del = tablePool.new, tablePool.del
+	Private.newTable = tablePool.new
+	Private.delTable = tablePool.del
+	Private.clearTable = tablePool.clear
 end
 
 -------------------------------------------------------------------------------
@@ -1223,7 +1261,6 @@ do
 		[54755] = [[Interface\ICONS\inv_glyph_majordruid]], --> Glyph of Rejuvenation
 		[54968] = [[Interface\ICONS\inv_glyph_majorpaladin]], --> Glyph of Holy Light
 		[56160] = [[Interface\ICONS\inv_glyph_majorpriest]], --> Glyph of Power Word: Shield
-		[57842] = [[Interface\ICONS\ability_warrior_focusedrage]], --> Killing Spree
 		[61607] = [[Interface\ICONS\ability_hunter_rapidkilling]] --> Mark of Blood
 	}
 

@@ -718,22 +718,26 @@ do
 
 			d.id = spell -- locked!
 
-			local spellid, school, petname = spell_split(spell)
+			local spellid, school, suffix = spell_split(spell)
 			d.spellid = spellid
 			d.spellschool = school
 
 			local abs_id = abs(spellid)
-			d.label = spellnames[abs_id]
 			d.icon = spellicons[abs_id]
+
+			-- for SPELL_EXTRA_ATTACKS
+			if tonumber(suffix) then
+				d.label = format("%s (%s)", spellnames[abs(suffix)], spellnames[abs_id])
+			else
+				d.label = spellnames[abs_id]
+				if suffix then -- has a suffix?
+					d.label = format("%s (%s)", d.label, suffix)
+				end
+			end
 
 			-- hots and dots?
 			if spellid < 0 and is_hot ~= false then
-				d.label = format("%s%s", d.label, is_hot and L["HoT"] or L["DoT"])
-			end
-
-			-- petname
-			if petname then
-				d.label = format("%s (%s)", d.label, petname)
+				d.label = format("%s (%s)", d.label, is_hot and L["HoT"] or L["DoT"])
 			end
 		end
 		return d
