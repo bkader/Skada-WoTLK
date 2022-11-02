@@ -27,7 +27,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	end
 
 	local function log_potion(set, actorid, actorname, actorflags, potionid)
-		local actor = Skada:GetPlayer(set, actorid, actorname, actorflags)
+		local actor = Skada:GetActor(set, actorid, actorname, actorflags)
 		if not actor then return end
 
 		-- record potion usage for actor and set
@@ -129,7 +129,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		for actorname, actor in pairs(actors) do
 			nr = nr + 1
 
-			local d = win:actor(nr, actor, nil, actorname)
+			local d = win:actor(nr, actor, actor.enemy, actorname)
 			d.value = actor.count
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
@@ -151,7 +151,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		win.title = uformat(L["%s's used potions"], win.actorname)
 		if not set or not win.actorname then return end
 
-		local actor = Skada:FindPlayer(set, win.actorid, win.actorname, true)
+		local actor = Skada:FindActor(set, win.actorid, win.actorname, true)
 		local total = actor and actor.potion
 		local potions = (total and total > 0) and actor.potionspells
 

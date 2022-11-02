@@ -67,7 +67,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 	local function spellmod_tooltip(win, id, label, tooltip)
 		if label == L["Critical Hits"] or label == L["Normal Hits"] or label == L["Glancing"] then
 			local set = win:GetSelectedSet()
-			local actor = set and set:GetActor(win.actorname, win.actorid)
+			local actor = set and set:GetActor(win.actorid, win.actorname)
 			local spell = actor.damagespells and actor.damagespells[win.spellid]
 
 			if actor.id == otherGUID then
@@ -162,7 +162,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 	local function activity_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local actor = set and set:GetActor(label, id)
+		local actor = set and set:GetActor(id, label)
 		if actor then
 			local totaltime = set:GetTime()
 			local activetime = actor:GetTime(set, true)
@@ -210,7 +210,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, uformat(L["%s's damage breakdown"], win.spellname))
 		if not set or not win.spellid then return end
 
-		local actor = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorid, win.actorname)
 		if not actor then return end
 
 		local spell = actor and actor.damagespells and actor.damagespells[win.spellid]
@@ -299,7 +299,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, L["actor damage"](win.spellname or L["Unknown"]))
 		if not set or not win.spellid then return end
 
-		local actor = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorid, win.actorname)
 		if not actor then return end
 
 		local spell = actor and actor.damagespells and actor.damagespells[win.spellid]
@@ -666,7 +666,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			for targetname, target in pairs(targets) do
 				nr = nr + 1
 
-				local d = win:actor(nr, target, true, targetname)
+				local d = win:actor(nr, target, target.enemy, targetname)
 				d.value = P.absdamage and target.total or target.amount
 				d.valuetext = Skada:FormatValueCols(mod_cols.Damage and Skada:FormatNumber(d.value))
 
@@ -685,7 +685,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
-			local d = win:actor(nr, target, true, targetname)
+			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = P.absdamage and target.total or target.amount
 
 			local otarget = otargets and otargets[targetname]
@@ -703,7 +703,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			if not targets[targetname] then
 				nr = nr + 1
 
-				local d = win:actor(nr, target, true, targetname)
+				local d = win:actor(nr, target, target.enemy, targetname)
 				d.value = P.absdamage and target.total or target.amount
 				d.valuetext = format_value_number(0, d.value, true, actor.id == otherGUID)
 
@@ -733,7 +733,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 				local dps, amount = actor:GetDPS(set)
 				if amount > 0 then
 					nr = nr + 1
-					local d = win:actor(nr, actor)
+					local d = win:actor(nr, actor, actor.enemy)
 
 					d.value = amount
 					d.valuetext = Skada:FormatValueCols(
@@ -776,7 +776,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			win:DisplayMode(mod)
 		elseif win.GetSelectedSet then
 			local set = win:GetSelectedSet()
-			local actor = set and set:GetActor(label, id)
+			local actor = set and set:GetActor(id, label)
 			if actor then
 				otherGUID = actor.id
 				otherName = actor.name

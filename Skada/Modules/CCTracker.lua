@@ -22,31 +22,31 @@ end
 -- ======= --
 Skada:RegisterModule("CC Done", function(L, P, _, C)
 	local mod = Skada:NewModule("CC Done")
-	local playermod = mod:NewModule("Crowd Control Spells")
+	local spellmod = mod:NewModule("Crowd Control Spells")
 	local targetmod = mod:NewModule("Crowd Control Targets")
-	local sourcemod = playermod:NewModule("Crowd Control Sources")
+	local sourcemod = spellmod:NewModule("Crowd Control Sources")
 	local cc_spells = Skada.extra_cc_spells -- extended list
 	local get_actor_cc_targets = nil
 	local get_cc_done_sources = nil
 	local mod_cols = nil
 
 	local function log_ccdone(set)
-		local player = Skada:GetPlayer(set, cc_table.actorid, cc_table.actorname, cc_table.actorflags)
-		if not player then return end
+		local actor = Skada:GetActor(set, cc_table.actorid, cc_table.actorname, cc_table.actorflags)
+		if not actor then return end
 
 		-- increment the count.
-		player.ccdone = (player.ccdone or 0) + 1
+		actor.ccdone = (actor.ccdone or 0) + 1
 		set.ccdone = (set.ccdone or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
 		if set == Skada.total and not P.totalidc then return end
 
 		-- record the spell.
-		local spell = player.ccdonespells and player.ccdonespells[cc_table.spellid]
+		local spell = actor.ccdonespells and actor.ccdonespells[cc_table.spellid]
 		if not spell then
-			player.ccdonespells = player.ccdonespells or {}
-			player.ccdonespells[cc_table.spellid] = {count = 0}
-			spell = player.ccdonespells[cc_table.spellid]
+			actor.ccdonespells = actor.ccdonespells or {}
+			actor.ccdonespells[cc_table.spellid] = {count = 0}
+			spell = actor.ccdonespells[cc_table.spellid]
 		end
 		spell.count = spell.count + 1
 
@@ -72,15 +72,15 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's control spells"], label)
 	end
 
-	function playermod:Update(win, set)
+	function spellmod:Update(win, set)
 		win.title = uformat(L["%s's control spells"], win.actorname)
 
-		local actor = set and set:GetActor(win.actorname, win.actorid)
+		local actor = set and set:GetActor(win.actorid, win.actorname)
 		local total = actor and actor.ccdone
 		local spells = (total and total > 0) and actor.ccdonespells
 
@@ -119,7 +119,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
-			local d = win:actor(nr, target, true, targetname)
+			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.count
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
@@ -187,11 +187,11 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 	end
 
 	function mod:OnEnable()
-		playermod.metadata = {click1 = sourcemod}
+		spellmod.metadata = {click1 = sourcemod}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = playermod,
+			click1 = spellmod,
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
@@ -203,7 +203,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 		-- no total click.
 		sourcemod.nototal = true
-		playermod.nototal = true
+		spellmod.nototal = true
 		targetmod.nototal = true
 
 		Skada:RegisterForCL(
@@ -246,7 +246,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 	end
 
 	get_actor_cc_targets = function(self, id, name, tbl)
-		local actor = self:GetActor(name, id)
+		local actor = self:GetActor(id, name)
 		local spells = actor and actor.ccdone and actor.ccdonespells
 		if not spells then return end
 
@@ -276,9 +276,9 @@ end)
 -- ======== --
 Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	local mod = Skada:NewModule("CC Taken")
-	local playermod = mod:NewModule("Crowd Control Spells")
+	local spellmod = mod:NewModule("Crowd Control Spells")
 	local sourcemod = mod:NewModule("Crowd Control Sources")
-	local targetmod = playermod:NewModule("Crowd Control Targets")
+	local targetmod = spellmod:NewModule("Crowd Control Targets")
 	local get_actor_cc_sources = nil
 	local get_cc_taken_targets = nil
 	local mod_cols = nil
@@ -297,22 +297,22 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	}, {__index = Skada.extra_cc_spells})
 
 	local function log_cctaken(set)
-		local player = Skada:GetPlayer(set, cc_table.actorid, cc_table.actorname, cc_table.actorflags)
-		if not player then return end
+		local actor = Skada:GetActor(set, cc_table.actorid, cc_table.actorname, cc_table.actorflags)
+		if not actor then return end
 
 		-- increment the count.
-		player.cctaken = (player.cctaken or 0) + 1
+		actor.cctaken = (actor.cctaken or 0) + 1
 		set.cctaken = (set.cctaken or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
 		if set == Skada.total and not P.totalidc then return end
 
 		-- record the spell.
-		local spell = player.cctakenspells and player.cctakenspells[cc_table.spellid]
+		local spell = actor.cctakenspells and actor.cctakenspells[cc_table.spellid]
 		if not spell then
-			player.cctakenspells = player.cctakenspells or {}
-			player.cctakenspells[cc_table.spellid] = {count = 0}
-			spell = player.cctakenspells[cc_table.spellid]
+			actor.cctakenspells = actor.cctakenspells or {}
+			actor.cctakenspells[cc_table.spellid] = {count = 0}
+			spell = actor.cctakenspells[cc_table.spellid]
 		end
 		spell.count = spell.count + 1
 
@@ -337,15 +337,15 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's control spells"], label)
 	end
 
-	function playermod:Update(win, set)
+	function spellmod:Update(win, set)
 		win.title = uformat(L["%s's control spells"], win.actorname)
 
-		local actor = set and set:GetActor(win.actorname, win.actorid)
+		local actor = set and set:GetActor(win.actorid, win.actorname)
 		local total = actor and actor.cctaken
 		local spells = (total and total > 0) and actor.cctakenspells
 
@@ -452,11 +452,11 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	end
 
 	function mod:OnEnable()
-		playermod.metadata = {click1 = targetmod}
+		spellmod.metadata = {click1 = targetmod}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = playermod,
+			click1 = spellmod,
 			click2 = sourcemod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
@@ -467,7 +467,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		mod_cols = self.metadata.columns
 
 		-- no total click.
-		playermod.nototal = true
+		spellmod.nototal = true
 		sourcemod.nototal = true
 		targetmod.nototal = true
 
@@ -511,7 +511,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	end
 
 	get_actor_cc_sources = function(self, id, name, tbl)
-		local actor = self:GetActor(name, id)
+		local actor = self:GetActor(id, name)
 		local spells = actor and actor.cctaken and actor.cctakenspells
 		if not spells then return end
 
@@ -541,7 +541,7 @@ end)
 -- ========= --
 Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 	local mod = Skada:NewModule("CC Breaks")
-	local playermod = mod:NewModule("Crowd Control Spells")
+	local spellmod = mod:NewModule("Crowd Control Spells")
 	local targetmod = mod:NewModule("Crowd Control Targets")
 	local cc_spells = Skada.cc_spells
 	local get_actor_cc_break_targets = nil
@@ -551,22 +551,22 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 	local GetPartyAssignment, UnitIterator = GetPartyAssignment, Skada.UnitIterator
 
 	local function log_ccbreak(set)
-		local player = Skada:GetPlayer(set, cc_table.srcGUID, cc_table.srcName, cc_table.srcFlags)
-		if not player then return end
+		local actor = Skada:GetActor(set, cc_table.actorid, cc_table.actorname, cc_table.actorflags)
+		if not actor then return end
 
 		-- increment the count.
-		player.ccbreak = (player.ccbreak or 0) + 1
+		actor.ccbreak = (actor.ccbreak or 0) + 1
 		set.ccbreak = (set.ccbreak or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
 		if set == Skada.total and not P.totalidc then return end
 
 		-- record the spell.
-		local spell = player.ccbreakspells and player.ccbreakspells[cc_table.spellid]
+		local spell = actor.ccbreakspells and actor.ccbreakspells[cc_table.spellid]
 		if not spell then
-			player.ccbreakspells = player.ccbreakspells or {}
-			player.ccbreakspells[cc_table.spellid] = {count = 0}
-			spell = player.ccbreakspells[cc_table.spellid]
+			actor.ccbreakspells = actor.ccbreakspells or {}
+			actor.ccbreakspells[cc_table.spellid] = {count = 0}
+			spell = actor.ccbreakspells[cc_table.spellid]
 		end
 		spell.count = spell.count + 1
 
@@ -583,14 +583,13 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		local srcGUID, srcName, srcFlags = t.srcGUID, t.srcName, t.srcFlags
 		local _srcGUID, _srcName, _srcFlags = Skada:FixMyPets(srcGUID, srcName, srcFlags)
 
-		cc_table.srcGUID = _srcGUID
-		cc_table.srcName = _srcName
-		cc_table.srcFlags = _srcFlags
-		cc_table.dstName = t.dstName
-		cc_table.spellid = t.spellstring
+		cc_table.actorid = _srcGUID
+		cc_table.actorname = _srcName
+		cc_table.actorflags = _srcFlags
 
-		cc_table.dstGUID = nil
-		cc_table.dstFlags = nil
+		cc_table.spellid = t.spellstring
+		cc_table.dstName = t.dstName
+		cc_table.srcName = nil
 
 		Skada:DispatchSets(log_ccbreak)
 
@@ -622,15 +621,15 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function spellmod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's control spells"], label)
 	end
 
-	function playermod:Update(win, set)
+	function spellmod:Update(win, set)
 		win.title = uformat(L["%s's control spells"], win.actorname)
 
-		local actor = set and set:GetActor(win.actorname, win.actorid)
+		local actor = set and set:GetActor(win.actorid, win.actorname)
 		local total = actor and actor.ccbreak
 		local spells = (total and total > 0) and actor.ccbreakspells
 
@@ -669,7 +668,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
-			local d = win:actor(nr, target, true, targetname)
+			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.count
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
@@ -714,7 +713,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = playermod,
+			click1 = spellmod,
 			click2 = targetmod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
@@ -725,7 +724,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		mod_cols = self.metadata.columns
 
 		-- no total click.
-		playermod.nototal = true
+		spellmod.nototal = true
 		targetmod.nototal = true
 
 		Skada:RegisterForCL(
@@ -782,7 +781,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 	end
 
 	get_actor_cc_break_targets = function(self, id, name, tbl)
-		local actor = self:GetActor(name, id)
+		local actor = self:GetActor(id, name)
 		local spells = actor and actor.ccbreak and actor.ccbreakspells
 		if not spells then return end
 

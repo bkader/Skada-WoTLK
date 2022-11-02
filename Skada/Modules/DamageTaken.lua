@@ -36,7 +36,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 
 	local dmg = {}
 	local function log_damage(set)
-		local actor = Skada:GetPlayer(set, dmg.actorid, dmg.actorname, dmg.actorflags)
+		local actor = Skada:GetActor(set, dmg.actorid, dmg.actorname, dmg.actorflags)
 		if not actor then return end
 
 		actor.damaged = (actor.damaged or 0) + dmg.amount
@@ -169,7 +169,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 
 	local function damage_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local actor = set and set:GetActor(label, id)
+		local actor = set and set:GetActor(id, label)
 		if not actor then return end
 
 		local totaltime = set:GetTime()
@@ -189,7 +189,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		local set = win:GetSelectedSet()
 		if not set then return end
 
-		local actor = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorid, win.actorname)
 		local spell = actor and actor.damagedspells and actor.damagedspells[id]
 		if not spell then return end
 
@@ -221,7 +221,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	local function spellmod_tooltip(win, id, label, tooltip)
 		if label == L["Critical Hits"] or label == L["Normal Hits"] or label == L["Glancing"] then
 			local set = win:GetSelectedSet()
-			local actor = set and set:GetPlayer(win.actorid, win.actorname)
+			local actor = set and set:GetActor(win.actorid, win.actorname)
 			local spell = actor and actor.damagedspells and actor.damagedspells[win.spellid]
 			if not spell then return end
 
@@ -265,7 +265,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		win.title = uformat(L["Damage taken by %s"], win.actorname)
 		if not set or not win.actorname then return end
 
-		local actor = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorid, win.actorname)
 		local total = actor and actor:GetDamageTaken()
 		local spells = (total and total > 0) and actor.damagedspells
 
@@ -308,7 +308,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		for sourcename, source in pairs(sources) do
 			nr = nr + 1
 
-			local d = win:actor(nr, source, true, sourcename)
+			local d = win:actor(nr, source, source.enemy, sourcename)
 			d.value = P.absdamage and source.total or source.amount
 			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
@@ -335,7 +335,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		win.title = uformat("%s: %s", win.actorname, uformat(L["%s's damage breakdown"], win.spellname))
 		if not set or not win.spellid then return end
 
-		local actor = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorid, win.actorname)
 		local spell = actor and actor.damagedspells and actor.damagedspells[win.spellid]
 		if not spell then
 			return
@@ -387,7 +387,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		win.title = uformat("%s: %s", win.actorname, uformat(L["Damage from %s"], win.spellname))
 		if not set or not win.spellid then return end
 
-		local actor = set:GetPlayer(win.actorid, win.actorname)
+		local actor = set:GetActor(win.actorid, win.actorname)
 		local spell = actor and actor.damagedspells and actor.damagedspells[win.spellid]
 		if not spell then return end
 
@@ -449,7 +449,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		win.title = L["actor damage"](win.targetname or L["Unknown"], win.actorname or L["Unknown"])
 		if not set or not win.targetname then return end
 
-		local actor = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorid, win.actorname)
 		local sources = actor and actor:GetDamageSources(set)
 		if not sources or not sources[win.targetname] then return end
 
@@ -605,7 +605,7 @@ Skada:RegisterModule("DTPS", function(L, P)
 
 	local function dtps_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local actor = set and set:GetActor(label, id)
+		local actor = set and set:GetActor(id, label)
 		if not actor then return end
 
 		local totaltime = set:GetTime()
@@ -694,7 +694,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 
 	local function player_tooltip(win, id, label, tooltip)
 		local set = win.spellid and win:GetSelectedSet()
-		local player = set and set:GetActor(label, id)
+		local player = set and set:GetActor(id, label)
 		if not player then return end
 
 		local spell = player.damagedspells and player.damagedspells[win.spellid]
@@ -772,7 +772,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		for sourcename, source in pairs(sources) do
 			nr = nr + 1
 
-			local d = win:actor(nr, source, true, sourcename)
+			local d = win:actor(nr, source, source.enemy, sourcename)
 			d.value = source.amount
 			format_valuetext(d, mod_cols, total, source.time and (d.value / source.time), win.metadata, true)
 		end

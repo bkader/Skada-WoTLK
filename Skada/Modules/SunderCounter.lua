@@ -31,7 +31,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 
 	local data = {}
 	local function log_sunder(set)
-		local actor = Skada:GetPlayer(set, data.actorid, data.actorname, data.actorflags)
+		local actor = Skada:GetActor(set, data.actorid, data.actorname, data.actorflags)
 		if not actor then return end
 
 		set.sunder = (set.sunder or 0) + 1
@@ -180,7 +180,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
-			local d = win:actor(nr, target, true, targetname)
+			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.count
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
@@ -379,7 +379,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 	end
 
 	get_actor_sunder_targets = function(self, id, name, tbl)
-		local actor = self:GetActor(name, id)
+		local actor = self:GetActor(id, name)
 		local total = actor and actor.sunder
 		if not actor.sundertargets then return end
 

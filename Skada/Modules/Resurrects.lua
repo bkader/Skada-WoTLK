@@ -23,7 +23,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 
 	local ress = {}
 	local function log_resurrect(set)
-		local actor = Skada:GetPlayer(set, ress.actorid, ress.actorname, ress.actorflags)
+		local actor = Skada:GetActor(set, ress.actorid, ress.actorname, ress.actorflags)
 		if not actor then return end
 
 		actor.ress = (actor.ress or 0) + 1
@@ -66,7 +66,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
-			local d = win:actor(nr, target, nil, targetname)
+			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.count
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
@@ -136,7 +136,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	---------------------------------------------------------------------------
 
 	get_actor_ress_targets = function(self, id, name, tbl)
-		local actor = self:GetActor(name, id)
+		local actor = self:GetActor(id, name)
 		local total = actor and actor.ress
 		local targets = total and actor.restargets
 		if not targets then return end

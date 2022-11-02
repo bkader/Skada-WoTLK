@@ -369,55 +369,6 @@ do
 end
 
 -------------------------------------------------------------------------------
--- class, role and spec functions
-
-local is_player = Private.is_player
-local is_pet = Private.is_pet
-local unit_class
-do
-	local is_creature = Private.is_creature
-
-	function unit_class(guid, flag, set, db, name)
-		set = set or Skada.current
-
-		-- an existing actor?
-		local actors = set and set.actors
-		if actors then
-			for i = 1, #actors do
-				local actor = actors[i]
-				if actor and actor.id == guid then
-					return actor.class, actor.role, actor.spec
-				elseif actor and actor.name == name and Skada.validclass[actor.class] then
-					return actor.class, actor.role, actor.spec
-				end
-			end
-		end
-
-		local class = "UNKNOWN"
-		if is_player(guid, name, flag) then
-			class = name and select(2, UnitClass(name))
-			if not class and tonumber(guid) then
-				class = GetClassFromGUID(guid, "group")
-				class = class or select(2, GetPlayerInfoByGUID(guid))
-			end
-		elseif is_pet(guid, flag) then
-			class = "PET"
-		elseif Skada:IsBoss(guid, true) then
-			class = "BOSS"
-		elseif is_creature(guid, flag) then
-			class = "MONSTER"
-		end
-
-		if class and db and db.class == nil then
-			db.class = class
-		end
-
-		return class
-	end
-	Private.unit_class = unit_class
-end
-
--------------------------------------------------------------------------------
 -- test mode
 
 do
@@ -884,12 +835,12 @@ end
 -- Active / Effetive time functions
 
 -- returns the selected set time.
-function Skada:GetSetTime(set, active)
-	if not set or not set.time then
+function Skada:GetSetTime(set)
+	local settime = set and set.time
+	if not settime then
 		return 0
 	end
 
-	local settime = active and set.activetime or set.time
 	return (settime >= 1) and settime or max(1, time() - set.starttime)
 end
 
@@ -898,7 +849,7 @@ function Skada:GetActiveTime(set, actor, active)
 	active = active or (set.type == "pvp") or (set.type == "arena") -- force active for pvp/arena
 
 	-- use settime to clamp
-	local settime = self:GetSetTime(set, active)
+	local settime = self:GetSetTime(set)
 
 	-- active: actor's time.
 	if (self.db.timemesure ~= 2 or active) and actor.time and actor.time > 0 then
@@ -925,7 +876,6 @@ function Skada:AddActiveTime(set, actor, target, override)
 
 	local adding = floor(100 * delta + 0.5) * 0.01
 	actor.time = (actor.time or 0) + adding
-	set.activetime = (set.activetime or 0) + adding
 
 	-- to save up memory, we only record the rest to the current set.
 	if (set == self.total and not self.db.totalidc) or not target then return end
@@ -1132,7 +1082,7 @@ function Skada:FilterClass(win, id, label)
 		win:DisplayMode(win.selectedmode, nil)
 	elseif win.GetSelectedSet and id then
 		local set = win:GetSelectedSet()
-		local actor = set and set:GetActor(label, id)
+		local actor = set and set:GetActor(id, label)
 		win:DisplayMode(win.selectedmode, actor and actor.class)
 	end
 end
@@ -1141,252 +1091,205 @@ end
 -- player & enemies functions
 
 do
+	local UnitLevel = UnitLevel
 	local GetUnitRole = Skada.GetUnitRole
 	local GetUnitSpec = Skada.GetUnitSpec
+	local GetUnitIdFromGUID = Skada.GetUnitIdFromGUID
 	local players, pets = Private.players, Private.pets
+	local actorPrototype = Skada.actorPrototype
 	local playerPrototype = Skada.playerPrototype
 	local enemyPrototype = Skada.enemyPrototype
-	local modes, userGUID = Skada.modes, Skada.userGUID
+	local userGUID, userClass = Skada.userGUID, Skada.userClass
+	local modes = Skada.modes
 
-	-- finds a player that was already recorded
-	local dummy_pet = {class = "PET"} -- used as fallback
-	function Skada:FindPlayer(set, id, name, is_create)
-		id = id or name -- fallback
+	local dummy_actor = {} -- used as fallback
 
-		local actors = set and (id ~= "total") and (name ~= L["Total"]) and set.actors
-		if not actors then
+	-- attempts to find and actor
+	function Skada:FindActor(set, actorid, actorname, is_strict)
+		-- make sure we have all data
+		actorid = actorid or actorname
+		actorname = actorname or actorid
+
+		-- why? I don't know...
+		if actorid == "total" or actorname == L["Total"] then return end
+
+		if not set or not set.actors then -- no set/actors table?
 			return
-		elseif not set._actoridx then
+		elseif not set._actoridx then -- fast lookup table
 			set._actoridx = new()
 		end
 
-		-- already cached player?
-		local player = set._actoridx[id]
-		if player then
-			return playerPrototype:Bind(player)
+		-- already cached?
+		local actor = set._actoridx[actorid]
+		if actor then
+			return (actor.enemy and enemyPrototype or playerPrototype):Bind(actor)
 		end
 
 		-- search the set
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and not actor.enemy and (actor.id == id or actor.name == name) then
-				set._actoridx[id] = actor
-				return actor
+		for _, act in pairs(set.actors) do
+			if act.id == actorid or act.name == actorname then
+				set._actoridx[actorid] = act
+				return (act.enemy and enemyPrototype or playerPrototype):Bind(act)
 			end
 		end
 
-		if is_create then return end
+		-- is_strict means we don't use our dummy_actor
+		if is_strict then return end
 
 		-- speed up things with pets
-		local ownerName = strmatch(name, "%<(%a+)%>")
+		local ownerName = strmatch(actorname, "%<(%a+)%>")
 		if ownerName then
-			dummy_pet.id = id
-			dummy_pet.name = name
-			dummy_pet.owner = ownerName
-			return playerPrototype:Bind(dummy_pet)
+			dummy_actor.id = actorid
+			dummy_actor.name = actorname
+			dummy_actor.class = "PET"
+			dummy_actor.owner = ownerName
+			return playerPrototype:Bind(dummy_actor)
 		end
 
-		-- search friendly enemies
-		local enemy = self:FindEnemy(set, name, id)
-		if enemy and enemy.flag and self:IsFriendly(enemy.flag) then
-			set._actoridx[id] = enemy
-			return enemy
-		end
-
-		-- our last hope!
-		dummy_pet.id = id
-		dummy_pet.name = name or L["Unknown"]
-		return playerPrototype:Bind(dummy_pet)
-	end
-
-	-- finds a player table or creates it if not found
-	function Skada:GetPlayer(set, guid, name, flag)
-		if not (set and set.actors and guid) then return end
-
-		local actor = self:FindPlayer(set, guid, name, true)
-
-		if not actor then
-			if not name then return end
-
-			actor = new()
-			actor.id = guid
-			actor.name = name
-			actor.flag = flag
-			actor.last = set.last_time or GetTime()
-			actor.time = 0
-			actor.__new = true -- new entry (removed later)
-
-			if players[guid] then
-				_, actor.class = UnitClass(players[guid])
-				actor.role = GetUnitRole(guid)
-				actor.spec = GetUnitSpec(guid)
-			elseif pets[guid] then
-				actor.class = "PET"
-			else
-				actor.class, actor.role, actor.pec = unit_class(guid, flag, nil, nil, name)
-			end
-
-			for i = 1, #modes do
-				local mode = modes[i]
-				if mode and mode.AddPlayerAttributes then
-					mode:AddPlayerAttributes(actor, set)
-				end
-			end
-
-			set.actors[#set.actors + 1] = actor
-		end
-
-		-- not all modules provide flags
-		if (actor.flag == nil or actor.flag == 0) and flag and flag ~= 0 then
-			actor.flag = flag
-			actor.__mod = true
-		end
-
-		-- attempt to fix player name:
-		if (actor.name == L["Unknown"] and name ~= L["Unknown"]) or (actor.name == actor.id and name ~= actor.id) then
-			actor.name = (actor.id == userGUID or guid == userGUID) and userName or name
-			actor.__mod = true
-		end
-
-		-- fix players created before their info was received
-		if self.validclass[actor.class] then
-			if actor.role == nil or actor.role == "NONE" then
-				actor.role = GetUnitRole(actor.id)
-				actor.__mod = true
-			end
-			if actor.spec == nil then
-				actor.spec = GetUnitSpec(actor.id)
-				actor.__mod = true
-			end
-		end
-
-		-- total set has "last" always removed.
-		if not actor.last then
-			actor.last = set.last_time or GetTime()
-			actor.__mod = true
-		end
-
-		if actor.__new or actor.__mod then
-			actor.__mod = nil
-			callbacks:Fire("Skada_GetPlayer", actor, set)
-		end
-
-		self.changed = true
-
-		if actor.__new then
-			actor.__new = nil
-			return playerPrototype:Bind(actor), true
-		end
-		return actor
-	end
-
-	-- finds an enemy unit
-	function Skada:FindEnemy(set, name, id)
-		local actors = name and set and set.actors
-		if not actors then
-			return
-		elseif not set._actoridx then
-			set._actoridx = new()
-		end
-
-		id = id or name -- fallback
-
-		local enemy = set._actoridx[id]
-		if enemy then
-			return enemyPrototype:Bind(enemy)
-		end
-
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.enemy and (actor.id == id or actor.name == name) then
-				set._actoridx[name] = enemyPrototype:Bind(actor)
-				return actor
-			end
-		end
-	end
-
-	-- finds or create an enemy entry
-	function Skada:GetEnemy(set, name, guid, flag)
-		if not (set and set.actors and name) then return end
-
-		local actor = self:FindEnemy(set, name, guid)
-
-		if not actor then
-
-			actor = new()
-			actor.id = guid
-			actor.name = name
-			actor.flag = flag
-			actor.enemy = true
-			actor.__new = true
-
-			if guid or flag then
-				actor.class = Private.unit_class(guid, flag, nil, actor, name)
-			else
-				actor.class = "ENEMY"
-			end
-
-			for i = 1, #modes do
-				local mode = modes[i]
-				if mode and mode.AddEnemyAttributes then
-					mode:AddEnemyAttributes(actor, set)
-				end
-			end
-
-			set.actors[#set.actors + 1] = actor
-		end
-
-		-- in case of a missing guid
-		if actor.id == nil and guid and guid ~= name then
-			actor.id = guid
-			actor.__mod = true
-		end
-
-		-- not all modules provide flags
-		if (actor.flag == nil or actor.flag == 0) and flag and flag ~= 0 then
-			actor.flag = flag
-			actor.__mod = true
-		end
-
-		-- attempt to fix enemy name:
-		if actor.name == L["Unknown"] and name ~= L["Unknown"] then
-			actor.name = name
-			actor.__mod = true
-		end
-
-		-- in pvp while having pvp module enabled?
-		if self.forPVP and self.validclass[actor.class] then
-			actor.__mod = (actor.spec == nil) and true or nil
-		end
-
-		if actor.__new or actor.__mod then
-			actor.__mod = nil
-			callbacks:Fire("Skada_GetEnemy", actor, set)
-		end
-
-		self.changed = true
-		if actor.__new then
-			actor.__new = nil
-			return enemyPrototype:Bind(actor), true
-		end
-		return actor
-	end
-
-	-- generic find a player or an enemey
-	function Skada:FindActor(set, id, name, no_strict)
-		return self:FindPlayer(set, id, name, not no_strict) or self:FindEnemy(set, name, id)
+		-- well.. our last hope!
+		dummy_actor.id = actorid
+		dummy_actor.name = actorname
+		dummy_actor.class = "UNKNOWN"
+		return playerPrototype:Bind(dummy_actor)
 	end
 
 	-- generic: finds a player/enemy or creates it.
-	function Skada:GetActor(set, id, name, flag)
-		local actor = self:FindActor(set, id, name)
-		-- creates it if not found
+	function Skada:GetActor(set, actorid, actorname, actorflags)
+		-- no set/actors table, sorry!
+		if not set or not set.actors then return end
+
+		-- make sure we have all data
+		actorid = actorid or actorname
+		actorname = actorname or actorid
+
+		-- attempt to find the actor (true: no dummy_actor)
+		local actor = self:FindActor(set, actorid, actorname, true)
+
+		-- not found? try to creat it then
 		if not actor then
-			if is_player(id, name, flag) == 1 or is_pet(id, flag) == 1 then -- group members or group pets
-				actor = self:GetPlayer(set, id, name, flag)
-			else -- an outsider maybe?
-				actor = self:GetEnemy(set, name, id, flag)
+			-- at least the name should be provided!
+			if not actorname then return end
+
+			-- create a new actor table...
+			actor = new()
+			actor.id = actorid
+			actor.name = actorname
+			actor.__new = true
+
+			-- actorflags:true => fakse actor
+			if actorflags == true then
+				actor.enemy = true
+				actor.class = "ENEMY"
+				actor.fake = true
+
+			-- is it me? move on..
+			elseif actorid == userGUID then
+				actor.class = userClass
+				actor.role = GetUnitRole(userGUID)
+				actor.spec = GetUnitSpec(userGUID)
+
+			-- a group member?
+			elseif players[actorid] then
+				_, actor.class = UnitClass(players[actorid])
+				actor.role = GetUnitRole(userGUID)
+				actor.spec = GetUnitSpec(userGUID)
+
+			-- a pet maybe?
+			elseif pets[actorid] then
+				actor.class = "PET"
+
+			-- was a player? (pvp scenario)
+			elseif self:IsPlayer(actorflags) then
+				actor.enemy = true
+				local unit = GetUnitIdFromGUID(actorid, "group")
+				if unit then -- found a valid unit?
+					_, actor.class = UnitClass(unit)
+				else
+					actor.class = "PLAYER"
+				end
+
+			-- a npc maybe?
+			elseif self:IsNPC(actorflags) then
+				actor.enemy = true
+				local unit = GetUnitIdFromGUID(actorid, "group")
+				local level = unit and UnitLevel(unit)
+				if level == -1 or self:IsBoss(actorid, true) then
+					actor.class = "BOSS"
+				elseif self:IsPet(actorflags) then
+					actor.class = "PET"
+				elseif self:IsNeutral(actorflags) then
+					actor.class = "NEUTRAL"
+				else
+					actor.class = "MONSTER"
+				end
+
+			else
+				actor.enemy = true
+				actor.class = "UNKNOWN"
 			end
+
+			for _, mode in pairs(modes) do
+				-- common
+				if mode.AddActorAttributes then
+					mode:AddActorAttributes(actor, set)
+				end
+
+				if mode.AddEnemyAttributes and actor.enemy then
+					mode:AddEnemyAttributes(actor, set) -- enemies
+				elseif mode.AddPlayerAttributes and not actor.enemy then
+					mode:AddPlayerAttributes(actor, set) -- players
+				end
+			end
+
+			set.actors[#set.actors + 1] = actor
+		end
+
+		-- just in case we have missing/wrong stuff
+		if (actor.name == L["Unknown"] and actorname ~= L["Unknown"]) or (actor.id == actor.name and actorname ~= actor.id) then
+			actor.name = (actor.id == userGUID or actorid == userGUID) and userName or actorname
+			actor.__mod = true
+		end
+
+		-- add more details to the actor...
+		if players[actor.id] or pets[actor.id] then
+			if self.validclass[actor.class] then
+				-- missing role?
+				if actor.role == nil or actor.role == "NONE" then
+					actor.role = GetUnitRole(actor.id)
+					actor.__mod = true
+				end
+				-- missing spec?
+				if actor.spec == nil then
+					actor.spec = GetUnitSpec(actor.id)
+					actor.__mod = true
+				end
+			end
+
+			-- total set has "last" always removed.
+			if not actor.last then
+				actor.last = set.last_time or GetTime()
+				actor.__mod = true
+			end
+		end
+
+		-- pvp enabled
+		if self.validclass[actor.class] and self.forPVP and not actor.spec then
+			actor.__mod = true
+		end
+
+		-- remove __mod key and fire callbacks
+		if actor.__new or actor.__mod then
+			actor.__mod = nil
+			callbacks:Fire(actor.enemy and "Skada_GetEnemy" or "Skada_GetPlayer", actor, set)
+		end
+
+		-- trigger addon change status
+		self.changed = true
+
+		-- remove the __new key after binding the actor
+		if actor.__new then
+			actor.__new = nil
+			return (actor.enemy and enemyPrototype or playerPrototype):Bind(actor), true
 		end
 		return actor
 	end
@@ -1423,11 +1326,11 @@ do
 		DISPEL_FAILED = ", extraspellid, extraspellname, extraschool",
 		STOLEN = ", extraspellid, extraspellname, extraschool, auratype",
 		EXTRA_ATTACKS = ", amount",
-		AURA_APPLIED = ", auratype",
-		AURA_REMOVED = ", auratype",
+		AURA_APPLIED = ", auratype, amount",
+		AURA_REMOVED = ", auratype, amount",
 		AURA_APPLIED_DOSE = ", auratype, amount",
 		AURA_REMOVED_DOSE = ", auratype, amount",
-		AURA_REFRESH = ", auratype",
+		AURA_REFRESH = ", auratype, amount",
 		AURA_BROKEN = ", auratype",
 		AURA_BROKEN_SPELL = ", extraspellid, extraspellname, extraschool, auratype",
 		CAST_START = "",

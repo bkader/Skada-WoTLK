@@ -147,7 +147,7 @@ do
 		end
 	end
 
-	local function find_or_create_actor(set, info, is_enemy)
+	local function find_or_create_actor(set, info)
 		-- 1. make sure we can record to the segment.
 		if not set or (set == Skada.total and not Skada.db.totalidc) then return end
 
@@ -155,16 +155,12 @@ do
 		if not info or not info.spellid then return end
 
 		-- 3. retrieve the actor.
-		if is_enemy then -- enemy?
-			return Skada:GetEnemy(set, info.actorname, info.actorid, info.actorflags)
-		end
-
-		return Skada:GetPlayer(set, info.actorid, info.actorname, info.actorflags) -- player?
+		return Skada:GetActor(set, info.actorid, info.actorname, info.actorflags)
 	end
 
 	-- handles SPELL_AURA_APPLIED event
-	function log_auraapplied(set, is_enemy)
-		local actor = find_or_create_actor(set, aura, is_enemy)
+	function log_auraapplied(set)
+		local actor = find_or_create_actor(set, aura)
 		if not actor then return end
 
 		local curtime = set.last_action or time()
@@ -194,8 +190,8 @@ do
 	end
 
 	-- handles SPELL_AURA_REFRESH and SPELL_AURA_APPLIED_DOSE events
-	function log_aurarefresh(set, is_enemy)
-		local actor = find_or_create_actor(set, aura, is_enemy)
+	function log_aurarefresh(set)
+		local actor = find_or_create_actor(set, aura)
 		if not actor then return end
 
 		-- spell
@@ -210,8 +206,8 @@ do
 	end
 
 	-- handles SPELL_AURA_REMOVED event
-	function log_auraremove(set, is_enemy)
-		local actor = find_or_create_actor(set, aura, is_enemy)
+	function log_auraremove(set)
+		local actor = find_or_create_actor(set, aura)
 		if not actor then return end
 
 		-- spell
@@ -236,8 +232,8 @@ do
 		end
 	end
 
-	function log_specialaura(set, is_enemy)
-		local actor = find_or_create_actor(set, aura, is_enemy)
+	function log_specialaura(set)
+		local actor = find_or_create_actor(set, aura)
 		if not actor then return end
 
 		-- spell
@@ -311,7 +307,7 @@ do
 
 	-- list actor's auras by type
 	function spell_update_func(self, auratype, win, set, cols)
-		local actor = set and auratype and set:GetActor(win.actorname, win.actorid)
+		local actor = set and auratype and set:GetActor(win.actorid, win.actorname)
 		local maxtime = actor and floor(actor:GetTime(set))
 		local spells = (maxtime and maxtime > 0) and actor.auras
 
@@ -378,7 +374,7 @@ do
 
 		-- list actor's auras targets by type
 		function target_update_func(self, auratype, win, set, cols, tbl)
-			local actor = set and auratype and set:GetActor(win.actorname, win.actorid)
+			local actor = set and auratype and set:GetActor(win.actorid, win.actorname)
 			if not actor then return end
 
 			local targets, maxtime = get_actor_auras_targets(actor, set, auratype, tbl)
@@ -415,7 +411,7 @@ do
 
 		-- list targets of the given aura
 		function spelltarget_update_func(self, auratype, win, set, cols, tbl)
-			local actor = set and auratype and set:GetActor(win.actorname, win.actorid)
+			local actor = set and auratype and set:GetActor(win.actorid, win.actorname)
 			if not actor then return end
 
 			local targets, maxtime = get_actor_aura_targets(actor, set, win.spellid, tbl)
@@ -457,7 +453,7 @@ do
 
 		-- list auras done on the given target
 		function targetspell_update_func(self, auratype, win, set, cols, tbl)
-			local actor = set and auratype and set:GetActor(win.actorname, win.actorid)
+			local actor = set and auratype and set:GetActor(win.actorid, win.actorname)
 			if not actor then return end
 
 			local spells, maxtime = get_actor_target_auras(actor, win.targetname, tbl)
@@ -482,7 +478,7 @@ do
 		local set = win:GetSelectedSet()
 		local settime = set and set:GetTime()
 		if not settime or settime == 0 then return end
-		local actor = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorid, win.actorname)
 		local spell = actor and actor.auras and actor.auras[id]
 		if not spell then return end
 
@@ -511,7 +507,7 @@ do
 
 	function spelltarget_tooltip(win, id, label, tooltip)
 		local set = win.spellid and win:GetSelectedSet()
-		local actor = set and set:GetActor(win.actorname, win.actorid)
+		local actor = set and set:GetActor(win.actorid, win.actorname)
 		local spell = actor and actor.auras and actor.auras[win.spellid]
 		local target = spell and spell.targets and spell.targets[label]
 		if not target then return end
@@ -827,7 +823,7 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 
 	local function spellsource_tooltip(win, id, label, tooltip)
 		local set = win.spellid and win:GetSelectedSet()
-		local actor = set and set:GetActor(label, id)
+		local actor = set and set:GetActor(id, label)
 		local spell = actor and actor.auras and actor.auras[win.spellid]
 		if not (spell and spell.count) then return end
 
@@ -901,13 +897,13 @@ Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 			aura.type = t.auratype
 
 			if t.event == "SPELL_PERIODIC_ENERGIZE" then
-				Skada:DispatchSets(log_specialaura, true)
+				Skada:DispatchSets(log_specialaura)
 			elseif t.event == "SPELL_AURA_APPLIED" then
-				Skada:DispatchSets(log_auraapplied, true)
+				Skada:DispatchSets(log_auraapplied)
 			elseif t.event == "SPELL_AURA_REMOVED" then
-				Skada:DispatchSets(log_auraremove, true)
+				Skada:DispatchSets(log_auraremove)
 			else
-				Skada:DispatchSets(log_aurarefresh, true)
+				Skada:DispatchSets(log_aurarefresh)
 			end
 		end
 	end
@@ -983,11 +979,11 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 		aura.type = t.auratype
 
 		if t.event == "SPELL_AURA_APPLIED" then
-			Skada:DispatchSets(log_auraapplied, true)
+			Skada:DispatchSets(log_auraapplied)
 		elseif t.event == "SPELL_AURA_REMOVED" then
-			Skada:DispatchSets(log_auraremove, true)
+			Skada:DispatchSets(log_auraremove)
 		else
-			Skada:DispatchSets(log_aurarefresh, true)
+			Skada:DispatchSets(log_aurarefresh)
 		end
 	end
 

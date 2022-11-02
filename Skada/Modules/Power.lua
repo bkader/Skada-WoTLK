@@ -60,7 +60,7 @@ Skada:RegisterModule("Resources", function(L, P)
 	local function log_gain(set)
 		if not (gain and gain.type and gainTable[gain.type]) then return end
 
-		local actor = Skada:GetPlayer(set, gain.actorid, gain.actorname, gain.actorflags)
+		local actor = Skada:GetActor(set, gain.actorid, gain.actorname, gain.actorflags)
 		if not actor then return end
 
 		actor[gainTable[gain.type]] = (actor[gainTable[gain.type]] or 0) + gain.amount
@@ -174,7 +174,7 @@ Skada:RegisterModule("Resources", function(L, P)
 		win.title = uformat(L["%s's gained %s"], win.actorname, L[self.powername])
 		if not set or not win.actorname then return end
 
-		local actor = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorid, win.actorname)
 		if not actor or actor.enemy then return end -- unavailable for enemies yet
 
 		local total = actor and self.power and actor[self.power]

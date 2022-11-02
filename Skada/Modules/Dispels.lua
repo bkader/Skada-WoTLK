@@ -27,10 +27,10 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 
 	local dispel = {}
 	local function log_dispel(set)
-		local actor = Skada:GetPlayer(set, dispel.actorid, dispel.actorname, dispel.actorflags)
+		local actor = Skada:GetActor(set, dispel.actorid, dispel.actorname, dispel.actorflags)
 		if not actor then return end
 
-		-- increment player's and set's dispels count
+		-- increment actor's and set's dispels count
 		actor.dispel = (actor.dispel or 0) + 1
 		set.dispel = (set.dispel or 0) + 1
 
@@ -118,7 +118,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
-			local d = win:actor(nr, target, true, targetname)
+			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.count
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
@@ -132,7 +132,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	function spellmod:Update(win, set)
 		win.title = uformat(L["%s's dispel spells"], win.actorname)
 
-		local actor = set and set:GetPlayer(win.actorid, win.actorname)
+		local actor = set and set:GetActor(win.actorid, win.actorname)
 		local total = actor and actor.dispel
 		local spells = (total and total > 0) and actor.dispelspells
 
@@ -220,7 +220,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	---------------------------------------------------------------------------
 
 	get_actor_dispelled_spells = function(self, id, name, tbl)
-		local actor = self:GetActor(name, id)
+		local actor = self:GetActor(id, name)
 		local total = actor and actor.dispel
 		local spells = total and total > 0 and actor.dispelspells
 		if not spells then return end
@@ -237,7 +237,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	end
 
 	get_actor_dispelled_targets = function(self, id, name, tbl)
-		local actor = self:GetActor(name, id)
+		local actor = self:GetActor(id, name)
 		local total = actor and actor.dispel
 		local spells = total and total > 0 and actor.dispelspells
 		if not spells then return end

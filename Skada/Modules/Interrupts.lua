@@ -28,10 +28,10 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 
 	local data = {}
 	local function log_interrupt(set)
-		local actor = Skada:GetPlayer(set, data.actorid, data.actorname, data.actorflags)
+		local actor = Skada:GetActor(set, data.actorid, data.actorname, data.actorflags)
 		if not actor then return end
 
-		-- increment player's and set's interrupts count
+		-- increment actor's and set's interrupts count
 		actor.interrupt = (actor.interrupt or 0) + 1
 		set.interrupt = (set.interrupt or 0) + 1
 
@@ -133,7 +133,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
-			local d = win:actor(nr, target, true, targetname)
+			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.count
 			format_valuetext(d, mod_cols, total, win.metadata, true)
 		end
@@ -148,7 +148,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		win.title = uformat(L["%s's interrupt spells"], win.actorname)
 		if not set or not win.actorname then return end
 
-		local actor = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorid, win.actorname)
 		local total = (actor and not actor.enemy) and actor.interrupt
 		local spells = (total and total > 0) and actor.interruptspells
 
@@ -277,7 +277,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	---------------------------------------------------------------------------
 
 	get_actor_interrupted_spells = function(self, id, name, tbl)
-		local actor = self:GetActor(name, id)
+		local actor = self:GetActor(id, name)
 		local total = actor and actor.interrupt
 		local spells = total and actor.interruptspells
 		if not spells then return end
@@ -294,7 +294,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	end
 
 	get_actor_interrupt_targets = function(self, id, name, tbl)
-		local actor = self:GetActor(name, id)
+		local actor = self:GetActor(id, name)
 		local total = actor and actor.interrupt
 		local spells = total and actor.interruptspells
 		if not spells then return end

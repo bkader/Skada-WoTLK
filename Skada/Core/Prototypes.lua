@@ -14,28 +14,18 @@ local actorPrototype = Skada.actorPrototype
 -- segment/set prototype & functions
 
 -- returns the segment's time
-function setPrototype:GetTime(active)
-	return Skada:GetSetTime(self, active)
+function setPrototype:GetTime()
+	return Skada:GetSetTime(self)
 end
 
 -- returns the actor's time if found (player or enemy)
 function setPrototype:GetActorTime(id, name, active)
-	local actor = self:GetActor(name, id)
-	return actor and actor:GetTime(self, active) or self:GetTime(active)
-end
-
--- attempts to retrieve a player
-function setPrototype:GetPlayer(id, name)
-	return Skada:FindPlayer(self, id, name, true)
-end
-
--- attempts to retrieve an enemy
-function setPrototype:GetEnemy(name, id)
-	return Skada:FindEnemy(self, name, id)
+	local actor = self:GetActor(id, name)
+	return actor and actor:GetTime(self, active) or self:GetTime()
 end
 
 -- attempts to find an actor (player or enemy)
-function setPrototype:GetActor(name, id, no_strict)
+function setPrototype:GetActor(id, name, no_strict)
 	return Skada:FindActor(self, id, name, no_strict)
 end
 
@@ -80,7 +70,7 @@ end
 -- fills the give table with actor's details
 function setPrototype:_fill_actor_table(t, name, actortime, no_strict)
 	if t and (not t.class or (actortime and not t.time)) then
-		local actor = self:GetActor(name, nil, no_strict)
+		local actor = self:GetActor(name, name, no_strict)
 		if not actor then return end
 
 		t.id = t.id or actor.id
@@ -129,13 +119,13 @@ end
 
 -- returns the actor's damage amount
 function setPrototype:GetActorDamage(id, name, useful)
-	local actor = self:GetActor(name, id)
+	local actor = self:GetActor(id, name)
 	return actor and actor:GetDamage(useful) or 0
 end
 
 -- returns the actor's dps and damage amount.
 function setPrototype:GetActorDPS(id, name, useful, active)
-	local actor = self:GetActor(name, id)
+	local actor = self:GetActor(id, name)
 	if actor then
 		return actor:GetDPS(self, useful, active)
 	end
@@ -144,7 +134,7 @@ end
 
 -- returns the actor's damage spells table if found
 function setPrototype:GetActorDamageSpells(id, name)
-	local actor = self:GetActor(name, id)
+	local actor = self:GetActor(id, name)
 	if actor then
 		return actor.damagespells, actor
 	end
@@ -152,7 +142,7 @@ end
 
 -- returns the actor's damage targets table if found
 function setPrototype:GetActorDamageTargets(id, name, tbl)
-	local actor = self:GetActor(name, id)
+	local actor = self:GetActor(id, name)
 	if actor then
 		local targets, total = actor:GetDamageTargets(self, tbl)
 		return targets, total, actor
@@ -161,7 +151,7 @@ end
 
 -- returns the actor's damage on the given target
 function setPrototype:GetActorDamageOnTarget(id, name, targetname)
-	local actor = self:GetActor(name, id)
+	local actor = self:GetActor(id, name)
 	if actor then
 		return actor:GetDamageOnTarget(targetname)
 	end
@@ -192,13 +182,13 @@ end
 
 -- returns the actor's damage taken amount
 function setPrototype:GetActorDamageTaken(id, name)
-	local actor = self:GetActor(name, id)
+	local actor = self:GetActor(id, name)
 	return actor and actor:GetDamageTaken()
 end
 
 -- returns the actor's dtps and damage taken amount
 function setPrototype:GetActorDTPS(id, name)
-	local actor = self:GetActor(name, id)
+	local actor = self:GetActor(id, name)
 	if actor then
 		return actor:GetDTPS(self)
 	end
@@ -207,13 +197,13 @@ end
 
 -- returns the actor's damage taken spells table if found
 function setPrototype:GetActorDamageTakenSpells(id, name)
-	local actor = self:GetActor(name, id)
+	local actor = self:GetActor(id, name)
 	return actor and actor.damagedspells or nil
 end
 
 -- returns the actor's damage taken sources table if found
 function setPrototype:GetActorDamageSources(id, name, tbl)
-	local actor = self:GetActor(name, id)
+	local actor = self:GetActor(id, name)
 	if actor then
 		local sources, total = actor:GetDamageSources(self, tbl)
 		return sources, total, actor
@@ -222,7 +212,7 @@ end
 
 -- returns the damage, overkill and useful
 function setPrototype:GetActorDamageFromSource(id, name, targetname)
-	local actor = self:GetActor(name, id)
+	local actor = self:GetActor(id, name)
 	if actor then
 		return actor:GetDamageFromSource(targetname)
 	end
@@ -231,7 +221,7 @@ end
 
 -- actor heal targets
 function setPrototype:GetActorHealTargets(id, name, tbl)
-	local actor = self:GetActor(name, id)
+	local actor = self:GetActor(id, name)
 	if actor then
 		local targets, total = actor:GetHealTargets(self, tbl)
 		return targets, total, actor

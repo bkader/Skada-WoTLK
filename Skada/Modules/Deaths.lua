@@ -2,7 +2,7 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local mod = Skada:NewModule("Deaths")
-	local playermod = mod:NewModule("Player's deaths")
+	local actormod = mod:NewModule("Player's deaths")
 	local deathlogmod = mod:NewModule("Death log")
 	local WATCH = nil -- true to watch those alive
 
@@ -59,7 +59,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local function log_deathlog(set, override)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
-		local actor = Skada:GetPlayer(set, data.actorid, data.actorname, data.actorflags)
+		local actor = Skada:GetActor(set, data.actorid, data.actorname, data.actorflags)
 		if not actor then return end
 
 		local deathlog = actor.deathlog and actor.deathlog[1]
@@ -69,7 +69,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			deathlog = actor.deathlog[1]
 		end
 
-		-- seet player maxhp if not already set
+		-- seet actor maxhp if not already set
 		if not deathlog.hpm or deathlog.hpm == 0 then
 			_, _, deathlog.hpm = UnitHealthInfo(actor.name, actor.id, "group")
 			deathlog.hpm = deathlog.hpm or 0
@@ -128,17 +128,17 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 	end
 
-	local function log_death(set, playerid, playername, playerflags)
-		local player = Skada:GetPlayer(set, playerid, playername, playerflags)
-		if not player then return end
+	local function log_death(set, actorid, actorname, actorflags)
+		local actor = Skada:GetActor(set, actorid, actorname, actorflags)
+		if not actor then return end
 
 		set.death = (set.death or 0) + 1
-		player.death = (player.death or 0) + 1
+		actor.death = (actor.death or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
 		if set == Skada.total and not P.totalidc then return end
 
-		local deathlog = player.deathlog and player.deathlog[1]
+		local deathlog = actor.deathlog and actor.deathlog[1]
 		if not deathlog then return end
 
 		deathlog.time = set.last_time or GetTime()
@@ -168,7 +168,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		-- announce death
 		if M.deathannounce and set ~= Skada.total then
-			mod:Announce(deathlog.log, player.name)
+			mod:Announce(deathlog.log, actor.name)
 		end
 	end
 
@@ -424,12 +424,12 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		function deathlogmod:Update(win, set)
 			win.title = uformat(L["%s's death log"], win.actorname)
 
-			local player = win.datakey and Skada:FindPlayer(set, win.actorid, win.actorname)
-			local deathlog = player and player.deathlog and player.deathlog[win.datakey]
+			local actor = win.datakey and Skada:FindActor(set, win.actorid, win.actorname)
+			local deathlog = actor and actor.deathlog and actor.deathlog[win.datakey]
 			if not deathlog then return end
 
 			if M.alternativedeaths then
-				local num = #player.deathlog
+				local num = #actor.deathlog
 				if win.datakey ~= num then
 					win.title = format("%s (%d)", win.title, num - win.datakey + 1)
 				end
@@ -466,7 +466,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 					d.icon = icon_mode
 					d.color = nil
 					d.value = 0
-					d.valuetext = format(L["%s dies"], player.name)
+					d.valuetext = format(L["%s dies"], actor.name)
 				end
 			end
 
@@ -570,16 +570,16 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function actormod:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's deaths"], label)
 	end
 
-	function playermod:Update(win, set)
+	function actormod:Update(win, set)
 		win.title = uformat(L["%s's deaths"], win.actorname)
 		if not set or not win.actorid then return end
 
-		local actor = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorid, win.actorname)
 		if not actor or actor.enemy then return end
 
 		local deathlog = (actor.death or WATCH) and actor.deathlog
@@ -682,7 +682,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 					local death = actor.deathlog[j]
 					if death and (death.timeod or WATCH) then
 						nr = nr + 1
-						local d = win:actor(nr, actor)
+						local d = win:actor(nr, actor, actor.enemy)
 						d.id = format("%s::%d", actor.id, j)
 
 						if death.timeod then
@@ -734,7 +734,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 	local function entry_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local actor = set and set:GetActor(win.actorname, win.actorid)
+		local actor = set and set:GetActor(win.actorid, win.actorname)
 		local deathlog = actor and actor.deathlog and win.datakey and actor.deathlog[win.datakey]
 		local entry = deathlog and deathlog.log and deathlog.log[id]
 		if not entry or not entry.id then return end
@@ -787,9 +787,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			columns = {Change = true, Health = true, Percent = true},
 			icon = icon_death
 		}
-		playermod.metadata = {click1 = deathlogmod}
+		actormod.metadata = {click1 = deathlogmod}
 		self.metadata = {
-			click1 = playermod,
+			click1 = actormod,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Time = true, Survivability = false, Source = false},
@@ -798,7 +798,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		-- alternative display
 		if M.alternativedeaths then
-			playermod.metadata.click1 = nil
+			actormod.metadata.click1 = nil
 			self.metadata.click1 = deathlogmod
 		end
 
@@ -807,7 +807,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		-- no total click.
 		deathlogmod.nototal = true
-		playermod.nototal = true
+		actormod.nototal = true
 
 		local flags_dst_nopets = {dst_is_interesting_nopets = true}
 
@@ -918,11 +918,11 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 	end
 
-	function mod:Announce(logs, playername)
+	function mod:Announce(logs, actorname)
 		-- announce only if:
 		-- 	1. we have a valid deathlog.
-		-- 	2. player is not in a pvp (spam caution).
-		-- 	3. player is in a group or channel set to self or guild.
+		-- 	2. actor is not in a pvp (spam caution).
+		-- 	3. actor is in a group or channel set to self or guild.
 		if not logs or IsInPvP() then return end
 
 		local channel = M.deathchannel
@@ -943,7 +943,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		local output = format(
 			(channel == "SELF") and "%s > %s (%s) %s" or "Skada: %s > %s (%s) %s",
 			log.src or L["Unknown"], -- source name
-			playername or L["Unknown"], -- player name
+			actorname or L["Unknown"], -- actor name
 			log.id and spellnames[abs(log.id)] or L["Unknown"], -- spell name
 			log.amt and Skada:FormatNumber(0 - log.amt, 1) or 0 -- spell amount
 		)
@@ -1063,12 +1063,12 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 							set = function(_, value)
 								if M.alternativedeaths then
 									M.alternativedeaths = nil
-									mod.metadata.click1 = playermod
-									playermod.metadata.click1 = deathlogmod
+									mod.metadata.click1 = actormod
+									actormod.metadata.click1 = deathlogmod
 								else
 									M.alternativedeaths = true
 									mod.metadata.click1 = deathlogmod
-									playermod.metadata.click1 = nil
+									actormod.metadata.click1 = nil
 								end
 
 								mod:Reload()

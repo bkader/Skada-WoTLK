@@ -3295,10 +3295,10 @@ do
 	end
 
 	local function tentative_handler()
+		Skada.current = del(Skada.current, true)
 		Skada:CancelTimer(tentative_timer, true)
 		tentative_timer = nil
 		tentative = nil
-		Skada.current = nil
 	end
 
 	function Skada:CombatLogEvent(t)

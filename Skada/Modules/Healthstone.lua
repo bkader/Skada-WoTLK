@@ -29,7 +29,7 @@ Skada:RegisterModule("Healthstones", function(L)
 	end
 
 	local function log_healthstone(set, actorid, actorname, actorflags)
-		local actor = Skada:GetPlayer(set, actorid, actorname, actorflags)
+		local actor = Skada:GetActor(set, actorid, actorname, actorflags)
 		if actor then
 			actor.healthstone = (actor.healthstone or 0) + 1
 			set.healthstone = (set.healthstone or 0) + 1

@@ -21,7 +21,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 
 	local function activity_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local actor = set and set:GetActor(label, id)
+		local actor = set and set:GetActor(id, label)
 		if not actor then return end
 
 		local settime = set:GetTime()
@@ -43,7 +43,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		win.title = uformat(L["%s's activity"], win.actorname)
 		if not win.actorname then return end
 
-		local actor = set:GetActor(win.actorname, win.actorid)
+		local actor = set:GetActor(win.actorid, win.actorname)
 		local maxtime = actor and actor:GetTime(set, true)
 		local targets = maxtime and get_activity_targets(actor, set)
 
@@ -57,7 +57,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		for name, target in pairs(targets) do
 			nr = nr + 1
 
-			local d = win:actor(nr, target, true, name)
+			local d = win:actor(nr, target, target.enemy, name)
 			d.value = target.time
 			format_valuetext(d, mod_cols, maxtime, win.metadata, true)
 		end
@@ -83,7 +83,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 				if activetime > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor)
+					local d = win:actor(nr, actor, actor.enemy)
 					d.value = activetime
 					format_valuetext(d, mod_cols, settime, win.metadata)
 					win:color(d, set, actor.enemy)
@@ -94,25 +94,11 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 
 	function mod:GetSetSummary(set)
 		if not set or not set.time then return end
-
-		local settime = set.time
-		local value, valuetext = nil, nil
-
-		if set.activetime then
-			value = set.activetime
-			valuetext = Skada:FormatValueCols(
-				mod_cols["Active Time"] and Skada:FormatTime(value),
-				mod_cols.Percent and Skada:FormatPercent(value, settime)
-			)
-		else -- backwards compatibility
-			value = settime
-			valuetext = Skada:FormatValueCols(
-				mod_cols["Active Time"] and Skada:FormatTime(value),
-				mod_cols.Percent and format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime))
-			)
-		end
-
-		return value, valuetext
+		local valuetext = Skada:FormatValueCols(
+			mod_cols["Active Time"] and Skada:FormatTime(set.time),
+			mod_cols.Percent and format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime))
+		)
+		return set.time, valuetext
 	end
 
 	function mod:OnEnable()

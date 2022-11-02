@@ -157,10 +157,9 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	local function log_custom_unit(set, name, playername, spellid, amount, absorbed)
-		local e = Skada:GetEnemy(set, name)
+		local e = Skada:GetActor(set, name, name, true)
 		if not e then return end
 
-		e.fake = true
 		e.damaged = (e.damaged or 0) + amount
 		e.totaldamaged = (e.totaldamaged or 0) + amount
 		if absorbed > 0 then
@@ -216,7 +215,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
 
-		local e = Skada:GetEnemy(set, dmg.actorname, dmg.actorid, dmg.actorflags)
+		local e = Skada:GetActor(set, dmg.actorid, dmg.actorname, dmg.actorflags)
 		if not e then return end
 
 		e.damaged = (e.damaged or 0) + dmg.amount
@@ -381,7 +380,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 	local function usefulmod_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local e = set and set:GetEnemy(label, id)
+		local e = set and set:GetActor(id, label)
 		local amount, total, useful = e:GetDamageTakenBreakdown(set)
 		if not useful or useful == 0 then return end
 
@@ -405,7 +404,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 		if not win.spellid then return end
 
-		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local actor = set and set:GetActor(win.targetid, win.targetname)
 		if not (actor and actor.GetDamageSpellSources) then return end
 
 		local sources, total = actor:GetDamageSpellSources(set, win.spellid)
@@ -470,7 +469,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		win.title = L["actor damage"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
 		if not win.actorname or not win.targetname then return end
 
-		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local actor = set and set:GetActor(win.targetid, win.targetname)
 		local sources = actor and actor:GetDamageSources(set)
 		local source = sources and sources[win.actorname]
 		if not source then return end
@@ -506,7 +505,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	function spellmod:Update(win, set)
 		win.title = uformat(L["Damage taken by %s"], win.targetname)
 
-		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local actor = set and set:GetActor(win.targetid, win.targetname)
 		local total = actor and actor:GetDamageTaken()
 		local spells = (total and total > 0) and actor.damagedspells
 
@@ -539,7 +538,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
 
-		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local actor = set and set:GetActor(win.targetid, win.targetname)
 		local total = actor and actor.usefuldamaged
 		local sources = (total and total > 0) and actor:GetDamageSources(set)
 
@@ -556,7 +555,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			if win:show_actor(source, set) and source.useful and source.useful > 0 then
 				nr = nr + 1
 
-				local d = win:actor(nr, source, nil, sourcename)
+				local d = win:actor(nr, source, source.enemy, sourcename)
 				d.value = source.useful
 				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
@@ -583,7 +582,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, true)
+					local d = win:actor(nr, actor, actor.enemy)
 					d.value = amount
 					format_valuetext(d, mod_cols, total, dtps, win.metadata)
 				end
@@ -834,7 +833,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
 
-		local e = Skada:GetEnemy(set, dmg.actorname, dmg.actorid, dmg.actorflags)
+		local e = Skada:GetActor(set, dmg.actorid, dmg.actorname, dmg.actorflags)
 		if not e then
 			return
 		elseif (set.type == "arena" or set.type == "pvp") and dmg.amount > 0 then
@@ -931,7 +930,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		win.title = L["actor damage"](win.targetname or L["Unknown"], win.actorname or L["Unknown"])
 		if not (win.targetname and win.actorname) then return end
 
-		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local actor = set and set:GetActor(win.targetid, win.targetname)
 		if not (actor and actor.GetDamageTargetSpells) then return end
 		local spells, total = actor:GetDamageTargetSpells(win.actorname)
 
@@ -966,7 +965,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 
 		if not win.spellid then return end
 
-		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local actor = set and set:GetActor(win.targetid, win.targetname)
 		if not (actor and actor.GetDamageSpellTargets) then return end
 
 		local targets, total = actor:GetDamageSpellTargets(set, win.spellid)
@@ -983,7 +982,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 			if not win.class or win.class == target.class then
 				nr = nr + 1
 
-				local d = win:actor(nr, target, nil, targetname)
+				local d = win:actor(nr, target, target.enemy, targetname)
 				d.value = target.amount
 				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
@@ -1015,7 +1014,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 			if not win.class or win.class == target.class then
 				nr = nr + 1
 
-				local d = win:actor(nr, target, true, targetname)
+				local d = win:actor(nr, target, target.enemy, targetname)
 				d.value = P.absdamage and target.total or target.amount
 				format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 			end
@@ -1030,7 +1029,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	function spellmod:Update(win, set)
 		win.title = L["actor damage"](win.targetname or L["Unknown"])
 
-		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local actor = set and set:GetActor(win.targetid, win.targetname)
 		local total = actor and actor:GetDamage()
 		local spells = (total and total > 0) and actor.damagespells
 
@@ -1072,7 +1071,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, true)
+					local d = win:actor(nr, actor, actor.enemy)
 					d.value = amount
 					format_valuetext(d, mod_cols, total, dps, win.metadata)
 				end
@@ -1248,7 +1247,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 		if not heal.amount or heal.amount == 0 then return end
 
-		local e = Skada:GetEnemy(set, heal.actorname, heal.actorid, heal.actorflags)
+		local e = Skada:GetActor(set, heal.actorid, heal.actorname, heal.actorflags)
 		if not e then
 			return
 		elseif (set.type == "arena" or set.type == "pvp") then
@@ -1309,7 +1308,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
-			local d = win:actor(nr, target, true, targetname)
+			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.amount
 			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
@@ -1323,7 +1322,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	function spellmod:Update(win, set)
 		win.title = L["actor heal spells"](win.targetname or L["Unknown"])
 
-		local actor = set and set:GetEnemy(win.targetname, win.targetid)
+		local actor = set and set:GetActor(win.targetid, win.targetname)
 		local total = actor and actor.heal
 		local spells = (total and total > 0) and actor.healspells
 
@@ -1368,7 +1367,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, true)
+					local d = win:actor(nr, actor, actor.enemy)
 					d.value = amount
 					format_valuetext(d, mod_cols, total, hps, win.metadata)
 				end

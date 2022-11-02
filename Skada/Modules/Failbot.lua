@@ -26,7 +26,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	end
 
 	local function log_fail(set, actorid, actorname, spellid, failname)
-		local actor = Skada:GetPlayer(set, actorid, actorname)
+		local actor = Skada:GetActor(set, actorid, actorname, 0)
 		if not actor or (actor.role == "TANK" and tank_events[failname]) then return end
 
 		actor.fail = (actor.fail or 0) + 1
@@ -85,7 +85,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	function spellmod:Update(win, set)
 		win.title = uformat(L["%s's fails"], win.actorname)
 
-		local actor = set and set:GetPlayer(win.actorid, win.actorname)
+		local actor = set and set:GetActor(win.actorid, win.actorname)
 		local total = actor and actor.fail
 		local spells = (total and total > 0) and actor.failspells
 
@@ -123,7 +123,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 			if win:show_actor(actor, set, true) and actor.fail then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor, actor.name)
+				local d = win:actor(nr, actor, actor.enemy)
 				d.value = actor.fail
 				format_valuetext(d, mod_cols, total, win.metadata)
 			end

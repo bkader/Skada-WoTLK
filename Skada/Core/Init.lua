@@ -229,18 +229,27 @@ function Private.register_classes()
 	local classcolors, validclass = {}, {}
 	for class, info in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
 		classcolors[class] = {r = info.r, g = info.g, b = info.b, colorStr = info.colorStr}
-		classcolors[class].colorStr = info.colorStr or Private.RGBPercToHex(info.r, info.g, info.b, true)
 		L[class] = LOCALIZED_CLASS_NAMES_MALE[class]
 		validclass[class] = true
 	end
 	ns.validclass = validclass -- used to validate classes
 
 	-- custom class colors
-	classcolors.BOSS = {r = 0.203, g = 0.345, b = 0.525, colorStr = "ff345886"}
-	classcolors.ENEMY = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
-	classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404, colorStr = "ff8c6367"}
-	classcolors.PET = {r = 0.3, g = 0.4, b = 0.5, colorStr = "ff4c0566"}
-	classcolors.PLAYER = {r = 0.94117, g = 0, b = 0.0196, colorStr = "fff00005"}
+	classcolors.BOSS = {r = 0.203, g = 0.345, b = 0.525}
+	classcolors.ENEMY = {r = 0.94117, g = 0, b = 0.0196}
+	classcolors.MONSTER = {r = 0.549, g = 0.388, b = 0.404}
+	classcolors.NEUTRAL = {r = 1.0, g = 1.0, b = 0.1}
+	classcolors.PET = {r = 0.09, g = 0.61, b = 0.55}
+
+	-- generate colorStr
+	local RGBPercToHex = Private.RGBPercToHex
+	for class, info in pairs(classcolors) do
+		if not info.colorStr then
+			info.colorStr = RGBPercToHex(info.r, info.g, info.b, true)
+		end
+	end
+	-- alias to enemy for now...
+	classcolors.PLAYER = classcolors.ENEMY
 
 	local P = ns.db
 
@@ -268,7 +277,7 @@ function Private.register_classes()
 		__call = function(t, class)
 			local color = P.usecustomcolors and P.customcolors and P.customcolors[class] or t[class]
 			if not color.colorStr then
-				color.colorStr = Private.RGBPercToHex(color.r, color.g, color.b, true)
+				color.colorStr = RGBPercToHex(color.r, color.g, color.b, true)
 			end
 			return color
 		end
@@ -284,6 +293,13 @@ function Private.register_classes()
 	-- class icons and coordinates
 	local classcoords_mt = {
 		__index = function(t, class)
+			-- neutral: monster
+			if class == "NEUTRAL" then
+				local coords = t.MONSTER
+				rawset(t, class, coords)
+				return coords
+			end
+
 			local coords = {384/512, 448/512, 64/512, 128/512} -- unknown
 			rawset(t, class, coords)
 			return coords
@@ -385,7 +401,7 @@ function Private.register_classes()
 			P.customcolors[class].r = r
 			P.customcolors[class].g = g
 			P.customcolors[class].b = b
-			P.customcolors[class].colorStr = Private.RGBPercToHex(r, g, b, true)
+			P.customcolors[class].colorStr = RGBPercToHex(r, g, b, true)
 		end,
 		args = {
 			enable = {

@@ -238,9 +238,7 @@ local set = Skada:GetSet("current")
 -- called like so: set:Func(...)
 set:GetTime() -- returns the segment time
 
-set:GetActor(name, guid) -- attempts to retrieve a player or an enemy.
-set:GetPlayer(guid, name) -- attempts to retrieve a player.
-set:GetEnemy(name, guid) -- attempts to retrieve an enemy.
+set:GetActor(guid, name) -- attempts to retrieve a player or an enemy.
 set:GetActorTime(guid, name, active) -- returns the actor's time if found or 0.
 
 set:GetDamage(useful) -- returns the segment damage amount, exlucing overkill if "useful" is true
@@ -302,7 +300,7 @@ First, you would want to get the segment, then the actor. After, you will have a
 ```lua
 -- After retrieving and actor like so:
 local set = Skada:GetSet("current")
-local actor = set:GetActor(name, guid)
+local actor = set:GetActor(guid, name)
 
 -- here is the list of common functions.
 actor:GetTime(active) -- returns actor's active/effective time.
@@ -363,7 +361,7 @@ Now in order to use the function, you simply do like so:
 
 ```lua
 local set = Skada:GetSet("current")
-local player = set:GetPlayer(UnitGUID("player"), UnitName("player")) -- get my own table
+local player = set:GetActor(Skada.userGUID, Skada.userName) -- get my own table
 
 -- dummy aura: 12345
 local uptime = player:GetAuraUptime(12345)
@@ -378,7 +376,7 @@ Skada comes with a set of predefined enemies functions that you can use:
 
 ```lua
 local set = Skada:GetSet("current")
-local enemy = set:GetEnemy("The Lich King") -- example
+local enemy = set:GetActor("The Lich King") -- example
 
 -- requires: Enemy Damage Taken module
 enemy:GetDamageTakenBreakdown() -- returns damage, total and useful.
