@@ -1,4 +1,4 @@
-# Skada for WotLK `3.3.5` (_Revisited - v1.8.83_)
+# Skada for WotLK `3.3.5` (_Revisited - v1.8.84_)
 
 ![Discord](https://img.shields.io/discord/795698054371868743?label=discord)
 ![GitHub last commit](https://img.shields.io/github/last-commit/bkader/Skada-WoTLK)
