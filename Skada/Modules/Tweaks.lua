@@ -74,7 +74,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 		local ignored_spells = Skada.ignored_spells.firsthit -- Edit Skada\Core\Tables.lua
 		local function firsthit_check(args)
 			-- src or dst must be in a group
-			if not Skada:InGroup(args.srcFlags) and not Skada:InGroup(args.dstFlags) then
+			if not args:SourceInGroup() and not args:DestInGroup() then
 				return
 			end
 

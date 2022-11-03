@@ -110,8 +110,8 @@ do
 		local maxtime = set and set:GetTime()
 		curtime = curtime or set.last_action or time()
 
-		for i = 1, #actors do
-			clear_actor_table(actors[i], curtime, maxtime)
+		for _, actor in pairs(actors) do
+			clear_actor_table(actor, curtime, maxtime)
 		end
 	end
 end
@@ -288,14 +288,13 @@ do
 			end
 
 			local nr = 0
-			for i = 1, #actors do
-				local actor = actors[i]
+			for actorname, actor in pairs(actors) do
 				if should_show_actor(win, actor, set, is_enemy) then
 					local count, uptime = count_auras_by_type(actor.auras, auratype)
 					if count and count > 0 and uptime > 0 then
 						nr = nr + 1
 
-						local d = win:actor(nr, actor, actor.enemy)
+						local d = win:actor(nr, actor, actor.enemy, actorname)
 						local maxtime = floor(actor:GetTime(set))
 						d.value = min(floor(uptime / count), maxtime)
 						format_valuetext(d, cols, count, maxtime, win.metadata)
@@ -577,15 +576,14 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 			if not actors then return end
 
 			tbl = clear(tbl or C)
-			for i = 1, #actors do
-				local actor = actors[i]
-				local spell = actor and not actor.enemy and actor.auras and actor.auras[spellid]
+			for actorname, actor in pairs(actors) do
+				local spell = not actor.enemy and actor.auras and actor.auras[spellid]
 				if spell then
 					local t = new_actor_table(actor)
 					t.count = spell.count
 					t.maxtime = floor(actor:GetTime(self))
 					t.uptime = min(t.maxtime, spell.uptime)
-					tbl[actor.name] = t
+					tbl[actorname] = t
 				end
 			end
 			return tbl
@@ -782,14 +780,13 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			local auras = win:show_actor(actor, set, true) and not actor.enemy and actor.auras
 			local spell = auras and auras[win.spellid]
 			if spell then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor, actor.enemy)
+				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = spell.uptime
 				format_valuetext(d, mod_cols, spell.count, actor:GetTime(set), win.metadata, true, true)
 			end

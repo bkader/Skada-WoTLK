@@ -144,12 +144,11 @@ Skada:RegisterModule("Resources", function(L, P)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor[self.power] then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor, actor.enemy)
+				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor[self.power]
 				format_valuetext(d, mod_cols, total, win.metadata)
 			end

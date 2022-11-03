@@ -76,14 +76,13 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) then
 				local activetime = actor:GetTime(set, true)
 				if activetime > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = activetime
 					format_valuetext(d, mod_cols, settime, win.metadata)
 					win:color(d, set, actor.enemy)

@@ -10,7 +10,6 @@ local _
 local UnitClass, GetPlayerInfoByGUID = UnitClass, GetPlayerInfoByGUID
 local GetClassFromGUID = Skada.GetClassFromGUID
 local tablePool, new, del = Skada.tablePool, Private.newTable, Private.delTable
-local clear, copy = Private.clearTable, Private.tCopy
 local L, callbacks = Skada.Locale, Skada.callbacks
 local userName = Skada.userName
 
@@ -378,7 +377,7 @@ do
 	local setPrototype = Skada.setPrototype
 	local playerPrototype = Skada.playerPrototype
 
-	local fakeSet, updateTimer = {}, nil
+	local fakeSet, updateTimer = nil, nil
 
 	-- there was no discrimination with classes and specs
 	-- the only reason this group composition was made is
@@ -390,17 +389,17 @@ do
 			if not actorsTable then
 				actorsTable = {
 					-- Tanks & Healers
-					{"Deafknight", "DEATHKNIGHT", "TANK", 250}, -- Blood Death Knight
-					{"Bubbleboy", "PRIEST", "HEALER", 256}, -- Discipline Priest
-					{"Channingtotem", "SHAMAN", "HEALER", 264}, -- Restoration Shaman
+					Deafknight = {"DEATHKNIGHT", "TANK", 250}, -- Blood Death Knight
+					Bubbleboy = {"PRIEST", "HEALER", 256}, -- Discipline Priest
+					Channingtotem = {"SHAMAN", "HEALER", 264}, -- Restoration Shaman
 					-- Damagers
-					{"Shiftycent", "DRUID", "DAMAGER", 102}, -- Balance Druid
-					{"Beargrills", "HUNTER", "DAMAGER", 254}, -- Marksmanship Hunter
-					{"Foodanddps", "MAGE", "DAMAGER", 63}, -- Fire Mage
-					{"Retryhard", "PALADIN", "DAMAGER", 70}, -- Retribution Paladin
-					{"Stabass", "ROGUE", "DAMAGER", 260}, -- Combat Rogue
-					{"Summonbot", "WARLOCK", "DAMAGER", 266}, -- Demonology Warlock
-					{"Chuggernaut", "WARRIOR", "DAMAGER", 72} -- Fury Warrior
+					Shiftycent = {"DRUID", "DAMAGER", 102}, -- Balance Druid
+					Beargrills = {"HUNTER", "DAMAGER", 254}, -- Marksmanship Hunter
+					Foodanddps = {"MAGE", "DAMAGER", 63}, -- Fire Mage
+					Retryhard = {"PALADIN", "DAMAGER", 70}, -- Retribution Paladin
+					Stabass = {"ROGUE", "DAMAGER", 260}, -- Combat Rogue
+					Summonbot = {"WARLOCK", "DAMAGER", 266}, -- Demonology Warlock
+					Chuggernaut = {"WARRIOR", "DAMAGER", 72} -- Fury Warrior
 				}
 			end
 
@@ -409,17 +408,19 @@ do
 	end
 
 	local function generate_fake_data()
-		fakeSet.name = "Fake Fight"
-		fakeSet.starttime = time() - 120
-		fakeSet.damage = 0
-		fakeSet.heal = 0
-		fakeSet.absorb = 0
-		fakeSet.type = "raid"
-		fakeSet.actors = clear(fakeSet.actors) or new()
+		fakeSet = tablePool.acquireHash(
+			"name", "Fake Fight",
+			"starttime", time() - 120,
+			"damage", 0,
+			"heal", 0,
+			"absorb", 0,
+			"type", "raid",
+			"actors", new()
+		)
 
 		local actors = fake_actors()
-		for i = 1, #actors do
-			local name, class, role, spec = actors[i][1], actors[i][2], actors[i][3], actors[i][4]
+		for name, info in pairs(actors) do
+			local class, role, spec = info[1], info[2], info[3]
 			local damage, heal, absorb = 0, 0, 0
 
 			if role == "TANK" then
@@ -444,7 +445,7 @@ do
 				"id", name, "name", name, "class", class, "role", role, "spec", spec,
 				"damage", damage, "heal", heal, "absorb", absorb
 			)
-			fakeSet.actors[#fakeSet.actors + 1] = actor
+			fakeSet.actors[name] = playerPrototype:Bind(actor)
 
 			fakeSet.damage = fakeSet.damage + damage
 			fakeSet.heal = fakeSet.heal + heal
@@ -458,37 +459,34 @@ do
 		set.time = time() - set.starttime
 
 		local actors = set.actors
-		for i = 1, #actors do
-			local actor = playerPrototype:Bind(actors[i])
-			if actor then
-				local damage, heal, absorb = 0, 0, 0
+		for actorname, actor in pairs(actors) do
+			local damage, heal, absorb = 0, 0, 0
 
-				if actor.role == "HEALER" then
-					damage = coef * random(0, 1500)
-					if actor.spec == 256 then
-						heal = coef * random(500, 1500)
-						absorb = coef * random(2500, 20000)
-					else
-						heal = coef * random(2500, 15000)
-						absorb = coef * random(0, 150)
-					end
-				elseif actor.role == "TANK" then
-					damage = coef * random(1000, 10000)
+			if actor.role == "HEALER" then
+				damage = coef * random(0, 1500)
+				if actor.spec == 256 then
 					heal = coef * random(500, 1500)
-					absorb = coef * random(1000, 1500)
+					absorb = coef * random(2500, 20000)
 				else
-					damage = coef * random(8000, 18000)
-					heal = coef * random(150, 1500)
+					heal = coef * random(2500, 15000)
+					absorb = coef * random(0, 150)
 				end
-
-				actor.damage = (actor.damage or 0) + damage
-				actor.heal = (actor.heal or 0) + heal
-				actor.absorb = (actor.absorb or 0) + absorb
-
-				set.damage = set.damage + damage
-				set.heal = set.heal + heal
-				set.absorb = set.absorb + absorb
+			elseif actor.role == "TANK" then
+				damage = coef * random(1000, 10000)
+				heal = coef * random(500, 1500)
+				absorb = coef * random(1000, 1500)
+			else
+				damage = coef * random(8000, 18000)
+				heal = coef * random(150, 1500)
 			end
+
+			actor.damage = (actor.damage or 0) + damage
+			actor.heal = (actor.heal or 0) + heal
+			actor.absorb = (actor.absorb or 0) + absorb
+
+			set.damage = set.damage + damage
+			set.heal = set.heal + heal
+			set.absorb = set.absorb + absorb
 		end
 	end
 
@@ -499,7 +497,7 @@ do
 
 	function Skada:TestMode()
 		if InCombatLockdown() or IsGroupInCombat() then
-			clear(fakeSet)
+			fakeSet = del(fakeSet, true)
 			self.testMode = nil
 			if updateTimer then
 				self:CancelTimer(updateTimer)
@@ -509,7 +507,7 @@ do
 		end
 		self.testMode = not self.testMode
 		if not self.testMode then
-			clear(fakeSet)
+			fakeSet = del(fakeSet, true)
 			if updateTimer then
 				self:CancelTimer(updateTimer)
 				updateTimer = nil
@@ -528,6 +526,7 @@ end
 -- temporary flags check bypass
 
 do
+	local clear = Private.clearTable
 	local temp_units = nil
 
 	-- adds a temporary unit with optional info
@@ -846,7 +845,8 @@ end
 
 -- returns the actor's active/effective time
 function Skada:GetActiveTime(set, actor, active)
-	active = active or (set.type == "pvp") or (set.type == "arena") -- force active for pvp/arena
+	-- force active for pvp/arena
+	active = active or (set and (set.type == "pvp" or set.type == "arena"))
 
 	-- use settime to clamp
 	local settime = self:GetSetTime(set)
@@ -905,6 +905,7 @@ do
 end
 
 -- new window creation dialog
+local copy = Private.tCopy
 local dialog_name = nil
 function Skada:NewWindow(window)
 	dialog_name = dialog_name or format("%sCreateWindowDialog", folder)
@@ -1049,33 +1050,6 @@ function Skada:CheckMemory()
 	end
 end
 
-do
-	local function clear_indexes(set)
-		if not set then return end
-		set._actoridx = del(set._actoridx)
-	end
-
-	-- clearing indexes
-	function Skada:ClearAllIndexes()
-		clear_indexes(Skada.current)
-		clear_indexes(Skada.total)
-
-		local sets = Skada.sets
-		if sets then
-			for i = 1, #sets do
-				clear_indexes(sets[i])
-			end
-		end
-
-		sets = Skada.tempsets
-		if sets then
-			for i = 1, #sets do
-				clear_indexes(sets[i])
-			end
-		end
-	end
-end
-
 -- filters by class
 function Skada:FilterClass(win, id, label)
 	if win.class then
@@ -1113,54 +1087,37 @@ do
 		-- why? I don't know...
 		if actorid == "total" or actorname == L["Total"] then return end
 
-		if not set or not set.actors then -- no set/actors table?
-			return
-		elseif not set._actoridx then -- fast lookup table
-			set._actoridx = new()
-		end
+		-- no set/actors table?
+		if not set or not set.actors then return end
 
 		-- already cached?
-		local actor = set._actoridx[actorid]
+		local actor = set.actors[actorname]
 		if actor then
 			return (actor.enemy and enemyPrototype or playerPrototype):Bind(actor)
-		end
-
-		-- search the set
-		for _, act in pairs(set.actors) do
-			if act.id == actorid or act.name == actorname then
-				set._actoridx[actorid] = act
-				return (act.enemy and enemyPrototype or playerPrototype):Bind(act)
-			end
 		end
 
 		-- is_strict means we don't use our dummy_actor
 		if is_strict then return end
 
 		-- speed up things with pets
-		local ownerName = strmatch(actorname, "%<(%a+)%>")
-		if ownerName then
+		if strmatch(actorname, "%<(%a+)%>") then
 			dummy_actor.id = actorid
 			dummy_actor.name = actorname
 			dummy_actor.class = "PET"
-			dummy_actor.owner = ownerName
-			return playerPrototype:Bind(dummy_actor)
+			return actorPrototype:Bind(dummy_actor)
 		end
 
 		-- well.. our last hope!
 		dummy_actor.id = actorid
 		dummy_actor.name = actorname
 		dummy_actor.class = "UNKNOWN"
-		return playerPrototype:Bind(dummy_actor)
+		return actorPrototype:Bind(dummy_actor)
 	end
 
 	-- generic: finds a player/enemy or creates it.
 	function Skada:GetActor(set, actorid, actorname, actorflags)
 		-- no set/actors table, sorry!
 		if not set or not set.actors then return end
-
-		-- make sure we have all data
-		actorid = actorid or actorname
-		actorname = actorname or actorid
 
 		-- attempt to find the actor (true: no dummy_actor)
 		local actor = self:FindActor(set, actorid, actorname, true)
@@ -1169,6 +1126,9 @@ do
 		if not actor then
 			-- at least the name should be provided!
 			if not actorname then return end
+
+			-- make sure we have all data
+			actorid = actorid or actorname
 
 			-- create a new actor table...
 			actor = new()
@@ -1191,8 +1151,8 @@ do
 			-- a group member?
 			elseif players[actorid] then
 				_, actor.class = UnitClass(players[actorid])
-				actor.role = GetUnitRole(userGUID)
-				actor.spec = GetUnitSpec(userGUID)
+				actor.role = GetUnitRole(actorid)
+				actor.spec = GetUnitSpec(actorid)
 
 			-- a pet maybe?
 			elseif pets[actorid] then
@@ -1208,8 +1168,8 @@ do
 					actor.class = "PLAYER"
 				end
 
-			-- a npc maybe?
-			elseif self:IsNPC(actorflags) then
+			-- avoid "nil" stuff
+			elseif not self:IsNone(actorflags) then
 				actor.enemy = true
 				local unit = GetUnitIdFromGUID(actorid, "group")
 				local level = unit and UnitLevel(unit)
@@ -1226,6 +1186,7 @@ do
 			else
 				actor.enemy = true
 				actor.class = "UNKNOWN"
+				self:Debug(format("Unknown unit spotted: %s (%s)", actorname, actorid))
 			end
 
 			for _, mode in pairs(modes) do
@@ -1241,13 +1202,7 @@ do
 				end
 			end
 
-			set.actors[#set.actors + 1] = actor
-		end
-
-		-- just in case we have missing/wrong stuff
-		if (actor.name == L["Unknown"] and actorname ~= L["Unknown"]) or (actor.id == actor.name and actorname ~= actor.id) then
-			actor.name = (actor.id == userGUID or actorid == userGUID) and userName or actorname
-			actor.__mod = true
+			set.actors[actorname] = actor
 		end
 
 		-- add more details to the actor...
@@ -1450,8 +1405,91 @@ do
 		end
 	end
 
-	local BITMASK_GROUP = Private.BITMASK_GROUP
 	local ARGS = {} -- reusable args table
+	do
+		local HasFlag = Private.HasFlag
+		local ARGS_MT = {}
+
+		do -- source or destination in the group
+			local BITMASK_GROUP = Private.BITMASK_GROUP
+			local BITMASK_PETS = Private.BITMASK_PETS
+
+			function ARGS_MT.SourceInGroup(args, nopets)
+				if HasFlag(args.srcFlags, BITMASK_GROUP) then
+					if nopets then
+						return not HasFlag(args.srcFlags, BITMASK_PETS)
+					end
+					return true
+				end
+				return false
+			end
+			function ARGS_MT.DestInGroup(args, nopets)
+				if HasFlag(args.dstFlags, BITMASK_GROUP) then
+					if nopets then
+						return not HasFlag(args.dstFlags, BITMASK_PETS)
+					end
+					return true
+				end
+				return false
+			end
+
+			function ARGS_MT.SourceIsPet(args)
+				return HasFlag(args.srcFlags, BITMASK_PETS)
+			end
+
+			-- checks whether the give guid/flags are pets
+			local pets = Private.pets
+			local function check_pet_flags(ownerFlags, petGUID, petFlags)
+				if HasFlag(ownerFlags, BITMASK_GROUP) then
+					return true -- owner is a group member?
+				end
+				if HasFlag(ownerFlags, BITMASK_PETS) then
+					return true -- summoned by another pet?
+				end
+				if HasFlag(petFlags, BITMASK_PETS) and pets[petGUID] then
+					return true -- already known pet
+				end
+				return false
+			end
+			function ARGS_MT.DestIsPet(args, owner)
+				if owner then
+					return check_pet_flags(args.srcFlags, args.dstGUID, args.dstFlags)
+				end
+				return HasFlag(args.dstFlags, BITMASK_PETS)
+			end
+		end
+
+		do -- source or destination are players
+			local BITMASK_PLAYER = Private.BITMASK_PLAYER
+			function ARGS_MT.SourceIsPlayer(args)
+				return HasFlag(args.srcFlags, BITMASK_PLAYER)
+			end
+			function ARGS_MT.DestIsPlayer(args)
+				return HasFlag(args.dstFlags, BITMASK_PLAYER)
+			end
+		end
+
+		do -- source and destination reactions
+			local BITMASK_FRIENDLY = Private.BITMASK_FRIENDLY
+			function ARGS_MT.SourceIsFriendly(args)
+				return HasFlag(args.srcFlags, BITMASK_FRIENDLY)
+			end
+			function ARGS_MT.DestIsFriendly(args)
+				return HasFlag(args.dstFlags, BITMASK_FRIENDLY)
+			end
+
+			local BITMASK_NEUTRAL = Private.BITMASK_NEUTRAL
+			function ARGS_MT.SourceIsNeutral(args)
+				return HasFlag(args.srcFlags, BITMASK_NEUTRAL)
+			end
+			function ARGS_MT.DestIsNeutral(args)
+				return HasFlag(args.dstFlags, BITMASK_NEUTRAL)
+			end
+		end
+
+		ARGS_MT = {__index = ARGS_MT}
+		setmetatable(ARGS, ARGS_MT)
+	end
 
 	-- combat log handler
 	function Skada:ParseCombatLog(_, timestamp, event, ...)
@@ -1500,14 +1538,14 @@ do
 
 		if args.spellid and args.spellschool and not args.spellstring then
 			args.spellstring = format((args.is_dot or args.is_hot) and "-%s.%s" or "%s.%s", args.spellid, args.spellschool)
-			if self:InGroup(args.srcFlags) or self:InGroup(args.dstFlags) then
+			if args:SourceInGroup() or args:DestInGroup() then
 				callbacks:Fire("Skada_SpellString", args, args.spellid, args.spellstring)
 			end
 		end
 
 		if args.extraspellid and args.extraschool and not args.extrastring then
 			args.extrastring = format("%s.%s", args.extraspellid, args.extraschool)
-			if self:InGroup(args.srcFlags) or self:InGroup(args.dstFlags) then
+			if args:SourceInGroup() or args:DestInGroup() then
 				callbacks:Fire("Skada_SpellString", args, args.extraspellid, args.extrastring)
 			end
 		end

@@ -176,12 +176,11 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.friendfire then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor, actor.enemy)
+				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.friendfire
 				format_valuetext(d, mod_cols, total, mod_cols.DPS and (d.value / actor:GetTime(set)), win.metadata)
 			end
@@ -253,10 +252,9 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 	function mod:SetComplete(set)
 		if not set.friendfire or set.friendfire == 0 then return end
-		for i = 1, #set.actors do
-			local actor = set.actors[i]
-			local amount = actor and not actor.enemy and actor.friendfire
-			if (actor and not amount and actor.friendfirespells) or amount == 0 then
+		for _, actor in pairs(set.actors) do
+			local amount = not actor.enemy and actor.friendfire
+			if (not amount and actor.friendfirespells) or amount == 0 then
 				actor.friendfire = nil
 				actor.friendfirespells = del(actor.friendfirespells, true)
 			end

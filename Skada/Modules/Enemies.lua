@@ -575,14 +575,13 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.enemy then
+		for actorname, actor in pairs(actors) do
+			if actor.enemy then
 				local dtps, amount = actor:GetDTPS(set, nil, not mod_cols.sDTPS)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = amount
 					format_valuetext(d, mod_cols, total, dtps, win.metadata)
 				end
@@ -1064,14 +1063,13 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		local nr = 0
 		local actors = set.actors -- enemies
 
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.enemy and not actor.fake then
+		for actorname, actor in pairs(actors) do
+			if actor.enemy and not actor.fake then
 				local dps, amount = actor:GetDPS(set)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = amount
 					format_valuetext(d, mod_cols, total, dps, win.metadata)
 				end
@@ -1360,14 +1358,13 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		local nr = 0
 		local actors = set.actors -- enemies
 
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.enemy and not actor.fake then
+		for actorname, actor in pairs(actors) do
+			if actor.enemy and not actor.fake then
 				local hps, amount = actor:GetHPS(set)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = amount
 					format_valuetext(d, mod_cols, total, hps, win.metadata)
 				end

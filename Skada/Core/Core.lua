@@ -1,8 +1,5 @@
 local folder, ns = ...
-local Private = ns.Private
-
 local Skada = LibStub("AceAddon-3.0"):NewAddon(ns, folder, "AceEvent-3.0", "AceTimer-3.0", "AceBucket-3.0", "AceHook-3.0", "AceConsole-3.0", "AceComm-3.0", "LibCompat-1.0-Skada")
-Skada.callbacks = Skada.callbacks or LibStub("CallbackHandler-1.0"):New(Skada)
 _G[folder] = ns
 
 local ACD = LibStub("AceConfigDialog-3.0")
@@ -10,6 +7,7 @@ local ACR = LibStub("AceConfigRegistry-3.0")
 local DBI = LibStub("LibDBIcon-1.0", true)
 
 -- cache frequently used globals
+local Private = ns.Private
 local _G, GetAddOnMetadata = _G, GetAddOnMetadata
 local new, del, clear, copy = Private.newTable, Private.delTable, Private.clearTable, Private.tCopy
 local tsort, tinsert, tremove, wipe = table.sort, table.insert, Private.tremove, wipe
@@ -110,11 +108,10 @@ local function verify_set(mode, set)
 	if mode.AddPlayerAttributes or mode.AddEnemyAttributes then
 		local actors = set.actors
 		if not actors then return end
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.enemy and mode.AddEnemyAttributes then
+		for _, actor in pairs(actors) do
+			if actor.enemy and mode.AddEnemyAttributes then
 				mode:AddEnemyAttributes(actor, set)
-			elseif actor and not actor.enemy and mode.mode.AddPlayerAttributes then
+			elseif not actor.enemy and mode.mode.AddPlayerAttributes then
 				mode:AddPlayerAttributes(actor, set)
 			end
 		end
@@ -178,7 +175,10 @@ end
 
 -- process the given set and stores into sv.
 local function process_set(set, curtime, mobname)
-	if not set then return end
+	if not set then
+		set = del(set, true) -- just in case
+		return
+	end
 
 	curtime = curtime or time()
 
@@ -210,11 +210,13 @@ local function process_set(set, curtime, mobname)
 
 			tinsert(Skada.sets, 1, set)
 			Skada:Debug("Segment Saved:", set.name)
+		else
+			set = del(set, true)
 		end
 	end
 
 	-- the segment didn't have the chance to get saved
-	if set.endtime == nil then
+	if set and set.endtime == nil then
 		set.endtime = curtime
 		set.time = max(1, set.endtime - set.starttime)
 	end
@@ -1465,13 +1467,10 @@ do
 			-- we only need to scan the 2nd line.
 			local text = _G["SkadaPetTooltipTextLeft2"] and _G["SkadaPetTooltipTextLeft2"]:GetText()
 			if text and text ~= "" then
-				for i = 1, #actors do
-					local actor = actors[i]
-					if actor and not actor.enemy then
-						local actorname = actor and gsub(actor.name, "%-.*", "")
-						if actorname and ((LOCALE_ruRU and find_name_declension(text, actorname)) or validate_pet_owner(text, actorname)) then
-							return actor.id, actor.name
-						end
+				for actorname, actor in pairs(actors) do
+					local name = not actor.enemy and gsub(actorname, "%-.*", "")
+					if name and ((LOCALE_ruRU and find_name_declension(text, name)) or validate_pet_owner(text, name)) then
+						return actor.id, actor.name
 					end
 				end
 			end
@@ -1538,8 +1537,6 @@ do
 					action.spellname = format("%s (%s)", action.spellname, action.petname)
 				end
 			else
-				-- just append the creature id to the player
-				action.actorid = format("%s%s", owner.id, GetCreatureId(action.actorid))
 				action.actorname = format("%s <%s>", action.actorname, owner.name)
 			end
 		else
@@ -1818,19 +1815,9 @@ local function generate_total()
 		local set_actors = set.actors
 		local total_actors = total.actors
 
-		for j = 1, #set_actors do
-			local p = set_actors[j]
-			if p and not p.enemy then
-				local index = nil
-				for k = 1, #total_actors do
-					local a = total_actors[k]
-					if a and a.id == p.id then
-						index = k
-						break
-					end
-				end
-
-				local actor = index and total_actors[index] or new()
+		for name, p in pairs(set_actors) do
+			if not p.enemy then
+				local actor = total_actors[name] or new()
 
 				for k, v in pairs(p) do
 					if (type(v) == "string" or k == "spec" or k == "flag") then
@@ -1840,9 +1827,7 @@ local function generate_total()
 					end
 				end
 
-				if not index then
-					total_actors[#total_actors + 1] = actor
-				end
+				total_actors[name] = actor
 			end
 		end
 	end
@@ -2130,6 +2115,8 @@ function Skada:PLAYER_ENTERING_WORLD()
 	if self.sets.sets then
 		self:Reset(true)
 	end
+
+	self:ApplySettings()
 end
 
 local last_check_group
@@ -2664,7 +2651,6 @@ function Private.reload_settings()
 		DBI:Register(folder, dataobj, P.icon)
 	end
 
-	Skada:ClearAllIndexes()
 	Private.refresh_button()
 	Skada.total = Skada.sets[0]
 	Skada:ApplySettings()
@@ -2708,7 +2694,6 @@ function Skada:OnInitialize()
 	self.data.RegisterCallback(self, "OnProfileChanged", Private.reload_settings)
 	self.data.RegisterCallback(self, "OnProfileCopied", Private.reload_settings)
 	self.data.RegisterCallback(self, "OnProfileReset", Private.reload_settings)
-	self.data.RegisterCallback(self, "OnDatabaseShutdown", "ClearAllIndexes")
 
 	Private.init_options()
 	Private.register_medias()
@@ -2766,9 +2751,6 @@ function Skada:OnEnable()
 
 	self:SetupStorage()
 	Private.reload_settings()
-
-	-- SharedMedia is sometimes late, we wait few seconds then re-apply settings.
-	self:ScheduleTimer("ApplySettings", 2)
 	self:ScheduleTimer("CheckMemory", 3)
 	self:ScheduleTimer("CleanGarbage", 4)
 end
@@ -2860,19 +2842,18 @@ function Skada:NewSegment()
 end
 
 function Skada:NewPhase()
-	if self.current and (time() - self.current.starttime) >= (P.minsetlength or 5) then
-		self.tempsets = self.tempsets or new()
+	if not self.current then return end
+	self.tempsets = self.tempsets or new()
 
-		local set = create_set(L["Current"])
-		set.mobname = self.current.mobname
-		set.gotboss = self.current.gotboss
-		set.started = self.current.started
-		set.phase = 2 + #self.tempsets
+	local set = create_set(L["Current"])
+	set.mobname = self.current.mobname
+	set.gotboss = self.current.gotboss
+	set.started = self.current.started
+	set.phase = 2 + #self.tempsets
 
-		self.tempsets[#self.tempsets + 1] = set
+	self.tempsets[#self.tempsets + 1] = set
 
-		self:Printf(L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r started."], set.mobname or L["Unknown"], set.phase)
-	end
+	self:Printf(L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r started."], set.mobname or L["Unknown"], set.phase)
 end
 
 function combat_end()
@@ -2891,10 +2872,12 @@ function combat_end()
 
 	-- process phase segments
 	if Skada.tempsets then
+		local setname = Skada.current.name
 		for i = 1, #Skada.tempsets do
-			process_set(Skada.tempsets[i], curtime, Skada.current.name)
+			local set = Skada.tempsets[i]
+			process_set(set, curtime, setname)
 		end
-		clear(Skada.tempsets)
+		Skada.tempsets = del(Skada.tempsets)
 	end
 
 	-- clear total semgnt
@@ -2910,9 +2893,8 @@ function combat_end()
 	-- remove players ".last" key from total segment.
 	local actors = Skada.total and Skada.total.actors
 	if actors then
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.last then
+		for _, actor in pairs(actors) do
+			if actor.last then
 				actor.last = nil
 			end
 		end
@@ -3189,7 +3171,7 @@ do
 	end
 
 	local BITMASK_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
-	local bit_band = bit.band
+	local HasFlag = Private.HasFlag
 	local function check_boss_fight(set, t, src_is_interesting, dst_is_interesting)
 		-- set mobname
 		if not set.mobname then
@@ -3201,15 +3183,15 @@ do
 				if set.type == "arena" then
 					Skada:SendMessage("COMBAT_ARENA_START", set, set.mobname)
 				end
-			elseif src_is_interesting and not Skada:IsFriendly(t.dstFlags) then
+			elseif src_is_interesting and not t:DestIsFriendly() then
 				set.mobname = t.dstName
-				if bit_band(t.dstFlags, BITMASK_CONTROL_PLAYER) ~= 0 then
+				if HasFlag(t.dstFlags, BITMASK_CONTROL_PLAYER) then
 					set.type = "pvp"
 					set.gotboss = false
 				end
-			elseif dst_is_interesting and not Skada:IsFriendly(t.srcFlags) then
+			elseif dst_is_interesting and not t:SourceIsFriendly() then
 				set.mobname = t.srcName
-				if bit_band(t.srcFlags, BITMASK_CONTROL_PLAYER) ~= 0 then
+				if HasFlag(t.srcFlags, BITMASK_CONTROL_PLAYER) then
 					set.type = "pvp"
 					set.gotboss = false
 				end
@@ -3231,7 +3213,7 @@ do
 		end
 
 		-- marking set as boss fights relies only on src_is_interesting
-		if not spellcast_events[t.event] and src_is_interesting and not Skada:IsFriendly(t.dstFlags) then
+		if trigger_events[t.event] and src_is_interesting and not t:DestIsFriendly() then
 			if set.gotboss == nil then
 				if not _targets or not _targets[t.dstName] then
 					local isboss, bossid, bossname = Skada:IsEncounter(t.dstGUID, t.dstName)
@@ -3253,18 +3235,15 @@ do
 		end
 	end
 
-	local check_flags_interest = Private.check_flags_interest
-	local check_pet_flags = Private.check_pet_flags
-
-	local function check_autostop(set, event, guid, flags)
-		if event == "UNIT_DIED" and check_flags_interest(guid, flags, true) then
+	local function check_autostop(set, event, src_is_interesting_nopets)
+		if event == "UNIT_DIED" and src_is_interesting_nopets then
 			death_counter = death_counter + 1
 			-- If we reached the treshold for stopping the segment, do so.
 			if death_counter >= starting_members * 0.5 and not set.stopped then
 				Skada:SendMessage("COMBAT_PLAYER_WIPE", set)
 				Skada:StopSegment(L["Stopping for wipe."])
 			end
-		elseif event == "SPELL_RESURRECT" and check_flags_interest(guid, flags, true) then
+		elseif event == "SPELL_RESURRECT" and src_is_interesting_nopets then
 			death_counter = death_counter - 1
 		end
 	end
@@ -3284,10 +3263,10 @@ do
 		local dst_is_interesting = nil
 
 		if not self.current and P.tentativecombatstart and trigger_events[t.event] and t.srcName and t.dstName and t.srcGUID ~= t.dstGUID then
-			src_is_interesting = check_flags_interest(t.srcGUID, t.srcFlags)
+			src_is_interesting = t:SourceInGroup()
 
 			if t.event ~= "SPELL_PERIODIC_DAMAGE" then
-				dst_is_interesting = check_flags_interest(t.dstGUID, t.dstFlags)
+				dst_is_interesting = t:DestInGroup()
 			end
 
 			if src_is_interesting or dst_is_interesting then
@@ -3304,8 +3283,11 @@ do
 		end
 
 		-- pet summons.
-		if t.event == "SPELL_SUMMON" and check_pet_flags(t.dstGUID, t.dstFlags, t.srcFlags) then
+		if t.event == "SPELL_SUMMON" and t:DestIsPet(true) then
 			summon_pet(t.dstGUID, t.srcGUID, t.srcName)
+		-- pet died?
+		elseif death_events[t.event] and pets[t.srcGUID] then
+			dismiss_pet(t.srcGUID)
 		end
 
 		-- current segment not created?
@@ -3324,7 +3306,7 @@ do
 
 		-- autostop on wipe enabled?
 		if P.autostop and (t.event == "UNIT_DIED" or t.event == "SPELL_RESURRECT") then
-			check_autostop(self.current, t.event, t.srcGUID, t.srcFlags)
+			check_autostop(self.current, t.event, t:SourceInGroup(true))
 		end
 
 		-- stopped or invalid events?
@@ -3352,7 +3334,7 @@ do
 			local fail = false
 
 			if flags.src_is_interesting_nopets then
-				local src_is_interesting_nopets = check_flags_interest(t.srcGUID, t.srcFlags, true)
+				local src_is_interesting_nopets = t:SourceInGroup(true)
 
 				if src_is_interesting_nopets then
 					src_is_interesting = true
@@ -3362,7 +3344,7 @@ do
 			end
 
 			if not fail and flags.dst_is_interesting_nopets then
-				local dst_is_interesting_nopets = check_flags_interest(t.dstGUID, t.dstFlags, true)
+				local dst_is_interesting_nopets = t:DestInGroup(true)
 				if dst_is_interesting_nopets then
 					dst_is_interesting = true
 				else
@@ -3372,7 +3354,7 @@ do
 
 			if not fail and flags.src_is_interesting or flags.src_is_not_interesting then
 				if not src_is_interesting then
-					src_is_interesting = check_flags_interest(t.srcGUID, t.srcFlags) or Private.get_temp_unit(t.srcGUID)
+					src_is_interesting = t:SourceInGroup() or Private.get_temp_unit(t.srcGUID)
 				end
 
 				if (flags.src_is_interesting and not src_is_interesting) or (flags.src_is_not_interesting and src_is_interesting) then
@@ -3382,7 +3364,7 @@ do
 
 			if not fail and flags.dst_is_interesting or flags.dst_is_not_interesting then
 				if not dst_is_interesting then
-					dst_is_interesting = check_flags_interest(t.dstGUID, t.dstFlags)
+					dst_is_interesting = t:DestInGroup()
 				end
 
 				if (flags.dst_is_interesting and not dst_is_interesting) or (flags.dst_is_not_interesting and dst_is_interesting) then

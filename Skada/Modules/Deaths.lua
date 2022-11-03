@@ -636,11 +636,10 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		local curtime = set.last_time or GetTime()
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.deathlog and (actor.death or WATCH) then
 				nr = nr + 1
-				local d = win:actor(nr, actor, actor.enemy)
+				local d = win:actor(nr, actor, actor.enemy, actorname)
 
 				if actor.death then
 					d.value = actor.death
@@ -672,17 +671,16 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		local nr = 0
 		local curtime = set.last_time or GetTime()
-
 		local actors = set.actors
-		for i = 1, #actors do
-			local actor = actors[i]
+
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.deathlog and (actor.death or WATCH) then
 				local num = #actor.deathlog
 				for j = 1, num do
 					local death = actor.deathlog[j]
 					if death and (death.timeod or WATCH) then
 						nr = nr + 1
-						local d = win:actor(nr, actor, actor.enemy)
+						local d = win:actor(nr, actor, actor.enemy, actorname)
 						d.id = format("%s::%d", actor.id, j)
 
 						if death.timeod then
@@ -903,11 +901,10 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 	function mod:SetComplete(set)
 		-- clean deathlogs.
-		for i = 1, #set.actors do
-			local actor = set.actors[i]
-			if actor and not actor.enemy and (not set.death or not actor.death) then
+		for _, actor in pairs(set.actors) do
+			if not actor.enemy and (not set.death or not actor.death) then
 				actor.death, actor.deathlog = nil, del(actor.deathlog, true)
-			elseif actor and not actor.enemy and actor.deathlog then
+			elseif not actor.enemy and actor.deathlog then
 				while #actor.deathlog > (actor.death or 0) do
 					del(tremove(actor.deathlog, 1), true)
 				end

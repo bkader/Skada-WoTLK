@@ -250,9 +250,8 @@ Skada:RegisterModule("Improvement", function(L)
 		if not encounter then return end
 
 		local actors = set.actors
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.id == userGUID then
+		for _, actor in pairs(actors) do
+			if actor.id == userGUID then
 				for j = 1, #modes do
 					local mode = modes[j]
 					if mode and updaters[mode] then

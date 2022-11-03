@@ -490,14 +490,13 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.damaged then
 				local dtps, amount = actor:GetDTPS(set, not mod_cols.DTPS)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = amount
 					format_valuetext(d, mod_cols, total, dtps, win.metadata)
 					win:color(d, set, actor.enemy)
@@ -584,10 +583,9 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		local total = set.totaldamaged or set.damaged
 		if not total or total == 0 then return end
 
-		for i = 1, #set.actors do
-			local actor = set.actors[i]
-			local amount = actor and (actor.totaldamaged or actor.damaged)
-			if (actor and not amount and actor.damagedspells) or amount == 0 then
+		for _, actor in pairs(set.actors) do
+			local amount = actor.totaldamaged or actor.damaged
+			if (not amount and actor.damagedspells) or amount == 0 then
 				actor.damaged, actor.totaldamaged = nil, nil
 				actor.damagedspells = del(actor.damagedspells, true)
 			end
@@ -634,14 +632,13 @@ Skada:RegisterModule("DTPS", function(L, P)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.damaged then
 				local dtps = actor:GetDTPS(set)
 				if dtps > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = dtps
 					format_valuetext(d, mod_cols, total, dtps, win.metadata)
 					win:color(d, set, actor.enemy)
@@ -737,9 +734,8 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		local total = 0
 		local sources = clear(C)
 		local actors = set.actors
-		for i = 1, #actors do
-			local actor = actors[i]
-			local spell = actor and not actor.enemy and actor.damagedspells and actor.damagedspells[win.spellid]
+		for _, actor in pairs(actors) do
+			local spell = not actor.enemy and actor.damagedspells and actor.damagedspells[win.spellid]
 
 			if spell and spell.sources then
 				for sourcename, source in pairs(spell.sources) do
@@ -791,20 +787,19 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		local targets = clear(C)
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
-			local spell = actor and not actor.enemy and actor.damagedspells and actor.damagedspells[win.spellid]
+		for actorname, actor in pairs(actors) do
+			local spell = not actor.enemy and actor.damagedspells and actor.damagedspells[win.spellid]
 			if spell then
 				local amount = P.absdamage and spell.total or spell.amount or 0
 				if amount > 0 then
-					targets[actor.name] = new()
-					targets[actor.name].id = actor.id
-					targets[actor.name].class = actor.class
-					targets[actor.name].role = actor.role
-					targets[actor.name].spec = actor.spec
-					targets[actor.name].enemy = actor.enemy
-					targets[actor.name].amount = amount
-					targets[actor.name].time = mod_cols.sDTPS and actor:GetTime(set)
+					targets[actorname] = new()
+					targets[actorname].id = actor.id
+					targets[actorname].class = actor.class
+					targets[actorname].role = actor.role
+					targets[actorname].spec = actor.spec
+					targets[actorname].enemy = actor.enemy
+					targets[actorname].amount = amount
+					targets[actorname].time = mod_cols.sDTPS and actor:GetTime(set)
 
 					total = total + amount
 				end
@@ -839,9 +834,8 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 
 		local spells = clear(C)
 		local actors = set.actors
-		for i = 1, #actors do
-			local actor = actors[i]
-			local _spells = actor and not actor.enemy and actor.damagedspells
+		for _, actor in pairs(actors) do
+			local _spells = not actor.enemy and actor.damagedspells
 			if _spells then
 				for spellid, spell in pairs(_spells) do
 					local amount = P.absdamage and spell.total or spell.amount or 0
@@ -956,8 +950,7 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 		local nr = 0
 
 		local actors = set.actors
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.damagedspells then
 				local tmp = new()
 				tmp.name = actor.name
@@ -982,7 +975,7 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 					C[actor.id] = tmp
 
 					nr = nr + 1
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 
 					d.value = 100 * avoid / count
 					fmt_valuetext(d, mod_cols, count, avoid, win.metadata)

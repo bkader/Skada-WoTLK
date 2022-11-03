@@ -200,12 +200,11 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if actor and actor.sunder then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor, actor.enemy)
+				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.sunder
 				format_valuetext(d, mod_cols, total, win.metadata)
 			end
@@ -359,9 +358,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 
 		local total = 0
 		local actors = self.actors
-		for i = 1, #actors do
-			local actor = actors[i]
-			local count = actor and actor.sundertargets and actor.sundertargets[name]
+		for actorname, actor in pairs(actors) do
+			local count = actor.sundertargets and actor.sundertargets[name]
 			if count then
 				local t = new()
 				t.id = actor.id
@@ -370,7 +368,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 				t.spec = actor.spec
 				t.enemy = actor.enemy
 				t.count = count
-				tbl[actor.name] = t
+				tbl[actorname] = t
 				-- add to total
 				total = total + count
 			end

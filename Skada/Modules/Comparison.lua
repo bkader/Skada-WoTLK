@@ -727,13 +727,12 @@ Skada:RegisterModule("Comparison", function(L, P)
 		local nr = 0
 		local oamount = set:GetActorDamage(otherGUID, otherName)
 
-		for i = 1, #set.actors do
-			local actor = set.actors[i]
+		for actorname, actor in pairs(set.actors) do
 			if can_compare(actor) then
 				local dps, amount = actor:GetDPS(set)
 				if amount > 0 then
 					nr = nr + 1
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 
 					d.value = amount
 					d.valuetext = Skada:FormatValueCols(

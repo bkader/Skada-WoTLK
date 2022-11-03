@@ -37,9 +37,8 @@ do
 			total = nil
 
 			local actors = set.actors
-			for i = 1, #actors do
-				local actor = actors[i]
-				local value = actor and actor.class == class and (not actor.enemy or arena) and actor[key]
+			for _, actor in pairs(actors) do
+				local value = actor.class == class and (not actor.enemy or arena) and actor[key]
 				if value then total = (total or 0) + value end
 			end
 			return total

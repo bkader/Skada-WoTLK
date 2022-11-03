@@ -353,14 +353,13 @@ Skada:RegisterModule("Healing", function(L, P)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.heal then
 				local hps, amount = actor:GetHPS(set, nil, not mod_cols.sHPS)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = amount
 					format_valuetext(d, mod_cols, total, hps, win.metadata)
 					win:color(d, set, actor.enemy)
@@ -439,10 +438,9 @@ Skada:RegisterModule("Healing", function(L, P)
 		if total == 0 then return end
 
 		-- clean healspells table!
-		for i = 1, #set.actors do
-			local actor = set.actors[i]
-			local amount = actor and not actor.enemy and ((actor.heal or 0) + (actor.overheal or 0))
-			if (actor and not amount and actor.healspells) or amount == 0 then
+		for _, actor in pairs(set.actors) do
+			local amount = (actor.heal or 0) + (actor.overheal or 0)
+			if (not amount and actor.healspells) or amount == 0 then
 				actor.heal, actor.overheal = nil, nil
 				actor.healspells = del(actor.healspells, true)
 			end
@@ -584,14 +582,13 @@ Skada:RegisterModule("Overhealing", function(L)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.overheal then
 				local ohps, overheal = actor:GetOHPS(set, nil, not mod_cols.HPS)
 				if overheal > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = actor.overheal
 					fmt_valuetext(d, mod_cols, actor.heal + d.value, ohps, win.metadata)
 				end
@@ -815,14 +812,13 @@ Skada:RegisterModule("Total Healing", function(L)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and (actor.heal or actor.overheal) then
 				local hps, amount = actor:GetTHPS(set, nil, not mod_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = amount
 					format_valuetext(d, mod_cols, total, hps, win.metadata)
 					win:color(d, set, actor.enemy)
@@ -1090,10 +1086,8 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 		tbl = clear(tbl or C)
 
 		local actors = self.actors
-		for i = 1, #actors do
-			local actor = actors[i]
-
-			local spells = actor and (not actor.enemy or self.arena) and actor.absorbspells -- absorb spells
+		for _, actor in pairs(actors) do
+			local spells = (not actor.enemy or self.arena) and actor.absorbspells -- absorb spells
 			if spells then
 				for _, spell in pairs(spells) do
 					if spell.targets then
@@ -1115,7 +1109,7 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 				end
 			end
 
-			spells = actor and (not actor.enemy or self.arena) and actor.healspells -- heal spells
+			spells = (not actor.enemy or self.arena) and actor.healspells -- heal spells
 			if spells then
 				for _, spell in pairs(spells) do
 					if spell.targets then
@@ -1148,10 +1142,8 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 		local total = 0
 
 		local actors = set.actors
-		for i = 1, #actors do
-			local actor = actors[i]
-
-			local spells = actor and (not actor.enemy or set.arena) and actor.absorbspells -- absorb spells
+		for _, actor in pairs(actors) do
+			local spells = (not actor.enemy or set.arena) and actor.absorbspells -- absorb spells
 			if spells then
 				for spellid, spell in pairs(spells) do
 					local amount = spell.targets and spell.targets[self.name]
@@ -1175,7 +1167,7 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 				end
 			end
 
-			spells = actor and (not actor.enemy or set.arena) and actor.healspells -- heal spells
+			spells = (not actor.enemy or set.arena) and actor.healspells -- heal spells
 			if spells then
 				for spellid, spell in pairs(spells) do
 					local amount = spell.targets and spell.targets[self.name] and spell.targets[self.name].amount
@@ -1210,10 +1202,8 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 		local total = 0
 
 		local actors = set.actors
-		for i = 1, #actors do
-			local actor = actors[i]
-
-			local spells = actor and (not actor.enemy or set.arena) and actor.absorbspells -- absorb spells
+		for _, actor in pairs(actors) do
+			local spells = (not actor.enemy or set.arena) and actor.absorbspells -- absorb spells
 			if spells then
 				for spellid, spell in pairs(spells) do
 					local amount = spell.targets and spell.targets[self.name]
@@ -1232,7 +1222,7 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 				end
 			end
 
-			spells = actor and (not actor.enemy or set.arena) and actor.healspells -- heal spells
+			spells = (not actor.enemy or set.arena) and actor.healspells -- heal spells
 			if spells then
 				for spellid, spell in pairs(spells) do
 					local amount = spell.targets and spell.targets[self.name] and spell.targets[self.name].amount
@@ -1262,10 +1252,8 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 		local total = 0
 
 		local actors = set.actors
-		for i = 1, #actors do
-			local actor = actors[i]
-
-			local spells = actor and (not actor.enemy or set.arena) and actor.absorbspells -- absorb spells
+		for _, actor in pairs(actors) do
+			local spells = (not actor.enemy or set.arena) and actor.absorbspells -- absorb spells
 			if spells then
 				for id, spell in pairs(spells) do
 					local amount = (id == spellid) and spell.targets and spell.targets[self.name]
@@ -1289,7 +1277,7 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 				end
 			end
 
-			spells = actor and (not actor.enemy or set.arena) and actor.healspells -- heal spells
+			spells = (not actor.enemy or set.arena) and actor.healspells -- heal spells
 			if spells then
 				for id, spell in pairs(spells) do
 					local amount = (id == spellid) and spell.targets and spell.targets[self.name] and spell.targets[self.name].amount

@@ -8,6 +8,7 @@ ns.logo = [[Interface\ICONS\spell_lightning_lightningbolt01]]
 ns.revisited = true -- Skada-Revisited flag
 ns.Private = {} -- holds private stuff
 ns.Locale = LibStub("AceLocale-3.0"):GetLocale(folder)
+ns.callbacks = LibStub("CallbackHandler-1.0"):New(ns)
 
 -- cache frequently used globals
 local pairs, ipairs = pairs, ipairs
@@ -44,8 +45,17 @@ ns.cacheTable2 = {} -- secondary cache table
 -------------------------------------------------------------------------------
 -- flags/bitmasks
 
+local HasFlag
 do
-	local bit_bor = bit.bor
+	local bit_bor, bit_band = bit.bor, bit.band
+
+	------------------------------------------------------
+	-- generic flag check function
+	------------------------------------------------------
+	function HasFlag(flags, flag)
+		return (bit_band(flags or 0, flag) ~= 0)
+	end
+	Private.HasFlag = HasFlag
 
 	------------------------------------------------------
 	-- self-affilation
@@ -54,7 +64,7 @@ do
 	Private.BITMASK_MINE = BITMASK_MINE
 
 	function ns:IsMine(flags)
-		return (band(flags, BITMASK_MINE) ~= 0)
+		return HasFlag(flags, BITMASK_MINE)
 	end
 
 	------------------------------------------------------
@@ -66,7 +76,7 @@ do
 	Private.BITMASK_GROUP = BITMASK_GROUP
 
 	function ns:InGroup(flags)
-		return (band(flags, BITMASK_GROUP) ~= 0)
+		return HasFlag(flags, BITMASK_GROUP)
 	end
 
 	------------------------------------------------------
@@ -78,7 +88,7 @@ do
 	Private.BITMASK_PETS = BITMASK_PETS
 
 	function ns:IsPet(flags)
-		return (band(flags, BITMASK_PETS) ~= 0)
+		return HasFlag(flags, BITMASK_PETS)
 	end
 
 	------------------------------------------------------
@@ -92,31 +102,37 @@ do
 	Private.BITMASK_HOSTILE = BITMASK_HOSTILE
 
 	function ns:IsFriendly(flags)
-		return (band(flags, BITMASK_FRIENDLY) ~= 0)
+		return HasFlag(flags, BITMASK_FRIENDLY)
 	end
 
 	function ns:IsNeutral(flags)
-		return (band(flags, BITMASK_NEUTRAL) ~= 0)
+		return HasFlag(flags, BITMASK_NEUTRAL)
 	end
 
 	function ns:IsHostile(flags)
-		return (band(flags, BITMASK_HOSTILE) ~= 0)
+		return HasFlag(flags, BITMASK_HOSTILE)
 	end
 
 	------------------------------------------------------
-	-- object type: player and npc
+	-- object type: player, npc and none
 	------------------------------------------------------
 	local BITMASK_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER or 0x00000400
 	local BITMASK_NPC = COMBATLOG_OBJECT_TYPE_NPC or 0x00000800
+	local BITMASK_NONE = COMBATLOG_OBJECT_NONE or 0x80000000
 	Private.BITMASK_PLAYER = BITMASK_PLAYER
 	Private.BITMASK_NPC = BITMASK_NPC
+	Private.BITMASK_NONE = BITMASK_NONE
 
 	function ns:IsPlayer(flags)
-		return (band(flags, BITMASK_PLAYER) == BITMASK_PLAYER)
+		return HasFlag(flags, BITMASK_PLAYER)
 	end
 
 	function ns:IsNPC(flags)
-		return (band(flags, BITMASK_NPC) == BITMASK_NPC)
+		return HasFlag(flags, BITMASK_NPC)
+	end
+
+	function ns:IsNone(flags)
+		return HasFlag(flags, BITMASK_NONE)
 	end
 end
 
@@ -535,7 +551,7 @@ function Private.register_schools()
 		elseif colorTable then
 			for i = #order, 1, -1 do
 				local k = order[i]
-				if band(key, k) == k then
+				if HasFlag(key, k) then
 					r = colorTable[k].r or r
 					g = colorTable[k].g or g
 					b = colorTable[k].b or b
@@ -990,7 +1006,7 @@ do
 
 		local values = {al = 0x10, rb = 0x01, rt = 0x02, db = 0x04, dt = 0x08}
 		local disabled = function()
-			return band(ns.db.totalflag, values.al) ~= 0
+			return HasFlag(ns.db.totalflag, values.al)
 		end
 
 		total_opt = {
@@ -1005,13 +1021,13 @@ do
 					inline = true,
 					order = 10,
 					get = function(i)
-						return (band(ns.db.totalflag, values[i[#i]]) ~= 0)
+						return HasFlag(ns.db.totalflag, values[i[#i]])
 					end,
 					set = function(i, val)
 						local v = values[i[#i]]
-						if val and band(ns.db.totalflag, v) == 0 then
+						if val and HasFlag(ns.db.totalflag, v) then
 							ns.db.totalflag = ns.db.totalflag + v
-						elseif not val and band(ns.db.totalflag, v) ~= 0 then
+						elseif not val and HasFlag(ns.db.totalflag, v) then
 							ns.db.totalflag = ns.db.totalflag - v
 						end
 					end,
@@ -1078,35 +1094,35 @@ do
 		end
 
 		-- raid bosses - 0x01
-		if band(totalflag, 0x01) ~= 0 then
+		if HasFlag(totalflag, 0x01) then
 			if set.type == "raid" and set.gotboss then
 				return true
 			end
 		end
 
 		-- raid trash - 0x02
-		if band(totalflag, 0x02) ~= 0 then
+		if HasFlag(totalflag, 0x02) then
 			if set.type == "raid" and not set.gotboss then
 				return true
 			end
 		end
 
 		-- dungeon boss - 0x04
-		if band(totalflag, 0x04) ~= 0 then
+		if HasFlag(totalflag, 0x04) then
 			if set.type == "party" and set.gotboss then
 				return true
 			end
 		end
 
 		-- dungeon trash - 0x08
-		if band(totalflag, 0x08) ~= 0 then
+		if HasFlag(totalflag, 0x08) then
 			if set.type == "party" and not set.gotboss then
 				return true
 			end
 		end
 
 		-- any combat - 0x10
-		if band(totalflag, 0x10) ~= 0 then
+		if HasFlag(totalflag, 0x10) then
 			return true
 		end
 
@@ -1335,7 +1351,6 @@ do
 	local strsub = string.sub
 	local UnitIsPlayer = UnitIsPlayer
 
-	-- add extra bitmasks if needed
 	local BITMASK_GROUP = Private.BITMASK_GROUP
 	local BITMASK_PETS = Private.BITMASK_PETS
 	local BITMASK_FRIENDLY = Private.BITMASK_FRIENDLY
@@ -1347,10 +1362,7 @@ do
 		if tonumber(guid) then
 			return (band(strsub(guid, 1, 5), 0x00F) == 3 or band(strsub(guid, 1, 5), 0x00F) == 5)
 		end
-		if tonumber(flags) then
-			return (band(flags, BITMASK_NPC) ~= 0)
-		end
-		return false
+		return HasFlag(flags, BITMASK_NPC)
 	end
 
 	-- tables that will cache info about players and pets
@@ -1385,15 +1397,15 @@ do
 				return __t1[guid]
 			end
 
-			-- player by UnitIsPlayer?
-			if name and UnitIsPlayer(name) then
+			-- player by flgs?
+			if HasFlag(flags, BITMASK_PLAYER) then
 				__t1[guid] = true
 				__t2[guid] = (__t2[guid] == nil) and false or __t2[guid]
 				return __t1[guid]
 			end
 
-			-- player by flgs?
-			if tonumber(flags) and band(flags, BITMASK_PLAYER) == BITMASK_PLAYER then
+			-- player by UnitIsPlayer?
+			if name and UnitIsPlayer(name) then
 				__t1[guid] = true
 				__t2[guid] = (__t2[guid] == nil) and false or __t2[guid]
 				return __t1[guid]
@@ -1426,8 +1438,8 @@ do
 			end
 
 			-- ungrouped pet?
-			if tonumber(flags) and (band(flags, BITMASK_PETS) ~= 0) then
-				__t2[guid] = (band(flags, BITMASK_FRIENDLY) ~= 0) and 1 or true
+			if HasFlag(flags, BITMASK_PETS) then
+				__t2[guid] = HasFlag(flags, BITMASK_FRIENDLY) and 1 or true
 				__t1[guid] = false
 				return __t2[guid]
 			end
@@ -1447,36 +1459,6 @@ do
 	-- simply removes the pet from the table.
 	function Private.dismiss_pet(petGUID)
 		pets[petGUID] = del(pets[petGUID])
-	end
-
-	-- checks given flags retention/interet
-	function Private.check_flags_interest(guid, flags, nopets)
-		local is_interesting = (players[guid] ~= nil)
-		if not is_interesting and band(flags, BITMASK_GROUP) ~= 0 then
-			if nopets then
-				is_interesting = band(flags, BITMASK_PETS) == 0
-			else
-				is_interesting = true
-			end
-		end
-		if not is_interesting and not nopets and band(flags, BITMASK_PETS) ~= 0 and pets[guid] then
-			is_interesting = true
-		end
-		return is_interesting
-	end
-
-	-- checks whether the give guid/flags are pets
-	function Private.check_pet_flags(petGUID, petFlags, ownerFlags)
-		if band(ownerFlags, BITMASK_GROUP) ~= 0 then
-			return true -- owner is a group member?
-		end
-		if band(ownerFlags, BITMASK_PETS) ~= 0 then
-			return true -- summoned by another pet?
-		end
-		if band(petFlags, BITMASK_PETS) ~= 0 and pets[petGUID] then
-			return true -- already known pet
-		end
-		return false
 	end
 end
 
@@ -1568,42 +1550,12 @@ do
 	local enemyPrototype = setmetatable({}, actorPrototype_mt)
 	ns.enemyPrototype = enemyPrototype
 
-	local upgrade_str = "\124cffffbb00%s\124r segment outdated data structure update."
-	local function update_set_actors(set)
-		if not set then return end
-		set.actors = set.actors or {}
-
-		-- players
-		local actors = set.players
-		if actors then
-			local actor = tremove(actors, 1)
-			while actor do
-				set.actors[#set.actors + 1] = actor
-				actor = tremove(actors, 1)
-			end
-			set.players = del(set.players)
-		end
-
-		-- enemies
-		actors = set.enemies
-		if actors then
-			local actor = tremove(actors, 1)
-			while actor do
-				actor.enemy = true
-				set.actors[#set.actors + 1] = actor
-				actor = tremove(actors, 1)
-			end
-			set.enemies = del(set.enemies)
-		end
-	end
-
 	local function bind_set_actors(actors)
 		if not actors then return end
-		for i = 1, #actors do
-			local actor = actors[i]
-			if actor and actor.enemy then
+		for _, actor in pairs(actors) do
+			if actor.enemy then
 				enemyPrototype:Bind(actor)
-			elseif actor and not actor.enemy then
+			elseif not actor.enemy then
 				playerPrototype:Bind(actor)
 			end
 		end
@@ -1614,10 +1566,6 @@ do
 		if obj and getmetatable(obj) ~= self then
 			setmetatable(obj, self)
 			self.__index = self
-			if obj.players or obj.enemies then
-				update_set_actors(obj)
-				ns:Print(format(upgrade_str, obj.name))
-			end
 			bind_set_actors(obj.actors)
 		end
 		self.arena = (ns.forPVP and obj and obj.type == "arena")

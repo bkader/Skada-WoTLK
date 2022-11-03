@@ -607,6 +607,16 @@ function Skada:OpenMenu(window)
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
+				info.text = L["Merge pets"]
+				info.func = function()
+					Skada.db.mergepets = not Skada.db.mergepets
+					Skada:ApplySettings()
+				end
+				info.checked = (Skada.db.mergepets == true)
+				info.keepShownOnClick = 1
+				UIDropDownMenu_AddButton(info, level)
+
+				wipe(info)
 				info.text = L["Absorbed Damage"]
 				info.func = function()
 					Skada.db.absdamage = (Skada.db.absdamage ~= true) and true or nil

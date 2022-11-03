@@ -164,12 +164,11 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.ccdone then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor, actor.enemy)
+				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.ccdone
 				format_valuetext(d, mod_cols, total, win.metadata)
 			end
@@ -227,17 +226,16 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 		local total = 0
 		local actors = self.actors
-		for i = 1, #actors do
-			local actor = actors[i]
-			local spell = actor and not actor.enemy and actor.ccdonespells and actor.ccdonespells[spellid]
+		for actorname, actor in pairs(actors) do
+			local spell = not actor.enemy and actor.ccdonespells and actor.ccdonespells[spellid]
 			if spell and spell.count then
-				tbl[actor.name] = new()
-				tbl[actor.name].id = actor.id
-				tbl[actor.name].class = actor.class
-				tbl[actor.name].role = actor.role
-				tbl[actor.name].spec = actor.spec
-				tbl[actor.name].enemy = actor.enemy
-				tbl[actor.name].count = spell.count
+				tbl[actorname] = new()
+				tbl[actorname].id = actor.id
+				tbl[actorname].class = actor.class
+				tbl[actorname].role = actor.role
+				tbl[actorname].spec = actor.spec
+				tbl[actorname].enemy = actor.enemy
+				tbl[actorname].count = spell.count
 				total = total + spell.count
 			end
 		end
@@ -429,12 +427,11 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.cctaken then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor, actor.enemy)
+				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.cctaken
 				format_valuetext(d, mod_cols, total, win.metadata)
 			end
@@ -492,17 +489,16 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 
 		local total = 0
 		local actors = self.actors
-		for i = 1, #actors do
-			local actor = actors[i]
-			local spell = actor and not actor.enemy and actor.cctakenspells and actor.cctakenspells[spellid]
+		for actorname, actor in pairs(actors) do
+			local spell = not actor.enemy and actor.cctakenspells and actor.cctakenspells[spellid]
 			if spell and spell.count then
-				tbl[actor.name] = new()
-				tbl[actor.name].id = actor.id
-				tbl[actor.name].class = actor.class
-				tbl[actor.name].role = actor.role
-				tbl[actor.name].spec = actor.spec
-				tbl[actor.name].enemy = actor.enemy
-				tbl[actor.name].count = spell.count
+				tbl[actorname] = new()
+				tbl[actorname].id = actor.id
+				tbl[actorname].class = actor.class
+				tbl[actorname].role = actor.role
+				tbl[actorname].spec = actor.spec
+				tbl[actorname].enemy = actor.enemy
+				tbl[actorname].count = spell.count
 				total = total + spell.count
 			end
 		end
@@ -687,12 +683,11 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.ccbreak then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor, actor.enemy)
+				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.ccbreak
 				format_valuetext(d, mod_cols, total, win.metadata)
 			end

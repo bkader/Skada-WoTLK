@@ -576,14 +576,13 @@ Skada:RegisterModule("Damage", function(L, P)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.damage then
 				local dps, amount = actor:GetDPS(set)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = amount
 					format_valuetext(d, mod_cols, total, dps, win.metadata)
 					win:color(d, set, actor.enemy)
@@ -691,10 +690,9 @@ Skada:RegisterModule("Damage", function(L, P)
 		local total = set.totaldamage or set.damage
 		if not total or total == 0 then return end
 
-		for i = 1, #set.actors do
-			local actor = set.actors[i]
-			local amount = actor and (actor.totaldamage or actor.damage)
-			if (actor and not amount and actor.damagespells) or amount == 0 then
+		for _, actor in pairs(set.actors) do
+			local amount = actor.totaldamage or actor.damage
+			if (not amount and actor.damagespells) or amount == 0 then
 				actor.damage, actor.totaldamage = nil, nil
 				actor.damagespells = del(actor.damagespells, true)
 			end
@@ -779,14 +777,13 @@ Skada:RegisterModule("DPS", function(L, P)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.damage then
 				local dps = actor:GetDPS(set)
 				if dps > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = dps
 					format_valuetext(d, mod_cols, total, dps, win.metadata)
 					win:color(d, set, actor.enemy)
@@ -811,7 +808,7 @@ Skada:RegisterModule("DPS", function(L, P)
 		mod_cols = self.metadata.columns
 
 		local parentmod = Skada:GetModule("Damage", true)
-		if parentmod then
+		if parentmod and parentmod.metadata then
 			self.metadata.click1 = parentmod.metadata.click1
 			self.metadata.click2 = parentmod.metadata.click2
 			self.metadata.click4 = parentmod.metadata.click4
@@ -884,19 +881,18 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C)
 		local total = 0
 		local sources = clear(C)
 		local actors = set.actors
-		for i = 1, #actors do
-			local actor = actors[i]
-			local spell = actor and not actor.enemy and actor.damagespells and actor.damagespells[win.spellid]
+		for actorname, actor in pairs(actors) do
+			local spell = not actor.enemy and actor.damagespells and actor.damagespells[win.spellid]
 			if spell then
 				local amount = P.absdamage and spell.total or spell.amount
 				if amount > 0 then
-					sources[actor.name] = new()
-					sources[actor.name].id = actor.id
-					sources[actor.name].class = actor.class
-					sources[actor.name].role = actor.role
-					sources[actor.name].spec = actor.spec
-					sources[actor.name].amount = amount
-					sources[actor.name].time = mod.metadata.columns.sDPS and actor:GetTime(set)
+					sources[actorname] = new()
+					sources[actorname].id = actor.id
+					sources[actorname].class = actor.class
+					sources[actorname].role = actor.role
+					sources[actorname].spec = actor.spec
+					sources[actorname].amount = amount
+					sources[actorname].time = mod.metadata.columns.sDPS and actor:GetTime(set)
 
 					total = total + amount
 				end
@@ -930,9 +926,8 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C)
 		end
 
 		local spells = clear(C)
-		for i = 1, #set.actors do
-			local actor = set.actors[i]
-			local _spells = actor and not actor.enemy and actor.damagespells
+		for _, actor in pairs(set.actors) do
+			local _spells = not actor.enemy and actor.damagespells
 			if _spells then
 				for spellid, spell in pairs(_spells) do
 					local amount = P.absdamage and spell.total or spell.amount
@@ -1111,14 +1106,13 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.damage then
 				local dps, amount = actor:GetDPS(set, true)
 				if amount > 0 then
 					nr = nr + 1
 
-					local d = win:actor(nr, actor, actor.enemy)
+					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = amount
 					format_valuetext(d, mod_cols, total, dps, win.metadata)
 					win:color(d, set, actor.enemy)
@@ -1319,12 +1313,11 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 		local nr = 0
 		local actors = set.actors
 
-		for i = 1, #actors do
-			local actor = actors[i]
+		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.overkill then
 				nr = nr + 1
 
-				local d = win:actor(nr, actor, actor.enemy)
+				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.overkill
 				format_valuetext(d, mod_cols, total, mod_cols.DPS and (d.value / actor:GetTime(set)), win.metadata)
 				win:color(d, set, actor.enemy)
