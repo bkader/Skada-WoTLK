@@ -5,9 +5,7 @@ local AddOnName = ...
 local L = LibStub("AceLocale-3.0"):GetLocale("Skada")
 
 local function SetupStorage(self)
-	self.char = self.char or _G.SkadaStorageDB
-	self.char.sets = self.char.sets or {}
-	self.char.version = self.char.version or _G.SkadaCharDB and _G.SkadaCharDB.version or 0
+	self.sets = self.sets or _G.SkadaStorageDB
 end
 
 local function CheckMemory(self)

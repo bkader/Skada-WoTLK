@@ -175,7 +175,7 @@ function Skada:OpenMenu(window)
 			info.text = L["Delete Segment"]
 			info.value = "delete"
 			info.hasArrow = 1
-			info.disabled = (not Skada.char.sets or #Skada.char.sets == 0)
+			info.disabled = (not Skada.sets or #Skada.sets == 0)
 			info.notCheckable = 1
 			UIDropDownMenu_AddButton(info, level)
 
@@ -185,7 +185,7 @@ function Skada:OpenMenu(window)
 				info.text = L["Keep Segment"]
 				info.value = "keep"
 				info.hasArrow = 1
-				info.disabled = (not Skada.char.sets or #Skada.char.sets == 0)
+				info.disabled = (not Skada.sets or #Skada.sets == 0)
 				info.notCheckable = 1
 				UIDropDownMenu_AddButton(info, level)
 			end
@@ -405,7 +405,7 @@ function Skada:OpenMenu(window)
 				info.checked = (self.win.selectedset == "current")
 				UIDropDownMenu_AddButton(info, level)
 
-				local sets = Skada.char.sets
+				local sets = Skada.sets
 				if #sets > 0 then
 					wipe(info)
 					info.disabled = 1
@@ -426,7 +426,7 @@ function Skada:OpenMenu(window)
 					end
 				end
 			elseif UIDROPDOWNMENU_MENU_VALUE == "delete" then
-				local sets = Skada.char.sets
+				local sets = Skada.sets
 				local num = #sets
 				for i = 1, num do
 					local set = sets[i]
@@ -439,7 +439,7 @@ function Skada:OpenMenu(window)
 					UIDropDownMenu_AddButton(info, level)
 				end
 			elseif UIDROPDOWNMENU_MENU_VALUE == "keep" then
-				local sets = Skada.char.sets
+				local sets = Skada.sets
 				local num, kept = #sets, 0
 				for i = 1, num do
 					local set = sets[i]
@@ -466,7 +466,7 @@ function Skada:OpenMenu(window)
 					wipe(info)
 					info.text = L["Select All"]
 					info.func = function()
-						local sets = Skada.char.sets
+						local sets = Skada.sets
 						for i = 1, #sets do
 							sets[i].keep = true
 						end
@@ -479,7 +479,7 @@ function Skada:OpenMenu(window)
 					wipe(info)
 					info.text = L["Deselect All"]
 					info.func = function()
-						local sets = Skada.char.sets
+						local sets = Skada.sets
 						for i = 1, #sets do
 							sets[i].keep = nil
 						end
@@ -639,7 +639,7 @@ function Skada:SegmentMenu(window)
 		if not level or not self.win then return end
 		info = info or UIDropDownMenu_CreateInfo()
 
-		local sets = Skada.char.sets
+		local sets = Skada.sets
 		local numsets = #sets
 
 		if level == 1 then
@@ -1139,12 +1139,12 @@ do
 			local setbox = AceGUI:Create("Dropdown")
 			setbox:SetLabel(L["Segment"])
 			setbox:SetList({total = L["Total"], current = L["Current"]})
-			local sets = Skada.char.sets
+			local sets = Skada.sets
 			for i = 1, #sets do
 				setbox:AddItem(i, sets[i].name)
 			end
 			setbox:SetCallback("OnValueChanged", function(f, e, value) Skada.db.report.set = value end)
-			setbox:SetValue(Skada.db.report.set or Skada.char.sets[1])
+			setbox:SetValue(Skada.db.report.set or Skada.sets[1])
 			frame:AddChild(setbox)
 		end
 

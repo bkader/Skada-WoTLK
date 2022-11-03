@@ -1060,7 +1060,7 @@ do
 		clear_indexes(Skada.current)
 		clear_indexes(Skada.total)
 
-		local sets = Skada.char.sets
+		local sets = Skada.sets
 		if sets then
 			for i = 1, #sets do
 				clear_indexes(sets[i])
