@@ -727,7 +727,7 @@ do
 				local mode = modes[i]
 				categorized[mode.category] = categorized[mode.category] or {}
 				categorized[mode.category][#categorized[mode.category] + 1] = mode
-				if not tContains(categories, mode.category) then
+				if not Skada.tContains(categories, mode.category) then
 					categories[#categories + 1] = mode.category
 				end
 			end

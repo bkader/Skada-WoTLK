@@ -10,7 +10,7 @@ Skada:RegisterModule("Fails", function(L, P)
 	local spellmod = mod:NewModule("Event's failed players")
 	local ignoredSpells = Skada.dummyTable -- Edit Skada\Core\Tables.lua
 
-	local pairs, tostring, format, tContains = pairs, tostring, string.format, tContains
+	local pairs, tostring, format, tContains = pairs, tostring, string.format, Skada.tContains
 	local GetSpellInfo, UnitGUID, IsInGroup = Skada.GetSpellInfo or GetSpellInfo, UnitGUID, Skada.IsInGroup
 	local _
 

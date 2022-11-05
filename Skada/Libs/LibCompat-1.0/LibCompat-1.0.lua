@@ -98,7 +98,7 @@ do
 	end
 
 	-- replace the global function
-	_G.tContains = function(tbl, item)
+	local function tContains(tbl, item)
 		for _, v in pairs(tbl) do
 			if item == v then
 				return true
@@ -109,6 +109,7 @@ do
 
 	lib.tLength = tLength
 	lib.tCopy = tCopy
+	lib.tContains = tContains
 end
 
 -------------------------------------------------------------------------------
