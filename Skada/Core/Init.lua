@@ -18,7 +18,6 @@ local strsplit, format, strmatch, gsub = strsplit, string.format, string.match, 
 local setmetatable, rawset, wipe = setmetatable, rawset, wipe
 local EmptyFunc = Multibar_EmptyFunc
 local Private, L = ns.Private, ns.Locale
-local new, del, _
 
 -- options table
 ns.options = {
@@ -224,7 +223,6 @@ do
 	local tablePool = Private.table_pool()
 	ns.tablePool = tablePool
 
-	new, del = tablePool.new, tablePool.del
 	Private.newTable = tablePool.new
 	Private.delTable = tablePool.del
 	Private.clearTable = tablePool.clear
@@ -1349,7 +1347,8 @@ end
 
 do
 	local strsub = string.sub
-	local UnitIsPlayer = UnitIsPlayer
+	local UnitGUID, UnitName = UnitGUID, UnitName
+	local UnitClass, UnitIsPlayer = UnitClass, UnitIsPlayer
 
 	local BITMASK_GROUP = Private.BITMASK_GROUP
 	local BITMASK_PETS = Private.BITMASK_PETS
@@ -1365,11 +1364,11 @@ do
 		return HasFlag(flags, BITMASK_NPC)
 	end
 
-	-- tables that will cache info about players and pets
-	local players = Private.players or {} -- [guid] = unit
-	Private.players = players
-	local pets = Private.pets or {} -- [guid] = {id = ownerGUID, name = ownerName}
-	Private.pets = pets
+	local guidToClass = Private.guidToClass or {}
+	Private.guidToClass = guidToClass
+
+	local guidToName = Private.guidToName or {}
+	Private.guidToName = guidToName
 
 	do
 		-- tables used to cached results in order to speed up check
@@ -1384,14 +1383,14 @@ do
 			end
 
 			-- group member?
-			if players[guid] then
+			if guidToName[guid] then
 				__t1[guid] = 1
 				__t2[guid] = (__t2[guid] == nil) and false or __t2[guid]
 				return __t1[guid]
 			end
 
 			-- group pet?
-			if pets[guid] then
+			if guidToClass[guid] then
 				__t1[guid] = false
 				__t2[guid] = __t2[guid] or 1
 				return __t1[guid]
@@ -1424,14 +1423,14 @@ do
 			end
 
 			-- just in case
-			if players[guid] then
+			if guidToName[guid] then
 				__t2[guid] = false
 				__t1[guid] = 1
 				return __t2[guid]
 			end
 
 			-- grouped pet?
-			if pets[guid] then
+			if guidToClass[guid] then
 				__t2[guid] = 1
 				__t1[guid] = false
 				return __t2[guid]
@@ -1449,16 +1448,18 @@ do
 		end
 	end
 
-	-- adds a pet to the table.
-	function Private.assign_pet(ownerGUID, ownerName, petGUID)
-		pets[petGUID] = pets[petGUID] or new()
-		pets[petGUID].id = ownerGUID
-		pets[petGUID].name = ownerName
-	end
+	-- adds a combatant
+	function Private.add_combatant(unit, ownerUnit)
+		local guid = UnitGUID(unit)
+		if guid and ownerUnit then
+			guidToClass[guid] = UnitGUID(ownerUnit)
+		elseif guid then
+			local _, class = UnitClass(unit)
+			guidToClass[guid] = class
 
-	-- simply removes the pet from the table.
-	function Private.dismiss_pet(petGUID)
-		pets[petGUID] = del(pets[petGUID])
+			local name, realm = UnitName(unit)
+			guidToName[guid] = realm and format("%s-%s", name, realm) or name
+		end
 	end
 end
 

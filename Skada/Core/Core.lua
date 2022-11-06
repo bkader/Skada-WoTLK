@@ -24,7 +24,7 @@ local IsInGroup, IsInRaid, IsInPvP = Skada.IsInGroup, Skada.IsInRaid, Skada.IsIn
 local GetNumGroupMembers, GetGroupTypeAndCount = Skada.GetNumGroupMembers, Skada.GetGroupTypeAndCount
 local GetCreatureId, UnitIterator, IsGroupDead = Skada.GetCreatureId, Skada.UnitIterator, Skada.IsGroupDead
 local prevent_duplicate, uformat, EscapeStr = Private.prevent_duplicate, Private.uformat, Private.EscapeStr
-local is_player, is_pet, assign_pet = Private.is_player, Private.is_pet, Private.assign_pet
+local add_combatant, is_player, is_pet = Private.add_combatant, Private.is_player, Private.is_pet
 local L, callbacks = Skada.Locale, Skada.callbacks
 local P, G, _
 
@@ -65,8 +65,8 @@ local check_version, convert_version
 local check_for_join_and_leave
 
 -- list of players, pets and vehicles
-local players = Private.players
-local pets = Private.pets
+local guidToClass = Private.guidToClass
+local guidToName = Private.guidToName
 local vehicles = {}
 
 -- targets table used when detecting boss fights.
@@ -272,26 +272,12 @@ end
 
 local dismiss_pet
 do
-	local dismiss_handler = Private.dismiss_pet
-	function dismiss_pet(guid, delay)
-		if not guid or not pets[guid] then return end
-		Skada:ScheduleTimer(dismiss_handler, delay or 0.1, guid)
+	local function dismiss_handler(guid)
+		guidToClass[guid] = nil
 	end
-end
-
-local function summon_pet(petGUID, ownerGUID, ownerName)
-	-- we assign the pet the normal way
-	assign_pet(ownerGUID, ownerName, petGUID)
-
-	-- we fix the table by searching through the complete list
-	local fixsummon = true
-	while fixsummon do
-		fixsummon = nil
-		for pet, owner in pairs(pets) do
-			if pets[owner.id] then
-				assign_pet(pets[owner.id].id, pets[owner.id].name, pet)
-				fixsummon = true
-			end
+	function dismiss_pet(guid, delay)
+		if guid and guidToClass[guid] and not guidToName[guid] then
+			Skada:ScheduleTimer(dismiss_handler, delay or 0.1, guid)
 		end
 	end
 end
@@ -1486,14 +1472,15 @@ do
 	end
 
 	local function fix_pets_handler(guid, flag)
-		if guid and pets[guid] then
-			return pets[guid]
+		local guidOrClass = guid and guidToClass[guid]
+		if guidOrClass and guidToName[guidOrClass] then
+			return guidOrClass, guidToName[guidOrClass]
 		end
 
 		-- flag is provided and it is mine.
 		if guid and flag and Skada:IsMine(flag) then
-			assign_pet(userGUID, userName, guid)
-			return pets[guid]
+			guidToClass[guid] = userGUID
+			return userGUID, userName
 		end
 
 		-- no owner yet?
@@ -1501,19 +1488,18 @@ do
 			-- guess the pet from roster.
 			local ownerUnit = get_pet_owner_unit(guid)
 			if ownerUnit then
-				assign_pet(UnitGUID(ownerUnit), UnitName(ownerUnit), guid)
-				return pets[guid]
+				local ownerGUID = UnitGUID(ownerUnit)
+				guidToClass[guid] = UnitGUID(ownerUnit)
+				return ownerGUID, (UnitName(ownerUnit))
 			end
 
 			-- guess the pet from tooltip.
 			local ownerGUID, ownerName = get_pet_owner_from_tooltip(guid)
 			if ownerGUID and ownerName then
-				assign_pet(ownerGUID, ownerName, guid)
-				return pets[guid]
+				guidToClass[guid] = ownerGUID
+				return ownerGUID, ownerName
 			end
 		end
-
-		return nil
 	end
 
 	function Skada:FixPets(action)
@@ -1523,12 +1509,12 @@ do
 		-- 1: group member / true: player / false: everything else
 		if is_player(action.actorid, action.actorname, action.actorflags) ~= false then return end
 
-		local owner = fix_pets_handler(action.actorid, action.actorflags)
-		if owner then
+		local ownerGUID, ownerName = fix_pets_handler(action.actorid, action.actorflags)
+		if ownerGUID and ownerName then
 			if P.mergepets then
 				action.petname = action.actorname
-				action.actorid = owner.id
-				action.actorname = owner.name
+				action.actorid = ownerGUID
+				action.actorname = ownerName
 
 				if action.spellid and action.petname then
 					action.spellid = format("%s.%s", action.spellid, action.petname)
@@ -1537,7 +1523,7 @@ do
 					action.spellname = format("%s (%s)", action.spellname, action.petname)
 				end
 			else
-				action.actorname = format("%s <%s>", action.actorname, owner.name)
+				action.actorname = format("%s <%s>", action.actorname, ownerName)
 			end
 		else
 			-- if for any reason we fail to find the pets, we simply
@@ -1547,13 +1533,13 @@ do
 	end
 
 	function Skada:FixMyPets(guid, name, flags)
-		if players[guid] or not is_pet(guid, flags) then
+		if not is_pet(guid, flags) then
 			return guid, name, flags
 		end
 
-		local owner = fix_pets_handler(guid, flags)
-		if owner then
-			return owner.id or guid, owner.name or name, owner.flag or flags
+		local ownerGUID, ownerName = fix_pets_handler(guid, flags)
+		if ownerGUID and ownerName then
+			return ownerGUID or guid, ownerName or name, flags
 		end
 
 		return guid, name, flags
@@ -1569,14 +1555,19 @@ do
 end
 
 function Skada:GetPetOwner(petGUID)
-	return pets[petGUID]
+	local guidOrClass = guidToClass[petGUID]
+	if guidOrClass and guidToName[guidOrClass] then
+		return guidOrClass, guidToName[guidOrClass], guidToClass[guidOrClass]
+	end
 end
 
 local function debug_pets()
 	check_group()
 	Skada:Print(L["Pets"])
-	for pet, owner in pairs(pets) do
-		Skada:Printf("pet %s belongs to %s, %s", pet, owner.id, owner.name)
+	for guid, guidOrClass in pairs(guidToClass) do
+		if guidToName[guidOrClass] then
+			Skada:Printf("%s > %s", guid, classcolors.format(guidToClass[guidOrClass], guidToName[guidOrClass]))
+		end
 	end
 end
 
@@ -2123,16 +2114,14 @@ local last_check_group
 function check_group()
 	-- throttle group check.
 	local checkTime = GetTime()
-	if last_check_group and (checkTime - last_check_group) <= 0.5 then
-		return
-	end
-	last_check_group = checkTime
+	if not last_check_group or (checkTime - last_check_group) > 0.5 then
+		last_check_group = checkTime
 
-	for unit, owner in UnitIterator() do
-		if owner == nil then
-			players[UnitGUID(unit)] = unit
-		else
-			assign_pet(UnitGUID(owner), UnitName(owner), UnitGUID(unit))
+		wipe(guidToClass)
+		wipe(guidToName)
+
+		for unit, owner in UnitIterator() do
+			add_combatant(unit, owner)
 		end
 	end
 end
@@ -2251,7 +2240,7 @@ do
 			version_count = count
 		end
 
-		Skada:SendMessage("GROUP_ROSTER_UPDATE", players, pets)
+		Skada:SendMessage("GROUP_ROSTER_UPDATE")
 	end
 end
 
@@ -2275,20 +2264,20 @@ do
 		for owner in pairs(owners) do
 			local unit = not ignoredUnits[owner] and get_pet_from_owner(owner)
 			if unit and UnitExists(unit) then
-				assign_pet(UnitGUID(owner), UnitName(owner), UnitGUID(unit))
+				guidToClass[UnitGUID(unit)] = UnitGUID(owner)
 			end
 		end
 	end
 
 	local function process_check_vehicle(unit)
 		local guid = unit and not ignoredUnits[unit] and UnitGUID(unit)
-		if not guid or not players[guid] then
+		if not guid or not guidToName[guid] then
 			return
 		elseif UnitHasVehicleUI(unit) then
 			local prefix, id, suffix = strmatch(unit, "([^%d]+)([%d]*)(.*)")
 			local vUnitId = format("%spet%s%s", prefix, id, suffix)
 			if UnitExists(vUnitId) then
-				assign_pet(guid, UnitName(unit), UnitGUID(vUnitId))
+				guidToClass[UnitGUID(vUnitId)] = guid
 				vehicles[guid] = UnitGUID(vUnitId)
 			end
 		elseif vehicles[guid] then
@@ -2900,7 +2889,7 @@ function combat_end()
 		end
 	end
 
-	if Skada.current.time >= P.minsetlength then
+	if Skada.current.time and Skada.current.time >= P.minsetlength then
 		Skada.total.time = (Skada.total.time or 0) + Skada.current.time
 	end
 
@@ -2911,6 +2900,7 @@ function combat_end()
 	_targets = del(_targets)
 
 	clean_sets()
+	wipe(vehicles)
 
 	for i = 1, #windows do
 		local win = windows[i]
@@ -3284,9 +3274,9 @@ do
 
 		-- pet summons.
 		if t.event == "SPELL_SUMMON" and t:DestIsPet(true) then
-			summon_pet(t.dstGUID, t.srcGUID, t.srcName)
+			guidToClass[t.dstGUID] = t.srcGUID
 		-- pet died?
-		elseif death_events[t.event] and pets[t.srcGUID] then
+		elseif death_events[t.event] and t:SourceIsPet() then
 			dismiss_pet(t.srcGUID)
 		end
 

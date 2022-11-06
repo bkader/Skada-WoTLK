@@ -7,8 +7,6 @@ local setmetatable, wipe = setmetatable, wipe
 local next, print, GetTime = next, print, GetTime
 local _
 
-local UnitClass, GetPlayerInfoByGUID = UnitClass, GetPlayerInfoByGUID
-local GetClassFromGUID = Skada.GetClassFromGUID
 local tablePool, new, del = Skada.tablePool, Private.newTable, Private.delTable
 local L, callbacks = Skada.Locale, Skada.callbacks
 local userName = Skada.userName
@@ -1066,10 +1064,12 @@ end
 
 do
 	local UnitLevel = UnitLevel
+	local UnitClass = UnitClass
 	local GetUnitRole = Skada.GetUnitRole
 	local GetUnitSpec = Skada.GetUnitSpec
 	local GetUnitIdFromGUID = Skada.GetUnitIdFromGUID
-	local players, pets = Private.players, Private.pets
+	local guidToClass = Private.guidToClass
+	local guidToName = Private.guidToName
 	local actorPrototype = Skada.actorPrototype
 	local playerPrototype = Skada.playerPrototype
 	local enemyPrototype = Skada.enemyPrototype
@@ -1136,7 +1136,7 @@ do
 			actor.name = actorname
 			actor.__new = true
 
-			-- actorflags:true => fakse actor
+			-- actorflags:true => fake actor
 			if actorflags == true then
 				actor.enemy = true
 				actor.class = "ENEMY"
@@ -1148,15 +1148,15 @@ do
 				actor.role = GetUnitRole(userGUID)
 				actor.spec = GetUnitSpec(userGUID)
 
-			-- a group member?
-			elseif players[actorid] then
-				_, actor.class = UnitClass(players[actorid])
-				actor.role = GetUnitRole(actorid)
-				actor.spec = GetUnitSpec(actorid)
-
-			-- a pet maybe?
-			elseif pets[actorid] then
-				actor.class = "PET"
+			-- a group member/pet?
+			elseif guidToClass[actorid] then
+				actor.class = guidToClass[actorid]
+				if guidToName[actor.class] then
+					actor.class = "PET"
+				else
+					actor.role = GetUnitRole(actorid)
+					actor.spec = GetUnitSpec(actorid)
+				end
 
 			-- was a player? (pvp scenario)
 			elseif self:IsPlayer(actorflags) then
@@ -1170,7 +1170,6 @@ do
 
 			-- avoid "nil" stuff
 			elseif not self:IsNone(actorflags) then
-				actor.enemy = true
 				local unit = GetUnitIdFromGUID(actorid, "group")
 				local level = unit and UnitLevel(unit)
 				if level == -1 or self:IsBoss(actorid, true) then
@@ -1181,6 +1180,9 @@ do
 					actor.class = "NEUTRAL"
 				else
 					actor.class = "MONSTER"
+				end
+				if not self:IsFriendly(actorflags) then
+					actor.enemy = true
 				end
 
 			else
@@ -1206,7 +1208,7 @@ do
 		end
 
 		-- add more details to the actor...
-		if players[actor.id] or pets[actor.id] then
+		if guidToClass[actor.id] then
 			if self.validclass[actor.class] then
 				-- missing role?
 				if actor.role == nil or actor.role == "NONE" then
@@ -1438,7 +1440,7 @@ do
 			end
 
 			-- checks whether the give guid/flags are pets
-			local pets = Private.pets
+			local guidToClass = Private.guidToClass
 			local function check_pet_flags(ownerFlags, petGUID, petFlags)
 				if HasFlag(ownerFlags, BITMASK_GROUP) then
 					return true -- owner is a group member?
@@ -1446,7 +1448,7 @@ do
 				if HasFlag(ownerFlags, BITMASK_PETS) then
 					return true -- summoned by another pet?
 				end
-				if HasFlag(petFlags, BITMASK_PETS) and pets[petGUID] then
+				if HasFlag(petFlags, BITMASK_PETS) and guidToClass[petGUID] then
 					return true -- already known pet
 				end
 				return false
@@ -1488,6 +1490,7 @@ do
 		end
 
 		ARGS_MT = {__index = ARGS_MT}
+		ARGS.__index = ARGS
 		setmetatable(ARGS, ARGS_MT)
 	end
 

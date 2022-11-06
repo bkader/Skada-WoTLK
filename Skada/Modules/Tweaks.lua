@@ -99,13 +99,12 @@ Skada:RegisterModule("Tweaks", function(L, P)
 					output = args.srcName
 				end
 			elseif Skada:IsBoss(args.dstGUID) then -- a player started?
-				local owner = Skada:GetPetOwner(args.srcGUID)
-				if owner then
-					local _, class = UnitClass(owner.name)
-					if class and classcolors[class] then
-						output = format(firsthit_fmt[4], classcolors.str(class), owner.name, L["PET"])
+				local _, ownerName, ownerClass = Skada:GetPetOwner(args.srcGUID)
+				if ownerName then
+					if ownerClass then
+						output = format(firsthit_fmt[4], classcolors.str(ownerClass), ownerName, L["PET"])
 					else
-						output = format(firsthit_fmt[1], owner.name, L["PET"])
+						output = format(firsthit_fmt[1], ownerName, L["PET"])
 					end
 				elseif args.srcName then
 					local _, class = UnitClass(args.srcName)
