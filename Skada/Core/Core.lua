@@ -1964,27 +1964,18 @@ do
 		end
 	end
 
-	local get_channel_list
-	do
-		local list = {}
-		function get_channel_list(...)
-			wipe(list)
-			for i = 1, select("#", ...) do
-				list[i] = select(i, ...)
-			end
-			return list
-		end
-	end
-
+	local tablePool = Skada.tablePool
+	local GetChannelList = GetChannelList
 	function Skada:Report(channel, chantype, report_mode_name, report_set_name, maxlines, window, barid)
 		if chantype == "channel" then
-			local list = get_channel_list(GetChannelList())
+			local list = tablePool.acquire(GetChannelList())
 			for i = 1, table.getn(list) * 0.5 do
 				if (P.report.channel == list[i * 2]) then
 					channel = list[i * 2 - 1]
 					break
 				end
 			end
+			list = del(list)
 		elseif chantype == nil then
 			chantype = "preset"
 		end

@@ -241,7 +241,9 @@ function Private.register_classes()
 
 	-- class colors/names and valid classes
 	local classcolors, validclass = {}, {}
-	for class, info in pairs(CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS) do
+	local CLASS_COLORS = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
+	for _, class in pairs(CLASS_SORT_ORDER) do
+		local info = CLASS_COLORS[class]
 		classcolors[class] = {r = info.r, g = info.g, b = info.b, colorStr = info.colorStr}
 		L[class] = LOCALIZED_CLASS_NAMES_MALE[class]
 		validclass[class] = true
@@ -1458,7 +1460,7 @@ do
 			guidToClass[guid] = class
 
 			local name, realm = UnitName(unit)
-			guidToName[guid] = realm and format("%s-%s", name, realm) or name
+			guidToName[guid] = realm and realm ~= "" and format("%s-%s", name, realm) or name
 		end
 	end
 end

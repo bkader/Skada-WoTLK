@@ -1083,6 +1083,51 @@ do
 		end
 	end
 
+	local build_report_channels
+	do
+		local IsInGuild, IsInRaid = IsInGuild, Skada.IsInRaid
+		local GetNumSubgroupMembers = Skada.GetNumSubgroupMembers
+		local GetChannelList = GetChannelList
+		local tablePool = Skada.tablePool
+
+		local defaults = {
+			whisper = {L["Whisper"], "whisper", true},
+			target = {L["Whisper Target"], "whisper"},
+			say = {L["Say"], "preset"},
+			raid = {L["Raid"], "preset", IsInRaid},
+			party = {L["Party"], "preset", function() return GetNumSubgroupMembers() > 0 end},
+			guild = {L["Guild"], "preset", IsInGuild},
+			officer = {L["Officer"], "preset", IsInGuild},
+			self = {L["Self"], "self"}
+		}
+
+		local blacklist = {
+			[L["[Trade]"]] = true,
+			[L["[General]"]] = true,
+			[L["[LocalDefense]"]] = true,
+			[L["[LookingForGroup]"]] = true
+		}
+
+		function build_report_channels()
+			local channels = tablePool.new()
+			for k, v in pairs(defaults) do
+				if (type(v[3]) == "function" and v[3]()) or type(v[3]) ~= "function" then
+					channels[k] = tablePool.acquire(v[1], v[2], v[3])
+				end
+			end
+
+			local list = tablePool.acquire(GetChannelList())
+			for i = 1, #list, 2 do
+				local channel = list[i + 1]
+				if not blacklist[channel] then
+					channels[channel] = tablePool.acquire(format("%s: %d/%s", L["Channel"], list[i], channel), "channel")
+				end
+			end
+			list = del(list, true)
+			return channels
+		end
+	end
+
 	local function create_report_window(window)
 		Skada.reportwindow = AceGUI:Create("Window")
 
@@ -1158,24 +1203,7 @@ do
 			frame:AddChild(setbox)
 		end
 
-		local channellist = {
-			whisper = {L["Whisper"], "whisper", true},
-			target = {L["Whisper Target"], "whisper"},
-			say = {L["Say"], "preset"},
-			raid = {L["Raid"], "preset"},
-			party = {L["Party"], "preset"},
-			guild = {L["Guild"], "preset"},
-			officer = {L["Officer"], "preset"},
-			self = {L["Self"], "self"}
-		}
-
-		local list = {GetChannelList()}
-		for i = 1, #list, 2 do
-			local chan = list[i + 1]
-			if chan ~= "Trade" and chan ~= "General" and chan ~= "LocalDefense" and chan ~= "LookingForGroup" then -- These should be localized.
-				channellist[chan] = {format("%s: %d/%s", L["Channel"], list[i], chan), "channel"}
-			end
-		end
+		local channellist = build_report_channels()
 
 		-- Channel, default last chosen or Say.
 		local channelbox = AceGUI:Create("Dropdown")
@@ -1248,6 +1276,9 @@ do
 
 		report:SetFullWidth(true)
 		frame:AddChild(report)
+
+		-- recycle the table
+		channellist = del(channellist, true)
 	end
 
 	function Private.open_report(window)
