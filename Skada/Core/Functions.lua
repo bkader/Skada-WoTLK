@@ -259,7 +259,7 @@ function Skada:FormatTime(sec, alt, ...)
 		local s = floor(sec - h * 3600 - m * 60)
 		return format("%02.f:%02.f:%02.f", h, m, s)
 	else
-		return format("%02.f:%02.f", floor(sec / 60), floor(sec % 60))
+		return format("%02.f:%02.f", floor(sec / 60), floor((sec % 60) + 0.5))
 	end
 end
 
@@ -1489,9 +1489,8 @@ do
 			end
 		end
 
-		ARGS_MT = {__index = ARGS_MT}
-		ARGS.__index = ARGS
-		setmetatable(ARGS, ARGS_MT)
+		setmetatable(ARGS, {__index = ARGS_MT})
+		ARGS_MT.__index = ARGS_MT
 	end
 
 	-- combat log handler

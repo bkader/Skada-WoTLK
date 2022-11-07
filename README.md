@@ -250,7 +250,6 @@ set:GetDTPS() -- returns the damage taken by players per second and damage amoun
 set:GetActorDamage(guid, name, useful) -- returns the damage done by the given actor.
 set:GetActorDPS(guid, name, useful, active) -- returns the dps and damage for the given actor.
 set:GetActorDamageTargets(guid, name, tbl) -- returns the table of damage targets.
-set:GetActorDamageSpells(guid, name) -- returns the table of damage spells.
 set:GetActorDamageOnTarget(guid, name, targetname) -- returns the damage, overkill [and useful for enemies]
 
 set:GetActorDamageTaken(guid, name) -- returns the damage taken by the actor.

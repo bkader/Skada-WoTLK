@@ -1030,7 +1030,7 @@ end
 
 do
 	local strtrim = strtrim or string.trim
-	local UnitExists, UnitName = UnitExists, UnitName
+	local UnitExists, UnitFullName = UnitExists, Private.UnitFullName
 
 	-- handles reporting
 	local function do_report(window, barid)
@@ -1047,12 +1047,7 @@ do
 			end
 		elseif channel == "target" then
 			if UnitExists("target") then
-				local toon, realm = UnitName("target")
-				if realm and #realm > 0 then
-					channel = toon .. "-" .. realm
-				else
-					channel = toon
-				end
+				channel = UnitFullName("target")
 			else
 				channel = nil
 			end
@@ -1083,6 +1078,7 @@ do
 		end
 	end
 
+	local channellist
 	local build_report_channels
 	do
 		local IsInGuild, IsInRaid = IsInGuild, Skada.IsInRaid
@@ -1091,7 +1087,7 @@ do
 		local tablePool = Skada.tablePool
 
 		local defaults = {
-			whisper = {L["Whisper"], "whisper", true},
+			whisper = {L["Whisper"], "whisper"},
 			target = {L["Whisper Target"], "whisper"},
 			say = {L["Say"], "preset"},
 			raid = {L["Raid"], "preset", IsInRaid},
@@ -1203,7 +1199,8 @@ do
 			frame:AddChild(setbox)
 		end
 
-		local channellist = build_report_channels()
+		if channellist then del(channellist, true) end
+		channellist = build_report_channels()
 
 		-- Channel, default last chosen or Say.
 		local channelbox = AceGUI:Create("Dropdown")
@@ -1222,7 +1219,7 @@ do
 		channelbox:SetCallback("OnValueChanged", function(f, e, value)
 			Skada.db.report.channel = value
 			Skada.db.report.chantype = channellist[value][2]
-			if channellist[origchan][3] ~= channellist[value][3] then
+			if origchan ~= value then
 				-- redraw in-place to add/remove whisper widget
 				local point, relativeTo, relativePoint, xOfs, yOfs = frame:GetPoint()
 				destroy_report_window()
@@ -1242,7 +1239,7 @@ do
 		lines:SetFullWidth(true)
 		frame:AddChild(lines)
 
-		if channellist[origchan][3] then
+		if origchan == "whisper" then
 			local whisperbox = AceGUI:Create("EditBox")
 			whisperbox:SetLabel(L["Whisper Target"])
 			whisperbox:SetText(Skada.db.report.target or "")
@@ -1276,9 +1273,6 @@ do
 
 		report:SetFullWidth(true)
 		frame:AddChild(report)
-
-		-- recycle the table
-		channellist = del(channellist, true)
 	end
 
 	function Private.open_report(window)

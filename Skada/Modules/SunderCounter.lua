@@ -1,9 +1,9 @@
 local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
-	local mod = Skada:NewModule("Sunder Counter")
-	local targetmod = mod:NewModule("Sunder target list")
-	local sourcemod = targetmod:NewModule("Sunder source list")
+	local mode = Skada:NewModule("Sunder Counter")
+	local mode_target = mode:NewModule("Sunder target list")
+	local mode_target_source = mode_target:NewModule("Sunder source list")
 	local get_actor_sunder_sources = nil
 	local get_actor_sunder_targets = nil
 
@@ -16,7 +16,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 	local active_sunders = {} -- holds sunder targets to consider refreshes
 	local spell_sunder, spell_devastate, sunder_link
 	local last_srcGUID, last_srcName, last_srcFlags
-	local mod_cols = nil
+	local mode_cols = nil
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -52,7 +52,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 			if not M.sunderannounce then
 				return
 			elseif not M.sunderbossonly or (M.sunderbossonly and Skada:IsBoss(dstGUID, true)) then
-				mod:Announce(uformat(L["%s dropped from %s!"], sunder_link or spell_sunder, dstName))
+				mode:Announce(uformat(L["%s dropped from %s!"], sunder_link or spell_sunder, dstName))
 			end
 		end
 	end
@@ -95,7 +95,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		elseif not tar.full then
 			tar.count = (tar.count or 0) + 1
 			if tar.count == 5 then
-				mod:Announce(format(
+				mode:Announce(format(
 					L["%s stacks of %s applied on %s in %s sec!"],
 					tar.count,
 					sunder_link or spell_sunder,
@@ -133,12 +133,12 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		end
 	end
 
-	function sourcemod:Enter(win, id, label)
+	function mode_target_source:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
 		win.title = format(L["%s's <%s> sources"], label, spell_sunder)
 	end
 
-	function sourcemod:Update(win, set)
+	function mode_target_source:Update(win, set)
 		win.title = uformat(L["%s's <%s> sources"], win.targetname, spell_sunder)
 		if not win.targetname then return end
 
@@ -155,16 +155,16 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 
 			local d = win:actor(nr, source, source.enemy, sourcename)
 			d.value = source.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function targetmod:Enter(win, id, label)
+	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's <%s> targets"], label, spell_sunder)
 	end
 
-	function targetmod:Update(win, set)
+	function mode_target:Update(win, set)
 		double_check_sunder()
 		win.title = uformat(L["%s's <%s> targets"], win.actorname, spell_sunder)
 		if not set or not win.actorname then return end
@@ -182,11 +182,11 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 
 			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		double_check_sunder()
 		win.title = L["Sunder Counter"]
 
@@ -206,35 +206,35 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.sunder
-				format_valuetext(d, mod_cols, total, win.metadata)
+				format_valuetext(d, mode_cols, total, win.metadata)
 			end
 		end
 	end
 
-	function mod:GetSetSummary(set)
+	function mode:GetSetSummary(set)
 		return set and set.sunder or 0
 	end
 
-	function mod:AddToTooltip(set, tooltip)
+	function mode:AddToTooltip(set, tooltip)
 		if set.sunder and set.sunder > 0 then
 			tooltip:AddDoubleLine(spell_sunder, set.sunder, 1, 1, 1)
 		end
 	end
 
-	function mod:OnEnable()
-		sourcemod.metadata = {showspots = true}
-		targetmod.metadata = {click1 = sourcemod}
+	function mode:OnEnable()
+		mode_target_source.metadata = {showspots = true}
+		mode_target.metadata = {click1 = mode_target_source}
 		self.metadata = {
 			showspots = true,
-			click1 = targetmod,
+			click1 = mode_target,
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\ability_warrior_sunder]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		targetmod.nototal = true
+		mode_target.nototal = true
 
 		local flags_src = {src_is_interesting_nopets = true}
 		Skada:RegisterForCL(
@@ -264,22 +264,22 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		Skada:AddMode(self, "Buffs and Debuffs")
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 
-	function mod:CombatLeave()
+	function mode:CombatLeave()
 		clear(data)
 		clear(sunder_targets)
 		last_srcGUID, last_srcName, last_srcFlags = nil, nil, nil
 	end
 
-	function mod:Announce(msg)
+	function mode:Announce(msg)
 		Skada:SendChat(msg, M.sunderchannel or "SAY", "preset")
 	end
 
-	function mod:OnInitialize()
+	function mode:OnInitialize()
 		double_check_sunder()
 
 		M.sunderchannel = M.sunderchannel or "SAY"

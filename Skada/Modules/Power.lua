@@ -1,12 +1,12 @@
 local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Resources", function(L, P)
-	local mod = Skada:NewModule("Resources")
-	mod.icon = [[Interface\Icons\spell_holy_rapture]]
+	local mode = Skada:NewModule("Resources")
+	mode.icon = [[Interface\Icons\spell_holy_rapture]]
 
 	local setmetatable, pairs = setmetatable, pairs
 	local format, uformat = string.format, Private.uformat
-	local mod_cols = nil
+	local mode_cols = nil
 
 	local SPELL_POWER_MANA = SPELL_POWER_MANA or 0
 	local SPELL_POWER_RAGE = SPELL_POWER_RAGE or 1
@@ -89,24 +89,24 @@ Skada:RegisterModule("Resources", function(L, P)
 	end
 
 	-- a base module used to create our power modules.
-	local basemod = {}
-	local basemod_mt = {__index = basemod}
+	local mode_base = {}
+	local mode_base_mt = {__index = mode_base}
 
 	-- a base actor module used to create power gained per actor modules.
-	local actormod = {}
-	local actormod_mt = {__index = actormod}
+	local mode_actor = {}
+	local mode_actor_mt = {__index = mode_actor}
 
 	-- allows us to create a module for each power type.
-	function basemod:Create(power)
+	function mode_base:Create(power)
 		if not power or not gainTable[power] then return end
 
 		local powername = namesTable[power]
 
 		local instance = Skada:NewModule(format("Power gained: %s", powername))
-		setmetatable(instance, basemod_mt)
+		setmetatable(instance, mode_base_mt)
 
 		local pmode = instance:NewModule(format("%s gained spells", powername))
-		setmetatable(pmode, actormod_mt)
+		setmetatable(pmode, mode_actor_mt)
 
 		pmode.powerid = power
 		pmode.power = gainTable[power]
@@ -128,7 +128,7 @@ Skada:RegisterModule("Resources", function(L, P)
 
 	-- this is the main module update function that shows the list
 	-- of actors depending on the selected power gain type.
-	function basemod:Update(win, set)
+	function mode_base:Update(win, set)
 		win.title = self.localeName or self.moduleName or L["Unknown"]
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
@@ -150,26 +150,26 @@ Skada:RegisterModule("Resources", function(L, P)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor[self.power]
-				format_valuetext(d, mod_cols, total, win.metadata)
+				format_valuetext(d, mode_cols, total, win.metadata)
 			end
 		end
 	end
 
 	-- base function used to return sets summaries
-	function basemod:GetSetSummary(set, win)
+	function mode_base:GetSetSummary(set, win)
 		if not set then return end
 		local value = set:GetTotal(win and win.class, nil, self.power) or 0
 		return value, Skada:FormatNumber(value)
 	end
 
 	-- actor mods common Enter function.
-	function actormod:Enter(win, id, label)
+	function mode_actor:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's gained %s"], label, namesTable[self.powerid])
 	end
 
 	-- actor mods main update function
-	function actormod:Update(win, set)
+	function mode_actor:Update(win, set)
 		win.title = uformat(L["%s's gained %s"], win.actorname, L[self.powername])
 		if not set or not win.actorname then return end
 
@@ -191,39 +191,39 @@ Skada:RegisterModule("Resources", function(L, P)
 
 			local d = win:spell(nr, spellid, false)
 			d.value = amount
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
 	-- we create the modules now
 	-- power gained: mana
-	local manamod = basemod:Create(SPELL_POWER_MANA)
-	local ragemod = basemod:Create(SPELL_POWER_RAGE)
-	local energymod = basemod:Create(SPELL_POWER_ENERGY)
-	local runicmod = basemod:Create(SPELL_POWER_RUNIC_POWER)
+	local mode_mana = mode_base:Create(SPELL_POWER_MANA)
+	local mode_rage = mode_base:Create(SPELL_POWER_RAGE)
+	local mode_energy = mode_base:Create(SPELL_POWER_ENERGY)
+	local mode_runic = mode_base:Create(SPELL_POWER_RUNIC_POWER)
 
-	function mod:OnEnable()
+	function mode:OnEnable()
 		self.metadata = {columns = {Amount = true, Percent = true, sPercent = true}}
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 		Skada:AddColumnOptions(self)
 
 		Skada:RegisterForCL(spell_energize, {src_is_interesting = true}, "SPELL_ENERGIZE", "SPELL_PERIODIC_ENERGIZE")
 
-		manamod.metadata.icon = [[Interface\Icons\spell_frost_summonwaterelemental]]
-		ragemod.metadata.icon = [[Interface\Icons\spell_nature_shamanrage]]
-		energymod.metadata.icon = [[Interface\Icons\spell_holy_circleofrenewal]]
-		runicmod.metadata.icon = [[Interface\Icons\inv_sword_62]]
+		mode_mana.metadata.icon = [[Interface\Icons\spell_frost_summonwaterelemental]]
+		mode_rage.metadata.icon = [[Interface\Icons\spell_nature_shamanrage]]
+		mode_energy.metadata.icon = [[Interface\Icons\spell_holy_circleofrenewal]]
+		mode_runic.metadata.icon = [[Interface\Icons\inv_sword_62]]
 
-		Skada:AddMode(manamod, "Resources")
-		Skada:AddMode(ragemod, "Resources")
-		Skada:AddMode(energymod, "Resources")
-		Skada:AddMode(runicmod, "Resources")
+		Skada:AddMode(mode_mana, "Resources")
+		Skada:AddMode(mode_rage, "Resources")
+		Skada:AddMode(mode_energy, "Resources")
+		Skada:AddMode(mode_runic, "Resources")
 	end
 
-	function mod:OnDisable()
-		Skada:RemoveMode(manamod)
-		Skada:RemoveMode(ragemod)
-		Skada:RemoveMode(energymod)
-		Skada:RemoveMode(runicmod)
+	function mode:OnDisable()
+		Skada:RemoveMode(mode_mana)
+		Skada:RemoveMode(mode_rage)
+		Skada:RemoveMode(mode_energy)
+		Skada:RemoveMode(mode_runic)
 	end
 end)

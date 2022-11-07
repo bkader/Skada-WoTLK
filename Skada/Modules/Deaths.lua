@@ -1,9 +1,9 @@
 local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Deaths", function(L, P, _, _, M)
-	local mod = Skada:NewModule("Deaths")
-	local actormod = mod:NewModule("Player's deaths")
-	local deathlogmod = mod:NewModule("Death log")
+	local mode = Skada:NewModule("Deaths")
+	local mode_actor = mode:NewModule("Player's deaths")
+	local mode_deathlog = mode:NewModule("Death log")
 	local WATCH = nil -- true to watch those alive
 
 	--------------------------------------------------------------------------
@@ -18,7 +18,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 	local GetTime, time, date, wipe = GetTime, time, date, wipe
 	local spellnames, spellicons = Skada.spellnames, Skada.spellicons
-	local mod_cols, submod_cols = nil, nil
+	local mode_cols, submode_cols = nil, nil
 
 	--------------------------------------------------------------------------
 	-- colors and icons
@@ -168,7 +168,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		-- announce death
 		if M.deathannounce and set ~= Skada.total then
-			mod:Announce(deathlog.log, actor.name)
+			mode:Announce(deathlog.log, actor.name)
 		end
 	end
 
@@ -252,7 +252,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		local ignored_spells = setmetatable({
 			[spellnames[15290]] = true, -- Vampiric Embrace
 			[spellnames[20267]] = true, -- Judgement of Light
-			[spellnames[23880]] = true, -- Bloodthirst
+			[spellnames[23881]] = true, -- Bloodthirst
 			[spellnames[50475]] = true, -- Blood Presence
 			[spellnames[52042]] = true, -- Healing Stream Totem
 		}, {__index = Skada.ignored_spells.heal})
@@ -404,7 +404,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	-- module functions
 	--------------------------------------------------------------------------
 
-	function deathlogmod:Enter(win, id, label)
+	function mode_deathlog:Enter(win, id, label)
 		if M.alternativedeaths then
 			win.actorid, win.datakey = strmatch(id, "(%w+)::(%d+)")
 			win.datakey = tonumber(win.datakey or 0)
@@ -421,7 +421,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			return a and b and a.time > b.time
 		end
 
-		function deathlogmod:Update(win, set)
+		function mode_deathlog:Update(win, set)
 			win.title = uformat(L["%s's death log"], win.actorname)
 
 			local actor = win.datakey and Skada:FindActor(set, win.actorid, win.actorname)
@@ -558,9 +558,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 						end
 
 						d.valuetext = Skada:FormatValueCols(
-							submod_cols.Change and change,
-							submod_cols.Health and Skada:FormatNumber(d.value),
-							submod_cols.Percent and Skada:FormatPercent(log.hp or 0, deathlog.hpm or 1)
+							submode_cols.Change and change,
+							submode_cols.Health and Skada:FormatNumber(d.value),
+							submode_cols.Percent and Skada:FormatPercent(log.hp or 0, deathlog.hpm or 1)
 						)
 					end
 				else
@@ -570,12 +570,12 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 	end
 
-	function actormod:Enter(win, id, label)
+	function mode_actor:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's deaths"], label)
 	end
 
-	function actormod:Update(win, set)
+	function mode_actor:Update(win, set)
 		win.title = uformat(L["%s's deaths"], win.actorname)
 		if not set or not win.actorid then return end
 
@@ -601,15 +601,15 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 				d.id = i
 				d.icon = d.icon or icon_death
 				d.label = d.label or L["Unknown"]
-				if mod_cols.Source and death.src then
+				if mode_cols.Source and death.src then
 					d.text = format("%s (%s)", d.label, death.src)
 				end
 
 				d.value = death.time or curtime
 				if death.timeod then
 					d.valuetext = Skada:FormatValueCols(
-						mod_cols.Time and date("%H:%M:%S", death.timeod),
-						mod_cols.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
+						mode_cols.Time and date("%H:%M:%S", death.timeod),
+						mode_cols.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
 					)
 				else
 					d.valuetext = "..."
@@ -686,15 +686,15 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 						if death.timeod then
 							d.value = death.time
 							d.valuetext = Skada:FormatValueCols(
-								mod_cols.Time and date("%H:%M:%S", death.timeod),
-								mod_cols.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
+								mode_cols.Time and date("%H:%M:%S", death.timeod),
+								mode_cols.Survivability and Skada:FormatTime(death.timeod - set.starttime, true)
 							)
 						else
 							d.value = curtime or GetTime()
 							d.valuetext = "..."
 						end
 
-						local src = mod_cols.Source and death.src
+						local src = mode_cols.Source and death.src
 						if num ~= 1 then
 							d.text = format(src and "%s (%d) (%s)" or "%s (%d)", d.text or d.label, num, src)
 							d.reportlabel = format("%s   %s", d.text, d.valuetext)
@@ -710,7 +710,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		if M.alternativedeaths and (set ~= Skada.total or P.totalidc) then
 			alt_update(self, win, set)
 		else
@@ -718,13 +718,13 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 	end
 
-	function mod:GetSetSummary(set, win)
+	function mode:GetSetSummary(set, win)
 		if not set then return end
 		local deaths = set:GetTotal(win and win.class, nil, "death") or 0
 		return set.last_time or GetTime(), deaths
 	end
 
-	function mod:AddToTooltip(set, tooltip)
+	function mode:AddToTooltip(set, tooltip)
 		if set.death and set.death > 0 then
 			tooltip:AddDoubleLine(L["Deaths"], set.death, 1, 1, 1)
 		end
@@ -778,16 +778,16 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 	end
 
-	function mod:OnEnable()
-		deathlogmod.metadata = {
+	function mode:OnEnable()
+		mode_deathlog.metadata = {
 			ordersort = true,
 			tooltip = entry_tooltip,
 			columns = {Change = true, Health = true, Percent = true},
 			icon = icon_death
 		}
-		actormod.metadata = {click1 = deathlogmod}
+		mode_actor.metadata = {click1 = mode_deathlog}
 		self.metadata = {
-			click1 = actormod,
+			click1 = mode_actor,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Time = true, Survivability = false, Source = false},
@@ -796,16 +796,16 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		-- alternative display
 		if M.alternativedeaths then
-			actormod.metadata.click1 = nil
-			self.metadata.click1 = deathlogmod
+			mode_actor.metadata.click1 = nil
+			self.metadata.click1 = mode_deathlog
 		end
 
-		mod_cols = self.metadata.columns
-		submod_cols = deathlogmod.metadata.columns
+		mode_cols = self.metadata.columns
+		submode_cols = mode_deathlog.metadata.columns
 
 		-- no total click.
-		deathlogmod.nototal = true
-		actormod.nototal = true
+		mode_deathlog.nototal = true
+		mode_actor.nototal = true
 
 		local flags_dst_nopets = {dst_is_interesting_nopets = true}
 
@@ -889,17 +889,17 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		Skada:AddMode(self)
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 
-	function mod:CombatLeave()
+	function mode:CombatLeave()
 		wipe(data)
 		wipe(dead)
 	end
 
-	function mod:SetComplete(set)
+	function mode:SetComplete(set)
 		-- clean deathlogs.
 		for _, actor in pairs(set.actors) do
 			if not actor.enemy and (not set.death or not actor.death) then
@@ -915,7 +915,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 	end
 
-	function mod:Announce(logs, actorname)
+	function mode:Announce(logs, actorname)
 		-- announce only if:
 		-- 	1. we have a valid deathlog.
 		-- 	2. actor is not in a pvp (spam caution).
@@ -977,12 +977,12 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			if not options then
 				options = {
 					type = "group",
-					name = mod.localeName,
+					name = mode.localeName,
 					desc = format(L["Options for %s."], L["Death log"]),
 					args = {
 						header = {
 							type = "description",
-							name = mod.localeName,
+							name = mode.localeName,
 							fontSize = "large",
 							image = icon_mode,
 							imageWidth = 18,
@@ -1060,15 +1060,15 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 							set = function(_, value)
 								if M.alternativedeaths then
 									M.alternativedeaths = nil
-									mod.metadata.click1 = actormod
-									actormod.metadata.click1 = deathlogmod
+									mode.metadata.click1 = mode_actor
+									mode_actor.metadata.click1 = mode_deathlog
 								else
 									M.alternativedeaths = true
-									mod.metadata.click1 = deathlogmod
-									actormod.metadata.click1 = nil
+									mode.metadata.click1 = mode_deathlog
+									mode_actor.metadata.click1 = nil
 								end
 
-								mod:Reload()
+								mode:Reload()
 								Skada:Wipe(true)
 								Skada:UpdateDisplay(true)
 							end,
@@ -1081,7 +1081,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			return options
 		end
 
-		function mod:OnInitialize()
+		function mode:OnInitialize()
 			M.deathlogevents = M.deathlogevents or 14
 			M.deathlogthreshold = M.deathlogthreshold or 1000
 			M.deathchannel = M.deathchannel or "AUTO"

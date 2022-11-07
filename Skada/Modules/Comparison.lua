@@ -4,12 +4,12 @@ Skada:RegisterModule("Comparison", function(L, P)
 	local parent = Skada:GetModule("Damage", true)
 	if not parent then return end
 
-	local mod = parent:NewModule("Comparison")
-	local spellmod = mod:NewModule("Damage spell list")
-	local dspellmod = spellmod:NewModule("Damage spell details")
-	local bspellmod = spellmod:NewModule("Damage Breakdown")
-	local targetmod = mod:NewModule("Damage target list")
-	local dtargetmod = targetmod:NewModule("Damage spell list")
+	local mode = parent:NewModule("Comparison")
+	local mode_spell = mode:NewModule("Damage spell list")
+	local mode_spell_details = mode_spell:NewModule("Damage spell details")
+	local mode_spell_breakdown = mode_spell:NewModule("Damage Breakdown")
+	local mode_target = mode:NewModule("Damage target list")
+	local mode_target_spell = mode_target:NewModule("Damage spell list")
 	local C = Skada.cacheTable2
 
 	local pairs, max = pairs, math.max
@@ -19,7 +19,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 	local userGUID, otherGUID = Skada.userGUID, nil
 	local userName, otherName = Skada.userName, nil
 	local userClass, otherClass = Skada.userClass, nil
-	local mod_cols = nil
+	local mode_cols = nil
 
 	-- damage miss types
 	local missTypes = Skada.missTypes
@@ -45,18 +45,18 @@ Skada:RegisterModule("Comparison", function(L, P)
 	local function format_value_percent(val, oval, disabled)
 		val, oval = val or 0, oval or 0
 		return Skada:FormatValueCols(
-			mod.metadata.columns.Damage and Skada:FormatPercent(val),
-			(mod.metadata.columns.Comparison and not disabled) and Skada:FormatPercent(oval),
-			(mod.metadata.columns.Percent and not disabled) and format_percent(oval, val)
+			mode.metadata.columns.Damage and Skada:FormatPercent(val),
+			(mode.metadata.columns.Comparison and not disabled) and Skada:FormatPercent(oval),
+			format_percent(oval, val, mode.metadata.columns.Percent and not disabled)
 		)
 	end
 
 	local function format_value_number(val, oval, fmt, disabled)
 		val, oval = val or 0, oval or 0 -- sanity check
 		return Skada:FormatValueCols(
-			mod.metadata.columns.Damage and (fmt and Skada:FormatNumber(val) or val),
-			(mod.metadata.columns.Comparison and not disabled) and (fmt and Skada:FormatNumber(oval) or oval),
-			format_percent(oval, val, mod.metadata.columns.Percent and not disabled)
+			mode.metadata.columns.Damage and (fmt and Skada:FormatNumber(val) or val),
+			(mode.metadata.columns.Comparison and not disabled) and (fmt and Skada:FormatNumber(oval) or oval),
+			format_percent(oval, val, mode.metadata.columns.Percent and not disabled)
 		)
 	end
 
@@ -64,7 +64,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		return (actor and not actor.enemy and actor.class == otherClass and actor.role == "DAMAGER")
 	end
 
-	local function spellmod_tooltip(win, id, label, tooltip)
+	local function mode_spell_tooltip(win, id, label, tooltip)
 		if label == L["Critical Hits"] or label == L["Normal Hits"] or label == L["Glancing"] then
 			local set = win:GetSelectedSet()
 			local actor = set and set:GetActor(win.actorid, win.actorname)
@@ -104,22 +104,14 @@ Skada:RegisterModule("Comparison", function(L, P)
 				return
 			end
 
-			local ospells = set:GetActorDamageSpells(otherGUID, otherName)
-			local ospell = ospells and ospells[win.spellid]
+			local oactor = set and set:GetActor(otherGUID, otherName)
+			local ospell = oactor and oactor.damagespells and oactor.damagespells[win.spellid]
 
 			if spell or ospell then
 				tooltip:AddLine(uformat(L["%s vs %s: %s"], actor and actor.name, otherName, win.spellname))
 				tooltip_school(tooltip, win.spellid)
 
 				if label == L["Critical Hits"] and (spell and spell.c_amt or ospell.c_amt) then
-					local num = spell and spell.c_num and (100 * spell.c_num / spell.count)
-					local onum = ospell and ospell.c_num and (100 * ospell.c_num / ospell.count)
-
-					tooltip:AddDoubleLine(L["Critical"], format_value_percent(onum, num, actor.id == otherGUID), 1, 1, 1)
-
-					num = (spell and spell.c_amt) and (spell.c_amt / spell.c_num)
-					onum = (ospell and ospell.c_amt) and (ospell.c_amt / ospell.c_num)
-
 					if (spell and spell.c_min) or (ospell and ospell.c_min) then
 						tooltip:AddDoubleLine(L["Minimum"], format_value_number(spell and spell.c_min, ospell and ospell.c_min, true), 1, 1, 1)
 					end
@@ -128,11 +120,10 @@ Skada:RegisterModule("Comparison", function(L, P)
 						tooltip:AddDoubleLine(L["Maximum"], format_value_number(spell and spell.c_max, ospell and ospell.c_max, true), 1, 1, 1)
 					end
 
+					local num = (spell and spell.c_amt) and (spell.c_amt / spell.c_num)
+					local onum = (ospell and ospell.c_amt) and (ospell.c_amt / ospell.c_num)
 					tooltip:AddDoubleLine(L["Average"], format_value_number(num, onum, true), 1, 1, 1)
 				elseif label == L["Normal Hits"] and ((spell and spell.n_amt) or (ospell and ospell.n_amt)) then
-					local num = (spell and spell.n_amt) and (spell.n_amt / spell.n_num)
-					local onum = (ospell and ospell.n_amt) and (ospell.n_amt / ospell.n_num)
-
 					if (spell and spell.n_min) or (ospell and ospell.n_min) then
 						tooltip:AddDoubleLine(L["Minimum"], format_value_number(spell and spell.n_min, ospell and ospell.n_min, true), 1, 1, 1)
 					end
@@ -141,6 +132,8 @@ Skada:RegisterModule("Comparison", function(L, P)
 						tooltip:AddDoubleLine(L["Maximum"], format_value_number(spell and spell.n_max, ospell and ospell.n_max, true), 1, 1, 1)
 					end
 
+					local num = (spell and spell.n_amt) and (spell.n_amt / spell.n_num)
+					local onum = (ospell and ospell.n_amt) and (ospell.n_amt / ospell.n_num)
 					tooltip:AddDoubleLine(L["Average"], format_value_number(num, onum, true), 1, 1, 1)
 				elseif label == L["Glancing"] and ((spell and spell.g_amt) or (ospell and ospell.g_amt)) then
 					local num = (spell and spell.g_amt) and (spell.g_amt / spell.g_num)
@@ -180,19 +173,9 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 		d.id = title
 		d.label = title
+		d.value = value or 0
 
-		if value then
-			d.value = value
-			ovalue = ovalue or 0
-		elseif ovalue then
-			d.value = ovalue
-			value = value or 0
-		else
-			d.value = value or 0
-			ovalue = ovalue or 0
-		end
-
-		d.valuetext = format_value_number(value, ovalue, fmt, disabled)
+		d.valuetext = format_value_number(value, ovalue or 0, fmt, disabled)
 
 		if win.metadata and (not win.metadata.maxvalue or d.value > win.metadata.maxvalue) then
 			win.metadata.maxvalue = d.value
@@ -201,74 +184,93 @@ Skada:RegisterModule("Comparison", function(L, P)
 		return nr
 	end
 
-	function dspellmod:Enter(win, id, label)
+	function mode_spell_details:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, uformat(L["%s's damage breakdown"], label))
+
+		if win.actorname == otherName then
+			win.title = uformat("%s: %s", win.actorname, format(L["%s's damage breakdown"], label))
+		else
+			win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, uformat(L["%s's damage breakdown"], win.spellname))
+		end
 	end
 
-	function dspellmod:Update(win, set)
-		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, uformat(L["%s's damage breakdown"], win.spellname))
-		if not set or not win.spellid then return end
+	function mode_spell_details:Tooltip(win, set, id, label, tooltip)
+		local actor = set and set:GetActor(win.actorid, win.actorname)
+		local spell = actor and actor.damagespells and actor.damagespells[id]
+		if spell and actor.id == otherGUID then
+			if spell.casts then
+				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
+			end
+			if spell.count then
+				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
+			end
 
-		local actor = set:GetActor(win.actorid, win.actorname)
-		if not actor then return end
+			return actor, spell
+		end
 
-		local spell = actor and actor.damagespells and actor.damagespells[win.spellid]
+		local oactor = set and set:GetActor(otherGUID, otherName)
+		local ospell = oactor and oactor.damagespells and oactor.damagespells[id]
+
+		-- casts
+		if (spell and spell.casts) or (ospell and ospell.casts) then
+			tooltip:AddDoubleLine(L["Casts"], format_value_number(spell and spell.casts, ospell and ospell.casts, true), 1, 1, 1)
+		end
+		-- hitss
+		if (spell and spell.count) or (ospell and ospell.count) then
+			tooltip:AddDoubleLine(L["Hits"], format_value_number(spell and spell.count, ospell and ospell.count, true), 1, 1, 1)
+		end
+
+		return actor, spell, oactor, ospell
+	end
+
+	function mode_spell_details:Update(win, set, actor, spell, oactor, ospell)
+		if not actor or not spell then
+			actor = set and set:GetActor(win.actorid, win.actorname)
+			spell = actor and actor.damagespells and actor.damagespells[win.spellid]
+		end
 
 		-- same actor?
-		if actor.id == otherGUID then
+		if spell and actor and actor.id == otherGUID then
 			win.title = format("%s: %s", actor.name, format(L["%s's damage breakdown"], win.spellname))
 
-			if spell then
-				if win.metadata then
-					win.metadata.maxvalue = spell.count
-				end
+			if win.metadata then
+				win.metadata.maxvalue = 0
+			end
 
-				local nr = add_detail_bar(win, 0, L["Hits"], spell.count, nil, nil, true)
-				win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
+			local nr = 0
 
-				if spell.casts and spell.casts > 0 then
-					nr = add_detail_bar(win, nr, L["Casts"], spell.casts, nil, nil, true)
-					win.dataset[nr].value = win.dataset[nr].value * 1e3 -- to be always first
-				end
+			if spell.n_num and spell.n_num > 0 then
+				nr = add_detail_bar(win, nr, L["Normal Hits"], spell.n_num, nil, nil, true)
+			end
 
-				if spell.n_num and spell.n_num > 0 then
-					nr = add_detail_bar(win, nr, L["Normal Hits"], spell.n_num, nil, nil, true)
-				end
+			if spell.c_num and spell.c_num > 0 then
+				nr = add_detail_bar(win, nr, L["Critical Hits"], spell.c_num, nil, nil, true)
+			end
 
-				if spell.c_num and spell.c_num > 0 then
-					nr = add_detail_bar(win, nr, L["Critical Hits"], spell.c_num, nil, nil, true)
-				end
+			if spell.g_num and spell.g_num > 0 then
+				nr = add_detail_bar(win, nr, L["Glancing"], spell.g_num, nil, nil, true)
+			end
 
-				if spell.g_num and spell.g_num > 0 then
-					nr = add_detail_bar(win, nr, L["Glancing"], spell.g_num, nil, nil, true)
-				end
-
-				for k, v in pairs(missTypes) do
-					if spell[v] or spell[k] then
-						nr = add_detail_bar(win, nr, L[k], spell[v] or spell[k], nil, nil, true)
-					end
+			for k, v in pairs(missTypes) do
+				if spell[v] or spell[k] then
+					nr = add_detail_bar(win, nr, L[k], spell[v] or spell[k], nil, nil, true)
 				end
 			end
 
 			return
 		end
 
-		local ospells = set:GetActorDamageSpells(otherGUID, otherName)
-		local ospell = ospells and ospells[win.spellid]
+		if not oactor or not ospell then
+			oactor = set and set:GetActor(otherGUID, otherName)
+			ospell = oactor and oactor.damagespells and oactor.damagespells[win.spellid]
+		end
 
 		if spell or ospell then
 			if win.metadata then
-				win.metadata.maxvalue = spell and spell.count or ospell.count
+				win.metadata.maxvalue = 0
 			end
 
-			local nr = add_detail_bar(win, 0, L["Hits"], spell and spell.count, ospell and ospell.count)
-			win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
-
-			if (spell and spell.casts and spell.casts > 0) or (ospell and ospell.casts and ospell.casts > 0) then
-				nr = add_detail_bar(win, nr, L["Casts"], spell and spell.casts, ospell and ospell.casts)
-				win.dataset[nr].value = win.dataset[nr].value * 1e3 -- to be always first
-			end
+			local nr = 0
 
 			if (spell and spell.n_num and spell.n_num > 0) or (ospell and ospell.n_num and ospell.n_num > 0) then
 				nr = add_detail_bar(win, nr, L["Normal Hits"], spell and spell.n_num, ospell and ospell.n_num)
@@ -290,150 +292,141 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 	end
 
-	function bspellmod:Enter(win, id, label)
+	function mode_spell_breakdown:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, L["actor damage"](label))
 	end
 
-	function bspellmod:Update(win, set)
+	function mode_spell_breakdown:Tooltip(win, set, id, label, tooltip)
+		local actor = set and set:GetActor(win.actorid, win.actorname)
+		local spell = actor and actor.damagespells and actor.damagespells[id]
+		if spell and actor.id == otherGUID then
+			local total = spell.total or spell.amount
+			if spell.r_amt then
+				total = total + spell.r_amt
+			end
+			if spell.b_amt then
+				total = total + spell.b_amt
+			end
+
+			tooltip:AddDoubleLine(L["Total"], Skada:FormatNumber(total), 1, 1, 1)
+			return actor, spell, total
+		end
+
+		local oactor = set and set:GetActor(otherGUID, otherName)
+		local ospell = oactor and oactor.damagespells and oactor.damagespells[id]
+		if spell or ospell then
+			local total = spell and (spell.total or spell.amount) or 0
+			if spell and spell.r_amt then
+				total = total + spell.r_amt
+			end
+			if spell and spell.b_amt then
+				total = total + spell.b_amt
+			end
+
+			local ototal = ospell and (ospell.total or ospell.amount) or 0
+			if ospell and ospell.r_amt then
+				ototal = ototal + ospell.r_amt
+			end
+			if ospell and ospell.b_amt then
+				ototal = ototal + ospell.b_amt
+			end
+
+			tooltip:AddDoubleLine(L["Total"], format_value_number(total, ototal, true), 1, 1, 1)
+			return actor, spell, oactor, ospell
+		end
+
+	end
+
+	function mode_spell_breakdown:Update(win, set, actor, spell, oactor, ospell)
 		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, L["actor damage"](win.spellname or L["Unknown"]))
 		if not set or not win.spellid then return end
 
-		local actor = set:GetActor(win.actorid, win.actorname)
-		if not actor then return end
+		if not actor or not spell then
+			actor = set:GetActor(win.actorid, win.actorname)
+			spell = actor and actor.damagespells and actor.damagespells[win.spellid]
+		end
 
-		local spell = actor and actor.damagespells and actor.damagespells[win.spellid]
-
-		if actor.id == otherGUID then
+		if spell and actor and actor.id == otherGUID then
 			win.title = uformat(L["%s's <%s> damage"], actor.name, win.spellname)
 
-			if spell then
-				local total = spell.amount
+			local nr = add_detail_bar(win, 0, L["Damage"], spell.amount, nil, true, true)
 
-				local absorbed = spell.total and max(0, spell.total - spell.amount)
-				if absorbed then
-					total = spell.total
-				end
+			-- absorbed damage
+			if spell.total and spell.total ~= spell.amount then
+				nr = add_detail_bar(win, nr, L["ABSORB"], max(0, spell.total - spell.amount), nil, true, true)
+			end
 
-				local blocked = spell.b_amt or spell.blocked
-				if blocked then
-					total = total + blocked
-				end
+			-- resisted damage
+			if spell.r_amt and spell.r_amt > 0 then
+				nr = add_detail_bar(win, nr, L["RESIST"], spell.r_amt, nil, true, true)
+			end
 
-				local resisted = spell.r_amt or spell.resisted
-				if resisted then
-					total = total + resisted
-				end
+			-- blocked damage
+			if spell.b_amt and spell.b_amt > 0 then
+				nr = add_detail_bar(win, nr, L["BLOCK"], spell.b_amt, nil, true, true)
+			end
 
-				-- total damage
-				local nr = add_detail_bar(win, 0, L["Total"], total, nil, true, true)
-				win.dataset[nr].value = win.dataset[nr].value + 1 -- to be always first
-
-				-- real damage
-				if total ~= spell.amount then
-					nr = add_detail_bar(win, nr, L["Damage"], spell.amount, nil, true, true)
-				end
-
-				-- absorbed damage
-				if absorbed and absorbed > 0 then
-					nr = add_detail_bar(win, nr, L["ABSORB"], absorbed, nil, true, true)
-				end
-
-				-- overkill damage
-				if spell.o_amt and spell.o_amt > 0 then
-					nr = add_detail_bar(win, nr, L["Overkill"], spell.o_amt, nil, true, true)
-				end
-
-				-- blocked damage
-				if blocked and blocked > 0 then
-					nr = add_detail_bar(win, nr, L["BLOCK"], blocked, nil, true, true)
-				end
-
-				-- resisted damage
-				if resisted and resisted > 0 then
-					nr = add_detail_bar(win, nr, L["RESIST"], resisted, nil, true, true)
-				end
+			-- overkill damage
+			if spell.o_amt and spell.o_amt > 0 then
+				nr = add_detail_bar(win, nr, L["Overkill"], spell.o_amt, nil, true, true)
 			end
 
 			return
 		end
 
-		local ospells = set:GetActorDamageSpells(otherGUID, otherName)
-		local ospell = ospells and ospells[win.spellid]
+		if not oactor or not ospell then
+			oactor = set and set:GetActor(otherGUID, otherName)
+			ospell = oactor and oactor.damagespells and oactor.damagespells[win.spellid]
+		end
 
 		if spell or ospell then
-			local total = spell and spell.amount
-			local ototal = ospell and ospell.amount
+			-- damage done
+			local nr = add_detail_bar(win, 0, L["Damage"], spell and spell.amount, ospell and ospell.amount, true)
 
-			local absorbed = (spell and spell.total) and max(0, spell.total - spell.amount)
-			if absorbed then
-				total = spell.total
-			end
-
-			local oabsorbed = (ospell and ospell.total) and max(0, ospell.total - ospell.amount)
-			if oabsorbed then
-				ototal = ospell.total
-			end
-
-			local blocked = spell and (spell.b_amt or spell.blocked)
-			if blocked then
-				total = total + blocked
-			end
-
-			local oblocked = ospell and (ospell.b_amt or ospell.blocked)
-			if oblocked then
-				ototal = ototal + oblocked
-			end
-
-			local resisted = spell and (spell.r_amt or spell.resisted)
-			if resisted then
-				total = total + resisted
-			end
-
-			local oresisted = ospell and (ospell.r_amt or ospell.resisted)
-			if oresisted then
-				ototal = ototal + oresisted
-			end
-
-			-- total damage
-			local nr = add_detail_bar(win, 0, L["Total"], total, ototal, true)
-			win.dataset[nr].value = (spell and total or ototal) + 1 -- to be always first
-
-			-- real damage
-			if (spell and total ~= spell.amount) or (ospell and ototal ~= ospell.amount) then
-				nr = add_detail_bar(win, nr, L["Damage"], spell and spell.amount, ospell and ospell.amount, true)
-			end
-
-			-- absorbed damage
-			if (absorbed and absorbed > 0) or (oabsorbed and oabsorbed > 0) then
-				nr = add_detail_bar(win, nr, L["ABSORB"], absorbed, oabsorbed, true)
-			end
-
-			-- overkill damage
-			local overkill = spell and spell.o_amt
-			local ooverkill = ospell and ospell.o_amt
-			if (overkill and overkill > 0) or (ooverkill and ooverkill > 0) then
-				nr = add_detail_bar(win, nr, L["Overkill"], overkill, ooverkill, true)
+			-- resisted damage
+			local r_amt1 = spell and spell.r_amt
+			local r_amt2 = ospell and ospell.r_amt
+			if (r_amt1 and r_amt1 > 0) or (r_amt2 and r_amt2 > 0) then
+				nr = add_detail_bar(win, nr, L["RESIST"], r_amt1, r_amt2, true)
 			end
 
 			-- blocked damage
-			if (blocked and blocked > 0) or (oblocked and oblocked > 0) then
-				nr = add_detail_bar(win, nr, L["BLOCK"], blocked, oblocked, true)
+			local b_amt1 = spell and spell.b_amt
+			local b_amt2 = ospell and ospell.b_amt
+			if (b_amt1 and b_amt1 > 0) or (b_amt2 and b_amt2 > 0) then
+				nr = add_detail_bar(win, nr, L["RESIST"], b_amt1, b_amt2, true)
 			end
 
-			-- resisted damage
-			if (resisted and resisted > 0) or (oresisted and oresisted > 0) then
-				nr = add_detail_bar(win, nr, L["RESIST"], resisted, oresisted, true)
+			-- overkill damage
+			local o_amt1 = spell and spell.o_amt
+			local o_amt2 = ospell and ospell.o_amt
+			if (o_amt1 and o_amt1 > 0) or (o_amt2 and o_amt2 > 0) then
+				nr = add_detail_bar(win, nr, L["Overkill"], o_amt1, o_amt2, true)
+			end
+
+			-- absorbed damage
+			local a_amt1 = spell and spell.total and spell.total ~= spell.amount and max(0, spell.total - spell.amount)
+			local a_amt2 = ospell and ospell.total and ospell.total ~= ospell.amount and max(0, ospell.total - ospell.amount)
+			if (a_amt1 and a_amt1 > 0) or (a_amt2 and a_amt2 > 0) then
+				nr = add_detail_bar(win, nr, L["ABSORB"], a_amt1, a_amt2, true)
+			end
+
+			-- glancing
+			local g_amt1 = spell and spell.g_amt
+			local g_amt2 = ospell and ospell.g_amt
+			if (g_amt1 and g_amt1 > 0) or (g_amt2 and g_amt2 > 0) then
+				nr = add_detail_bar(win, nr, L["Glancing"], g_amt1, g_amt2, true)
 			end
 		end
 	end
 
-	function dtargetmod:Enter(win, id, label)
+	function mode_target_spell:Enter(win, id, label)
 		win.targetname = label
 		win.title = uformat(L["%s vs %s: Damage on %s"], win.actorname, otherName, label)
 	end
 
-	function dtargetmod:Update(win, set)
+	function mode_target_spell:Update(win, set)
 		win.title = uformat(L["%s vs %s: Damage on %s"], win.actorname, otherName, win.targetname)
 		if not set or not win.targetname then return end
 
@@ -464,7 +457,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 					local d = win:spell(nr, spellid)
 					d.value = amount
-					d.valuetext = Skada:FormatValueCols(mod_cols.Damage and Skada:FormatNumber(d.value))
+					d.valuetext = Skada:FormatValueCols(mode_cols.Damage and Skada:FormatNumber(d.value))
 
 					if win.metadata and d.value > win.metadata.maxvalue then
 						win.metadata.maxvalue = d.value
@@ -567,17 +560,22 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s vs %s: Spells"], label, otherName)
+		if label == otherName then
+			win.title = L["actor damage"](label)
+		else
+			win.title = uformat(L["%s vs %s: Spells"], label, otherName)
+		end
 	end
 
-	function spellmod:Update(win, set)
+	function mode_spell:Update(win, set)
 		win.title = uformat(L["%s vs %s: Spells"], win.actorname, otherName)
 		if not set or not win.actorname then return end
 
-		local spells, actor = set:GetActorDamageSpells(win.actorid, win.actorname)
-		if not actor or not spells then
+		local actor = set:GetActor(win.actorid, win.actorname)
+		local spells = actor and actor.damagespells
+		if not spells then
 			return
 		elseif win.metadata then
 			win.metadata.maxvalue = 0
@@ -587,14 +585,14 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 		-- same actor?
 		if actor.id == otherGUID then
-			win.title = L["actor damage"](actor.name)
+			win.title = L["actor damage"](otherName)
 
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1
 
 				local d = win:spell(nr, spellid)
 				d.value = P.absdamage and spell.total or spell.amount or 0
-				d.valuetext = Skada:FormatValueCols(mod_cols.Damage and Skada:FormatNumber(d.value))
+				d.valuetext = Skada:FormatValueCols(mode_cols.Damage and Skada:FormatNumber(d.value))
 
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
@@ -605,7 +603,8 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 
 		-- collect compared actor's spells.
-		local ospells = set:GetActorDamageSpells(otherGUID, otherName)
+		local oactor = set and set:GetActor(otherGUID, otherName)
+		local ospells = oactor and oactor.damagespells
 
 		-- iterate comparison actor's spells.
 		for spellid, spell in pairs(spells) do
@@ -640,12 +639,16 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 	end
 
-	function targetmod:Enter(win, id, label)
+	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s vs %s: Targets"], label, otherName)
+		if label == otherName then
+			win.title = format(L["%s's targets"], label)
+		else
+			win.title = uformat(L["%s vs %s: Targets"], label, otherName)
+		end
 	end
 
-	function targetmod:Update(win, set)
+	function mode_target:Update(win, set)
 		win.title = uformat(L["%s vs %s: Targets"], win.actorname, otherName)
 		if not set or not win.actorname then return end
 
@@ -668,7 +671,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 				local d = win:actor(nr, target, target.enemy, targetname)
 				d.value = P.absdamage and target.total or target.amount
-				d.valuetext = Skada:FormatValueCols(mod_cols.Damage and Skada:FormatNumber(d.value))
+				d.valuetext = Skada:FormatValueCols(mode_cols.Damage and Skada:FormatNumber(d.value))
 
 				if win.metadata and d.value > win.metadata.maxvalue then
 					win.metadata.maxvalue = d.value
@@ -714,7 +717,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = format("%s: %s", L["Comparison"], otherName)
 
 		local total = set and set:GetDamage()
@@ -736,9 +739,9 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 					d.value = amount
 					d.valuetext = Skada:FormatValueCols(
-						mod_cols.Damage and Skada:FormatNumber(d.value),
-						mod_cols.DPS and Skada:FormatNumber(dps),
-						format_percent(oamount, d.value, mod_cols.Percent and actor.id ~= otherGUID)
+						mode_cols.Damage and Skada:FormatNumber(d.value),
+						mode_cols.DPS and Skada:FormatNumber(dps),
+						format_percent(oamount, d.value, mode_cols.Percent and actor.id ~= otherGUID)
 					)
 
 					-- a valid window, not a tooltip
@@ -766,13 +769,13 @@ Skada:RegisterModule("Comparison", function(L, P)
 		userGUID = userGUID or Skada.userGUID
 
 		-- same actor or me? reset to the actor
-		if id == userGUID or (id == otherGUID and win.selectedmode == mod) then
+		if id == userGUID or (id == otherGUID and win.selectedmode == mode) then
 			userName = userName or Skada.userName
 			userClass = userClass or Skada.userClass
 			otherGUID = userGUID
 			otherName = userName
 			otherClass = userClass
-			win:DisplayMode(mod)
+			win:DisplayMode(mode)
 		elseif win.GetSelectedSet then
 			local set = win:GetSelectedSet()
 			local actor = set and set:GetActor(id, label)
@@ -780,32 +783,32 @@ Skada:RegisterModule("Comparison", function(L, P)
 				otherGUID = actor.id
 				otherName = actor.name
 				otherClass = actor.class
-				win:DisplayMode(mod)
+				win:DisplayMode(mode)
 			end
 		end
 	end
 
-	function mod:OnEnable()
-		dspellmod.metadata = {tooltip = spellmod_tooltip}
-		targetmod.metadata = {click1 = dtargetmod}
-		spellmod.metadata = {click1 = dspellmod, click2 = bspellmod}
+	function mode:OnEnable()
+		mode_spell_details.metadata = {tooltip = mode_spell_tooltip}
+		mode_target.metadata = {click1 = mode_target_spell}
+		mode_spell.metadata = {click1 = mode_spell_details, click2 = mode_spell_breakdown}
 		self.metadata = {
 			showspots = true,
 			post_tooltip = activity_tooltip,
-			click1 = spellmod,
-			click2 = targetmod,
+			click1 = mode_spell,
+			click2 = mode_target,
 			click3 = set_actor,
 			click3_label = L["Damage Comparison"],
 			columns = {Damage = true, DPS = true, Comparison = true, Percent = true},
 			icon = [[Interface\Icons\Ability_Warrior_OffensiveStance]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
 		self.nototal = true
-		spellmod.nototal = true
-		targetmod.nototal = true
+		mode_spell.nototal = true
+		mode_target.nototal = true
 
 		self.category = parent.category or L["Damage Done"]
 		Skada:AddColumnOptions(self)

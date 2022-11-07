@@ -1,7 +1,7 @@
 local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Tweaks", function(L, P)
-	local mod = Skada:NewModule("Tweaks", "AceHook-3.0")
+	local mode = Skada:NewModule("Tweaks", "AceHook-3.0")
 
 	local format, uformat = string.format, Private.uformat
 	local UnitClass, GetTime = UnitClass, GetTime
@@ -163,13 +163,13 @@ Skada:RegisterModule("Tweaks", function(L, P)
 				Skada:Debug("First Hit: Printed!")
 			end
 
-			function mod:PrintFirstHit()
+			function mode:PrintFirstHit()
 				if firsthit and firsthit.hitline and not firsthittimer then
 					firsthittimer = Skada:ScheduleTimer(firsthit_print, 0.25)
 				end
 			end
 
-			function mod:ClearFirstHit()
+			function mode:ClearFirstHit()
 				firsthit = del(firsthit)
 				if firsthittimer then
 					Skada:CancelTimer(firsthittimer, true)
@@ -307,10 +307,10 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			end
 		end
 
-		function mod:ParseLink(link, text, button, chatframe)
+		function mode:ParseLink(link, text, button, chatframe)
 			local linktype, id = split(":", link)
 			if linktype ~= "SKSP" then
-				return mod.hooks.SetItemRef(link, text, button, chatframe)
+				return mode.hooks.SetItemRef(link, text, button, chatframe)
 			end
 
 			local meterid = tonumber(id)
@@ -347,12 +347,12 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			end
 		end
 
-		function mod:CombatEnter()
+		function mode:CombatEnter()
 			if not P.combatlogfix then return end
 			Skada:ScheduleTimer(CombatLogClearEntries, 0.1)
 		end
 
-		function mod:CombatLogFix()
+		function mode:CombatLogFix()
 			if P.combatlogfix then
 				Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
 
@@ -386,7 +386,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			Skada:StopSegment(L["Smart Stop"])
 		end
 
-		function mod:BossDefeated(_, set)
+		function mode:BossDefeated(_, set)
 			if not set or set.stopped or not set.gotboss or ignoredBosses[set.gotboss] then return end
 			Skada:ScheduleTimer(smart_stop, P.smartwait or 3, set)
 		end
@@ -394,7 +394,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 
 	---------------------------------------------------------------------------
 
-	function mod:ApplySettings()
+	function mode:ApplySettings()
 		-- First Hit!
 		if P.firsthit then
 			Skada.RegisterMessage(self, "COMBAT_ENCOUNTER_START", "PrintFirstHit")
@@ -432,15 +432,15 @@ Skada:RegisterModule("Tweaks", function(L, P)
 		-- combatlog fix
 		self:CombatLogFix()
 	end
-	mod.OnEnable = mod.ApplySettings
+	mode.OnEnable = mode.ApplySettings
 
 	do
 		local function set_value(i, val)
 			P[i[#i]] = val
-			mod:ApplySettings()
+			mode:ApplySettings()
 		end
 
-		function mod:OnInitialize()
+		function mode:OnInitialize()
 			-- class colors table
 			classcolors = classcolors or Skada.classcolors
 
@@ -571,7 +571,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 		end
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		self:UnhookAll()
 		Skada.UnregisterAllCallbacks(self)
 		Skada.UnregisterAllMessages(self)

@@ -1,10 +1,10 @@
 local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
-	local mod = Skada:NewModule("Interrupts")
-	local extraspellmod = mod:NewModule("Interrupted spells")
-	local targetmod = mod:NewModule("Interrupted targets")
-	local spellmod = mod:NewModule("Interrupt spells")
+	local mode = Skada:NewModule("Interrupts")
+	local mode_extraspell = mode:NewModule("Interrupted spells")
+	local mode_target = mode:NewModule("Interrupted targets")
+	local mode_spell = mode:NewModule("Interrupt spells")
 	local ignored_spells = Skada.ignored_spells.interrupt -- Edit Skada\Core\Tables.lua
 	local get_actor_interrupted_spells = nil
 	local get_actor_interrupt_targets = nil
@@ -13,7 +13,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	local pairs, format, uformat = pairs, string.format, Private.uformat
 	local new, clear = Private.newTable, Private.clearTable
 	local GetSpellLink = Private.spell_link or GetSpellLink
-	local mod_cols = nil
+	local mode_cols = nil
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -87,12 +87,12 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		Skada:SendChat(format(L["%s interrupted!"], spelllink), M.interruptchannel or "SAY", "preset")
 	end
 
-	function extraspellmod:Enter(win, id, label)
+	function mode_extraspell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's interrupted spells"], label)
 	end
 
-	function extraspellmod:Update(win, set)
+	function mode_extraspell:Update(win, set)
 		win.title = uformat(L["%s's interrupted spells"], win.actorname)
 		if not set or not win.actorname then return end
 
@@ -109,16 +109,16 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 
 			local d = win:spell(nr, spellid)
 			d.value = count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function targetmod:Enter(win, id, label)
+	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's interrupted targets"], label)
 	end
 
-	function targetmod:Update(win, set)
+	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's interrupted targets"], win.actorname)
 		if not set or not win.actorname then return end
 
@@ -135,16 +135,16 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 
 			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's interrupt spells"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function mode_spell:Update(win, set)
 		win.title = uformat(L["%s's interrupt spells"], win.actorname)
 		if not set or not win.actorname then return end
 
@@ -164,11 +164,11 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 
 			local d = win:spell(nr, spellid)
 			d.value = spell.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Interrupts"], L[win.class]) or L["Interrupts"]
 
 		local total = set and set:GetTotal(win.class, nil, "interrupt")
@@ -187,51 +187,51 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.interrupt
-				format_valuetext(d, mod_cols, total, win.metadata)
+				format_valuetext(d, mode_cols, total, win.metadata)
 			end
 		end
 	end
 
-	function mod:GetSetSummary(set, win)
+	function mode:GetSetSummary(set, win)
 		if not set then return end
 		return set:GetTotal(win and win.class, nil, "interrupt") or 0
 	end
 
-	function mod:OnEnable()
+	function mode:OnEnable()
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = extraspellmod,
-			click2 = targetmod,
-			click3 = spellmod,
+			click1 = mode_extraspell,
+			click2 = mode_target,
+			click3 = mode_spell,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\ability_kick]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		extraspellmod.nototal = true
-		targetmod.nototal = true
-		spellmod.nototal = true
+		mode_extraspell.nototal = true
+		mode_target.nototal = true
+		mode_spell.nototal = true
 
 		Skada:RegisterForCL(spell_interrupt, {src_is_interesting = true}, "SPELL_INTERRUPT")
 		Skada:AddMode(self)
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada:RemoveMode(self)
 	end
 
-	function mod:AddToTooltip(set, tooltip)
+	function mode:AddToTooltip(set, tooltip)
 		if set.interrupt and set.interrupt > 0 then
 			tooltip:AddDoubleLine(L["Interrupts"], set.interrupt, 1, 1, 1)
 		end
 	end
 
-	function mod:OnInitialize()
+	function mode:OnInitialize()
 		M.interruptchannel = M.interruptchannel or  "SAY"
 
 		Skada.options.args.modules.args.interrupts = {

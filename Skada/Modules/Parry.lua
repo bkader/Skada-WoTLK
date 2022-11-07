@@ -1,10 +1,10 @@
 local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
-	local mod = Skada:NewModule("Parry-Haste")
-	local targetmod = mod:NewModule("Parry target list")
+	local mode = Skada:NewModule("Parry-Haste")
+	local mode_target = mode:NewModule("Parry target list")
 	local pairs, format, uformat = pairs, string.format, Private.uformat
-	local mod_cols = nil
+	local mode_cols = nil
 
 	local parrybosses = {
 		[L["Acidmaw"]] = true,
@@ -61,12 +61,12 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 		end
 	end
 
-	function targetmod:Enter(win, id, label)
+	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's parry targets"], label)
 	end
 
-	function targetmod:Update(win, set)
+	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's parry targets"], win.actorname)
 		if not set or not win.actorname then return end
 
@@ -87,11 +87,11 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 			local d = win:actor(nr, targetname)
 			d.class = "BOSS" -- what else can it be?
 			d.value = count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Parry-Haste"], L[win.class]) or L["Parry-Haste"]
 
 		local total = set and set:GetTotal(win.class, nil, "parry")
@@ -110,31 +110,31 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.parry
-				format_valuetext(d, mod_cols, total, win.metadata)
+				format_valuetext(d, mode_cols, total, win.metadata)
 			end
 		end
 	end
 
-	function mod:GetSetSummary(set, win)
+	function mode:GetSetSummary(set, win)
 		if not set then return end
 		return set:GetTotal(win and win.class, nil, "parry") or 0
 	end
 
-	function mod:OnEnable()
+	function mode:OnEnable()
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = targetmod,
+			click1 = mode_target,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\ability_parry]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		targetmod.nototal = true
+		mode_target.nototal = true
 
 		Skada:RegisterForCL(
 			spell_missed,
@@ -146,11 +146,11 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 		Skada:AddMode(self)
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada:RemoveMode(self)
 	end
 
-	function mod:OnInitialize()
+	function mode:OnInitialize()
 		M.parrychannel = M.parrychannel or "AUTO"
 
 		Skada.options.args.modules.args.Parry = {

@@ -62,7 +62,6 @@ L["Width"] = true
 L["The width of %s."] = true
 L["Height"] = true
 L["The height of %s."] = true
-L["More Details"] = true
 L["Active Time"] = true
 L["Segment Time"] = true
 L["Click for \124cff00ff00%s\124r"] = true

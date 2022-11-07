@@ -527,10 +527,10 @@ end
 -- Buffs Module
 
 Skada:RegisterModule("Buffs", function(_, P, G, C)
-	local mod = Skada:NewModule("Buffs")
-	local spellmod = mod:NewModule("Buff spell list")
-	local spelltargetmod = spellmod:NewModule("Players list")
-	local mod_cols = nil
+	local mode = Skada:NewModule("Buffs")
+	local mode_spell = mode:NewModule("Buff spell list")
+	local mode_spell_target = mode_spell:NewModule("Players list")
+	local mode_cols = nil
 
 	local function handle_buff(t)
 		if t.spellid and not ignored_buffs[t.spellid] and t.spellstring and (t.auratype == "BUFF" or special_buffs[t.spellid]) then
@@ -555,7 +555,7 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 		if t.__temp then t = del(t) end
 	end
 
-	function spelltargetmod:Enter(win, id, label)
+	function mode_spell_target:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = uformat(L["%s's targets"], label)
 	end
@@ -589,7 +589,7 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 			return tbl
 		end
 
-		function spelltargetmod:Update(win, set)
+		function mode_spell_target:Update(win, set)
 			win.title = uformat(L["%s's targets"], win.spellname)
 
 			local targets = get_aura_targets(set, win.spellid)
@@ -605,24 +605,24 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 
 				local d = win:actor(nr, target, target.enemy, name)
 				d.value = target.uptime
-				format_valuetext(d, mod_cols, target.count, target.maxtime, win.metadata, true)
+				format_valuetext(d, mode_cols, target.count, target.maxtime, win.metadata, true)
 			end
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's buffs"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function mode_spell:Update(win, set)
 		win.title = uformat(L["%s's buffs"], win.actorname)
-		spell_update_func(self, "BUFF", win, set, mod_cols)
+		spell_update_func(self, "BUFF", win, set, mode_cols)
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Buffs"], L[win.class]) or L["Buffs"]
-		main_update_func(self, "BUFF", win, set, mod_cols)
+		main_update_func(self, "BUFF", win, set, mode_cols)
 	end
 
 	do
@@ -662,33 +662,33 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 			end
 		end
 
-		function mod:CombatEnter(_, set)
+		function mode:CombatEnter(_, set)
 			if not G.inCombat and set and not set.stopped and not self.checked then
 				GroupIterator(check_unit_buffs)
 				self.checked = true
 			end
 		end
 
-		function mod:CombatLeave()
+		function mode:CombatLeave()
 			self.checked = nil
 		end
 	end
 
-	function mod:OnEnable()
-		spelltargetmod.metadata = {showspots = true, ordersort = true, tooltip = spelltarget_tooltip}
-		spellmod.metadata = {valueorder = true, tooltip = spell_tooltip, click1 = spelltargetmod}
+	function mode:OnEnable()
+		mode_spell_target.metadata = {showspots = true, ordersort = true, tooltip = spelltarget_tooltip}
+		mode_spell.metadata = {valueorder = true, tooltip = spell_tooltip, click1 = mode_spell_target}
 		self.metadata = {
-			click1 = spellmod,
+			click1 = mode_spell,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_divinespirit]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		spellmod.nototal = true
+		mode_spell.nototal = true
 
 		Skada:RegisterForCL(
 			handle_buff,
@@ -705,7 +705,7 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 		Skada:AddMode(self, "Buffs and Debuffs")
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
@@ -715,13 +715,13 @@ end)
 -- Debuffs Module
 
 Skada:RegisterModule("Debuffs", function(_, _, _, C)
-	local mod = Skada:NewModule("Debuffs")
-	local spellmod = mod:NewModule("Debuff spell list")
-	local spelltargetmod = spellmod:NewModule("Debuff target list")
-	local spellsourcemod = spellmod:NewModule("Debuff source list")
-	local targetmod = mod:NewModule("Debuff target list")
-	local targetspellmod = targetmod:NewModule("Debuff spell list")
-	local mod_cols = nil
+	local mode = Skada:NewModule("Debuffs")
+	local mode_spell = mode:NewModule("Debuff spell list")
+	local mode_spell_target = mode_spell:NewModule("Debuff target list")
+	local mode_spell_source = mode_spell:NewModule("Debuff source list")
+	local mode_target = mode:NewModule("Debuff target list")
+	local mode_target_spell = mode_target:NewModule("Debuff spell list")
+	local mode_cols = nil
 
 	local function handle_debuff(t)
 		if t.auratype ~= "DEBUFF" or not t.spellid or ignored_debuffs[t.spellid] then return end
@@ -744,32 +744,32 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 		end
 	end
 
-	function targetspellmod:Enter(win, id, label)
+	function mode_target_spell:Enter(win, id, label)
 		win.targetname = label or L["Unknown"]
 		win.title = L["actor debuffs"](win.actorname or L["Unknown"], label)
 	end
 
-	function targetspellmod:Update(win, set)
+	function mode_target_spell:Update(win, set)
 		win.title = L["actor debuffs"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
-		targetspell_update_func(self, "DEBUFF", win, set, mod_cols, C)
+		targetspell_update_func(self, "DEBUFF", win, set, mode_cols, C)
 	end
 
-	function spelltargetmod:Enter(win, id, label)
+	function mode_spell_target:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = uformat(L["%s's <%s> targets"], win.actorname, label)
 	end
 
-	function spelltargetmod:Update(win, set)
+	function mode_spell_target:Update(win, set)
 		win.title = uformat(L["%s's <%s> targets"], win.actorname, win.spellname)
-		spelltarget_update_func(self, "DEBUFF", win, set, mod_cols, C)
+		spelltarget_update_func(self, "DEBUFF", win, set, mode_cols, C)
 	end
 
-	function spellsourcemod:Enter(win, id, label)
+	function mode_spell_source:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = uformat(L["%s's sources"], label)
 	end
 
-	function spellsourcemod:Update(win, set)
+	function mode_spell_source:Update(win, set)
 		win.title = uformat(L["%s's sources"], win.spellname)
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
@@ -788,34 +788,34 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = spell.uptime
-				format_valuetext(d, mod_cols, spell.count, actor:GetTime(set), win.metadata, true, true)
+				format_valuetext(d, mode_cols, spell.count, actor:GetTime(set), win.metadata, true, true)
 			end
 		end
 	end
 
-	function targetmod:Enter(win, id, label)
+	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's targets"], label)
 	end
 
-	function targetmod:Update(win, set)
+	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's targets"], win.actorname)
-		target_update_func(self, "DEBUFF", win, set, mod_cols, C)
+		target_update_func(self, "DEBUFF", win, set, mode_cols, C)
 	end
 
-	function spellmod:Enter(win, id, label)
+	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = L["actor debuffs"](label)
 	end
 
-	function spellmod:Update(win, set)
+	function mode_spell:Update(win, set)
 		win.title = L["actor debuffs"](win.actorname or L["Unknown"])
-		spell_update_func(self, "DEBUFF", win, set, mod_cols)
+		spell_update_func(self, "DEBUFF", win, set, mode_cols)
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Debuffs"], L[win.class]) or L["Debuffs"]
-		main_update_func(self, "DEBUFF", win, set, mod_cols)
+		main_update_func(self, "DEBUFF", win, set, mode_cols)
 	end
 
 	local function spellsource_tooltip(win, id, label, tooltip)
@@ -833,30 +833,30 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 		end
 	end
 
-	function mod:OnEnable()
-		spellsourcemod.metadata = {
+	function mode:OnEnable()
+		mode_spell_source.metadata = {
 			tooltip = spellsource_tooltip,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"]
 		}
 
-		spelltargetmod.metadata = {tooltip = spelltarget_tooltip}
-		spellmod.metadata = {click1 = spelltargetmod, click2 = spellsourcemod, tooltip = spell_tooltip}
-		targetmod.metadata = {click1 = targetspellmod}
+		mode_spell_target.metadata = {tooltip = spelltarget_tooltip}
+		mode_spell.metadata = {click1 = mode_spell_target, click2 = mode_spell_source, tooltip = spell_tooltip}
+		mode_target.metadata = {click1 = mode_target_spell}
 		self.metadata = {
-			click1 = spellmod,
-			click2 = targetmod,
+			click1 = mode_spell,
+			click2 = mode_target,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_shadow_shadowwordpain]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		spellmod.nototal = true
-		targetmod.nototal = true
+		mode_spell.nototal = true
+		mode_target.nototal = true
 
 		Skada:RegisterForCL(
 			handle_debuff,
@@ -870,7 +870,7 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 		Skada:AddMode(self, "Buffs and Debuffs")
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada:RemoveMode(self)
 	end
 end)
@@ -879,9 +879,9 @@ end)
 -- Enemy Buffs Module
 
 Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
-	local mod = Skada:NewModule("Enemy Buffs")
-	local spellmod = mod:NewModule("Buff spell list")
-	local mod_cols = nil
+	local mode = Skada:NewModule("Enemy Buffs")
+	local mode_spell = mode:NewModule("Buff spell list")
+	local mode_cols = nil
 
 	local function handle_buff(t)
 		if t.spellid and not ignored_buffs[t.spellid] and (t.auratype == "BUFF" or special_buffs[t.spellid]) then
@@ -905,35 +905,35 @@ Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's buffs"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function mode_spell:Update(win, set)
 		win.title = uformat(L["%s's buffs"], win.actorname)
-		spell_update_func(self, "BUFF", win, set, mod_cols)
+		spell_update_func(self, "BUFF", win, set, mode_cols)
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Enemy Buffs"], L[win.class]) or L["Enemy Buffs"]
-		main_update_func(self, "BUFF", win, set, mod_cols, true)
+		main_update_func(self, "BUFF", win, set, mode_cols, true)
 	end
 
-	function mod:OnEnable()
-		spellmod.metadata = {valueorder = true, tooltip = spell_tooltip}
+	function mode:OnEnable()
+		mode_spell.metadata = {valueorder = true, tooltip = spell_tooltip}
 		self.metadata = {
-			click1 = spellmod,
+			click1 = mode_spell,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\ability_paladin_beaconoflight]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		spellmod.nototal = true
+		mode_spell.nototal = true
 
 		Skada:RegisterForCL(
 			handle_buff,
@@ -948,7 +948,7 @@ Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 		Skada:AddMode(self, "Enemies")
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada:RemoveMode(self)
 	end
 end)
@@ -957,12 +957,12 @@ end)
 -- Enemy Debuffs Module
 
 Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
-	local mod = Skada:NewModule("Enemy Debuffs")
-	local spellmod = mod:NewModule("Debuff spell list")
-	local spelltargetmod = spellmod:NewModule("Debuff target list")
-	local targetmod = mod:NewModule("Debuff target list")
-	local targetspellmod = targetmod:NewModule("Debuff spell list")
-	local mod_cols = nil
+	local mode = Skada:NewModule("Enemy Debuffs")
+	local mode_spell = mode:NewModule("Debuff spell list")
+	local mode_spell_target = mode_spell:NewModule("Debuff target list")
+	local mode_target = mode:NewModule("Debuff target list")
+	local mode_target_spell = mode_target:NewModule("Debuff spell list")
+	local mode_cols = nil
 
 	local function handle_debuff(t)
 		if t.auratype ~= "DEBUFF" or not t.spellid or ignored_debuffs[t.spellid] then return end
@@ -984,69 +984,69 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 		end
 	end
 
-	function targetspellmod:Enter(win, id, label)
+	function mode_target_spell:Enter(win, id, label)
 		win.targetname = label or L["Unknown"]
 		win.title = L["actor debuffs"](win.actorname or L["Unknown"], label)
 	end
 
-	function targetspellmod:Update(win, set)
+	function mode_target_spell:Update(win, set)
 		win.title = L["actor debuffs"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
-		targetspell_update_func(self, "DEBUFF", win, set, mod_cols, C)
+		targetspell_update_func(self, "DEBUFF", win, set, mode_cols, C)
 	end
 
-	function spelltargetmod:Enter(win, id, label)
+	function mode_spell_target:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = uformat(L["%s's <%s> targets"], win.actorname, label)
 	end
 
-	function spelltargetmod:Update(win, set)
+	function mode_spell_target:Update(win, set)
 		win.title = uformat(L["%s's <%s> targets"], win.actorname, win.spellname)
-		spelltarget_update_func(self, "DEBUFF", win, set, mod_cols, C)
+		spelltarget_update_func(self, "DEBUFF", win, set, mode_cols, C)
 	end
 
-	function targetmod:Enter(win, id, label)
+	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's targets"], label)
 	end
 
-	function targetmod:Update(win, set)
+	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's targets"], win.actorname)
-		target_update_func(self, "DEBUFF", win, set, mod_cols, C)
+		target_update_func(self, "DEBUFF", win, set, mode_cols, C)
 	end
 
-	function spellmod:Enter(win, id, label)
+	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = L["actor debuffs"](label)
 	end
 
-	function spellmod:Update(win, set)
+	function mode_spell:Update(win, set)
 		win.title = L["actor debuffs"](win.actorname or L["Unknown"])
-		spell_update_func(self, "DEBUFF", win, set, mod_cols)
+		spell_update_func(self, "DEBUFF", win, set, mode_cols)
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Enemy Debuffs"], L[win.class]) or L["Enemy Debuffs"]
-		main_update_func(self, "DEBUFF", win, set, mod_cols, true)
+		main_update_func(self, "DEBUFF", win, set, mode_cols, true)
 	end
 
-	function mod:OnEnable()
-		spelltargetmod.metadata = {tooltip = spelltarget_tooltip}
-		spellmod.metadata = {click1 = spelltargetmod, tooltip = spell_tooltip}
-		targetmod.metadata = {click1 = targetspellmod}
+	function mode:OnEnable()
+		mode_spell_target.metadata = {tooltip = spelltarget_tooltip}
+		mode_spell.metadata = {click1 = mode_spell_target, tooltip = spell_tooltip}
+		mode_target.metadata = {click1 = mode_target_spell}
 		self.metadata = {
-			click1 = spellmod,
-			click2 = targetmod,
+			click1 = mode_spell,
+			click2 = mode_target,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\ability_warlock_improvedsoulleech]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		spellmod.nototal = true
-		targetmod.nototal = true
+		mode_spell.nototal = true
+		mode_target.nototal = true
 
 		Skada:RegisterForCL(
 			handle_debuff,
@@ -1060,7 +1060,7 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 		Skada:AddMode(self, "Enemies")
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada:RemoveMode(self)
 	end
 end)

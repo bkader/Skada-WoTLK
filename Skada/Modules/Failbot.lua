@@ -4,15 +4,15 @@ if not LibFail then return end
 local folder, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Fails", function(L, P, _, _, M)
-	local mod = Skada:NewModule("Fails")
-	local spellmod = mod:NewModule("Player's failed events")
-	local playermod = spellmod:NewModule("Event's failed players")
+	local mode = Skada:NewModule("Fails")
+	local mode_spell = mode:NewModule("Player's failed events")
+	local mode_actor = mode_spell:NewModule("Event's failed players")
 	local ignored_spells = Skada.ignored_spells.fail -- Edit Skada\Core\Tables.lua
 	local count_fails_by_spell = nil
 
 	local pairs, tostring, format, UnitGUID = pairs, tostring, string.format, UnitGUID
 	local uformat, IsInGroup = Private.uformat, Skada.IsInGroup
-	local tank_events, mod_cols
+	local tank_events, mode_cols
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -46,12 +46,12 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		Skada:DispatchSets(log_fail, actorid, actorname, tostring(spellid), failname)
 	end
 
-	function playermod:Enter(win, id, label)
+	function mode_actor:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = format(L["%s's fails"], label)
 	end
 
-	function playermod:Update(win, set)
+	function mode_actor:Update(win, set)
 		win.title = uformat(L["%s's fails"], win.spellname)
 		if not win.spellid then return end
 
@@ -71,17 +71,17 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.failspells[win.spellid]
-				format_valuetext(d, mod_cols, total, win.metadata, true)
+				format_valuetext(d, mode_cols, total, win.metadata, true)
 			end
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's fails"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function mode_spell:Update(win, set)
 		win.title = uformat(L["%s's fails"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorid, win.actorname)
@@ -100,11 +100,11 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 
 			local d = win:spell(nr, spellid)
 			d.value = count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Fails"], L[win.class]) or L["Fails"]
 
 		local total = set and set:GetTotal(win.class, nil, "fail")
@@ -123,44 +123,44 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.fail
-				format_valuetext(d, mod_cols, total, win.metadata)
+				format_valuetext(d, mode_cols, total, win.metadata)
 			end
 		end
 	end
 
-	function mod:GetSetSummary(set, win)
+	function mode:GetSetSummary(set, win)
 		if not set then return end
 		return set:GetTotal(win and win.class, nil, "fail") or 0
 	end
 
-	function mod:AddToTooltip(set, tooltip)
+	function mode:AddToTooltip(set, tooltip)
 		if set.fail and set.fail > 0 then
 			tooltip:AddDoubleLine(L["Fails"], set.fail, 1, 1, 1)
 		end
 	end
 
-	function mod:OnEnable()
-		spellmod.metadata = {click1 = playermod}
+	function mode:OnEnable()
+		mode_spell.metadata = {click1 = mode_actor}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = spellmod,
+			click1 = mode_spell,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\ability_creature_cursed_01]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		spellmod.nototal = true
+		mode_spell.nototal = true
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self)
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
@@ -173,12 +173,12 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 			if not options then
 				options = {
 					type = "group",
-					name = mod.localeName,
-					desc = format(L["Options for %s."], mod.localeName),
+					name = mode.localeName,
+					desc = format(L["Options for %s."], mode.localeName),
 					args = {
 						header = {
 							type = "description",
-							name = mod.localeName,
+							name = mode.localeName,
 							fontSize = "large",
 							image = [[Interface\Icons\ability_creature_cursed_01]],
 							imageWidth = 18,
@@ -214,7 +214,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 			return options
 		end
 
-		function mod:OnInitialize()
+		function mode:OnInitialize()
 			local events = LibFail:GetSupportedEvents()
 			for i = 1, #events do
 				LibFail.RegisterCallback(folder, events[i], on_fail)
@@ -232,7 +232,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		end
 	end
 
-	function mod:CombatLeave(_, set)
+	function mode:CombatLeave(_, set)
 		if set and set.fail and set.fail > 0 and M.failsannounce then
 			local channel = M.failschannel or "AUTO"
 			if channel == "SELF" or channel == "GUILD" or IsInGroup() then

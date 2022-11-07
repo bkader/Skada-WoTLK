@@ -1,16 +1,16 @@
 local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Potions", function(L, P, _, C)
-	local mod = Skada:NewModule("Potions")
-	local spellmod = mod:NewModule("Potions list")
-	local playermod = spellmod:NewModule("Players list")
+	local mode = Skada:NewModule("Potions")
+	local mode_spell = mode:NewModule("Potions list")
+	local mode_actor = mode_spell:NewModule("Players list")
 	local get_actors_by_potion = nil
 
 	local pairs, tconcat, format, strsub, uformat = pairs, table.concat, string.format, string.sub, Private.uformat
 	local GetItemInfo, classcolors = GetItemInfo, Skada.classcolors
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 	local potion_ids = {}
-	local mod_cols = nil
+	local mode_cols = nil
 
 	local prepotionStr, potionStr = "\124c%s%s\124r %s", "\124T%s:14:14:0:0:64:64:4:60:4:60\124t"
 	local prepotion
@@ -86,7 +86,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		end
 
 		-- we use this function to record pre-pots as well.
-		function mod:CombatEnter()
+		function mode:CombatEnter()
 			if P.prepotion and not self.checked then
 				prepotion = prepotion or {}
 				GroupIterator(check_unit_potions, prepotion)
@@ -94,7 +94,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 			end
 		end
 
-		function mod:CombatLeave()
+		function mode:CombatLeave()
 			if prepotion then
 				if P.prepotion and next(prepotion) ~= nil then
 					Skada:Printf(L["pre-potion: %s"], tconcat(prepotion, ", "))
@@ -105,12 +105,12 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		end
 	end
 
-	function playermod:Enter(win, id, label)
+	function mode_actor:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = label
 	end
 
-	function playermod:Update(win, set)
+	function mode_actor:Update(win, set)
 		win.title = win.spellname or L["Unknown"]
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
@@ -131,11 +131,11 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 
 			local d = win:actor(nr, actor, actor.enemy, actorname)
 			d.value = actor.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's used potions"], label)
 	end
@@ -147,7 +147,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		end
 	end
 
-	function spellmod:Update(win, set)
+	function mode_spell:Update(win, set)
 		win.title = uformat(L["%s's used potions"], win.actorname)
 		if not set or not win.actorname then return end
 
@@ -178,12 +178,12 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 				d.icon = potionicon
 
 				d.value = count
-				format_valuetext(d, mod_cols, total, win.metadata, true)
+				format_valuetext(d, mode_cols, total, win.metadata, true)
 			end
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Potions"], L[win.class]) or L["Potions"]
 
 		local total = set and set:GetTotal(win.class, nil, "potion")
@@ -202,17 +202,17 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.potion
-				format_valuetext(d, mod_cols, total, win.metadata)
+				format_valuetext(d, mode_cols, total, win.metadata)
 			end
 		end
 	end
 
-	function mod:GetSetSummary(set, win)
+	function mode:GetSetSummary(set, win)
 		if not set then return end
 		return set:GetTotal(win and win.class, nil, "potion") or 0
 	end
 
-	function mod:OnInitialize()
+	function mode:OnInitialize()
 		-- list of potion: [spellid] = potionid (string)
 
 		--[[ level NaN ]]--
@@ -346,7 +346,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		}
 	end
 
-	function mod:ApplySettings()
+	function mode:ApplySettings()
 		if P.prepotion then
 			Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
 			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
@@ -355,33 +355,33 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		end
 	end
 
-	function mod:OnEnable()
-		playermod.metadata = {
+	function mode:OnEnable()
+		mode_actor.metadata = {
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"]
 		}
-		spellmod.metadata = {click1 = playermod}
+		mode_spell.metadata = {click1 = mode_actor}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = spellmod,
+			click1 = mode_spell,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\inv_potion_31]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		spellmod.nototal = true
+		mode_spell.nototal = true
 
 		Skada:RegisterForCL(potion_used, {src_is_interesting_nopets = true}, "SPELL_CAST_SUCCESS")
 		Skada.RegisterCallback(self, "Skada_ApplySettings", "ApplySettings")
 		Skada:AddMode(self)
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada.UnregisterAllCallbacks(self)
 		Skada:RemoveMode(self)
 	end

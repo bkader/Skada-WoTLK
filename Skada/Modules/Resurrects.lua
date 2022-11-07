@@ -1,14 +1,14 @@
 local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Resurrects", function(L, P, _, C)
-	local mod = Skada:NewModule("Resurrects")
-	local targetmod = mod:NewModule("Resurrect target list")
+	local mode = Skada:NewModule("Resurrects")
+	local mode_target = mode:NewModule("Resurrect target list")
 
 	local pairs, format, uformat = pairs, string.format, Private.uformat
 	local new, clear = Private.newTable, Private.clearTable
 	local get_actor_ress_targets = nil
 	local ress_spells = Skada.ress_spells
-	local mod_cols = nil
+	local mode_cols = nil
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -46,12 +46,12 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		end
 	end
 
-	function targetmod:Enter(win, id, label)
+	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's resurrect targets"], label)
 	end
 
-	function targetmod:Update(win, set)
+	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's resurrect targets"], win.actorname)
 		if not set or not win.actorname then return end
 
@@ -68,11 +68,11 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 
 			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = L["Resurrects"]
 
 		local total = set and set:GetTotal(win.class, nil, "ress")
@@ -91,30 +91,30 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.ress
-				format_valuetext(d, mod_cols, total, win.metadata)
+				format_valuetext(d, mode_cols, total, win.metadata)
 			end
 		end
 	end
 
-	function mod:GetSetSummary(set, win)
+	function mode:GetSetSummary(set, win)
 		if not set then return end
 		return set:GetTotal(win and win.class, nil, "ress") or 0
 	end
 
-	function mod:OnEnable()
+	function mode:OnEnable()
 		self.metadata = {
 			valuesort = true,
-			click1 = targetmod,
+			click1 = mode_target,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_holy_resurrection]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		targetmod.nototal = true
+		mode_target.nototal = true
 
 		Skada:RegisterForCL(spell_resurrect, {src_is_not_interesting = true, dst_is_interesting_nopets = true}, "SPELL_RESURRECT")
 		Skada:RegisterForCL(spell_resurrect, {src_is_interesting = true, dst_is_not_interesting = true}, "SPELL_CAST_SUCCESS")
@@ -122,11 +122,11 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		Skada:AddMode(self)
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada:RemoveMode(self)
 	end
 
-	function mod:AddToTooltip(set, tooltip)
+	function mode:AddToTooltip(set, tooltip)
 		if set.ress and set.ress > 0 then
 			tooltip:AddDoubleLine(L["Resurrects"], set.ress, 1, 1, 1)
 		end

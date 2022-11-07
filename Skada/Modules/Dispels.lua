@@ -1,10 +1,10 @@
 local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Dispels", function(L, P, _, C)
-	local mod = Skada:NewModule("Dispels")
-	local extraspellmod = mod:NewModule("Dispelled spell list")
-	local targetmod = mod:NewModule("Dispelled target list")
-	local spellmod = mod:NewModule("Dispel spell list")
+	local mode = Skada:NewModule("Dispels")
+	local mode_extraspell = mode:NewModule("Dispelled spell list")
+	local mode_target = mode:NewModule("Dispelled target list")
+	local mode_spell = mode:NewModule("Dispel spell list")
 	local ignored_spells = Skada.ignored_spells.dispel -- Edit Skada\Core\Tables.lua
 	local get_actor_dispelled_spells = nil
 	local get_actor_dispelled_targets = nil
@@ -12,7 +12,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	-- cache frequently used globals
 	local pairs, format = pairs, string.format
 	local uformat, new, clear = Private.uformat, Private.newTable, Private.clearTable
-	local mod_cols = nil
+	local mode_cols = nil
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -74,12 +74,12 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		end
 	end
 
-	function extraspellmod:Enter(win, id, label)
+	function mode_extraspell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's dispelled spells"], label)
 	end
 
-	function extraspellmod:Update(win, set)
+	function mode_extraspell:Update(win, set)
 		win.title = uformat(L["%s's dispelled spells"], win.actorname)
 
 		local spells, total, actor = get_actor_dispelled_spells(set, win.actorid, win.actorname)
@@ -95,16 +95,16 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 
 			local d = win:spell(nr, spellid)
 			d.value = count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function targetmod:Enter(win, id, label)
+	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's dispelled targets"], label)
 	end
 
-	function targetmod:Update(win, set)
+	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's dispelled targets"], win.actorname)
 
 		local targets, total, actor = get_actor_dispelled_targets(set, win.actorid, win.actorname)
@@ -120,16 +120,16 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 
 			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's dispel spells"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function mode_spell:Update(win, set)
 		win.title = uformat(L["%s's dispel spells"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorid, win.actorname)
@@ -148,11 +148,11 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 
 			local d = win:spell(nr, spellid)
 			d.value = spell.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Dispels"], L[win.class]) or L["Dispels"]
 
 		local total = set and set:GetTotal(win.class, nil, "dispel")
@@ -171,48 +171,48 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.dispel
-				format_valuetext(d, mod_cols, total, win.metadata)
+				format_valuetext(d, mode_cols, total, win.metadata)
 			end
 		end
 	end
 
-	function mod:GetSetSummary(set, win)
+	function mode:GetSetSummary(set, win)
 		if not set then return end
 		local value = set:GetTotal(win and win.class, nil, "dispel") or 0
 		return value, Skada:FormatNumber(value)
 	end
 
-	function mod:AddToTooltip(set, tooltip)
+	function mode:AddToTooltip(set, tooltip)
 		if set.dispel and set.dispel > 0 then
 			tooltip:AddDoubleLine(L["Dispels"], set.dispel, 1, 1, 1)
 		end
 	end
 
-	function mod:OnEnable()
+	function mode:OnEnable()
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = targetmod,
-			click2 = extraspellmod,
-			click3 = spellmod,
+			click1 = mode_target,
+			click2 = mode_extraspell,
+			click3 = mode_spell,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_holy_dispelmagic]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		extraspellmod.nototal = true
-		targetmod.nototal = true
-		spellmod.nototal = true
+		mode_extraspell.nototal = true
+		mode_target.nototal = true
+		mode_spell.nototal = true
 
 		Skada:RegisterForCL(spell_dispel, {src_is_interesting = true}, "SPELL_DISPEL", "SPELL_STOLEN")
 		Skada:AddMode(self)
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada:RemoveMode(self)
 	end
 

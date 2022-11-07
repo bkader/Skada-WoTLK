@@ -1,7 +1,7 @@
 local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("My Spells", function(L, P)
-	local mod = Skada:NewModule("My Spells")
+	local mode = Skada:NewModule("My Spells")
 
 	local pairs, format = pairs, string.format
 	local userGUID, userName = Skada.userGUID, Skada.userName
@@ -86,7 +86,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = L["My Spells"]
 
 		local player = set and set:GetActor(userGUID, userName)
@@ -132,7 +132,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 		end
 	end
 
-	function mod:OnEnable()
+	function mode:OnEnable()
 		self.metadata = {
 			showspots = true,
 			tooltip = spell_tooltip,
@@ -145,7 +145,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 		Skada:AddMode(self)
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada:RemoveMode(self)
 	end
 end)

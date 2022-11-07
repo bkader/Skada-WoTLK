@@ -1,12 +1,12 @@
 local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Activity", function(L, P, _, C)
-	local mod = Skada:NewModule("Activity")
-	local targetmod = mod:NewModule("Activity per Target")
+	local mode = Skada:NewModule("Activity")
+	local mode_target = mode:NewModule("Activity per Target")
 	local date, pairs, format = date, pairs, string.format
 	local uformat, new, clear = Private.uformat, Private.newTable, Private.clearTable
 	local get_activity_targets = nil
-	local mod_cols = nil
+	local mode_cols = nil
 
 	local function format_valuetext(d, columns, maxtime, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -34,12 +34,12 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, settime), nil, nil, nil, 1, 1, 1)
 	end
 
-	function targetmod:Enter(win, id, label)
+	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's activity"], label)
 	end
 
-	function targetmod:Update(win, set)
+	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's activity"], win.actorname)
 		if not win.actorname then return end
 
@@ -59,11 +59,11 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 
 			local d = win:actor(nr, target, target.enemy, name)
 			d.value = target.time
-			format_valuetext(d, mod_cols, maxtime, win.metadata, true)
+			format_valuetext(d, mode_cols, maxtime, win.metadata, true)
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Activity"], L[win.class]) or L["Activity"]
 
 		local settime = set and set:GetTime()
@@ -84,43 +84,43 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 
 					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = activetime
-					format_valuetext(d, mod_cols, settime, win.metadata)
+					format_valuetext(d, mode_cols, settime, win.metadata)
 					win:color(d, set, actor.enemy)
 				end
 			end
 		end
 	end
 
-	function mod:GetSetSummary(set)
+	function mode:GetSetSummary(set)
 		if not set or not set.time then return end
 		local valuetext = Skada:FormatValueCols(
-			mod_cols["Active Time"] and Skada:FormatTime(set.time),
-			mod_cols.Percent and format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime))
+			mode_cols["Active Time"] and Skada:FormatTime(set.time),
+			mode_cols.Percent and format("%s - %s", date("%H:%M", set.starttime), date("%H:%M", set.endtime))
 		)
 		return set.time, valuetext
 	end
 
-	function mod:OnEnable()
+	function mode:OnEnable()
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
 			tooltip = activity_tooltip,
-			click1 = targetmod,
+			click1 = mode_target,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {["Active Time"] = true, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_borrowedtime]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		targetmod.nototal = true
+		mode_target.nototal = true
 
 		Skada:AddMode(self)
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada:RemoveMode(self)
 	end
 

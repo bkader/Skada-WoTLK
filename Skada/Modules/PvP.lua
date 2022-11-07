@@ -1,6 +1,6 @@
 local _, Skada = ...
 Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
-	local mod = Skada:NewModule("Player vs. Player")
+	local mode = Skada:NewModule("Player vs. Player")
 
 	local format, wipe, GetTime = string.format, wipe, GetTime
 	local UnitGUID, UnitClass, UnitBuff, UnitIsPlayer = UnitGUID, UnitClass, UnitBuff, UnitIsPlayer
@@ -162,7 +162,7 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 		end
 	end
 
-	function mod:UNIT_AURA(_, unit)
+	function mode:UNIT_AURA(_, unit)
 		if Skada.insType ~= "pvp" and Skada.insType ~= "arena" then
 			Skada.UnregisterEvent(self, "UNIT_AURA")
 		elseif unit and UnitIsPlayer(unit) and not specsCache[UnitGUID(unit)] then
@@ -182,7 +182,7 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 		end
 	end
 
-	function mod:UNIT_SPELLCAST_START(_, unit)
+	function mode:UNIT_SPELLCAST_START(_, unit)
 		if Skada.insType ~= "pvp" and Skada.insType ~= "arena" then
 			Skada.UnregisterEvent(self, "UNIT_SPELLCAST_START")
 		elseif unit and UnitIsPlayer(unit) and not specsCache[UnitGUID(unit)] then
@@ -194,7 +194,7 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 		end
 	end
 
-	function mod:CheckZone(_, current, previous)
+	function mode:CheckZone(_, current, previous)
 		if current == previous then return end
 
 		specsCache = wipe(specsCache or {})
@@ -211,7 +211,7 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 		end
 	end
 
-	function mod:GetEnemy(_, actor, set)
+	function mode:GetEnemy(_, actor, set)
 		if actor and not actor.fake and Skada.validclass[actor.class] then
 			if actor.spec == nil then
 				actor.spec = specsCache[actor.id]
@@ -231,20 +231,20 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 		end
 	end
 
-	function mod:OnEnable()
+	function mode:OnEnable()
 		Skada.forPVP = true
 		specsCache = specsCache or {}
 		Skada.RegisterMessage(self, "ZONE_TYPE_CHANGED", "CheckZone")
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada.forPVP = nil
 		Skada.UnregisterAllMessages(self)
 	end
 
 	---------------------------------------------------------------------------
 
-	function mod:OnInitialize()
+	function mode:OnInitialize()
 		if P.modules.arena then
 			P.modules.arena = nil
 		end

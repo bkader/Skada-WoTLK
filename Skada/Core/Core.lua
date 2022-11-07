@@ -16,7 +16,7 @@ local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostri
 local max, min, abs = math.max, math.min, math.abs
 local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction
 local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
-local UnitExists, UnitGUID, UnitName, UnitClass = UnitExists, UnitGUID, UnitName, UnitClass
+local UnitExists, UnitGUID, UnitClass, UnitFullName = UnitExists, UnitGUID, UnitClass, Private.UnitFullName
 local GameTooltip, ReloadUI, GetScreenWidth = GameTooltip, ReloadUI, GetScreenWidth
 local GetSpellLink, spellnames, spellicons = GetSpellLink, Skada.spellnames, Skada.spellicons
 local SecondsToTime, time, GetTime = SecondsToTime, time, GetTime
@@ -49,7 +49,7 @@ BINDING_NAME_SKADA_STOP = L["Stop"]
 local userGUID = UnitGUID("player")
 Skada.userGUID = userGUID
 
-local userName = UnitName("player")
+local userName = UnitFullName("player")
 Skada.userName = userName
 
 local _, userClass = UnitClass("player")
@@ -898,12 +898,13 @@ function Window:DisplayMode(mode, class)
 	Skada:UpdateDisplay()
 end
 
+local user_sort_func
 do
 	local function default_sort_func(a, b)
 		return a.localeName < b.localeName
 	end
 
-	local function user_sort_func(a, b)
+	function user_sort_func(a, b)
 		if P.sortmodesbyusage and P.modeclicks then
 			return (P.modeclicks[a.moduleName] or 0) > (P.modeclicks[b.moduleName] or 0)
 		end
@@ -975,7 +976,12 @@ end
 do
 	local function click_on_set(win, id, _, button)
 		if button == "LeftButton" then
-			win:DisplayModes(id)
+			local mode = find_mode(id)
+			if mode then -- fix odd behavior
+				win:DisplayMode(mode)
+			else
+				win:DisplayModes(id)
+			end
 		elseif button == "RightButton" then
 			win:RightClick()
 		end
@@ -1490,7 +1496,7 @@ do
 			if ownerUnit then
 				local ownerGUID = UnitGUID(ownerUnit)
 				guidToClass[guid] = UnitGUID(ownerUnit)
-				return ownerGUID, (UnitName(ownerUnit))
+				return ownerGUID, UnitFullName(ownerUnit)
 			end
 
 			-- guess the pet from tooltip.
@@ -1655,6 +1661,9 @@ do
 	local function add_subview_lines(tooltip, win, mode, id, label)
 		if not (type(mode) == "table" and mode.Update) then return end
 
+		local set = win and win:GetSelectedSet()
+		if not set then return end
+
 		-- windows should have separate tooltip tables in order
 		-- to display different numbers for same spells for example.
 		win.ttwin = win.ttwin or new_window(true)
@@ -1664,44 +1673,49 @@ do
 			mode:Enter(win.ttwin, id, label)
 		end
 
-		mode:Update(win.ttwin, win:GetSelectedSet())
+		-- tooltip title
+		tooltip:AddLine(win.ttwin.title or mode.title or mode.localeName)
+
+		-- mode:Update(win, set, info1)
+		if mode.Tooltip then
+			mode:Update(win.ttwin, set, mode:Tooltip(win.ttwin, set, id, label, tooltip))
+		else
+			mode:Update(win.ttwin, set)
+		end
 
 		local dataset = win.ttwin.dataset
-		if not dataset then return end
-
-		if not mode.metadata or not mode.metadata.ordersort then
+		local num_dataset = dataset and #dataset
+		if not num_dataset or num_dataset == 0 then
+			return
+		elseif not mode.metadata or not mode.metadata.ordersort then
 			tsort(dataset, value_sort)
 		end
 
-		if #dataset > 0 then
-			tooltip:AddLine(win.ttwin.title or mode.title or mode.localeName)
-			local nr = 0
+		local nr = 0
+		for i = 1, num_dataset do
+			local data = dataset[i]
+			if data and data.id and not data.ignore and nr < P.tooltiprows then
+				nr = nr + 1
+				local color = white
 
-			for i = 1, #dataset do
-				local data = dataset[i]
-				if data and data.id and not data.ignore and nr < P.tooltiprows then
-					nr = nr + 1
-					local color = white
-
-					if data.color then
-						color = data.color
-					elseif Skada.validclass[data.class] then
-						color = classcolors(data.class)
-					end
-
-					local title = data.text or data.label
-					if mode.metadata and mode.metadata.showspots then
-						title = format("\124cffffffff%d.\124r %s", nr, title)
-					end
-					tooltip:AddDoubleLine(title, data.valuetext, color.r, color.g, color.b)
-				elseif nr >= P.tooltiprows then
-					break -- no need to continue
+				if data.color then
+					color = data.color
+				elseif Skada.validclass[data.class] then
+					color = classcolors(data.class)
 				end
-			end
 
-			if mode.Enter then
-				tooltip:AddLine(" ")
+				local title = data.text or data.label
+				if mode.metadata and mode.metadata.showspots then
+					title = format("\124cffffffff%d.\124r %s", nr, title)
+				end
+				tooltip:AddDoubleLine(title, data.valuetext, color.r, color.g, color.b)
+			elseif nr >= P.tooltiprows then
+				break -- no need to continue
 			end
+		end
+
+		if mode.Enter then
+			tooltip:AddLine(" ")
 		end
 	end
 
@@ -2098,6 +2112,7 @@ function Skada:PLAYER_ENTERING_WORLD()
 		self:Reset(true)
 	end
 
+	tsort(modes, user_sort_func)
 	self:ApplySettings()
 end
 

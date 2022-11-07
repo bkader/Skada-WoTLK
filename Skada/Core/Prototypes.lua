@@ -131,14 +131,6 @@ function setPrototype:GetActorDPS(id, name, useful, active)
 	return 0, 0
 end
 
--- returns the actor's damage spells table if found
-function setPrototype:GetActorDamageSpells(id, name)
-	local actor = self:GetActor(id, name)
-	if actor then
-		return actor.damagespells, actor
-	end
-end
-
 -- returns the actor's damage targets table if found
 function setPrototype:GetActorDamageTargets(id, name, tbl)
 	local actor = self:GetActor(id, name)

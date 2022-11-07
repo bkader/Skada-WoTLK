@@ -1,10 +1,10 @@
 local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
-	local mod = Skada:NewModule("Friendly Fire")
-	local targetmod = mod:NewModule("Damage target list")
-	local spellmod = mod:NewModule("Damage spell list")
-	local spelltargetmod = spellmod:NewModule("Damage spell targets")
+	local mode = Skada:NewModule("Friendly Fire")
+	local mode_target = mode:NewModule("Damage target list")
+	local mode_spell = mode:NewModule("Damage spell list")
+	local mode_spell_target = mode_spell:NewModule("Damage spell targets")
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
 	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
 	local get_actor_friendfire_targets = nil
@@ -12,7 +12,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 	local pairs, wipe, format, uformat = pairs, wipe, string.format, Private.uformat
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
-	local mod_cols = nil
+	local mode_cols = nil
 
 	local function format_valuetext(d, columns, total, dps, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -78,12 +78,12 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 	end
 
-	function targetmod:Enter(win, id, label)
+	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = format(L["%s's targets"], label)
 	end
 
-	function targetmod:Update(win, set)
+	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's targets"], win.actorname)
 
 		local targets, total, actor = get_actor_friendfire_targets(set, win.actorid, win.actorname)
@@ -94,23 +94,23 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime(set)
+		local actortime = mode_cols.sDPS and actor:GetTime(set)
 
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.amount
-			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mode_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = L["actor damage"](label)
 	end
 
-	function spellmod:Update(win, set)
+	function mode_spell:Update(win, set)
 		win.title = L["actor damage"](win.actorname or L["Unknown"])
 
 		local actor = set and set:GetActor(win.actorid, win.actorname)
@@ -124,23 +124,23 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime(set)
+		local actortime = mode_cols.sDPS and actor:GetTime(set)
 
 		for spellid, spell in pairs(spells) do
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, true)
 			d.value = spell.amount
-			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mode_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
-	function spelltargetmod:Enter(win, id, label)
+	function mode_spell_target:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = uformat(L["%s's <%s> damage"], win.actorname, label)
 	end
 
-	function spelltargetmod:Update(win, set)
+	function mode_spell_target:Update(win, set)
 		win.title = uformat(L["%s's <%s> damage"], win.actorname, win.spellname)
 		if not win.spellid then return end
 
@@ -152,18 +152,18 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 
 		local nr = 0
-		local actortime = mod_cols.sDPS and actor:GetTime(set)
+		local actortime = mode_cols.sDPS and actor:GetTime(set)
 
 		for targetname, target in pairs(targets) do
 			nr = nr + 1
 
 			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.amount
-			format_valuetext(d, mod_cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, mode_cols, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["Friendly Fire"], L[win.class]) or L["Friendly Fire"]
 
 		local total = set and set:GetTotal(win.class, nil, "friendfire")
@@ -182,12 +182,12 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.friendfire
-				format_valuetext(d, mod_cols, total, mod_cols.DPS and (d.value / actor:GetTime(set)), win.metadata)
+				format_valuetext(d, mode_cols, total, mode_cols.DPS and (d.value / actor:GetTime(set)), win.metadata)
 			end
 		end
 	end
 
-	function mod:GetSetSummary(set, win)
+	function mode:GetSetSummary(set, win)
 		if not set then return end
 		local value = set:GetTotal(win and win.class, nil, "friendfire") or 0
 		local valuetext = Skada:FormatValueCols(
@@ -197,23 +197,23 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		return value, valuetext
 	end
 
-	function mod:OnEnable()
-		spellmod.metadata = {click1 = spelltargetmod}
+	function mode:OnEnable()
+		mode_spell.metadata = {click1 = mode_spell_target}
 		self.metadata = {
 			showspots = true,
-			click1 = spellmod,
-			click2 = targetmod,
+			click1 = mode_spell,
+			click2 = mode_target,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
 			icon = [[Interface\Icons\inv_gizmo_supersappercharge]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		spellmod.nototal = true
-		targetmod.nototal = true
+		mode_spell.nototal = true
+		mode_target.nototal = true
 
 		local flags_src_dst = {src_is_interesting_nopets = true, dst_is_interesting = true}
 
@@ -241,16 +241,16 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		Skada:AddMode(self, "Damage Done")
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 
-	function mod:CombatLeave()
+	function mode:CombatLeave()
 		wipe(dmg)
 	end
 
-	function mod:SetComplete(set)
+	function mode:SetComplete(set)
 		if not set.friendfire or set.friendfire == 0 then return end
 		for _, actor in pairs(set.actors) do
 			local amount = not actor.enemy and actor.friendfire

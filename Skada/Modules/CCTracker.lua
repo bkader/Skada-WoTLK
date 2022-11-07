@@ -21,14 +21,14 @@ end
 -- CC Done --
 -- ======= --
 Skada:RegisterModule("CC Done", function(L, P, _, C)
-	local mod = Skada:NewModule("CC Done")
-	local spellmod = mod:NewModule("Crowd Control Spells")
-	local targetmod = mod:NewModule("Crowd Control Targets")
-	local sourcemod = spellmod:NewModule("Crowd Control Sources")
+	local mode = Skada:NewModule("CC Done")
+	local mode_spell = mode:NewModule("Crowd Control Spells")
+	local mode_target = mode:NewModule("Crowd Control Targets")
+	local mode_source = mode_spell:NewModule("Crowd Control Sources")
 	local cc_spells = Skada.extra_cc_spells -- extended list
 	local get_actor_cc_targets = nil
 	local get_cc_done_sources = nil
-	local mod_cols = nil
+	local mode_cols = nil
 
 	local function log_ccdone(set)
 		local actor = Skada:GetActor(set, cc_table.actorid, cc_table.actorname, cc_table.actorflags)
@@ -72,12 +72,12 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's control spells"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function mode_spell:Update(win, set)
 		win.title = uformat(L["%s's control spells"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorid, win.actorname)
@@ -96,16 +96,16 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 			local d = win:spell(nr, spellid, false)
 			d.value = spell.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function targetmod:Enter(win, id, label)
+	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's control targets"], label)
 	end
 
-	function targetmod:Update(win, set)
+	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's control targets"], win.actorname)
 
 		local targets, total, actor = get_actor_cc_targets(set, win.actorid, win.actorname)
@@ -121,16 +121,16 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function sourcemod:Enter(win, id, label)
+	function mode_source:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = uformat(L["%s's sources"], label)
 	end
 
-	function sourcemod:Update(win, set)
+	function mode_source:Update(win, set)
 		win.title = uformat(L["%s's sources"], win.spellname)
 		if not set or not win.spellid then return end
 
@@ -147,11 +147,11 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 			local d = win:actor(nr, source, source.enemy, sourcename)
 			d.value = source.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["CC Done"], L[win.class]) or L["CC Done"]
 
 		local total = set and set:GetTotal(win.class, nil, "ccdone")
@@ -170,40 +170,40 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.ccdone
-				format_valuetext(d, mod_cols, total, win.metadata)
+				format_valuetext(d, mode_cols, total, win.metadata)
 			end
 		end
 	end
 
-	function mod:GetSetSummary(set, win)
+	function mode:GetSetSummary(set, win)
 		return set and set:GetTotal(win and win.class, nil, "ccdone") or 0
 	end
 
-	function mod:AddToTooltip(set, tooltip)
+	function mode:AddToTooltip(set, tooltip)
 		if set.ccdone and set.ccdone > 0 then
 			tooltip:AddDoubleLine(L["CC Done"], set.ccdone, 1, 1, 1)
 		end
 	end
 
-	function mod:OnEnable()
-		spellmod.metadata = {click1 = sourcemod}
+	function mode:OnEnable()
+		mode_spell.metadata = {click1 = mode_source}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = spellmod,
-			click2 = targetmod,
+			click1 = mode_spell,
+			click2 = mode_target,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_frost_chainsofice]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		sourcemod.nototal = true
-		spellmod.nototal = true
-		targetmod.nototal = true
+		mode_source.nototal = true
+		mode_spell.nototal = true
+		mode_target.nototal = true
 
 		Skada:RegisterForCL(
 			aura_applied,
@@ -215,7 +215,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		Skada:AddMode(self, "Crowd Control")
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada:RemoveMode(self)
 	end
 
@@ -273,13 +273,13 @@ end)
 -- CC Taken --
 -- ======== --
 Skada:RegisterModule("CC Taken", function(L, P, _, C)
-	local mod = Skada:NewModule("CC Taken")
-	local spellmod = mod:NewModule("Crowd Control Spells")
-	local sourcemod = mod:NewModule("Crowd Control Sources")
-	local targetmod = spellmod:NewModule("Crowd Control Targets")
+	local mode = Skada:NewModule("CC Taken")
+	local mode_spell = mode:NewModule("Crowd Control Spells")
+	local mode_source = mode:NewModule("Crowd Control Sources")
+	local mode_target = mode_spell:NewModule("Crowd Control Targets")
 	local get_actor_cc_sources = nil
 	local get_cc_taken_targets = nil
-	local mod_cols = nil
+	local mode_cols = nil
 
 	-- few raid spells added to the extended list of cc spells
 	local cc_spells = setmetatable({
@@ -335,12 +335,12 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's control spells"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function mode_spell:Update(win, set)
 		win.title = uformat(L["%s's control spells"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorid, win.actorname)
@@ -359,16 +359,16 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 
 			local d = win:spell(nr, spellid, false)
 			d.value = spell.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function sourcemod:Enter(win, id, label)
+	function mode_source:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's control sources"], label)
 	end
 
-	function sourcemod:Update(win, set)
+	function mode_source:Update(win, set)
 		win.title = uformat(L["%s's control sources"], win.actorname)
 
 		local sources, total, actor = get_actor_cc_sources(set, win.actorid, win.actorname)
@@ -384,16 +384,16 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 
 			local d = win:actor(nr, source, true, sourcename)
 			d.value = source.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function targetmod:Enter(win, id, label)
+	function mode_target:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = uformat(L["%s's targets"], label)
 	end
 
-	function targetmod:Update(win, set)
+	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's targets"], win.spellname)
 		if not set or not win.spellid then return end
 
@@ -410,11 +410,11 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 
 			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["CC Taken"], L[win.class]) or L["CC Taken"]
 
 		local total = set and set:GetTotal(win.class, nil, "cctaken")
@@ -433,40 +433,40 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.cctaken
-				format_valuetext(d, mod_cols, total, win.metadata)
+				format_valuetext(d, mode_cols, total, win.metadata)
 			end
 		end
 	end
 
-	function mod:GetSetSummary(set, win)
+	function mode:GetSetSummary(set, win)
 		return set and set:GetTotal(win and win.class, nil, "cctaken") or 0
 	end
 
-	function mod:AddToTooltip(set, tooltip)
+	function mode:AddToTooltip(set, tooltip)
 		if set.cctaken and set.cctaken > 0 then
 			tooltip:AddDoubleLine(L["CC Taken"], set.cctaken, 1, 1, 1)
 		end
 	end
 
-	function mod:OnEnable()
-		spellmod.metadata = {click1 = targetmod}
+	function mode:OnEnable()
+		mode_spell.metadata = {click1 = mode_target}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = spellmod,
-			click2 = sourcemod,
+			click1 = mode_spell,
+			click2 = mode_source,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_magic_polymorphrabbit]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		spellmod.nototal = true
-		sourcemod.nototal = true
-		targetmod.nototal = true
+		mode_spell.nototal = true
+		mode_source.nototal = true
+		mode_target.nototal = true
 
 		Skada:RegisterForCL(
 			aura_applied,
@@ -478,7 +478,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		Skada:AddMode(self, "Crowd Control")
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada:RemoveMode(self)
 	end
 
@@ -536,12 +536,12 @@ end)
 -- CC Breaks --
 -- ========= --
 Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
-	local mod = Skada:NewModule("CC Breaks")
-	local spellmod = mod:NewModule("Crowd Control Spells")
-	local targetmod = mod:NewModule("Crowd Control Targets")
+	local mode = Skada:NewModule("CC Breaks")
+	local mode_spell = mode:NewModule("Crowd Control Spells")
+	local mode_target = mode:NewModule("Crowd Control Targets")
 	local cc_spells = Skada.cc_spells
 	local get_actor_cc_break_targets = nil
-	local mod_cols = nil
+	local mode_cols = nil
 
 	local UnitName, UnitInRaid, IsInRaid = UnitName, UnitInRaid, Skada.IsInRaid
 	local GetPartyAssignment, UnitIterator = GetPartyAssignment, Skada.UnitIterator
@@ -617,12 +617,12 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		end
 	end
 
-	function spellmod:Enter(win, id, label)
+	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's control spells"], label)
 	end
 
-	function spellmod:Update(win, set)
+	function mode_spell:Update(win, set)
 		win.title = uformat(L["%s's control spells"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorid, win.actorname)
@@ -641,16 +641,16 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 
 			local d = win:spell(nr, spellid, false)
 			d.value = spell.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function targetmod:Enter(win, id, label)
+	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		win.title = uformat(L["%s's control targets"], label)
 	end
 
-	function targetmod:Update(win, set)
+	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's control targets"], win.actorname)
 
 		local targets, total, actor = get_actor_cc_break_targets(set, win.actorid, win.actorname)
@@ -666,11 +666,11 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 
 			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.count
-			format_valuetext(d, mod_cols, total, win.metadata, true)
+			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
 
-	function mod:Update(win, set)
+	function mode:Update(win, set)
 		win.title = win.class and format("%s (%s)", L["CC Breaks"], L[win.class]) or L["CC Breaks"]
 
 		local total = set and set:GetTotal(win.class, nil, "ccbreak")
@@ -689,38 +689,38 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.ccbreak
-				format_valuetext(d, mod_cols, total, win.metadata)
+				format_valuetext(d, mode_cols, total, win.metadata)
 			end
 		end
 	end
 
-	function mod:GetSetSummary(set, win)
+	function mode:GetSetSummary(set, win)
 		return set and set:GetTotal(win and win.class, nil, "ccbreak") or 0
 	end
 
-	function mod:AddToTooltip(set, tooltip)
+	function mode:AddToTooltip(set, tooltip)
 		if set.ccbreak and set.ccbreak > 0 then
 			tooltip:AddDoubleLine(L["CC Breaks"], set.ccbreak, 1, 1, 1)
 		end
 	end
 
-	function mod:OnEnable()
+	function mode:OnEnable()
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
-			click1 = spellmod,
-			click2 = targetmod,
+			click1 = mode_spell,
+			click2 = mode_target,
 			click4 = Skada.FilterClass,
 			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_holy_sealofvalor]]
 		}
 
-		mod_cols = self.metadata.columns
+		mode_cols = self.metadata.columns
 
 		-- no total click.
-		spellmod.nototal = true
-		targetmod.nototal = true
+		mode_spell.nototal = true
+		mode_target.nototal = true
 
 		Skada:RegisterForCL(
 			aura_broken,
@@ -732,11 +732,11 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		Skada:AddMode(self, "Crowd Control")
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada:RemoveMode(self)
 	end
 
-	function mod:OnInitialize()
+	function mode:OnInitialize()
 		Skada.options.args.modules.args.ccoptions = {
 			type = "group",
 			name = self.localeName,

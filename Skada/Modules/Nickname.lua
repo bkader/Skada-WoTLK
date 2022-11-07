@@ -1,6 +1,6 @@
 local _, Skada = ...
 Skada:RegisterModule("Nickname", function(L, P, G)
-	local mod = Skada:NewModule("Nickname")
+	local mode = Skada:NewModule("Nickname")
 	local CONST_COMM_MOD = "Nickname"
 
 	local time, wipe = time, wipe
@@ -352,7 +352,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 		end
 	end
 
-	function mod:OnEvent(event)
+	function mode:OnEvent(event)
 		if self.sendCooldown > time() then
 			self.nicknameTimer = self.nicknameTimer or Skada.ScheduleTimer(self, "SendNickname", 30)
 		else
@@ -360,7 +360,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 		end
 	end
 
-	function mod:SendNickname(nocooldown)
+	function mode:SendNickname(nocooldown)
 		self:SetCacheTable()
 
 		if not nocooldown then
@@ -376,13 +376,13 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 	end
 
 	local function remove_nickname(guid)
-		if mod.db.cache[guid] then
-			mod.db.cache[guid] = nil
+		if mode.db.cache[guid] then
+			mode.db.cache[guid] = nil
 		end
 		cached_nickname[guid] = false
 	end
 
-	function mod:OnCommNickname(sender, guid, nickname)
+	function mode:OnCommNickname(sender, guid, nickname)
 		self:SetCacheTable()
 		if not P.ignorenicknames and sender and guid then
 			-- no nickname or removed?
@@ -405,7 +405,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 		end
 	end
 
-	function mod:OnInitialize()
+	function mode:OnInitialize()
 		P.namedisplay = P.namedisplay or 2
 
 		-- move nickname to global
@@ -447,7 +447,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 						if okey == true then
 							G.nickname = nickname
 							cached_nickname[Skada.userGUID] = nickname or false
-							mod:SendNickname(true)
+							mode:SendNickname(true)
 							Skada:ApplySettings()
 						else
 							Skada:Print(nickname)
@@ -472,7 +472,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 					desc = L["When enabled, nicknames set by Skada users are ignored."],
 					set = function(_, value)
 						P.ignorenicknames = value
-						mod:UpdateComms(nil, not P.syncoff)
+						mode:UpdateComms(nil, not P.syncoff)
 						Skada:ApplySettings()
 					end,
 					order = 30,
@@ -489,7 +489,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 					func = function()
 						G.nicknames.reset = nil
 						G.nicknames.cache = wipe(G.nicknames.cache or {})
-						mod:SetCacheTable()
+						mode:SetCacheTable()
 					end,
 					disabled = function()
 						return (not G.nicknames or next(G.nicknames.cache) == nil)
@@ -499,7 +499,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 		}
 	end
 
-	function mod:UpdateComms(_, enable)
+	function mode:UpdateComms(_, enable)
 		if enable and not P.ignorenicknames then
 			Skada.AddComm(self, CONST_COMM_MOD, "OnCommNickname")
 			Skada.RegisterMessage(self, "GROUP_ROSTER_UPDATE", "OnEvent")
@@ -511,7 +511,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 		end
 	end
 
-	function mod:OnEnable()
+	function mode:OnEnable()
 		self.sendCooldown = 0
 		self:SetCacheTable()
 
@@ -521,7 +521,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 		self:UpdateComms(nil, not P.syncoff)
 	end
 
-	function mod:OnDisable()
+	function mode:OnDisable()
 		Skada.UnregisterAllCallbacks(self)
 		Skada:UnregisterAllMessages(self)
 		Skada.RemoveAllComms(self)
@@ -535,7 +535,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 		local nickname_fmt = {[1] = "%1$s", [2] = "%2$s", [3] = "%1$s (%2$s)", [4] = "%2$s (%1$s)"}
 
 		cached_nickname = setmetatable({}, {__mode = "kv", __index = function(t, guid)
-			if not mod.db then mod:SetCacheTable() end -- why wasn't it available yet?!
+			if not mode.db then mode:SetCacheTable() end -- why wasn't it available yet?!
 
 			local nickname = false
 
@@ -546,8 +546,8 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 			elseif guid == Skada.userGUID then
 				nickname = G.nickname or false
 			-- well! we've got one!
-			elseif mod.db and mod.db.cache[guid] then
-				nickname = mod.db and mod.db.cache[guid] or false
+			elseif mode.db and mode.db.cache[guid] then
+				nickname = mode.db and mode.db.cache[guid] or false
 			end
 
 			-- cache it and move on!
@@ -577,13 +577,13 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 	-- cache table functions
 
 	local function check_for_reset()
-		if not mod.db.reset or time() > mod.db.reset then
-			mod.db.reset = time() + (60 * 60 * 24 * 15)
-			mod.db.cache = wipe(mod.db.cache or {})
+		if not mode.db.reset or time() > mode.db.reset then
+			mode.db.reset = time() + (60 * 60 * 24 * 15)
+			mode.db.cache = wipe(mode.db.cache or {})
 		end
 	end
 
-	function mod:SetCacheTable()
+	function mode:SetCacheTable()
 		if not self.db then
 			G.nicknames = G.nicknames or {cache = {}}
 			self.db = G.nicknames
@@ -591,7 +591,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 		check_for_reset()
 	end
 
-	function mod:Reset()
+	function mode:Reset()
 		P.namedisplay = P.namedisplay or 2
 
 		G.nicknames = G.nicknames or {cache = {}}
