@@ -2,12 +2,13 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90018
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90019
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
 -------------------------------------------------------------------------------
 -- library callbacks
+-------------------------------------------------------------------------------
 
 local CallbackHandler = LibStub("CallbackHandler-1.0")
 lib.callbacks = lib.callbacks or CallbackHandler:New(lib)
@@ -15,6 +16,7 @@ local callbacks = lib.callbacks
 
 -------------------------------------------------------------------------------
 -- cache frequently used lua and game functions
+-------------------------------------------------------------------------------
 
 local GetTime = GetTime
 local min, max, floor = math.min, math.max, math.floor
@@ -31,6 +33,7 @@ local IsShiftKeyDown = IsShiftKeyDown
 
 -------------------------------------------------------------------------------
 -- localization
+-------------------------------------------------------------------------------
 
 local L_RESIZE_HEADER = "Resize"
 local L_RESIZE_CLICK = "\124cff00ff00Click\124r to freely resize window."
@@ -92,6 +95,7 @@ end
 
 -------------------------------------------------------------------------------
 -- frame and class creation
+-------------------------------------------------------------------------------
 
 -- manageable textures and fontstrings z level
 local createFrame
@@ -158,6 +162,7 @@ end
 
 -------------------------------------------------------------------------------
 -- library variables.
+-------------------------------------------------------------------------------
 
 local framePrototype = createClass("Frame")
 lib.barPrototype = lib.barPrototype or createClass({}, framePrototype)
@@ -190,6 +195,7 @@ local ICON_STRETCH = [[Interface\MINIMAP\ROTATING-MINIMAPGUIDEARROW.blp]]
 
 -------------------------------------------------------------------------------
 -- local functions
+-------------------------------------------------------------------------------
 
 -- table pool
 local new, del
@@ -215,26 +221,13 @@ end
 
 -------------------------------------------------------------------------------
 -- library functions.
-
--- lib:Embed - library embed
-do
-	lib.embeds = lib.embeds or {}
-
-	local mixins = {"NewBar", "GetBar", "ReleaseBar", "GetBars", "NewBarGroup", "GetBarGroup", "GetBarGroups", "SetScrollSpeed", "RegisterCallback", "callbacks"}
-	function lib:Embed(target)
-		for k, v in pairs(mixins) do
-			target[v] = self[v]
-		end
-		lib.embeds[target] = true
-		return target
-	end
-end
+-------------------------------------------------------------------------------
 
 -- lib:NewBarGroup - bar list creation
 do
 	local function anchorOnMouseDown(self, button)
 		local p = self:GetParent()
-		if p.locked or button == "MiddleButton" then
+		if (button == "LeftButton" and p.locked) or button == "MiddleButton" then
 			stretchOnMouseDown(p.stretcher, "LeftButton")
 		elseif button == "LeftButton" and not p.locked and not p.isMoving then
 			p.isMoving = true
@@ -248,7 +241,7 @@ do
 
 	local function anchorOnMouseUp(self, button)
 		local p = self:GetParent()
-		if p.locked or button == "MiddleButton" then
+		if (button == "LeftButton" and p.locked) or button == "MiddleButton" then
 			stretchOnMouseUp(p.stretcher, "LeftButton")
 		elseif button == "LeftButton" and not p.locked and p.isMoving then
 			p.isMoving = nil
@@ -634,6 +627,7 @@ barPrototype.SetShown = SetShown
 
 -------------------------------------------------------------------------------
 -- bar lists/groups functions
+-------------------------------------------------------------------------------
 
 -- locks the bar group
 function barListPrototype:Lock(fireevent)
@@ -1766,6 +1760,7 @@ end
 
 -------------------------------------------------------------------------------
 -- bar functions
+-------------------------------------------------------------------------------
 
 -- barPrototype:Create - creates a new bar
 do
@@ -2205,6 +2200,302 @@ end
 function barPrototype:SetMaxValue(val)
 	self.maxValue = val
 	self:SetValue(self.value)
+end
+
+-------------------------------------------------------------------------------
+-- sticky frames | credits: Jason Greer - LibFlyPaper-1.1
+-------------------------------------------------------------------------------
+do
+	local math_huge, unpack = math.huge, unpack
+	local DEFAULT_STICKY_TOLERANCE = 16
+	local FRAME_STRATAS = {BACKGROUND = 1, LOW = 2, MEDIUM = 3, HIGH = 4, DIALOG = 5, FULLSCREEN = 6, FULLSCREEN_DIALOG = 7, TOOLTIP = 8}
+	local FRAME_ANCHORS = {"TL", "TR", "TC", "BL", "BR", "BC", "LT", "LB", "LC", "RT", "RB", "RC"}
+	local FRAME_ANCHOR_POINTS = {
+		-- bottom to top
+		TL = {"BOTTOMLEFT", "TOPLEFT", 0, 1},
+		TR = {"BOTTOMRIGHT", "TOPRIGHT", 0, 1},
+		TC = {"BOTTOM", "TOP", 0, 1},
+		-- top to bottom
+		BL = {"TOPLEFT", "BOTTOMLEFT", 0, -1},
+		BR = {"TOPRIGHT", "BOTTOMRIGHT", 0, -1},
+		BC = {"TOP", "BOTTOM", 0, -1},
+		-- right to left
+		LT = {"TOPRIGHT", "TOPLEFT", -1, 0},
+		LB = {"BOTTOMRIGHT", "BOTTOMLEFT", -1, 0},
+		LC = {"RIGHT", "LEFT", -1, 0},
+		-- left to right
+		RT = {"TOPLEFT", "TOPRIGHT", 1, 0},
+		RB = {"BOTTOMLEFT", "BOTTOMRIGHT", 1, 0},
+		RC = {"LEFT", "RIGHT", 1, 0}
+	}
+	local COORDS = {
+		TOP = function(left, bottom, width, height)
+			return left + width * 0.5, bottom + height
+		end,
+		TOPLEFT = function(left, bottom, width, height)
+			return left, bottom + height
+		end,
+		TOPRIGHT = function(left, bottom, width, height)
+			return left + width, bottom + height
+		end,
+		BOTTOM = function(left, bottom, width, height)
+			return left + width * 0.5, bottom
+		end,
+		BOTTOMLEFT = function(left, bottom, width, height)
+			return left, bottom
+		end,
+		BOTTOMRIGHT = function(left, bottom, width, height)
+			return left + width, bottom
+		end,
+		LEFT = function(left, bottom, width, height)
+			return left, bottom + height * 0.5
+		end,
+		CENTER = function(left, bottom, width, height)
+			return left + width * 0.5, bottom + height * 0.5
+		end,
+		RIGHT = function(left, bottom, width, height)
+			return left + width, bottom + height * 0.5
+		end
+	}
+
+	local function getScaledRect(self)
+		if self.GetScaledRect then
+			return self:GetScaledRect()
+		end
+
+		local left, bottom, width, height = self:GetRect()
+		local scale = self:GetEffectiveScale()
+		return left * scale, bottom * scale, width * scale, height * scale
+	end
+
+	-- two dimensional distance
+	local function getSquaredDistance(x1, y1, x2, y2)
+		return (x1 - x2) ^ 2 + (y1 - y2) ^ 2
+	end
+
+	-- returns true if <self> or one of the frames that <self>
+	-- is dependent on is anchored to <frame> and nil otherwise
+	local function isFrameDependentOn(self, frame)
+		if self and frame then
+			if self == frame then
+				return true
+			end
+
+			local points = self:GetNumPoints()
+			for i = 1, points do
+				local _, parent = self:GetPoint(i)
+				if isFrameDependentOn(parent, frame) then
+					return true
+				end
+			end
+		end
+	end
+
+	-- returns true if its actually possible to attach
+	-- the two frames without error
+	local function canAttach(self, frame)
+		return self and frame and not isFrameDependentOn(frame, self)
+	end
+
+	-- returns the addon id and addonName associated with
+	-- the specified frame <self>
+	local function getFrameGroup(self)
+		local sticky = lib._sticky
+		if not sticky then return end
+
+		for name, group in pairs(sticky) do
+			for groupId, groupFrame in pairs(group) do
+				if groupFrame == self then
+					return name, groupId
+				end
+			end
+		end
+	end
+
+	-- returns 0 if a frame is in the same group as another frame
+	-- and 1 otherwise
+	local function getGroupDistance(self, frame)
+		return (self == frame or getFrameGroup(self) == getFrameGroup(frame)) and 0 or 1
+	end
+
+	local function getZDistance(self, frame)
+		if self == frame then
+			return 0
+		end
+
+		local s1 = FRAME_STRATAS[self:GetFrameStrata()]
+		local s2 = FRAME_STRATAS[frame:GetFrameStrata()]
+		local l1 = self:GetFrameLevel()
+		local l2 = frame:GetFrameLevel()
+
+		return getSquaredDistance(s1, l1, s2, l2)
+	end
+
+	-- iterate through all anchor points
+	-- return the one with the shortest distance
+	local function getClosestAnchor(self, frame)
+		if self == frame then return end
+
+		local bestDistance = math_huge
+		local bestAnchor = false
+		local l1, b1, w1, h1 = getScaledRect(self)
+		local l2, b2, w2, h2 = getScaledRect(frame)
+
+		for i = 1, #FRAME_ANCHORS do
+			local anchor = FRAME_ANCHORS[i]
+			local point, relPoint = unpack(FRAME_ANCHOR_POINTS[anchor])
+			local x1, y1 = COORDS[point](l1, b1, w1, h1)
+			local x2, y2 = COORDS[relPoint](l2, b2, w2, h2)
+			local distance = getSquaredDistance(x1, y1, x2, y2)
+
+			if distance < bestDistance then
+				bestDistance = distance
+				bestAnchor = anchor
+			end
+		end
+
+		return bestAnchor, bestDistance
+	end
+
+	local function getClosestFrame(self, sticky, tolerance)
+		local maxDistance = (tonumber(tolerance) or DEFAULT_STICKY_TOLERANCE) ^ 2
+		local bestDistance = math_huge
+		local bestAnchor, bestFrame, bestId
+
+		for id, frame in pairs(sticky) do
+			if canAttach(self, frame) then
+				local anchor, distance = getClosestAnchor(self, frame)
+
+				if distance <= maxDistance then
+					-- prioritize frames on the same layer
+					distance = distance + getZDistance(self, frame)
+
+					-- prioritize frames from the same addon
+					distance = distance + getGroupDistance(self, frame)
+
+					if distance < bestDistance then
+						bestAnchor = anchor
+						bestDistance = distance
+						bestFrame = frame
+						bestId = id
+					end
+				end
+			end
+		end
+
+		return bestFrame, bestAnchor, bestId, bestDistance
+	end
+
+	local function anchorFrame(self, frame, anchor, xOfs, yOfs)
+		local point, relPoint, xMult, yMult = unpack(FRAME_ANCHOR_POINTS[anchor])
+		local s = self:GetEffectiveScale()
+		local x = ((tonumber(xOfs) or 0) * xMult) / s
+		local y = ((tonumber(yOfs) or 0) * yMult) / s
+
+		self:ClearAllPoints()
+		self:SetPoint(point, frame, relPoint, x, y)
+
+		callbacks:Fire("OnAnchorFrame", self, frame, anchor, x, y)
+	end
+
+	-- attempts to anchor <self> to a specific anchor point on <frame>
+	function barListPrototype:Stick(frame, tolerance, xOfs, yOfs)
+		if not canAttach(self, frame) then return end
+
+		local anchor, distance = getClosestAnchor(self, frame)
+		local maxDistance = (tonumber(tolerance) or DEFAULT_STICKY_TOLERANCE) ^ 2
+
+		if distance <= maxDistance then
+			anchorFrame(self, frame, anchor, xOfs, yOfs)
+			return anchor, distance
+		end
+	end
+
+	-- iterate through all registered frames, and try to stick to the nearest one
+	function barListPrototype:StickToClosestFrameInGroup(groupName, tolerance, xOfs, yOfs)
+		local group = lib._sticky and lib._sticky[groupName]
+		if not group then return end
+
+		local frame, anchor, id = getClosestFrame(self, group, tolerance)
+		if frame then
+			anchorFrame(self, frame, anchor, xOfs, yOfs)
+			return anchor, id, frame
+		end
+	end
+
+	local function addFrame(groupName, id, frame)
+		local group = lib._sticky and lib._sticky[groupName]
+		if not group then
+			lib._sticky = lib._sticky or new()
+			lib._sticky[groupName] = new()
+			group = lib._sticky[groupName]
+		end
+
+		if not group[id] then
+			group[id] = frame
+			callbacks:Fire("OnAddFrame", frame, groupName, id)
+			return true
+		end
+	end
+
+	local function removeFrame(groupName, id)
+		local group = lib._sticky and lib._sticky[groupName]
+		if not group then return end
+
+		local frame = group[id]
+		if frame then
+			group[id] = nil
+			callbacks:Fire("OnRemoveFrame", frame, groupName, id)
+
+			-- free tables
+			if next(group) == nil then
+				lib._sticky[groupName] = del(group)
+			end
+			if next(lib._sticky) == nil then
+				lib._sticky = del(lib._sticky)
+			end
+
+			return true
+		end
+	end
+
+	function barListPrototype:SetSticky(sticky, groupName)
+		if sticky then
+			addFrame(groupName, self.name, self)
+		else
+			removeFrame(groupName, self.name)
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
+-- library embeds
+-------------------------------------------------------------------------------
+
+-- lib:Embed - library embed
+do
+	lib.embeds = lib.embeds or {}
+
+	local mixins = {
+		"NewBar",
+		"GetBar",
+		"ReleaseBar",
+		"GetBars",
+		"NewBarGroup",
+		"GetBarGroup",
+		"GetBarGroups",
+		"SetScrollSpeed",
+		"RegisterCallback",
+		"callbacks"
+	}
+
+	function lib:Embed(target)
+		for k, v in pairs(mixins) do
+			target[v] = self[v]
+		end
+		lib.embeds[target] = true
+		return target
+	end
 end
 
 --- Finally: upgrade our old embeds

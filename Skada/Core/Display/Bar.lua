@@ -4,9 +4,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local mod = Skada:NewModule("Bar Display", "SpecializedLibBars-1.0")
 	local callbacks = mod.callbacks
 
-	local FlyPaper = LibStub("LibFlyPaper-1.1", true)
 	local ACR = LibStub("AceConfigRegistry-3.0")
-
 	local pairs, tsort, format = pairs, table.sort, string.format
 	local max, min, abs = math.max, math.min, math.abs
 	local GameTooltip, GameTooltip_Hide = GameTooltip, GameTooltip_Hide
@@ -312,12 +310,12 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			SavePosition(group, group.win.db) -- save window position
 
 			-- handle sticked windows
-			if FlyPaper and group.win.db.sticky and not group.locked then
+			if group.win.db.sticky and not group.locked then
 				local p = group.win.db
 
 				-- attempt to stick to the closest frame.
 				local offset = p.background.borderthickness
-				local _, _, frame = FlyPaper.StickToClosestFrameInGroup(group, folder, nil, offset, offset)
+				local _, _, frame = group:StickToClosestFrameInGroup(folder, nil, offset, offset)
 
 				-- found a frame to stick it to?
 				if frame then
@@ -340,14 +338,14 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				local win = windows[i]
 				local p = win and win.db
 				if p and p.display == "bar" and children[win.name] then
-					FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
+					win.bargroup:Stick(group, nil, offset, offset)
 					start_move(win.bargroup, p.sticked, p.background.borderthickness)
 				end
 			end
 		end
 
 		function mod:WindowMoveStart(_, group)
-			local p = FlyPaper and group and group.win and group.win.db
+			local p = group and group.win and group.win.db
 			if p and p.sticky and not p.hidden then
 				local offset = p.background.borderthickness
 				start_move(group, p.sticked, offset)
@@ -377,7 +375,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		p.background.height = height
 
 		-- resize sticked windows as well.
-		if FlyPaper and p.sticky then
+		if p.sticky then
 			local offset = p.background.borderthickness
 			for i = 1, #windows do
 				local win = windows[i]
@@ -553,6 +551,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			if Skada.testMode then return end
 
 			local win, id, label = bar.win, bar.id, bar.text
+			if not win then return end
 
 			if button == self.db.button then
 				self:ScrollStart(win)
@@ -1122,12 +1121,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 			color = p.textcolor or COLOR_WHITE
 			g:SetTextColor(color.r, color.g, color.b, color.a or 1)
-
-			if FlyPaper and p.sticky then
-				FlyPaper.AddFrame(folder, p.name, g)
-			elseif FlyPaper then
-				FlyPaper.RemoveFrame(folder, p.name)
-			end
+			g:SetSticky(p.sticky, folder)
 
 			-- make player's bar fixed.
 			g.showself = P.showself or p.showself
@@ -1144,12 +1138,12 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		end
 
 		function mod:WindowResizing(_, group)
-			if FlyPaper and group and not group.isStretching and group.win and group.win.db and group.win.db.sticky then
+			if group and not group.isStretching and group.win and group.win.db and group.win.db.sticky then
 				local offset = group.win.db.background.borderthickness
 				for i = 1, #windows do
 					local win = windows[i]
 					if win and win.db and win.db.display == "bar" and win.bargroup:IsShown() and group.win.db.sticked and group.win.db.sticked[win.db.name] then
-						FlyPaper.Stick(win.bargroup, group, nil, offset, offset)
+						win.bargroup:Stick(group, nil, offset, offset)
 					end
 				end
 			end
@@ -2518,6 +2512,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		end
 
 		function mod:OnEnable()
+			self:RegisterCallback("OnRemoveFrame")
+			self:RegisterCallback("OnAnchorFrame")
 			self:RegisterCallback("BarClick")
 			self:RegisterCallback("BarEnter")
 			self:RegisterCallback("BarLeave")
@@ -2572,11 +2568,6 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 					i = i + 1
 					theme = G.themes[i]
 				end
-			end
-
-			if FlyPaper then
-				FlyPaper.RegisterCallback(self, "OnRemoveFrame")
-				FlyPaper.RegisterCallback(self, "OnAnchorFrame")
 			end
 		end
 	end
