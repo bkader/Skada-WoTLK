@@ -2,11 +2,16 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90017
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90018
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 
+-------------------------------------------------------------------------------
+-- library callbacks
+
 local CallbackHandler = LibStub("CallbackHandler-1.0")
+lib.callbacks = lib.callbacks or CallbackHandler:New(lib)
+local callbacks = lib.callbacks
 
 -------------------------------------------------------------------------------
 -- cache frequently used lua and game functions
@@ -215,7 +220,7 @@ end
 do
 	lib.embeds = lib.embeds or {}
 
-	local mixins = {"NewBar", "GetBar", "ReleaseBar", "GetBars", "NewBarGroup", "GetBarGroup", "GetBarGroups", "SetScrollSpeed"}
+	local mixins = {"NewBar", "GetBar", "ReleaseBar", "GetBars", "NewBarGroup", "GetBarGroup", "GetBarGroups", "SetScrollSpeed", "RegisterCallback", "callbacks"}
 	function lib:Embed(target)
 		for k, v in pairs(mixins) do
 			target[v] = self[v]
@@ -237,10 +242,7 @@ do
 			self.startX = p:GetLeft()
 			self.startY = p:GetTop()
 			p:StartMoving()
-
-			if p.callbacks then
-				p.callbacks:Fire("WindowMoveStart", p, self.startX, self.startY)
-			end
+			callbacks:Fire("WindowMoveStart", p, self.startX, self.startY)
 		end
 	end
 
@@ -254,20 +256,20 @@ do
 
 			local endX = p:GetLeft()
 			local endY = p:GetTop()
-			if p.callbacks and (self.startX ~= endX or self.startY ~= endY) then
-				p.callbacks:Fire("WindowMoveStop", p, endX, endY)
+			if self.startX ~= endX or self.startY ~= endY then
+				callbacks:Fire("WindowMoveStop", p, endX, endY)
 			end
 		end
 	end
 
 	local function listOnMouseDown(self, button)
-		if button == "LeftButton" and IsAltKeyDown() then
+		if button == "LeftButton" and not self.locked then
 			anchorOnMouseDown(self.button, button)
 		end
 	end
 
 	local function listOnMouseUp(self, button)
-		if button == "LeftButton" then
+		if button == "LeftButton" and not self.locked then
 			anchorOnMouseUp(self.button, button)
 		end
 	end
@@ -276,7 +278,7 @@ do
 		self:SetLength(width)
 		self:GuessMaxBars()
 		self:SortBars()
-		self.callbacks:Fire("WindowResizing", self)
+		callbacks:Fire("WindowResizing", self)
 	end
 
 	local function listOnMouseWheel(self, direction)
@@ -286,14 +288,14 @@ do
 
 		if direction == 1 and offset > 0 then
 			self:SetBarOffset(IsShiftKeyDown() and 0 or max(0, offset - (IsControlKeyDown() and maxbars or scrollspeed)))
-			self.callbacks:Fire("WindowScroll", self, direction)
+			callbacks:Fire("WindowScroll", self, direction)
 		elseif direction == -1 and ((numbars - maxbars - offset) > 0) then
 			if IsShiftKeyDown() then
 				self:SetBarOffset(numbars - maxbars)
 			else
 				self:SetBarOffset(min(max(0, numbars - maxbars), offset + (IsControlKeyDown() and maxbars or scrollspeed)))
 			end
-			self.callbacks:Fire("WindowScroll", self, direction)
+			callbacks:Fire("WindowScroll", self, direction)
 		end
 	end
 
@@ -330,9 +332,8 @@ do
 		list:SetScript("OnMouseDown", listOnMouseDown)
 		list:SetScript("OnMouseUp", listOnMouseUp)
 
-		list.callbacks = list.callbacks or CallbackHandler:New(list)
-		barLists[self][name] = list
 		list.name = name
+		barLists[self][name] = list
 
 		local myfont = lib.defaultFont
 		if not myfont then
@@ -367,7 +368,7 @@ do
 		list.buttons = {}
 
 		list:SetPoint("TOPLEFT", UIParent, "CENTER")
-		list:SetMinResize(80, 60)
+		list:SetMinResize(150, 60)
 		list:SetMaxResize(500, 500)
 
 		list.showIcon = true
@@ -535,7 +536,7 @@ function lib:ReleaseBar(name)
 		bars[self][bar.name] = nil
 		recycledBars[#recycledBars + 1] = bar
 		self.numBars = self.numBars - 1
-		self.callbacks:Fire("BarReleased", bar, bar.name, self.numBars)
+		callbacks:Fire("BarReleased", bar, bar.name, self.numBars)
 	end
 end
 
@@ -645,7 +646,7 @@ function barListPrototype:Lock(fireevent)
 	end
 
 	if fireevent then
-		self.callbacks:Fire("WindowLocked", self, self.locked)
+		callbacks:Fire("WindowLocked", self, self.locked)
 	end
 end
 
@@ -660,7 +661,7 @@ function barListPrototype:Unlock(fireevent)
 	end
 
 	if fireevent then
-		self.callbacks:Fire("WindowLocked", self, self.locked)
+		callbacks:Fire("WindowLocked", self, self.locked)
 	end
 end
 
@@ -1152,9 +1153,7 @@ do
 			p:SetLength(p:GetLength())
 			p:GuessMaxBars()
 			p:SortBars()
-			if p.callbacks then
-				p.callbacks:Fire("WindowResized", p)
-			end
+			callbacks:Fire("WindowResized", p)
 		end
 	end
 
@@ -1264,16 +1263,16 @@ do
 		if self.stretch_off then
 			self.stretch_on = nil
 			self.stretch_off = nil
-			self.callbacks:Fire("WindowStretchStop", self)
+			callbacks:Fire("WindowStretchStop", self)
 		elseif self.stretch_on then
 			if not self.isStretching then
 				self.isStretching = true
 				self:SavePosition()
 				self:StartSizing(self.stretchdown and "BOTTOM" or "TOP")
-				self.callbacks:Fire("WindowStretchStart", self)
+				callbacks:Fire("WindowStretchStart", self)
 			else
 				self:SortBars()
-				self.callbacks:Fire("WindowStretching", self)
+				callbacks:Fire("WindowStretching", self)
 			end
 		else
 			self.isStretching = nil
@@ -1772,8 +1771,8 @@ end
 do
 	local function barOnMouseDown(self, button)
 		local p = self:GetParent()
-		if p and p.callbacks then
-			p.callbacks:Fire("BarClick", self, button)
+		if p then
+			callbacks:Fire("BarClick", self, button)
 		end
 	end
 
@@ -1783,9 +1782,7 @@ do
 		if p.barhighlight then
 			self.hg:SetVertexColor(1, 1, 1, 0.1)
 		end
-		if p.callbacks then
-			p.callbacks:Fire("BarEnter", self, motion)
-		end
+		callbacks:Fire("BarEnter", self, motion)
 	end
 
 	local function barOnLeave(self, motion)
@@ -1794,9 +1791,7 @@ do
 		if p.barhighlight then
 			self.hg:SetVertexColor(0, 0, 0, 0)
 		end
-		if p.callbacks then
-			p.callbacks:Fire("BarLeave", self, motion)
-		end
+		callbacks:Fire("BarLeave", self, motion)
 	end
 
 	local DEFAULT_ICON = [[Interface\Icons\INV_Misc_QuestionMark]]

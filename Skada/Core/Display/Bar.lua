@@ -2,6 +2,8 @@ local folder, Skada = ...
 local Private = Skada.Private
 Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local mod = Skada:NewModule("Bar Display", "SpecializedLibBars-1.0")
+	local callbacks = mod.callbacks
+
 	local FlyPaper = LibStub("LibFlyPaper-1.1", true)
 	local ACR = LibStub("AceConfigRegistry-3.0")
 
@@ -152,11 +154,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				p.title.toolbar = 2
 			end
 
-			-- Save a reference to window in bar group. Needed for some nasty callbacks.
-			if bargroup then
-				-- Clear callbacks.
-				bargroup.callbacks = LibStub("CallbackHandler-1.0"):New(bargroup)
-			else
+			if not bargroup then
 				bargroup = mod:NewBarGroup(
 					p.name, -- window name
 					p.barorientation, -- bars orientation
@@ -176,23 +174,6 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 
 			bargroup.win = window
-
-			bargroup.RegisterCallback(mod, "BarClick")
-			bargroup.RegisterCallback(mod, "BarEnter")
-			bargroup.RegisterCallback(mod, "BarLeave")
-			bargroup.RegisterCallback(mod, "BarReleased")
-
-			bargroup.RegisterCallback(mod, "WindowMoveStart")
-			bargroup.RegisterCallback(mod, "WindowMoveStop")
-
-			bargroup.RegisterCallback(mod, "WindowResized")
-			bargroup.RegisterCallback(mod, "WindowLocked")
-			bargroup.RegisterCallback(mod, "WindowResizing")
-
-			bargroup.RegisterCallback(mod, "WindowStretching")
-			bargroup.RegisterCallback(mod, "WindowStretchStart")
-			bargroup.RegisterCallback(mod, "WindowStretchStop")
-
 			bargroup:EnableMouse(true)
 			bargroup:HookScript("OnMouseDown", listOnMouseDown)
 			bargroup:HideBarIcons()
@@ -401,7 +382,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			for i = 1, #windows do
 				local win = windows[i]
 				if win and win.db and win.db.display == "bar" and win.bargroup:IsShown() and p.sticked and p.sticked[win.db.name] then
-					win.bargroup.callbacks:Fire("WindowMoveStop", win.bargroup)
+					callbacks:Fire("WindowMoveStop", win.bargroup)
 				end
 			end
 		end
@@ -2534,6 +2515,21 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 
 			GetScrollOptions = nil
 			return opt_scroll
+		end
+
+		function mod:OnEnable()
+			self:RegisterCallback("BarClick")
+			self:RegisterCallback("BarEnter")
+			self:RegisterCallback("BarLeave")
+			self:RegisterCallback("BarReleased")
+			self:RegisterCallback("WindowMoveStart")
+			self:RegisterCallback("WindowMoveStop")
+			self:RegisterCallback("WindowResized")
+			self:RegisterCallback("WindowLocked")
+			self:RegisterCallback("WindowResizing")
+			self:RegisterCallback("WindowStretching")
+			self:RegisterCallback("WindowStretchStart")
+			self:RegisterCallback("WindowStretchStop")
 		end
 
 		function mod:OnInitialize()
