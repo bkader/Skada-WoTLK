@@ -7,8 +7,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 	local UnitClass, GetTime = UnitClass, GetTime
 	local GetSpellInfo = Private.spell_info or GetSpellInfo
 	local GetSpellLink = Private.spell_link or GetSpellLink
-	local new, del = Private.newTable, Private.delTable
-	local classcolors = Skada.classcolors
+	local TempTable, classcolors = Private.TempTable, Skada.classcolors
 
 	local channel_events, fofrostmourne
 
@@ -33,7 +32,6 @@ Skada:RegisterModule("Tweaks", function(L, P)
 
 		local who_pulled
 		do
-			local tconcat = table.concat
 			local UnitExists, UnitName = UnitExists, UnitName
 
 			function who_pulled(hitline)
@@ -51,20 +49,19 @@ Skada:RegisterModule("Tweaks", function(L, P)
 					local bosstarget = format("boss%dtarget", i)
 					local target = UnitName(bosstarget)
 					if target then
-						targettable = targettable or new()
-
 						local _, class = UnitClass(bosstarget)
 						if class and classcolors[class] then
 							target = classcolors.format(class, target)
 						end
 
-						targettable[#targettable + 1] = uformat("%s > %s", UnitName(boss), target)
+						targettable = targettable or TempTable()
+						targettable:insert(uformat("%s > %s", UnitName(boss), target))
 					end
 				end
 
 				if targettable then
-					targetline = format(L["\124cffffbb00Boss First Target\124r: %s"], tconcat(targettable, " \124\124 "))
-					targettable = del(targettable)
+					targetline = format(L["\124cffffbb00Boss First Target\124r: %s"], targettable:concat(" \124\124 "))
+					targettable = targettable:free()
 				end
 
 				return hitline, targetline
@@ -118,7 +115,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 
 			if output then
 				local spell = GetSpellLink(args.spellid) or args.spellname
-				firsthit = firsthit or new()
+				firsthit = firsthit or TempTable()
 				firsthit.hitline, firsthit.targetline = who_pulled(uformat(L["\124cffffff00First Hit\124r: %s from %s"], spell, output))
 				firsthit.checked = true -- once only
 			end
@@ -170,7 +167,7 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			end
 
 			function mode:ClearFirstHit()
-				firsthit = del(firsthit)
+				firsthit = firsthit:free()
 				if firsthittimer then
 					Skada:CancelTimer(firsthittimer, true)
 					firsthittimer = nil

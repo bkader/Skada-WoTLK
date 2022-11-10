@@ -32,24 +32,24 @@ do
 	end
 	Skada.OnModuleCreated = on_module_created
 
-	local tremove = table.remove
 	local tconcat = table.concat
+	local TempTable = Private.TempTable
 
 	local function module_table(...)
-		local args = tablePool.acquire(...)
+		local args = TempTable(...)
 		if #args >= 2 then
 			-- name must always be first
-			local name = tremove(args, 1)
+			local name = args:remove(1)
 			if type(name) ~= "string" then
-				del(args)
+				args:free()
 				return
 			end
 
 			-- second arg can be the desc or the callback
 			local func = nil
-			local desc = tremove(args, 1)
+			local desc = args:remove(1)
 			if type(desc) == "string" then
-				func = tremove(args, 1)
+				func = args:remove(1)
 				desc = L[desc]
 			elseif type(desc) == "function" then
 				func = desc
@@ -58,7 +58,7 @@ do
 
 			-- double check just in case
 			if type(func) ~= "function" then
-				del(args)
+				args:free()
 				return
 			end
 
@@ -70,25 +70,27 @@ do
 			local args_rem = #args
 			if args_rem > 0 then
 				module.deps = {}
+				local localized_deps = new()
 				for i = 1, #args do
 					module.deps[i] = args[i]
-					args[i] = L[args[i]] -- localize
+					localized_deps[i] = L[args[i]] -- localize
 				end
 
 				-- format module's description
 				if desc then
-					desc = format("%s\n%s", desc, format(L["\124cff00ff00Requires\124r: %s"], tconcat(args, ", ")))
+					desc = format("%s\n%s", desc, format(L["\124cff00ff00Requires\124r: %s"], tconcat(localized_deps, ", ")))
 				else
-					desc = format(L["\124cff00ff00Requires\124r: %s"], tconcat(args, ", "))
+					desc = format(L["\124cff00ff00Requires\124r: %s"], tconcat(localized_deps, ", "))
 				end
+				del(localized_deps)
 			end
 			module.desc = desc
-			del(args)
+			args:free()
 
 			return module
 		end
 
-		del(args)
+		args:free()
 	end
 
 	-- adds a module to the loadable modules table.

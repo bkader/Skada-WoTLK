@@ -1084,7 +1084,7 @@ do
 		local IsInGuild, IsInRaid = IsInGuild, Skada.IsInRaid
 		local GetNumSubgroupMembers = Skada.GetNumSubgroupMembers
 		local GetChannelList = GetChannelList
-		local tablePool = Skada.tablePool
+		local TempTable = Private.TempTable
 
 		local defaults = {
 			whisper = {L["Whisper"], "whisper"},
@@ -1105,21 +1105,21 @@ do
 		}
 
 		function build_report_channels()
-			local channels = tablePool.new()
+			local channels = TempTable()
 			for k, v in pairs(defaults) do
 				if (type(v[3]) == "function" and v[3]()) or type(v[3]) ~= "function" then
-					channels[k] = tablePool.acquire(v[1], v[2], v[3])
+					channels[k] = TempTable(v[1], v[2], v[3])
 				end
 			end
 
-			local list = tablePool.acquire(GetChannelList())
+			local list = TempTable(GetChannelList())
 			for i = 1, #list, 2 do
 				local channel = list[i + 1]
 				if not blacklist[channel] then
-					channels[channel] = tablePool.acquire(format("%s: %d/%s", L["Channel"], list[i], channel), "channel")
+					channels[channel] = TempTable(format("%s: %d/%s", L["Channel"], list[i], channel), "channel")
 				end
 			end
-			list = del(list, true)
+			list:free()
 			return channels
 		end
 	end
@@ -1199,7 +1199,7 @@ do
 			frame:AddChild(setbox)
 		end
 
-		if channellist then del(channellist, true) end
+		if channellist then channellist:free() end
 		channellist = build_report_channels()
 
 		-- Channel, default last chosen or Say.

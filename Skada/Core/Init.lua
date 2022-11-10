@@ -136,8 +136,9 @@ do
 end
 
 -------------------------------------------------------------------------------
--- creates a table pool
+-- table pools
 
+-- creates a table pool
 function Private.table_pool()
 	local pool = {tables = Private.WeakTable()}
 
@@ -226,6 +227,43 @@ do
 	Private.newTable = tablePool.new
 	Private.delTable = tablePool.del
 	Private.clearTable = tablePool.clear
+end
+
+-- alternative table reuse
+do
+	local tables = {}
+	local table_mt = {
+		__index = {
+			free = function(t, no_recurse)
+				if not no_recurse then
+					for k, v in pairs(t) do
+						if type(v) == "table" and getmetatable(t) == "TempTable" then
+							v:free()
+						end
+					end
+				end
+				wipe(t)
+				tables[t] = true
+				return nil -- to assign input reference
+			end,
+			-- aliases --
+			concat = table.concat,
+			insert = table.insert,
+			remove = table.remove,
+			sort = table.sort,
+			wipe = table.wipe,
+		},
+		__metatable = "TempTable"
+	}
+
+	function Private.TempTable(...)
+		local t = next(tables) or setmetatable({}, table_mt)
+		if t then tables[t] = nil end
+		for i = 1, select("#", ...) do
+			t[i] = (select(i, ...))
+		end
+		return t
+	end
 end
 
 -------------------------------------------------------------------------------

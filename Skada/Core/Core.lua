@@ -9,7 +9,7 @@ local DBI = LibStub("LibDBIcon-1.0", true)
 -- cache frequently used globals
 local Private = ns.Private
 local _G, GetAddOnMetadata = _G, GetAddOnMetadata
-local new, del, clear, copy = Private.newTable, Private.delTable, Private.clearTable, Private.tCopy
+local TempTable, new, del, copy = Private.TempTable, Private.newTable, Private.delTable, Private.tCopy
 local tsort, tinsert, tremove, wipe = table.sort, table.insert, Private.tremove, wipe
 local next, pairs, type, setmetatable = next, pairs, type, setmetatable
 local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostring, strmatch, string.format, string.gsub, string.lower, string.find
@@ -1978,18 +1978,17 @@ do
 		end
 	end
 
-	local tablePool = Skada.tablePool
 	local GetChannelList = GetChannelList
 	function Skada:Report(channel, chantype, report_mode_name, report_set_name, maxlines, window, barid)
 		if chantype == "channel" then
-			local list = tablePool.acquire(GetChannelList())
+			local list = TempTable(GetChannelList())
 			for i = 1, table.getn(list) * 0.5 do
 				if (P.report.channel == list[i * 2]) then
 					channel = list[i * 2 - 1]
 					break
 				end
 			end
-			list = del(list)
+			list:free()
 		elseif chantype == nil then
 			chantype = "preset"
 		end
