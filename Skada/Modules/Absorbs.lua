@@ -958,8 +958,8 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 	end
 
 	do
-		local UnitGUID, UnitName, UnitClass = UnitGUID, UnitName, UnitClass
-		local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
+		local UnitGUID, UnitClass = UnitGUID, UnitClass
+		local UnitFullName = Private.UnitFullName
 		local LGT = LibStub("LibGroupTalents-1.0")
 
 		-- some effects aren't shields but rather special effects, such us talents.
@@ -980,46 +980,40 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 			}
 		}
 
-		local function check_unit_shields(unit, owner, timestamp, curtime)
-			if UnitIsDeadOrGhost(unit) then return end
+		local actorflags = Private.DEFAULT_FLAGS -- default
+		function mode:Skada_UnitBuff(_, _, owner, curtime, timestamp, actorid, actorname, args)
+			if not absorbspells[args.id] or ignored_spells[args.id] then return end
 
-			local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
-			for i = 1, 40 do
-				local _, _, _, _, _, _, expires, unitCaster, _, _, spellid = UnitBuff(unit, i)
-				if not spellid then
-					break -- nothing found
-				elseif absorbspells[spellid] and unitCaster and not ignored_spells[spellid] then
-					local t = new()
-					t.timestamp = timestamp + max(0, expires - curtime)
-					t.srcGUID = UnitGUID(unitCaster)
-					t.srcName = UnitName(unitCaster)
-					t.srcFlags = 0
-					t.dstGUID = dstGUID
-					t.dstName = dstName
-					t.dstFlags = 0
-					t.spellid = spellid
-					t.spellstring = format("%s.%s", spellid, absorbspells[spellid].school)
-					t.__temp = true
-					handle_shield(t)
-				end
-			end
+			local t = new()
+			t.timestamp = timestamp + max(0, args.expires - curtime)
+			t.srcGUID = UnitGUID(args.source)
+			t.srcName = UnitFullName(args.source)
+			t.srcFlags = owner and 0 or actorflags
+			t.dstGUID = actorid
+			t.dstName = actorname
+			t.dstFlags = owner and 0 or actorflags
+			t.spellid = args.id
+			t.spellstring = format("%s.%s", args.id, absorbspells[args.id].school)
+			t.__temp = true
+			handle_shield(t)
+		end
 
-			-- passive shields (not for pets)
+		function mode:Skada_UnitScan(_, unit, owner, curtime, timestamp, actorid, actorname)
 			if owner then return end
-
 			local _, class = UnitClass(unit)
-			if not _passive[class] then return end
+			local spells = _passive[class]
+			if not spells then return end
 
-			for spellid, _ in pairs(_passive[class]) do
-				local points = LGT:GUIDHasTalent(dstGUID, spellnames[spellid], LGT:GetActiveTalentGroup(unit))
+			for spellid, _ in pairs(spells) do
+				local points = LGT:GUIDHasTalent(actorid, spellnames[spellid], LGT:GetActiveTalentGroup(unit))
 				if points then
 					local t = new()
 					t.timestamp = timestamp - 60
-					t.srcGUID = dstGUID
-					t.srcName = dstName
+					t.srcGUID = actorid
+					t.srcName = actorname
 					t.srcFlags = 0
-					t.dstGUID = dstGUID
-					t.dstName = dstName
+					t.dstGUID = actorid
+					t.dstName = actorname
 					t.dstFlags = 0
 					t.spellid = spellid
 					t.spellstring = format("%s.%s", spellid, absorbspells[spellid].school)
@@ -1028,23 +1022,14 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 				end
 			end
 		end
+	end
 
-		function mode:CombatEnter(_, set, args)
-			if not G.inCombat and set and not set.stopped and not self.checked then
-				self:ZoneModifier()
-				GroupIterator(check_unit_shields, args.timestamp, set.last_time or GetTime())
-				self.checked = true
-			end
-		end
-
-		function mode:CombatLeave()
-			self.checked = nil
-			wipe(absorb)
-			clear(heals)
-			clear(shields)
-			clear(shield_amounts)
-			clear(shields_popped)
-		end
+	function mode:CombatLeave()
+		wipe(absorb)
+		clear(heals)
+		clear(shields)
+		clear(shield_amounts)
+		clear(shields_popped)
 	end
 
 	function mode:OnEnable()
@@ -1107,12 +1092,15 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 			"SWING_MISSED"
 		)
 
-		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
+		Skada.RegisterCallback(self, "Skada_UnitBuff")
+		Skada.RegisterCallback(self, "Skada_UnitScan")
+		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "ZoneModifier")
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self, "Absorbs and Healing")
 	end
 
 	function mode:OnDisable()
+		Skada.UnregisterAllCallbacks(self)
 		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end

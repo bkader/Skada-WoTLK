@@ -5,15 +5,13 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	local mode_spell = mode:NewModule("Potions list")
 	local mode_actor = mode_spell:NewModule("Players list")
 	local get_actors_by_potion = nil
-
-	local pairs, tconcat, format, strsub, uformat = pairs, table.concat, string.format, string.sub, Private.uformat
-	local GetItemInfo, classcolors = GetItemInfo, Skada.classcolors
-	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
-	local potion_ids = {}
 	local mode_cols = nil
 
+	local pairs, format, strsub, uformat = pairs, string.format, string.sub, Private.uformat
+	local GetItemInfo, classcolors = GetItemInfo, Skada.classcolors
+	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 	local prepotionStr, potionStr = "\124c%s%s\124r %s", "\124T%s:14:14:0:0:64:64:4:60:4:60\124t"
-	local prepotion
+	local potion_ids, prepotion = {}, nil
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -42,65 +40,59 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	end
 
 	local function potion_used(t)
-		if t.spellid and potion_ids[t.spellid] then
+		if t.__temp or (t.spellid and potion_ids[t.spellid]) then
 			Skada:DispatchSets(log_potion, t.srcGUID, t.srcName, t.srcFlags, potion_ids[t.spellid])
 		end
 		if t.__temp then t = del(t) end
 	end
 
 	do
-		local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
-		local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
+		local next, tconcat = next, table.concat
+		local UnitClass, potions = UnitClass, nil
+		local actorflags = Private.DEFAULT_FLAGS -- default
 
-		local function check_unit_potions(unit, owner, prepot)
-			if owner or UnitIsDeadOrGhost(unit) then return end
+		-- listens to found buffs
+		function mode:Skada_UnitBuff(_, _, owner, _, _, actorid, actorname, args)
+			if owner or not potion_ids[args.id] then return end
+			local pots = potions and potions[actorname]
+			if not pots then
+				potions = potions or new()
+				potions[actorname] = potions[actorname] or new()
+				pots = potions[actorname]
+			end
+			pots[#pots + 1] = format(potionStr, args.icon)
 
-			local actorid, actorname = UnitGUID(unit), UnitName(unit)
-			local _, class = UnitClass(unit)
+			local t = new()
+			t.srcGUID = actorid
+			t.srcName = actorname
+			t.srcFlags = actorflags
+			t.spellid = args.id
+			t.__temp = true
+			potion_used(t)
+		end
 
-			local potions = nil
-			for i = 1, 40 do
-				local _, _, icon, _, _, _, _, _, _, _, spellid = UnitBuff(unit, i)
-				if not spellid then
-					break -- nothing found
-				elseif potion_ids[spellid] then
-					potions = potions or new()
-					potions[#potions + 1] = format(potionStr, icon)
+		-- listens to scanned actor
+		function mode:Skada_UnitScan(_, unit, owner, curtime, timestamp, actorid, actorname)
+			if potions and potions[actorname] then
+				local _, class = UnitClass(unit)
+				prepotion = prepotion or {}
+				prepotion[#prepotion + 1] = format(prepotionStr, classcolors.str(class), actorname, tconcat(potions[actorname], " "))
 
-					-- instant recording doesn't work, so we delay it
-					local t = new()
-					t.srcGUID = actorid
-					t.srcName = actorname
-					t.spellid = spellid
-					t.__temp = true
-					Skada:ScheduleTimer(potion_used, 1, t)
+				-- release tables
+				potions[actorname] = del(potions[actorname])
+				if next(potions) == nil then
+					potions = del(potions)
 				end
 			end
-
-			if not potions then
-				return
-			elseif next(potions) ~= nil and Skada.validclass[class] then
-				prepot[#prepot + 1] = format(prepotionStr, classcolors.str(class), actorname, tconcat(potions, " "))
-			end
-			del(potions)
 		end
 
-		-- we use this function to record pre-pots as well.
-		function mode:CombatEnter()
-			if P.prepotion and not self.checked then
-				prepotion = prepotion or {}
-				GroupIterator(check_unit_potions, prepotion)
-				self.checked = true
-			end
-		end
-
+		-- listens to combat end
 		function mode:CombatLeave()
 			if prepotion then
 				if P.prepotion and next(prepotion) ~= nil then
 					Skada:Printf(L["pre-potion: %s"], tconcat(prepotion, ", "))
 				end
 				clear(prepotion)
-				self.checked = nil
 			end
 		end
 	end
@@ -210,6 +202,48 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	function mode:GetSetSummary(set, win)
 		if not set then return end
 		return set:GetTotal(win and win.class, nil, "potion") or 0
+	end
+
+	function mode:OnEnable()
+		mode_actor.metadata = {
+			click4 = Skada.FilterClass,
+			click4_label = L["Toggle Class Filter"]
+		}
+		mode_spell.metadata = {click1 = mode_actor}
+		self.metadata = {
+			showspots = true,
+			ordersort = true,
+			click1 = mode_spell,
+			click4 = Skada.FilterClass,
+			click4_label = L["Toggle Class Filter"],
+			columns = {Count = true, Percent = false, sPercent = false},
+			icon = [[Interface\Icons\inv_potion_31]]
+		}
+
+		mode_cols = self.metadata.columns
+
+		-- no total click.
+		mode_spell.nototal = true
+
+		Skada:RegisterForCL(potion_used, {src_is_interesting_nopets = true}, "SPELL_CAST_SUCCESS")
+		Skada.RegisterCallback(self, "Skada_ApplySettings", "ApplySettings")
+		Skada:AddMode(self)
+	end
+
+	function mode:OnDisable()
+		Skada.UnregisterAllCallbacks(self)
+		Skada:RemoveMode(self)
+	end
+
+	function mode:ApplySettings()
+		if P.prepotion then
+			Skada.RegisterCallback(self, "Skada_UnitBuff")
+			Skada.RegisterCallback(self, "Skada_UnitScan")
+			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
+		else
+			Skada.UnregisterAllCallbacks(self)
+			Skada.UnregisterAllMessages(self)
+		end
 	end
 
 	function mode:OnInitialize()
@@ -344,46 +378,6 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 			desc = L["Prints pre-potion after the end of the combat."],
 			order = 0
 		}
-	end
-
-	function mode:ApplySettings()
-		if P.prepotion then
-			Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
-			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
-		else
-			Skada.UnregisterAllMessages(self)
-		end
-	end
-
-	function mode:OnEnable()
-		mode_actor.metadata = {
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"]
-		}
-		mode_spell.metadata = {click1 = mode_actor}
-		self.metadata = {
-			showspots = true,
-			ordersort = true,
-			click1 = mode_spell,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
-			columns = {Count = true, Percent = false, sPercent = false},
-			icon = [[Interface\Icons\inv_potion_31]]
-		}
-
-		mode_cols = self.metadata.columns
-
-		-- no total click.
-		mode_spell.nototal = true
-
-		Skada:RegisterForCL(potion_used, {src_is_interesting_nopets = true}, "SPELL_CAST_SUCCESS")
-		Skada.RegisterCallback(self, "Skada_ApplySettings", "ApplySettings")
-		Skada:AddMode(self)
-	end
-
-	function mode:OnDisable()
-		Skada.UnregisterAllCallbacks(self)
-		Skada:RemoveMode(self)
 	end
 
 	---------------------------------------------------------------------------

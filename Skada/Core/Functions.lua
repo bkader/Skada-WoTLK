@@ -1254,6 +1254,49 @@ do
 	end
 end
 
+-- scans the group for buffs, shields and potions
+do
+	local UnitGUID, UnitAura, UnitIsDeadOrGhost = UnitGUID, UnitAura, UnitIsDeadOrGhost
+	local GroupIterator, UnitFullName = Skada.GroupIterator, Private.UnitFullName
+	local auraTable = nil
+
+	local function unit_buff(unit, i)
+		local t = wipe(auraTable)
+		t.name, t.rank, t.icon, _, _, t.duration, t.expires, t.source, _, _, t.id = UnitAura(unit, i, "HELPFUL")
+		return t
+	end
+
+	local function scan_group_buffs(unit, owner, curtime, timestamp)
+		-- why do you want to scan dead units?
+		if UnitIsDeadOrGhost(unit) then return end
+
+		-- call api functions only once
+		local actorid, actorname = UnitGUID(unit), UnitFullName(unit)
+
+		-- scan for buffs
+		for i = 1, 40 do
+			local buff = unit_buff(unit, i)
+			if not buff.id then
+				break -- nothing found!
+			elseif buff.source then
+				callbacks:Fire("Skada_UnitBuff", unit, owner, curtime, timestamp, actorid, actorname, buff)
+			end
+		end
+
+		-- fires when the unit scan is complete
+		callbacks:Fire("Skada_UnitScan", unit, owner, curtime, timestamp, actorid, actorname)
+	end
+
+	function Skada:ScanGroupBuffs(curtime, timestamp)
+		if not self.global.inCombat and self.current and not self.current.stopped then
+			auraTable = auraTable or {}
+			GroupIterator(scan_group_buffs, curtime, timestamp)
+			-- wipe the table at the end of the scan
+			wipe(auraTable)
+		end
+	end
+end
+
 -------------------------------------------------------------------------------
 -- combat log parser
 

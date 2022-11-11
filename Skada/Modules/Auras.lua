@@ -533,7 +533,7 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 	local mode_cols = nil
 
 	local function handle_buff(t)
-		if t.spellid and not ignored_buffs[t.spellid] and t.spellstring and (t.auratype == "BUFF" or special_buffs[t.spellid]) then
+		if t.__temp or (t.spellid and not ignored_buffs[t.spellid] and t.spellstring and (t.auratype == "BUFF" or special_buffs[t.spellid])) then
 			aura.actorid = t.dstGUID
 			aura.actorname = t.dstName
 			aura.actorflags = t.dstFlags
@@ -626,9 +626,6 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 	end
 
 	do
-		local UnitName, UnitGUID, UnitBuff = UnitName, UnitGUID, UnitBuff
-		local UnitIsDeadOrGhost, GroupIterator = UnitIsDeadOrGhost, Skada.GroupIterator
-
 		-- per-session spell strings cache
 		local spellstrings = G.spellstrings or {}
 		G.spellstrings = spellstrings
@@ -640,37 +637,21 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 			end
 		end)
 
-		local function check_unit_buffs(unit, owner)
-			if owner or UnitIsDeadOrGhost(unit) then return end
-			local dstGUID, dstName = UnitGUID(unit), UnitName(unit)
-			for i = 1, 40 do
-				local _, rank, _, _, _, _, _, unitCaster, _, _, spellid = UnitBuff(unit, i)
-				if not spellid then
-					break -- nothing found!
-				elseif unitCaster and rank ~= SPELL_PASSIVE then
-					local t = new()
-					t.event = "SPELL_AURA_APPLIED"
-					t.dstGUID = dstGUID
-					t.dstName = dstName
-					t.dstFlags = 0
-					t.spellid = spellid
-					t.spellstring = spellstrings[spellid]
-					t.auratype = "BUFF"
-					t.__temp = true
-					handle_buff(t)
-				end
-			end
-		end
+		local actorflags = Private.DEFAULT_FLAGS -- default
+		function mode:Skada_UnitBuff(_, _, owner, _, _, actorid, actorname, args)
+			local spellstring = not owner and args.rank ~= SPELL_PASSIVE and not ignored_buffs[args.id] and spellstrings[args.id]
+			if not spellstring then return end
 
-		function mode:CombatEnter(_, set)
-			if not G.inCombat and set and not set.stopped and not self.checked then
-				GroupIterator(check_unit_buffs)
-				self.checked = true
-			end
-		end
-
-		function mode:CombatLeave()
-			self.checked = nil
+			local t = new()
+			t.event = "SPELL_AURA_APPLIED"
+			t.dstGUID = actorid
+			t.dstName = actorname
+			t.dstFlags = actorflags
+			t.spellid = args.id
+			t.spellstring = spellstring
+			t.auratype = "BUFF"
+			t.__temp = true
+			handle_buff(t)
 		end
 	end
 
@@ -700,13 +681,12 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 			"SPELL_PERIODIC_ENERGIZE"
 		)
 
-		Skada.RegisterMessage(self, "COMBAT_PLAYER_ENTER", "CombatEnter")
-		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
+		Skada.RegisterCallback(self, "Skada_UnitBuff")
 		Skada:AddMode(self, "Buffs and Debuffs")
 	end
 
 	function mode:OnDisable()
-		Skada.UnregisterAllMessages(self)
+		Skada.UnregisterAllCallbacks(self)
 		Skada:RemoveMode(self)
 	end
 end)

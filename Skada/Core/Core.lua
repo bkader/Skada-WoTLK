@@ -3295,6 +3295,7 @@ do
 				self.current.type = (self.insType == "none" and IsInGroup()) and "group" or self.insType
 			end
 			self.current.started = true
+			self:ScanGroupBuffs(self.current.last_time or GetTime(), t.timestamp)
 			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, t)
 			G.inCombat = true
 		end
