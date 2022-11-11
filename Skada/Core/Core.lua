@@ -142,10 +142,6 @@ local function create_set(setname, set)
 	set.starttime = time()
 	set.time = 0
 	set.actors = set.actors or new()
-	if setname ~= L["Total"] or P.totalidc then
-		set.last_action = set.starttime
-		set.last_time = GetTime()
-	end
 
 	-- last alterations before returning.
 	for i = 1, #modes do
@@ -2101,6 +2097,9 @@ function Skada:PLAYER_ENTERING_WORLD()
 	userGUID = self.userGUID or UnitGUID("player")
 	self.userGUID = userGUID
 
+	self._Time = GetTime()
+	self._time = time()
+
 	Skada:CheckZone()
 	if was_in_party == nil then
 		Skada:ScheduleTimer("UpdateRoster", 1)
@@ -3295,7 +3294,7 @@ do
 				self.current.type = (self.insType == "none" and IsInGroup()) and "group" or self.insType
 			end
 			self.current.started = true
-			self:ScanGroupBuffs(self.current.last_time or GetTime(), t.timestamp)
+			self:ScanGroupBuffs(self._Time or GetTime(), t.timestamp)
 			self:SendMessage("COMBAT_PLAYER_ENTER", self.current, t)
 			G.inCombat = true
 		end
@@ -3308,23 +3307,8 @@ do
 		-- stopped or invalid events?
 		if self.current.stopped or not combatlog_events[t.event] then return end
 
-		self.current.last_action = time()
-		self.current.last_time = GetTime()
-
-		if P.totalidc then -- add to total segment
-			self.total.last_action = self.current.last_action
-			self.total.last_time = self.current.last_time
-		end
-
-		if self.tempsets then -- add to phases
-			for i = 1, #self.tempsets do
-				local set = self.tempsets[i]
-				if set and not set.stopped then
-					set.last_action = self.current.last_action
-					set.last_time = self.current.last_time
-				end
-			end
-		end
+		self._Time = GetTime()
+		self._time = time()
 
 		for func, flags in next, combatlog_events[t.event] do
 			local fail = false

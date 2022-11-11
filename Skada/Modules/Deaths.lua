@@ -79,7 +79,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		log.id = data.spellid
 		log.src = data.srcName
 		log.cri = data.critical
-		log.time = set.last_time or GetTime()
+		log.time = Skada._Time or GetTime()
 		_, log.hp = UnitHealthInfo(actor.name, actor.id, "group")
 
 		if data.amount then
@@ -141,8 +141,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		local deathlog = actor.deathlog and actor.deathlog[1]
 		if not deathlog then return end
 
-		deathlog.time = set.last_time or GetTime()
-		deathlog.timeod = set.last_action or time()
+		deathlog.time = Skada._Time or GetTime()
+		deathlog.timeod = Skada._time or time()
 
 		for i = #deathlog.log, 1, -1 do
 			local e = deathlog.log[i]
@@ -473,7 +473,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			tsort(deathlog.log, sort_logs)
 
 			local nr = 0
-			local curtime = deathlog.time or set.last_time or GetTime()
+			local curtime = deathlog.time or Skada._Time or GetTime()
 			for i = #deathlog.log, 1, -1 do
 				local log = deathlog.log[i]
 				local diff = tonumber(log.time) - tonumber(curtime)
@@ -590,7 +590,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 
 		local nr = 0
-		local curtime = set.last_time or GetTime()
+		local curtime = Skada._Time or GetTime()
 
 		for i = 1, #deathlog do
 			local death = deathlog[i]
@@ -633,7 +633,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 
 		local nr = 0
-		local curtime = set.last_time or GetTime()
+		local curtime = Skada._Time or GetTime()
 		local actors = set.actors
 
 		for actorname, actor in pairs(actors) do
@@ -670,7 +670,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 
 		local nr = 0
-		local curtime = set.last_time or GetTime()
+		local curtime = Skada._Time or GetTime()
 		local actors = set.actors
 
 		for actorname, actor in pairs(actors) do
@@ -721,7 +721,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	function mode:GetSetSummary(set, win)
 		if not set then return end
 		local deaths = set:GetTotal(win and win.class, nil, "death") or 0
-		return set.last_time or GetTime(), deaths
+		return Skada._Time or GetTime(), deaths
 	end
 
 	function mode:AddToTooltip(set, tooltip)

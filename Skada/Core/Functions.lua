@@ -864,7 +864,7 @@ end
 function Skada:AddActiveTime(set, actor, target, override)
 	if not actor or not actor.last then return end
 
-	local curtime = set.last_time or GetTime()
+	local curtime = Skada._Time or GetTime()
 	local delta = curtime - actor.last
 	actor.last = curtime
 
@@ -1226,7 +1226,7 @@ do
 
 			-- total set has "last" always removed.
 			if not actor.last then
-				actor.last = set.last_time or GetTime()
+				actor.last = Skada._Time or GetTime()
 				actor.__mod = true
 			end
 		end
@@ -1287,12 +1287,19 @@ do
 		callbacks:Fire("Skada_UnitScan", unit, owner, curtime, timestamp, actorid, actorname)
 	end
 
-	function Skada:ScanGroupBuffs(curtime, timestamp)
+	local function ScanGroupBuffs(self, curtime, timestamp)
 		if not self.global.inCombat and self.current and not self.current.stopped then
 			auraTable = auraTable or {}
 			GroupIterator(scan_group_buffs, curtime, timestamp)
 			-- wipe the table at the end of the scan
 			wipe(auraTable)
+		end
+	end
+
+	Skada.ScanGroupBuffs = Skada.EmptyFunc
+	function callbacks:OnUsed(_, eventname)
+		if eventname == "Skada_UnitScan" or eventname == "Skada_UnitBuff" then
+			Skada.ScanGroupBuffs = ScanGroupBuffs
 		end
 	end
 end

@@ -78,13 +78,12 @@ do
 					if target.active ~= nil and target.start then
 						target.uptime = min(spell.uptime, target.uptime + floor((curtime - target.start) + 0.5))
 					end
+					-- remove temporary keys
+					target.active, target.start = nil, nil
 
 					-- remove targets with 0 uptime.
 					if target.uptime == 0 then
 						spell.targets[name] = del(spell.targets[name])
-					else
-						-- remove temporary keys
-						target.active, target.start = nil, nil
 					end
 				end
 
@@ -108,7 +107,7 @@ do
 		if not actors then return end
 
 		local maxtime = set and set:GetTime()
-		curtime = curtime or set.last_action or time()
+		curtime = curtime or Skada._time or time()
 
 		for _, actor in pairs(actors) do
 			clear_actor_table(actor, curtime, maxtime)
@@ -163,7 +162,7 @@ do
 		local actor = find_or_create_actor(set, aura)
 		if not actor then return end
 
-		local curtime = set.last_action or time()
+		local curtime = Skada._time or time()
 		local spell = actor.auras and actor.auras[aura.spellid]
 		if not spell then
 			actor.auras = actor.auras or {}
@@ -214,7 +213,7 @@ do
 		local spell = actor.auras and actor.auras[aura.spellid]
 		if not spell or not spell.active or spell.active == 0 then return end
 
-		local curtime = set.last_action or time()
+		local curtime = Skada._time or time()
 		spell.active = spell.active - 1
 		if spell.active == 0 and spell.start then
 			spell.uptime = spell.uptime + floor((curtime - spell.start) + 0.5)

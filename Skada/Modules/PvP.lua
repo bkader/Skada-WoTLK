@@ -226,7 +226,7 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 			end
 
 			if actor.last == nil then
-				actor.last = set.last_time or GetTime()
+				actor.last = Skada._Time or GetTime()
 			end
 		end
 	end
