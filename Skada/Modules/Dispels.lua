@@ -2,9 +2,9 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Dispels", function(L, P, _, C)
 	local mode = Skada:NewModule("Dispels")
-	local mode_extraspell = mode:NewModule("Dispelled spell list")
-	local mode_target = mode:NewModule("Dispelled target list")
-	local mode_spell = mode:NewModule("Dispel spell list")
+	local mode_extraspell = mode:NewModule("Spell List")
+	local mode_target = mode:NewModule("Target List")
+	local mode_spell = mode:NewModule("Dispel spells")
 	local ignored_spells = Skada.ignored_spells.dispel -- Edit Skada\Core\Tables.lua
 	local get_actor_dispelled_spells = nil
 	local get_actor_dispelled_targets = nil

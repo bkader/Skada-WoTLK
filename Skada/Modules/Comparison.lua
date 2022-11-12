@@ -5,11 +5,11 @@ Skada:RegisterModule("Comparison", function(L, P)
 	if not parent then return end
 
 	local mode = parent:NewModule("Comparison")
-	local mode_spell = mode:NewModule("Damage spell list")
-	local mode_spell_details = mode_spell:NewModule("Damage spell details")
-	local mode_spell_breakdown = mode_spell:NewModule("Damage Breakdown")
-	local mode_target = mode:NewModule("Damage target list")
-	local mode_target_spell = mode_target:NewModule("Damage spell list")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_spell_details = mode_spell:NewModule("Spell Details")
+	local mode_spell_breakdown = mode_spell:NewModule("More Details")
+	local mode_target = mode:NewModule("Target List")
+	local mode_target_spell = mode_target:NewModule("Spell List")
 	local C = Skada.cacheTable2
 
 	local pairs, max = pairs, math.max
@@ -798,7 +798,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			click1 = mode_spell,
 			click2 = mode_target,
 			click3 = set_actor,
-			click3_label = L["Damage Comparison"],
+			click3_label = L["Comparison"],
 			columns = {Damage = true, DPS = true, Comparison = true, Percent = true},
 			icon = [[Interface\Icons\Ability_Warrior_OffensiveStance]]
 		}
@@ -814,7 +814,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		Skada:AddColumnOptions(self)
 
 		parent.metadata.click3 = set_actor
-		parent.metadata.click3_label = L["Damage Comparison"]
+		parent.metadata.click3_label = L["Comparison"]
 		parent:Reload()
 	end
 end, "Damage")

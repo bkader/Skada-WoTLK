@@ -2,8 +2,8 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Potions", function(L, P, _, C)
 	local mode = Skada:NewModule("Potions")
-	local mode_spell = mode:NewModule("Potions list")
-	local mode_actor = mode_spell:NewModule("Players list")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_actor = mode_spell:NewModule("Target List")
 	local get_actors_by_potion = nil
 	local mode_cols = nil
 
@@ -43,7 +43,6 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 		if t.__temp or (t.spellid and potion_ids[t.spellid]) then
 			Skada:DispatchSets(log_potion, t.srcGUID, t.srcName, t.srcFlags, potion_ids[t.spellid])
 		end
-		if t.__temp then t = del(t) end
 	end
 
 	do
@@ -69,6 +68,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 			t.spellid = args.id
 			t.__temp = true
 			potion_used(t)
+			t = del(t)
 		end
 
 		-- listens to scanned actor

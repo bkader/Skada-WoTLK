@@ -23,11 +23,11 @@ end
 
 Skada:RegisterModule("Damage Taken", function(L, P)
 	local mode = Skada:NewModule("Damage Taken")
-	local mode_spell = mode:NewModule("Damage spell list")
-	local mode_spell_details = mode_spell:NewModule("Damage spell details")
-	local mode_spell_breakdown = mode_spell:NewModule("Damage Breakdown")
-	local mode_source = mode:NewModule("Damage source list")
-	local mode_source_spell = mode_source:NewModule("Damage spell list")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_spell_details = mode_spell:NewModule("Spell Details")
+	local mode_spell_breakdown = mode_spell:NewModule("More Details")
+	local mode_source = mode:NewModule("Source List")
+	local mode_source_spell = mode_source:NewModule("Spell List")
 	local tooltip_school = Skada.tooltip_school
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
 	local missTypes = Skada.missTypes
@@ -726,8 +726,8 @@ end, "Damage Taken")
 
 Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 	local mode = Skada:NewModule("Damage Taken By Spell")
-	local mode_target = mode:NewModule("Damage spell targets")
-	local mode_source = mode:NewModule("Damage spell sources")
+	local mode_target = mode:NewModule("Target List")
+	local mode_source = mode:NewModule("Source List")
 	local C = Skada.cacheTable2
 	local mode_cols = nil
 
@@ -933,7 +933,7 @@ end, "Damage Taken")
 
 Skada:RegisterModule("Avoidance & Mitigation", function(L)
 	local mode = Skada:NewModule("Avoidance & Mitigation")
-	local mode_breakdown = mode:NewModule("Damage Breakdown")
+	local mode_breakdown = mode:NewModule("More Details")
 	local missTypes = Skada.missTypes
 	local C = Skada.cacheTable2
 	local mode_cols = nil

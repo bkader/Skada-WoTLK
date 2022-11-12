@@ -544,6 +544,9 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				Skada:ModeMenu(bar.win, bar)
 			elseif button == "RightButton" then
 				bar.win:RightClick(bar, button)
+			elseif IsAltKeyDown() and bar.win.class then
+				bar.win.class = nil
+				bar.win:UpdateDisplay()
 			end
 		end
 

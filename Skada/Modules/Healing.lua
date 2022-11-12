@@ -25,9 +25,9 @@ end
 
 Skada:RegisterModule("Healing", function(L, P)
 	local mode = Skada:NewModule("Healing")
-	local mode_spell = mode:NewModule("Healing spell list")
-	local mode_target = mode:NewModule("Healed target list")
-	local mode_target_spell = mode_target:NewModule("Healing spell list")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_target = mode:NewModule("Target List")
+	local mode_target_spell = mode_target:NewModule("Spell List")
 	local ignored_spells = Skada.ignored_spells.heal -- Edit Skada\Core\Tables.lua
 	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
 	tooltip_school = tooltip_school or Skada.tooltip_school
@@ -454,9 +454,9 @@ end)
 
 Skada:RegisterModule("Overhealing", function(L)
 	local mode = Skada:NewModule("Overhealing")
-	local mode_spell = mode:NewModule("Overheal spell list")
-	local mode_target = mode:NewModule("Overhealed target list")
-	local mode_target_spell = mode_target:NewModule("Overheal spell list")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_target = mode:NewModule("Target List")
+	local mode_target_spell = mode_target:NewModule("Spell List")
 	local mode_cols = nil
 
 	local function fmt_valuetext(d, columns, total, dps, metadata, subview)
@@ -637,9 +637,9 @@ end, "Healing")
 
 Skada:RegisterModule("Total Healing", function(L)
 	local mode = Skada:NewModule("Total Healing")
-	local mode_spell = mode:NewModule("Healing spell list")
-	local mode_target = mode:NewModule("Healed target list")
-	local mode_target_spell = mode_target:NewModule("Healing spell list")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_target = mode:NewModule("Target List")
+	local mode_target_spell = mode_target:NewModule("Spell List")
 	tooltip_school = tooltip_school or Skada.tooltip_school
 	local mode_cols = nil
 
@@ -869,10 +869,10 @@ end, "Healing")
 
 Skada:RegisterModule("Healing Taken", function(L, P)
 	local mode = Skada:NewModule("Healing Taken")
-	local mode_source = mode:NewModule("Healing source list")
-	local mode_source_spell = mode_source:NewModule("Healing spell list")
-	local mode_spell = mode:NewModule("Healing spell list")
-	local mode_spell_source = mode_source:NewModule("Healing source list")
+	local mode_source = mode:NewModule("Source List")
+	local mode_source_spell = mode_source:NewModule("Spell List")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_spell_source = mode_source:NewModule("Source List")
 	local new, clear = Private.newTable, Private.clearTable
 	local C = Skada.cacheTable2
 	local mode_cols = nil

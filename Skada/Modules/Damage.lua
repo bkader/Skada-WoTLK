@@ -22,11 +22,11 @@ end
 
 Skada:RegisterModule("Damage", function(L, P)
 	local mode = Skada:NewModule("Damage")
-	local mode_spell = mode:NewModule("Damage spell list")
-	local mode_spell_details = mode_spell:NewModule("Damage spell details")
-	local mode_spell_breakdown = mode_spell:NewModule("Damage Breakdown")
-	local mode_target = mode:NewModule("Damage target list")
-	local mode_target_spell = mode_target:NewModule("Damage spell list")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_spell_details = mode_spell:NewModule("Spell Details")
+	local mode_spell_breakdown = mode_spell:NewModule("More Details")
+	local mode_target = mode:NewModule("Target List")
+	local mode_target_spell = mode_target:NewModule("Spell List")
 
 	local wipe = wipe
 	local PercentToRGB = Private.PercentToRGB
@@ -870,7 +870,7 @@ end, "Damage")
 
 Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C)
 	local mode = Skada:NewModule("Damage Done By Spell")
-	local mode_source = mode:NewModule("Damage spell sources")
+	local mode_source = mode:NewModule("Source List")
 	local mode_cols = nil
 
 	local function mode_source_tooltip(win, id, label, tooltip)
@@ -1026,9 +1026,9 @@ end, "Damage")
 
 Skada:RegisterModule("Useful Damage", function(L, P)
 	local mode = Skada:NewModule("Useful Damage")
-	local mode_spell = mode:NewModule("Damage spell list")
-	local mode_target = mode:NewModule("Damage target list")
-	local mode_target_spell = mode_target:NewModule("Damage spell list")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_target = mode:NewModule("Target List")
+	local mode_target_spell = mode_target:NewModule("Spell List")
 	local max = math.max
 	local mode_cols = nil
 
@@ -1205,10 +1205,10 @@ end, "Damage")
 
 Skada:RegisterModule("Overkill", function(L, _, _, C)
 	local mode = Skada:NewModule("Overkill")
-	local mode_spell = mode:NewModule("Overkill spell list")
-	local mode_target = mode:NewModule("Overkill target list")
-	local mode_spell_target = mode_spell:NewModule("Overkill target list")
-	local mode_target_spell = mode_target:NewModule("Overkill spell list")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_target = mode:NewModule("Target List")
+	local mode_spell_target = mode_spell:NewModule("Target List")
+	local mode_target_spell = mode_target:NewModule("Spell List")
 	local get_actor_spell_overkill_targets = nil
 	local mode_cols = nil
 

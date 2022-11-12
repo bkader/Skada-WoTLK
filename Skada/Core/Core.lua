@@ -557,6 +557,7 @@ function Window:UpdateDisplay()
 					local d = self:nr(0)
 					d.id = "total"
 					d.label = L["Total"]
+					d.text = self.class and format("%s (%s)", d.label, L[self.class]) or nil
 					d.ignore = true
 					d.value = value + 1 -- to be always first
 					d.valuetext = valuetext or tostring(value)

@@ -5,8 +5,8 @@ local folder, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	local mode = Skada:NewModule("Fails")
-	local mode_spell = mode:NewModule("Player's failed events")
-	local mode_actor = mode_spell:NewModule("Event's failed players")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_spell_target = mode_spell:NewModule("Target List")
 	local ignored_spells = Skada.ignored_spells.fail -- Edit Skada\Core\Tables.lua
 	local count_fails_by_spell = nil
 
@@ -46,12 +46,12 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		Skada:DispatchSets(log_fail, actorid, actorname, tostring(spellid), failname)
 	end
 
-	function mode_actor:Enter(win, id, label)
+	function mode_spell_target:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
 		win.title = format(L["%s's fails"], label)
 	end
 
-	function mode_actor:Update(win, set)
+	function mode_spell_target:Update(win, set)
 		win.title = uformat(L["%s's fails"], win.spellname)
 		if not win.spellid then return end
 
@@ -140,7 +140,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	end
 
 	function mode:OnEnable()
-		mode_spell.metadata = {click1 = mode_actor}
+		mode_spell.metadata = {click1 = mode_spell_target}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,

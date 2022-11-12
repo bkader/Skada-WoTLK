@@ -22,9 +22,9 @@ end
 -- ======= --
 Skada:RegisterModule("CC Done", function(L, P, _, C)
 	local mode = Skada:NewModule("CC Done")
-	local mode_spell = mode:NewModule("Crowd Control Spells")
-	local mode_target = mode:NewModule("Crowd Control Targets")
-	local mode_source = mode_spell:NewModule("Crowd Control Sources")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_target = mode:NewModule("Target List")
+	local mode_source = mode_spell:NewModule("Source List")
 	local cc_spells = Skada.extra_cc_spells -- extended list
 	local get_actor_cc_targets = nil
 	local get_cc_done_sources = nil
@@ -274,9 +274,9 @@ end)
 -- ======== --
 Skada:RegisterModule("CC Taken", function(L, P, _, C)
 	local mode = Skada:NewModule("CC Taken")
-	local mode_spell = mode:NewModule("Crowd Control Spells")
-	local mode_source = mode:NewModule("Crowd Control Sources")
-	local mode_target = mode_spell:NewModule("Crowd Control Targets")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_source = mode:NewModule("Source List")
+	local mode_target = mode_spell:NewModule("Target List")
 	local get_actor_cc_sources = nil
 	local get_cc_taken_targets = nil
 	local mode_cols = nil
@@ -537,8 +537,8 @@ end)
 -- ========= --
 Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 	local mode = Skada:NewModule("CC Breaks")
-	local mode_spell = mode:NewModule("Crowd Control Spells")
-	local mode_target = mode:NewModule("Crowd Control Targets")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_target = mode:NewModule("Target List")
 	local cc_spells = Skada.cc_spells
 	local get_actor_cc_break_targets = nil
 	local mode_cols = nil

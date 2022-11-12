@@ -527,8 +527,8 @@ end
 
 Skada:RegisterModule("Buffs", function(_, P, G, C)
 	local mode = Skada:NewModule("Buffs")
-	local mode_spell = mode:NewModule("Buff spell list")
-	local mode_spell_target = mode_spell:NewModule("Players list")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_spell_target = mode_spell:NewModule("Target List")
 	local mode_cols = nil
 
 	local function handle_buff(t)
@@ -551,7 +551,6 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 				Skada:DispatchSets(log_aurarefresh)
 			end
 		end
-		if t.__temp then t = del(t) end
 	end
 
 	function mode_spell_target:Enter(win, id, label)
@@ -651,6 +650,7 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 			t.auratype = "BUFF"
 			t.__temp = true
 			handle_buff(t)
+			t = del(t)
 		end
 	end
 
@@ -695,11 +695,11 @@ end)
 
 Skada:RegisterModule("Debuffs", function(_, _, _, C)
 	local mode = Skada:NewModule("Debuffs")
-	local mode_spell = mode:NewModule("Debuff spell list")
-	local mode_spell_target = mode_spell:NewModule("Debuff target list")
-	local mode_spell_source = mode_spell:NewModule("Debuff source list")
-	local mode_target = mode:NewModule("Debuff target list")
-	local mode_target_spell = mode_target:NewModule("Debuff spell list")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_spell_target = mode_spell:NewModule("Target List")
+	local mode_spell_source = mode_spell:NewModule("Source List")
+	local mode_target = mode:NewModule("Target List")
+	local mode_target_spell = mode_target:NewModule("Spell List")
 	local mode_cols = nil
 
 	local function handle_debuff(t)
@@ -859,7 +859,7 @@ end)
 
 Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 	local mode = Skada:NewModule("Enemy Buffs")
-	local mode_spell = mode:NewModule("Buff spell list")
+	local mode_spell = mode:NewModule("Spell List")
 	local mode_cols = nil
 
 	local function handle_buff(t)
@@ -937,10 +937,10 @@ end)
 
 Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 	local mode = Skada:NewModule("Enemy Debuffs")
-	local mode_spell = mode:NewModule("Debuff spell list")
-	local mode_spell_target = mode_spell:NewModule("Debuff target list")
-	local mode_target = mode:NewModule("Debuff target list")
-	local mode_target_spell = mode_target:NewModule("Debuff spell list")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_spell_target = mode_spell:NewModule("Target List")
+	local mode_target = mode:NewModule("Target List")
+	local mode_target_spell = mode_target:NewModule("Spell List")
 	local mode_cols = nil
 
 	local function handle_debuff(t)

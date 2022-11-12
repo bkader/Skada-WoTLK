@@ -104,7 +104,7 @@ end
 
 -- returns set's dps and damage amount
 function setPrototype:GetDPS(useful, class)
-	local total = self:GetDamage(useful, class)
+	local total = self:GetDamage(class, useful)
 	if not total or total == 0 then
 		return 0, total
 	end

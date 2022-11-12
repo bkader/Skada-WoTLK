@@ -2,7 +2,7 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	local mode = Skada:NewModule("Resurrects")
-	local mode_target = mode:NewModule("Resurrect target list")
+	local mode_target = mode:NewModule("Target List")
 
 	local pairs, format, uformat = pairs, string.format, Private.uformat
 	local new, clear = Private.newTable, Private.clearTable

@@ -11,10 +11,10 @@ local setPrototype, enemyPrototype = Skada.setPrototype, Skada.enemyPrototype
 
 Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	local mode = Skada:NewModule("Enemy Damage Taken")
-	local mode_source = mode:NewModule("Damage source list")
-	local mode_source_spell = mode_source:NewModule("Damage spell list")
-	local mode_spell = mode:NewModule("Damage spell list")
-	local mode_spell_source = mode_spell:NewModule("Damage spell sources")
+	local mode_source = mode:NewModule("Source List")
+	local mode_source_spell = mode_source:NewModule("Spell List")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_spell_source = mode_spell:NewModule("Source List")
 	local mode_useful = mode:NewModule("Useful Damage")
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
 	local mode_cols = nil
@@ -795,10 +795,10 @@ end)
 
 Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	local mode = Skada:NewModule("Enemy Damage Done")
-	local mode_target = mode:NewModule("Damage target list")
-	local mode_target_spell = mode_target:NewModule("Damage spell targets")
-	local mode_spell = mode:NewModule("Damage spell list")
-	local mode_spell_target = mode_spell:NewModule("Damage spell targets")
+	local mode_target = mode:NewModule("Target List")
+	local mode_target_spell = mode_target:NewModule("Target List")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_spell_target = mode_spell:NewModule("Target List")
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
 	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
 	local mode_cols = nil
@@ -1212,8 +1212,8 @@ end)
 
 Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	local mode = Skada:NewModule("Enemy Healing Done")
-	local mode_target = mode:NewModule("Healed target list")
-	local mode_spell = mode:NewModule("Healing spell list")
+	local mode_target = mode:NewModule("Target List")
+	local mode_spell = mode:NewModule("Spell List")
 	local ignored_spells = Skada.ignored_spells.heal -- Edit Skada\Core\Tables.lua
 	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
 	local mode_cols = nil

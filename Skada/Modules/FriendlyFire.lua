@@ -2,9 +2,9 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local mode = Skada:NewModule("Friendly Fire")
-	local mode_target = mode:NewModule("Damage target list")
-	local mode_spell = mode:NewModule("Damage spell list")
-	local mode_spell_target = mode_spell:NewModule("Damage spell targets")
+	local mode_target = mode:NewModule("Target List")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_spell_target = mode_spell:NewModule("Target List")
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
 	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
 	local get_actor_friendfire_targets = nil

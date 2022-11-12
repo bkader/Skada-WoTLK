@@ -2,8 +2,8 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	local mode = Skada:NewModule("Interrupts")
-	local mode_extraspell = mode:NewModule("Interrupted spells")
-	local mode_target = mode:NewModule("Interrupted targets")
+	local mode_extraspell = mode:NewModule("Spell List")
+	local mode_target = mode:NewModule("Target List")
 	local mode_spell = mode:NewModule("Interrupt spells")
 	local ignored_spells = Skada.ignored_spells.interrupt -- Edit Skada\Core\Tables.lua
 	local get_actor_interrupted_spells = nil
