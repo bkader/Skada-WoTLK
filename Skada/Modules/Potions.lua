@@ -1,6 +1,6 @@
 local _, Skada = ...
 local Private = Skada.Private
-Skada:RegisterModule("Potions", function(L, P, _, C)
+Skada:RegisterModule("Potions", function(L, P, G, C)
 	local mode = Skada:NewModule("Potions")
 	local mode_spell = mode:NewModule("Spell List")
 	local mode_actor = mode_spell:NewModule("Target List")
@@ -11,7 +11,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	local GetItemInfo, classcolors = GetItemInfo, Skada.classcolors
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 	local prepotionStr, potionStr = "\124c%s%s\124r %s", "\124T%s:14:14:0:0:64:64:4:60:4:60\124t"
-	local potion_ids, prepotion = {}, nil
+	local potion_ids, prepotion = {}, {}
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -46,44 +46,35 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 	end
 
 	do
-		local next, tconcat = next, table.concat
-		local UnitClass, potions = UnitClass, nil
-		local actorflags = Private.DEFAULT_FLAGS -- default
+		local tconcat = table.concat
+		local UnitClass = UnitClass
 
-		-- listens to found buffs
-		function mode:Skada_UnitBuff(_, _, owner, _, _, actorid, actorname, args)
-			if owner or not potion_ids[args.id] then return end
-			local pots = potions and potions[actorname]
-			if not pots then
-				potions = potions or new()
-				potions[actorname] = potions[actorname] or new()
-				pots = potions[actorname]
-			end
-			pots[#pots + 1] = format(potionStr, args.icon)
+		-- listens to combat start
+		function mode:UnitBuff(_, args)
+			if args.owner or not args.auras then return end
 
-			local t = new()
-			t.srcGUID = actorid
-			t.srcName = actorname
-			t.srcFlags = actorflags
-			t.spellid = args.id
-			t.__temp = true
-			potion_used(t)
-			t = del(t)
-		end
+			local potions = nil
+			for _, aura in pairs(args.auras) do
+				if potion_ids[aura.id] then
+					local t = new()
+					t.srcGUID = args.dstGUID
+					t.srcName = args.dstName
+					t.srcFlags = args.dstFlags
+					t.spellid = aura.id
+					t.__temp = true
+					potion_used(t)
+					t = del(t)
 
-		-- listens to scanned actor
-		function mode:Skada_UnitScan(_, unit, owner, curtime, timestamp, actorid, actorname)
-			if potions and potions[actorname] then
-				local _, class = UnitClass(unit)
-				prepotion = prepotion or {}
-				prepotion[#prepotion + 1] = format(prepotionStr, classcolors.str(class), actorname, tconcat(potions[actorname], " "))
-
-				-- release tables
-				potions[actorname] = del(potions[actorname])
-				if next(potions) == nil then
-					potions = del(potions)
+					potions = potions or new()
+					potions[#potions + 1] = format(potionStr, aura.icon)
 				end
 			end
+
+			if not potions then return end
+
+			local _, class = UnitClass(args.unit)
+			prepotion[#prepotion + 1] = format(prepotionStr, classcolors.str(class), args.dstName, tconcat(potions, " "))
+			potions = del(potions)
 		end
 
 		-- listens to combat end
@@ -237,8 +228,7 @@ Skada:RegisterModule("Potions", function(L, P, _, C)
 
 	function mode:ApplySettings()
 		if P.prepotion then
-			Skada.RegisterCallback(self, "Skada_UnitBuff")
-			Skada.RegisterCallback(self, "Skada_UnitScan")
+			Skada.RegisterCallback(self, "Skada_UnitBuffs", "UnitBuff")
 			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		else
 			Skada.UnregisterAllCallbacks(self)

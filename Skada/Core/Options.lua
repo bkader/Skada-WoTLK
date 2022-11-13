@@ -310,7 +310,7 @@ options.args.generaloptions = {
 					end,
 					set = function()
 						Skada.db.icon.hide = not Skada.db.icon.hide
-						Private.refresh_button()
+						Private.RefreshButton()
 					end
 				},
 				mergepets = {
@@ -824,8 +824,8 @@ options.args.tweaks = {
 			desc = format(L["Advanced options for %s."], L["Tweaks"]),
 			order = 900,
 			args = {
-				toast_opt = Private.toast_options(),
-				total_opt = Private.total_options()
+				toast_opt = Private.ToastOptions(),
+				total_opt = Private.TotalOptions()
 			}
 		}
 	}
@@ -857,7 +857,7 @@ do
 						name = L["Open Config"],
 						width = "full",
 						order = 0,
-						func = Private.open_options
+						func = Private.OpenOptions
 					}
 				}
 			}
@@ -884,8 +884,8 @@ do
 		return initOptions
 	end
 
-	function Private.init_options()
-		Private.init_options = nil -- remove it
+	function Private.InitOptions()
+		Private.InitOptions = nil -- remove it
 
 		local frame_name = format("%s Dialog", folder)
 		LibStub("AceConfig-3.0"):RegisterOptionsTable(frame_name, get_init_options)
@@ -893,7 +893,7 @@ do
 	end
 end
 
-function Private.open_options(win)
+function Private.OpenOptions(win)
 	if not ACR:GetOptionsTable(folder) then
 		LibStub("AceConfig-3.0"):RegisterOptionsTable(folder, options)
 		ACD:SetDefaultSize(folder, 630, 500)
@@ -997,7 +997,7 @@ do
 	end
 
 	local modesList = nil
-	function Private.frame_options(db, include_dimensions)
+	function Private.FrameOptions(db, include_dimensions)
 		local obj = {
 			type = "group",
 			name = L["Window"],
@@ -1367,7 +1367,7 @@ do
 						set = function(_, child)
 							db.child = (child == "") and nil or child
 							db.childmode = db.child and (db.childmode or 1) or nil
-							Private.reload_settings()
+							Private.ReloadSettings()
 						end
 					},
 					childmode = {
@@ -1414,7 +1414,7 @@ end
 do
 	local ipairs, strmatch, uformat = ipairs, strmatch, Private.uformat
 	local UnitName, GetRealmName, collectgarbage = UnitName, GetRealmName, collectgarbage
-	local copy, open_window = Private.tCopy, Private.open_import_export
+	local copy, open_window = Private.tCopy, Private.ImportExport
 	local serialize_profile = nil
 
 	local function get_profile_name(str)
@@ -1478,16 +1478,16 @@ do
 			profile = profile[folder]
 		end
 
-		local old_reload_settings = Private.reload_settings
-		Private.reload_settings = function()
-			Private.reload_settings = old_reload_settings
+		local Old_ReloadSettings = Private.ReloadSettings
+		Private.ReloadSettings = function()
+			Private.ReloadSettings = Old_ReloadSettings
 			copy(Skada.db, profile)
-			Private.reload_settings()
+			Private.ReloadSettings()
 			LibStub("AceConfigRegistry-3.0"):NotifyChange(folder)
 		end
 
 		Skada.data:SetProfile(profileName)
-		Private.reload_settings()
+		Private.ReloadSettings()
 		Skada:Wipe()
 		Skada:UpdateDisplay(true)
 		return true
@@ -1501,9 +1501,9 @@ do
 		return open_window(L["This is your current profile in text format."], serialize_profile())
 	end
 
-	function Private.advanced_profile(args)
+	function Private.AdvancedProfile(args)
 		if not args then return end
-		Private.advanced_profile = nil -- remove it
+		Private.AdvancedProfile = nil -- remove it
 		local CONST_COMM_PROFILE = "PR"
 
 		local Share = {}
@@ -1525,7 +1525,7 @@ do
 				Share:Enable(false) -- disable receiving
 				Share.target = nil -- reset target
 			end
-			Private.confirm_dialog(uformat(L["opt_profile_received"], sender), acceptfunc)
+			Private.ConfirmDialog(uformat(L["opt_profile_received"], sender), acceptfunc)
 		end
 
 		function Share:Send(profileStr, target)

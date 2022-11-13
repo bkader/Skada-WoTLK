@@ -40,21 +40,6 @@ Skada:RegisterModule("Damage", function(L, P)
 	-- no matter their role or damage amount, since pets aren't considered.
 	local whitelist = {}
 
-	local function log_spellcast(set, actorid, actorname, actorflags, spellid)
-		if not set or (set == Skada.total and not P.totalidc) then return end
-
-		local actor = Skada:FindActor(set, actorid, actorname, true)
-		if not actor or not actor.damagespells then return end
-
-		local spell = actor.damagespells[spellid]
-		if not spell then return end
-
-		-- because some DoTs don't have an initial damage
-		-- we start from 1 and not from 0 if casts wasn't
-		-- previously set. Otherwise we just increment.
-		spell.casts = (spell.casts or 1) + 1
-	end
-
 	local function add_actor_time(set, actor, spellid, target)
 		if whitelist[spellid] then
 			Skada:AddActiveTime(set, actor, target, tonumber(whitelist[spellid]))
@@ -123,10 +108,6 @@ Skada:RegisterModule("Damage", function(L, P)
 
 		spell.count = (spell.count or 0) + 1
 		spell.amount = spell.amount + dmg.amount
-
-		if dmg.spell ~= 6603 and not dmg.is_dot then
-			spell.casts = spell.casts or 1
-		end
 
 		if spell.total then
 			spell.total = spell.total + dmg.amount + absorbed
@@ -197,13 +178,6 @@ Skada:RegisterModule("Damage", function(L, P)
 
 		if overkill then
 			target.o_amt = (target.o_amt or 0) + overkill
-		end
-	end
-
-	local function spell_cast(t)
-		if t.srcGUID ~= t.dstGUID and t.spellid and not ignored_spells[t.spellid] then
-			local srcGUID, srcName, srcFlags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
-			Skada:DispatchSets(log_spellcast, srcGUID, srcName, srcFlags, t.spellstring)
 		end
 	end
 
@@ -421,9 +395,6 @@ Skada:RegisterModule("Damage", function(L, P)
 		local actor = set and set:GetActor(win.actorid, win.actorname)
 		local spell = actor and actor.damagespells and actor.damagespells[id]
 		if spell then
-			if spell.casts then
-				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
-			end
 			if spell.count then
 				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 				return spell, spell.count
@@ -670,14 +641,6 @@ Skada:RegisterModule("Damage", function(L, P)
 		mode_target.nototal = true
 
 		local flags_src_dst = {src_is_interesting = true, dst_is_not_interesting = true}
-
-		Skada:RegisterForCL(
-			spell_cast,
-			flags_src_dst,
-			"SPELL_CAST_START",
-			"SPELL_CAST_SUCCESS"
-		)
-
 		Skada:RegisterForCL(
 			spell_damage,
 			flags_src_dst,
@@ -880,10 +843,6 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C)
 		if not spell then return end
 
 		tooltip:AddLine(label .. " - " .. win.spellname)
-
-		if spell.casts then
-			tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
-		end
 
 		if not spell.count or spell.count == 0 then return end
 

@@ -36,10 +36,6 @@ Skada:RegisterModule("My Spells", function(L, P)
 		tooltip:AddLine(actor.name .. " - " .. label)
 		tooltip_school(tooltip, id)
 
-		if spell.casts and spell.casts > 0 then
-			tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
-		end
-
 		if not spell.count or spell.count == 0 then return end
 
 		-- count stats

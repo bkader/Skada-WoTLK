@@ -17,46 +17,39 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	local mode_spell_source = mode_spell:NewModule("Source List")
 	local mode_useful = mode:NewModule("Useful Damage")
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
+	local grouped_units = Skada.grouped_units -- Edit Skada\Core\Tables.lua
+	local custom_units = Skada.custom_units -- Edit Skada\Core\Tables.lua
 	local mode_cols = nil
 
-	local instanceDiff, customGroupsTable, customUnitsTable, customUnitsInfo
-	local UnitIterator, GetCreatureId = Skada.UnitIterator, Skada.GetCreatureId
+	local instanceDiff, customGroupsTable, customUnitsTable
+	local GetUnitIdFromGUID, GetCreatureId = Skada.GetUnitIdFromGUID, Skada.GetCreatureId
 	local UnitHealthInfo, UnitPowerInfo = Skada.UnitHealthInfo, Skada.UnitPowerInfo
 	local UnitExists, UnitGUID = UnitExists, UnitGUID
 	local UnitHealthMax, UnitPowerMax = UnitHealthMax, UnitPowerMax
-	local tContains, del = tContains, Private.delTable
-
-	-- this table holds the units to which the damage done is
-	-- collected into a new fake unit.
-	local customGroups = {}
-
-	-- this table holds units that should create a fake unit
-	-- at certain health percentage. Useful in case you want
-	-- to collect damage done to the units at certain phases.
-	local customUnits = {}
+	local del = Private.delTable
 
 	-- table of acceptable/trackable instance difficulties
 	-- uncomments those you want to use or add custom ones.
 	local allowed_diffs = {
-		-- ["5n"] = true, -- 5man Normal
-		-- ["5h"] = true, -- 5man Heroic
-		-- ["mc"] = true, -- Mythic Dungeons
-		-- ["tw"] = true, -- Time Walker
-		-- ["wb"] = true, -- World Boss
+		["5n"] = false, -- 5man Normal
+		["5h"] = false, -- 5man Heroic
+		["mc"] = false, -- Mythic Dungeons
+		["tw"] = false, -- Time Walker
+		["wb"] = false, -- World Boss
 		["10n"] = true, -- 10man Normal
 		["10h"] = true, -- 10man Heroic
 		["25n"] = true, -- 25man Normal
 		["25h"] = true, -- 25man Heroic
 	}
 
-	local function format_valuetext(d, columns, total, dtps, metadata, subview)
+	local function format_valuetext(d, columns, total, dtps, metadata, subview, dont_sort)
 		d.valuetext = Skada:FormatValueCols(
 			columns.Damage and Skada:FormatNumber(d.value),
 			columns[subview and "sDTPS" or "DTPS"] and Skada:FormatNumber(dtps),
 			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
 		)
 
-		if metadata and d.value > metadata.maxvalue then
+		if not dont_sort and metadata and d.value > metadata.maxvalue then
 			metadata.maxvalue = d.value
 		end
 	end
@@ -68,36 +61,20 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		return instanceDiff
 	end
 
-	local function custom_units_max_value(id, guid, unit)
-		if id and customUnitsInfo and customUnitsInfo[id] then
-			return customUnitsInfo[id]
-		end
-
-		local maxval
-		for uid in UnitIterator() do
-			if UnitExists(uid .. "target") and UnitGUID(uid .. "target") == guid then
-				maxval = (unit.power ~= nil) and UnitPowerMax(uid .. "target", unit.power) or UnitHealthMax(uid .. "target")
-				if maxval and maxval > 0 then break end -- break only if found!
-			end
-		end
-
+	local function custom_units_max_value(guid, unit)
+		local diff = get_instance_diff()
+		local maxval = unit.values and unit.values[diff]
 		if not maxval then
-			if unit.power ~= nil then
-				_, _, maxval = UnitPowerInfo(nil, guid, unit.power)
-			else
-				_, _, maxval = UnitHealthInfo(nil, guid)
+			local uid = GetUnitIdFromGUID(guid)
+			if uid then
+				maxval = (unit.power ~= nil) and UnitPowerMax(uid, unit.power) or UnitHealthMax(uid)
+			end
+
+			if maxval then
+				unit.values = unit.values or {}
+				unit.values[diff] = maxval
 			end
 		end
-
-		if not maxval and unit.values then
-			maxval = unit.values[get_instance_diff()]
-		end
-
-		if maxval and maxval > 0 then
-			customUnitsInfo = customUnitsInfo or {}
-			customUnitsInfo[id] = maxval
-		end
-
 		return maxval
 	end
 
@@ -106,54 +83,56 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			return (customUnitsTable[guid] ~= -1)
 		end
 
-		local id = GetCreatureId(guid)
-		local unit = id and customUnits[id]
-		if unit then
+		local unit = custom_units[GetCreatureId(guid)]
+		if not unit then
+			-- prevent constant checking...
 			customUnitsTable = customUnitsTable or {}
-
-			if unit.diff ~= nil and ((type(unit.diff) == "table" and not tContains(unit.diff, get_instance_diff())) or (type(unit.diff) == "string" and get_instance_diff() ~= unit.diff)) then
-				customUnitsTable[guid] = -1
-				return false
-			end
-
-			-- get the unit max value.
-			local maxval = custom_units_max_value(id, guid, unit)
-			if not maxval or maxval == 0 then
-				customUnitsTable[guid] = -1
-				return false
-			end
-
-			-- calculate the current value and the point where to stop.
-			local curval = maxval - amount - overkill
-			local minval = floor(maxval * (unit.stop or 0))
-
-			-- ignore units below minimum required.
-			if curval <= minval then
-				customUnitsTable[guid] = -1
-				return false
-			end
-
-			local t = new()
-			t.oname = name or L["Unknown"]
-			t.name = unit.name
-			t.guid = guid
-			t.curval = curval
-			t.minval = minval
-			t.maxval = floor(maxval * (unit.start or 1))
-			t.full = maxval
-			t.power = (unit.power ~= nil)
-			t.useful = unit.useful
-
-			if unit.name == nil then
-				local str = unit.text or (unit.stop and L["%s - %s%% to %s%%"] or L["%s below %s%%"])
-				t.name = format(str, t.oname, (unit.start or 1) * 100, (unit.stop or 0) * 100)
-			end
-
-			customUnitsTable[guid] = t
-			return true
+			customUnitsTable[guid] = -1
+			return false
 		end
 
-		return false
+		customUnitsTable = customUnitsTable or {}
+
+		if unit.diff ~= nil and ((type(unit.diff) == "table" and not unit.diff[get_instance_diff()]) or (type(unit.diff) == "string" and get_instance_diff() ~= unit.diff)) then
+			customUnitsTable[guid] = -1
+			return false
+		end
+
+		-- get the unit max value.
+		local maxval = custom_units_max_value(guid, unit)
+		if not maxval or maxval == 0 then
+			customUnitsTable[guid] = -1
+			return false
+		end
+
+		-- calculate the current value and the point where to stop.
+		local curval = maxval - amount - overkill
+		local minval = floor(maxval * (unit.stop or 0))
+
+		-- ignore units below minimum required.
+		if curval <= minval then
+			customUnitsTable[guid] = -1
+			return false
+		end
+
+		local t = new()
+		t.oname = name or L["Unknown"]
+		t.name = unit.name
+		t.guid = guid
+		t.curval = curval
+		t.minval = minval
+		t.maxval = floor(maxval * (unit.start or 1))
+		t.full = maxval
+		t.power = (unit.power ~= nil)
+		t.useful = unit.useful
+
+		if unit.name == nil then
+			local str = unit.text or (unit.stop and L["%s - %s%% to %s%%"] or L["%s below %s%%"])
+			t.name = format(str, t.oname, (unit.start or 1) * 100, (unit.stop or 0) * 100)
+		end
+
+		customUnitsTable[guid] = t
+		return true
 	end
 
 	local function log_custom_unit(set, name, playername, spellid, amount, absorbed)
@@ -200,12 +179,20 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	local function log_custom_group(set, id, name, playername, spellid, amount, overkill, absorbed)
-		if not (name and customGroups[name]) then return end -- not a custom group.
-		if customGroups[name] == L["Halion and Inferno"] and get_instance_diff() ~= "25h" then return end -- rs25hm only
+		local group_name = name and grouped_units[name]
+		if not group_name then
+			group_name = grouped_units[GetCreatureId(id)]
+			if not group_name then return end
+			grouped_units[name] = group_name
+		end
+		if group_name == L["Halion and Inferno"] and get_instance_diff() ~= "25h" then return end -- rs25hm only
 		if customGroupsTable and customGroupsTable[id] then return end -- a custom unit with useful damage.
 
-		amount = (customGroups[name] == L["Princes overkilling"]) and overkill or amount
-		log_custom_unit(set, customGroups[name], playername, spellid, amount, absorbed)
+		if group_name == L["Princes overkilling"] then
+			log_custom_unit(set, group_name, playername, spellid, overkill, absorbed)
+			return
+		end
+		log_custom_unit(set, group_name, playername, spellid, amount, absorbed)
 	end
 
 	local dmg = {}
@@ -301,12 +288,12 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 				if unit.curval <= unit.maxval then
 					log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, unit.maxval - unit.curval, absorbed)
 					amount = amount - (unit.maxval - unit.curval)
-					if customGroups[unit.oname] and unit.useful then
+					if grouped_units[unit.oname] and unit.useful then
 						log_custom_group(set, unit.guid, unit.oname, dmg.srcName, dmg.spellid, amount, overkill, absorbed)
 						customGroupsTable = customGroupsTable or {}
 						customGroupsTable[unit.guid] = true
 					end
-					if customGroups[unit.name] then
+					if grouped_units[unit.name] then
 						log_custom_group(set, unit.guid, unit.name, dmg.srcName, dmg.spellid, unit.maxval - unit.curval, overkill, absorbed)
 					end
 				end
@@ -319,7 +306,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 				local amount = dmg.amount - overkill
 				unit.curval = unit.curval - amount
 
-				if customGroups[unit.name] then
+				if grouped_units[unit.name] then
 					log_custom_group(set, unit.guid, unit.name, dmg.srcName, dmg.spellid, amount, overkill, absorbed)
 				end
 
@@ -583,7 +570,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = amount
-					format_valuetext(d, mode_cols, total, dtps, win.metadata)
+					format_valuetext(d, mode_cols, total, dtps, win.metadata, nil, actor.fake)
 				end
 			end
 		end
@@ -666,85 +653,8 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	function mode:CombatLeave()
 		instanceDiff = nil
 		wipe(dmg)
-		clear(customUnitsInfo)
 		clear(customUnitsTable)
 		clear(customGroupsTable)
-	end
-
-	function mode:OnInitialize()
-		-- ----------------------------
-		-- Custom Groups
-		-- ----------------------------
-
-		-- The Lich King: Useful targets
-		customGroups[L["The Lich King"]] = L["Important targets"]
-		customGroups[L["Raging Spirit"]] = L["Important targets"]
-		customGroups[L["Ice Sphere"]] = L["Important targets"]
-		customGroups[L["Val'kyr Shadowguard"]] = L["Important targets"]
-		customGroups[L["Wicked Spirit"]] = L["Important targets"]
-
-		-- Professor Putricide: Oozes
-		customGroups[L["Gas Cloud"]] = L["Oozes"]
-		customGroups[L["Volatile Ooze"]] = L["Oozes"]
-
-		-- Blood Prince Council: Princes overkilling
-		customGroups[L["Prince Valanar"]] = L["Princes overkilling"]
-		customGroups[L["Prince Taldaram"]] = L["Princes overkilling"]
-		customGroups[L["Prince Keleseth"]] = L["Princes overkilling"]
-
-		-- Lady Deathwhisper: Adds
-		customGroups[L["Cult Adherent"]] = L["Adds"]
-		customGroups[L["Empowered Adherent"]] = L["Adds"]
-		customGroups[L["Reanimated Adherent"]] = L["Adds"]
-		customGroups[L["Cult Fanatic"]] = L["Adds"]
-		customGroups[L["Deformed Fanatic"]] = L["Adds"]
-		customGroups[L["Reanimated Fanatic"]] = L["Adds"]
-		customGroups[L["Darnavan"]] = L["Adds"]
-
-		-- Halion: Halion and Inferno
-		customGroups[L["Halion"]] = L["Halion and Inferno"]
-		customGroups[L["Living Inferno"]] = L["Halion and Inferno"]
-
-		-- ----------------------------
-		-- Custom Units
-		-- ----------------------------
-
-		-- ICC: Lady Deathwhisper
-		customUnits[36855] = {
-			start = 0, power = 0, text = L["%s - Phase 2"],
-			values = {["10n"] = 3264800, ["10h"] = 3264800, ["25n"] = 11193600, ["25h"] = 13992000}
-		}
-
-		-- ICC: Professor Putricide
-		customUnits[36678] = {
-			start = 0.35, text = L["%s - Phase 3"],
-			values = {["10n"] = 9761500, ["10h"] = 13666100, ["25n"] = 41835000, ["25h"] = 50202000}
-		}
-
-		-- ICC: Sindragosa
-		customUnits[36853] = {
-			start = 0.35, text = L["%s - Phase 2"],
-			values = {["10n"] = 11156000, ["10h"] = 13945000, ["25n"] = 38348750, ["25h"] = 46018500}
-		}
-
-		-- ICC: The Lich King
-		customUnits[36597] = {
-			start = 0.4, stop = 0.1, text = L["%s - Phase 3"],
-			values = {["10n"] = 17431250, ["10h"] = 29458813, ["25n"] = 61009375, ["25h"] = 103151165}
-		}
-
-		-- ICC: Valkyrs overkilling
-		customUnits[36609] = {
-			name = L["Valkyrs overkilling"],
-			diff = {"10h", "25h"}, start = 0.5, useful = true,
-			values = {["10h"] = 1417500, ["25h"] = 2992000}
-		}
-
-		-- ToC: Anub'arak
-		customUnits[34564] = {
-			start = 0.3, text = L["%s - Phase 2"],
-			values = {["10n"] = 4183500, ["10h"] = 5438550, ["25n"] = 20917500, ["25h"] = 27192750}
-		}
 	end
 
 	---------------------------------------------------------------------------

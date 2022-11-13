@@ -156,7 +156,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 
 	local function menuOnClick(self, button)
 		if button == "RightButton" then
-			Private.open_options(self.win)
+			Private.OpenOptions(self.win)
 		else
 			Skada:OpenMenu(self.win)
 		end
@@ -303,6 +303,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		tinsert(barlibrary.bars, 1, bar)
 	end
 
+	local Print = Private.Print
 	function barlibrary:Withdraw(win)
 		local db = win.db
 
@@ -315,7 +316,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 				uuid = barlibrary.bars[#barlibrary.bars].uuid + 1
 			else
 				uuid = 1
-				print("\124c0033ff99SkadaInline\124r: THIS SHOULD NEVER HAPPEN")
+				Print("\124c0033ff99SkadaInline\124r: THIS SHOULD NEVER HAPPEN")
 			end
 			replacement = self:CreateBar(uuid, win)
 			barlibrary.bars[#barlibrary.bars + 1] = replacement
@@ -703,7 +704,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 			}
 		}
 
-		options.windowoptions = Private.frame_options(db, true)
+		options.windowoptions = Private.FrameOptions(db, true)
 	end
 
 	function mod:OnInitialize()

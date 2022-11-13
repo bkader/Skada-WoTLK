@@ -14,7 +14,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local max, floor, abs = math.max, math.floor, math.abs
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 	local UnitIsFeignDeath, UnitHealthInfo = UnitIsFeignDeath, Skada.UnitHealthInfo
-	local GetSpellLink, spell_split = Private.spell_link, Private.spell_split
+	local GetSpellLink, SpellSplit = Private.SpellLink, Private.SpellSplit
 	local IsInGroup, IsInPvP = Skada.IsInGroup, Skada.IsInPvP
 	local GetTime, time, date, wipe = GetTime, time, date, wipe
 	local spellnames, spellicons = Skada.spellnames, Skada.spellicons

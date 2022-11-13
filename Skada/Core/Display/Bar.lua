@@ -8,7 +8,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local pairs, tsort, format = pairs, table.sort, string.format
 	local max, min, abs = math.max, math.min, math.abs
 	local GameTooltip, GameTooltip_Hide = GameTooltip, GameTooltip_Hide
-	local GetSpellLink = Private.spell_link or GetSpellLink
+	local GetSpellLink = Private.SpellLink or GetSpellLink
 	local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
 	local IsShiftKeyDown = IsShiftKeyDown
 	local IsAltKeyDown = IsAltKeyDown
@@ -16,7 +16,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local IsModifierKeyDown = IsModifierKeyDown
 	local SavePosition = Private.SavePosition
 	local RestorePosition = Private.RestorePosition
-	local prevent_duplicate = Private.prevent_duplicate
+	local CheckDuplicate = Private.CheckDuplicate
 	local new, del, copy = Private.newTable, Private.delTable, Private.tCopy
 	local _
 
@@ -81,10 +81,10 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 		end
 
-		local open_options = Private.open_options
+		local OpenOptions = Private.OpenOptions
 		local function configOnClick(self, button)
 			if button == "RightButton" then
-				open_options(self.list.win)
+				OpenOptions(self.list.win)
 			else
 				Skada:OpenMenu(self.list.win)
 			end
@@ -112,10 +112,10 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 		end
 
-		local open_report = Private.open_report
+		local OpenReport = Private.OpenReport
 		local function reportOnClick(self, button)
 			if button == "LeftButton" then
-				open_report(self.list.win)
+				OpenReport(self.list.win)
 			end
 		end
 
@@ -1164,7 +1164,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		}
 	}
 
-	local frame_options = Private.frame_options
+	local FrameOptions = Private.FrameOptions
 
 	function mod:AddDisplayOptions(win, options)
 		local db = win.db
@@ -1892,7 +1892,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			}
 		}
 
-		options.windowoptions = frame_options(db)
+		options.windowoptions = FrameOptions(db)
 
 		options.windowoptions.args.position.args.barwidth = {
 			type = "range",
@@ -2213,10 +2213,10 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 
 			local function check_theme_name(name)
-				return prevent_duplicate(prevent_duplicate(name, themes), G.themes)
+				return CheckDuplicate(CheckDuplicate(name, themes), G.themes)
 			end
 
-			local open_import_export = Private.open_import_export
+			local ImportExport = Private.ImportExport
 			local serialize, deserialize = Private.serialize, Private.deserialize
 			local temp = {}
 
@@ -2227,7 +2227,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				wipe(temp)
 				copy(temp, theme)
 				temp.__name = applytheme
-				return open_import_export(L["This is your current theme in text format."], serialize(true, nil, temp))
+				return ImportExport(L["This is your current theme in text format."], serialize(true, nil, temp))
 			end
 
 			local function theme_import(data)
@@ -2334,7 +2334,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 								name = L["Import"],
 								order = 50,
 								func = function()
-									return open_import_export(L["Paste here a theme in text format."], theme_import)
+									return ImportExport(L["Paste here a theme in text format."], theme_import)
 								end
 							},
 							delete = {

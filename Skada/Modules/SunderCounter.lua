@@ -9,7 +9,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 
 	local pairs, format, GetTime, uformat = pairs, string.format, GetTime, Private.uformat
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
-	local GetSpellLink = Private.spell_link or GetSpellLink
+	local GetSpellLink = Private.SpellLink or GetSpellLink
 	local spellnames = Skada.spellnames
 
 	local sunder_targets -- holds sunder targets details for announcement

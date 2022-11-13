@@ -12,7 +12,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	-- cache frequently used globals
 	local pairs, format, uformat = pairs, string.format, Private.uformat
 	local new, clear = Private.newTable, Private.clearTable
-	local GetSpellLink = Private.spell_link or GetSpellLink
+	local GetSpellLink = Private.SpellLink or GetSpellLink
 	local mode_cols = nil
 
 	local function format_valuetext(d, columns, total, metadata, subview)

@@ -2,7 +2,7 @@ local _, Skada = ...
 local Private = Skada.Private
 
 local pairs, format, uformat = pairs, string.format, Private.uformat
-local GetSpellLink = Private.spell_link or GetSpellLink
+local GetSpellLink = Private.SpellLink or GetSpellLink
 local new, clear = Private.newTable, Private.clearTable
 local cc_table = {} -- holds stuff from cleu
 

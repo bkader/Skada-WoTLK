@@ -350,10 +350,10 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		end
 	end
 
-	local open_options = Private.open_options
+	local OpenOptions = Private.OpenOptions
 	function mod:ConfigClicked(cbk, group, button)
 		if button == "RightButton" then
-			open_options(group.win)
+			OpenOptions(group.win)
 		else
 			Skada:OpenMenu(group.win)
 		end

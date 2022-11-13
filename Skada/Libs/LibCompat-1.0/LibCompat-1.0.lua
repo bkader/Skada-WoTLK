@@ -4,7 +4,7 @@
 -- @author: Kader B (https://github.com/bkader/LibCompat-1.0)
 --
 
-local MAJOR, MINOR = "LibCompat-1.0-Skada", 36
+local MAJOR, MINOR = "LibCompat-1.0-Skada", 37
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
@@ -20,22 +20,93 @@ local GetUnitIdFromGUID
 
 -------------------------------------------------------------------------------
 
+local Units
 do
-	local pcall = pcall
+	-- solo and target targets
+	local solo = {"player", "pet"}
+	local target = {"target", "targettarget", "focus", "focustarget", "mouseover", "mouseovertarget"}
+
+	-- boss
+	local boss = {}
+	for i = 1, 5 do
+		boss[i] = format("boss%d", i)
+		target[#target + 1] = format("boss%d", i)
+	end
+
+	-- party
+	local party = {}
+	local partypet = {}
+	for i = 1, 4 do
+		party[i] = format("party%d", i)
+		partypet[i] = format("partypet%d", i)
+		target[#target + 1] = format("party%dtarget", i)
+	end
+
+	-- raid
+	local raid = {}
+	local raidpet = {}
+	for i = 1, 40 do
+		raid[i] = format("raid%d", i)
+		raidpet[i] = format("raidpet%d", i)
+		target[#target + 1] = format("raid%dtarget", i)
+	end
+
+	-- arena
+	local arena = {}
+	local arenapet = {}
+	for i = 1, 5 do
+		arena[i] = format("arena%d", i)
+		arenapet[i] = format("arenapet%d", i)
+		target[#target + 1] = format("arena%d", i)
+	end
+
+	lib.Units = {
+		-- solo and targets
+		solo = solo,
+		target = target,
+		-- party units and pets
+		party = party,
+		partypet = partypet,
+		-- raid units and pets
+		raid = raid,
+		raidpet = raidpet,
+		-- arena units and pets
+		arena = arena,
+		arenapet = arenapet,
+		-- boss units
+		boss = boss
+	}
+	Units = lib.Units
+end
+
+-------------------------------------------------------------------------------
+
+do
+	local wipe, select, tconcat = wipe, select, table.concat
+	local temp = {}
+	local function _print(...)
+		wipe(temp)
+		for i = 1, select("#", ...) do
+			temp[#temp + 1] = select(i, ...)
+		end
+		DEFAULT_CHAT_FRAME:AddMessage(tconcat(temp, " "))
+	end
 
 	function Dispatch(func, ...)
 		if type(func) ~= "function" then
-			print("\124cffff9900Error\124r: Dispatch requires a function.")
+			_print("\124cffff9900Error\124r: Dispatch requires a function.")
 			return
 		end
 		return func(...)
 	end
 
+
+	local pcall = pcall
 	local function QuickDispatch(func, ...)
 		if type(func) ~= "function" then return end
 		local ok, err = pcall(func, ...)
 		if not ok then
-			print("\124cffff9900Error\124r:" .. (err or "<no error given>"))
+			_print("\124cffff9900Error\124r:" .. (err or "<no error given>"))
 			return
 		end
 		return true
@@ -111,6 +182,8 @@ do
 			end
 		end
 
+		local party = Units.party
+		local partypet = Units.partypet
 		local function PartyIterator(excPets)
 			while step do
 				local unit, owner
@@ -118,10 +191,10 @@ do
 					unit, owner = SelfIterator(excPets)
 					step = step or 3
 				elseif step == 3 then
-					unit, owner, step = format("party%d", count), nil, 4
+					unit, owner, step = party[count], nil, 4
 				elseif step == 4 then
 					if not excPets then
-						unit, owner = format("partypet%d", count), format("party%d", count)
+						unit, owner = partypet[count], party[count]
 					end
 					count = count + 1
 					step = count <= nmem and 3 or nil
@@ -132,14 +205,16 @@ do
 			end
 		end
 
+		local raid = Units.raid
+		local raidpet = Units.raidpet
 		local function RaidIterator(excPets)
 			while step do
 				local unit, owner
 				if step == 1 then
-					unit, owner, step = format("raid%d", count), nil, 2
+					unit, owner, step = raid[count], nil, 2
 				elseif step == 2 then
 					if not excPets then
-						unit, owner = format("raidpet%d", count), format("raid%d", count)
+						unit, owner = raidpet[count], raid[count]
 					end
 					count = count + 1
 					step = count <= nmem and 1 or nil
@@ -187,54 +262,32 @@ do
 		end
 	end
 
-	local MAX_BOSS_FRAMES = MAX_BOSS_FRAMES or 5
-
-	function GetUnitIdFromGUID(guid, filter)
-		if filter == nil or filter == "boss" then
-			for i = 1, MAX_BOSS_FRAMES do
-				if UnitExists("boss" .. i) and UnitGUID("boss" .. i) == guid then
-					return "boss" .. i
-				end
-			end
-			if filter == "boss" then return end
-		end
-
-		if filter == nil or filter == "group" then
-			for unit in UnitIterator() do
-				if UnitGUID(unit) == guid then
+	do
+		local function FindUnitId(guid, units)
+			if not units then return end
+			for _, unit in next, units do
+				if UnitExists(unit) and UnitGUID(unit) == guid then
 					return unit
-				elseif UnitExists(unit .. "target") and UnitGUID(unit .. "target") == guid then
-					return unit .. "target"
 				end
 			end
-			if filter == "group" then return end
 		end
 
-		if filter == nil or filter == "player" then
-			if UnitExists("target") and UnitGUID("target") == guid then
-				return "target"
-			elseif UnitExists("focus") and UnitGUID("focus") == guid then
-				return "focus"
-			elseif UnitExists("targettarget") and UnitGUID("targettarget") == guid then
-				return "targettarget"
-			elseif UnitExists("focustarget") and UnitGUID("focustarget") == guid then
-				return "focustarget"
-			elseif UnitExists("mouseover") and UnitGUID("mouseover") == guid then
-				return "mouseover"
-			elseif filter == "player" then return end
-		end
-
-		if filter == "arena" then
-			for i = 1, 5 do
-				if UnitExists("arena" .. i) and UnitGUID("arena" .. i) == guid then
-					return "arena" .. i
-				end
+		function GetUnitIdFromGUID(guid, grouped)
+			-- start with group members
+			if grouped then
+				local unit = FindUnitId(guid, Units[IsInRaid() and "raid" or IsInGroup() and "party" or "solo"])
+				unit = unit or FindUnitId(guid, Units[IsInRaid() and "raidpet" or IsInGroup() and "partypet" or "solo"])
+				return unit or FindUnitId(guid, Units.target)
 			end
+
+			local unit = not grouped and FindUnitId(guid, Units.target)
+			unit = unit or FindUnitId(guid, Units[IsInRaid() and "raid" or IsInGroup() and "party" or "solo"])
+			return unit or FindUnitId(guid, Units[IsInRaid() and "raidpet" or IsInGroup() and "partypet" or "solo"])
 		end
 	end
 
-	local function GetClassFromGUID(guid, filter)
-		local unit = GetUnitIdFromGUID(guid, filter)
+	local function GetClassFromGUID(guid)
+		local unit = GetUnitIdFromGUID(guid)
 		local class
 		if unit and unit:find("pet") then
 			class = "PET"
@@ -252,8 +305,8 @@ do
 
 	local unknownUnits = {[_G.UKNOWNBEING] = true, [_G.UNKNOWNOBJECT] = true}
 
-	local function UnitHealthInfo(unit, guid, filter)
-		unit = (unit and not unknownUnits[unit]) and unit or (guid and GetUnitIdFromGUID(guid, filter))
+	local function UnitHealthInfo(unit, guid)
+		unit = (unit and not unknownUnits[unit]) and unit or (guid and GetUnitIdFromGUID(guid))
 		local percent, health, maxhealth
 		if unit and UnitExists(unit) then
 			health, maxhealth = UnitHealth(unit), UnitHealthMax(unit)
@@ -264,8 +317,8 @@ do
 		return percent, health, maxhealth
 	end
 
-	local function UnitPowerInfo(unit, guid, powerType, filter)
-		unit = (unit and not unknownUnits[unit]) and unit or (guid and GetUnitIdFromGUID(guid, filter))
+	local function UnitPowerInfo(unit, guid, powerType)
+		unit = (unit and not unknownUnits[unit]) and unit or (guid and GetUnitIdFromGUID(guid))
 		local percent, power, maxpower
 		if unit and UnitExists(unit) then
 			power, maxpower = UnitPower(unit, powerType), UnitPowerMax(unit, powerType)
@@ -334,7 +387,7 @@ do
 
 	-- cached specs
 	local cachedSpecs = setmetatable({}, {__index = function(self, guid)
-		local unit = guid and (GetUnitIdFromGUID(guid, "group") or GetUnitIdFromGUID(guid, "player"))
+		local unit = guid and GetUnitIdFromGUID(guid, true)
 		if not unit then return end
 
 		local _, class = UnitClass(unit)
@@ -368,7 +421,7 @@ do
 
 	-- cached roles
 	local cachedRoles = setmetatable({}, {__index = function(self, guid)
-		local unit = guid and (GetUnitIdFromGUID(guid, "group") or GetUnitIdFromGUID(guid, "player"))
+		local unit = guid and GetUnitIdFromGUID(guid, true)
 		if not unit then return end
 
 		local role = nil
@@ -448,6 +501,7 @@ end
 -------------------------------------------------------------------------------
 
 local mixins = {
+	"Units",
 	"EmptyFunc",
 	"Dispatch",
 	"QuickDispatch",

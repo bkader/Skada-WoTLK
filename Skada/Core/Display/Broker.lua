@@ -350,7 +350,7 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 			}
 		}
 
-		options.windowoptions = Private.frame_options(db, true)
+		options.windowoptions = Private.FrameOptions(db, true)
 	end
 
 	function mod:OnInitialize()

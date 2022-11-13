@@ -198,9 +198,6 @@ Skada:RegisterModule("Comparison", function(L, P)
 		local actor = set and set:GetActor(win.actorid, win.actorname)
 		local spell = actor and actor.damagespells and actor.damagespells[id]
 		if spell and actor.id == otherGUID then
-			if spell.casts then
-				tooltip:AddDoubleLine(L["Casts"], spell.casts, 1, 1, 1)
-			end
 			if spell.count then
 				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 			end
@@ -211,11 +208,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		local oactor = set and set:GetActor(otherGUID, otherName)
 		local ospell = oactor and oactor.damagespells and oactor.damagespells[id]
 
-		-- casts
-		if (spell and spell.casts) or (ospell and ospell.casts) then
-			tooltip:AddDoubleLine(L["Casts"], format_value_number(spell and spell.casts, ospell and ospell.casts, true), 1, 1, 1)
-		end
-		-- hitss
+		-- hits
 		if (spell and spell.count) or (ospell and ospell.count) then
 			tooltip:AddDoubleLine(L["Hits"], format_value_number(spell and spell.count, ospell and ospell.count, true), 1, 1, 1)
 		end

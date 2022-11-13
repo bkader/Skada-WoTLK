@@ -4,7 +4,7 @@ local Private = Skada.Private
 local select, pairs, type = select, pairs, type
 local tonumber, format = tonumber, string.format
 local setmetatable, wipe = setmetatable, wipe
-local next, print, GetTime = next, print, GetTime
+local next, time, GetTime = next, time, GetTime
 local _
 
 local tablePool, new, del = Skada.tablePool, Private.newTable, Private.delTable
@@ -14,9 +14,12 @@ local userName = Skada.userName
 -------------------------------------------------------------------------------
 -- debug function
 
-function Skada:Debug(...)
-	if self.db.debug then
-		print("\124cff33ff99Skada Debug\124r:", ...)
+do
+	local Print = Private.Print
+	local debug_str = format("\124cff33ff99%s Debug\124r:", folder)
+	function Skada:Debug(...)
+		if not self.db.debug then return end
+		Print(debug_str, ...)
 	end
 end
 
@@ -177,7 +180,7 @@ end
 do
 	local reverse = string.reverse
 	local numbersystem = nil
-	function Private.set_numeral_format(system)
+	function Private.SetNumberFormat(system)
 		system = system or numbersystem
 		if numbersystem == system then return end
 		numbersystem = system
@@ -285,7 +288,7 @@ do
 	local format_2 = "%s (%s)"
 	local format_3 = "%s (%s, %s)"
 
-	function Private.set_value_format(bracket, separator)
+	function Private.SetValueFormat(bracket, separator)
 		format_2 = brackets[bracket or 1]
 		format_3 = "%s " .. format(format_2, separators[separator or 1])
 		format_2 = "%s " .. format_2
@@ -530,26 +533,26 @@ do
 	local temp_units = nil
 
 	-- adds a temporary unit with optional info
-	function Private.add_temp_unit(guid, info)
+	function Private.AddTempUnit(guid, info)
 		if not guid then return end
 		temp_units = temp_units or new()
 		temp_units[guid] = info or true
 	end
 
 	-- deletes a temporary unit if found
-	function Private.del_temp_unit(guid)
+	function Private.DelTempUnit(guid)
 		if guid and temp_units and temp_units[guid] then
 			temp_units[guid] = del(temp_units[guid])
 		end
 	end
 
 	-- returns the temporary unit stored "info" or false
-	function Private.get_temp_unit(guid)
+	function Private.GetTempUnit(guid)
 		return guid and temp_units and temp_units[guid]
 	end
 
 	-- clears all store temporary units
-	function Private.clear_temp_units()
+	function Private.ClearTempUnits()
 		temp_units = clear(temp_units)
 	end
 end
@@ -900,7 +903,7 @@ do
 			return
 		end
 
-		Private.confirm_dialog(L["Do you want to reset Skada?\nHold SHIFT to reset all data."], f, t)
+		Private.ConfirmDialog(L["Do you want to reset Skada?\nHold SHIFT to reset all data."], f, t)
 	end
 end
 
@@ -983,7 +986,7 @@ do
 	end
 
 	function Skada:Reinstall()
-		Private.confirm_dialog(L["Are you sure you want to reinstall Skada?"], f, t)
+		Private.ConfirmDialog(L["Are you sure you want to reinstall Skada?"], f, t)
 	end
 end
 
@@ -1112,7 +1115,7 @@ do
 		-- well.. our last hope!
 		dummy_actor.id = actorid
 		dummy_actor.name = actorname
-		dummy_actor.class = "UNKNOWN"
+		dummy_actor.class = (set.mobname == actorname) and "ENEMY" or "UNKNOWN" -- can be wrong
 		return actorPrototype:Bind(dummy_actor)
 	end
 
@@ -1138,20 +1141,22 @@ do
 			actor.name = actorname
 			actor.__new = true
 
-			-- actorflags:true => fake actor
-			if actorflags == true then
-				actor.enemy = true
-				actor.class = "ENEMY"
-				actor.fake = true
-
 			-- is it me? move on..
-			elseif actorid == userGUID then
+			if actorid == userGUID then
 				actor.class = userClass
 				actor.role = GetUnitRole(userGUID)
 				actor.spec = GetUnitSpec(userGUID)
+			end
+
+			-- actorflags:true => fake actor
+			if not actor.class and actorflags == true then
+				actor.enemy = true
+				actor.class = "ENEMY"
+				actor.fake = true
+			end
 
 			-- a group member/pet?
-			elseif guidToClass[actorid] then
+			if not actor.class and guidToClass[actorid] then
 				actor.class = guidToClass[actorid]
 				if guidToName[actor.class] then
 					actor.class = "PET"
@@ -1159,20 +1164,24 @@ do
 					actor.role = GetUnitRole(actorid)
 					actor.spec = GetUnitSpec(actorid)
 				end
+			end
 
-			-- was a player? (pvp scenario)
-			elseif self:IsPlayer(actorflags) then
-				actor.enemy = true
-				local unit = GetUnitIdFromGUID(actorid, "group")
+			-- was it a player? (pvp scenario)
+			if not actor.class and self:IsPlayer(actorflags) then
+				local unit = GetUnitIdFromGUID(actorid, true)
 				if unit then -- found a valid unit?
 					_, actor.class = UnitClass(unit)
 				else
 					actor.class = "PLAYER"
 				end
+				if not self:IsFriendly(actorflags) or not self:InGroup(actorflags) then
+					actor.enemy = true
+				end
+			end
 
 			-- avoid "nil" stuff
-			elseif not self:IsNone(actorflags) then
-				local unit = GetUnitIdFromGUID(actorid, "group")
+			if not actor.class and not self:IsNone(actorflags) then
+				local unit = GetUnitIdFromGUID(actorid)
 				local level = unit and UnitLevel(unit)
 				if level == -1 or self:IsBoss(actorid, true) then
 					actor.class = "BOSS"
@@ -1183,11 +1192,13 @@ do
 				else
 					actor.class = "MONSTER"
 				end
-				if not self:IsFriendly(actorflags) then
+				if not self:IsFriendly(actorflags) or not self:InGroup(actorflags) then
 					actor.enemy = true
 				end
+			end
 
-			else
+			-- last hope!
+			if not actor.class then
 				actor.enemy = true
 				actor.class = "UNKNOWN"
 				self:Debug(format("Unknown unit spotted: %s (%s)", actorname, actorid))
@@ -1251,56 +1262,6 @@ do
 			return (actor.enemy and enemyPrototype or playerPrototype):Bind(actor), true
 		end
 		return actor
-	end
-end
-
--- scans the group for buffs, shields and potions
-do
-	local UnitGUID, UnitAura, UnitIsDeadOrGhost = UnitGUID, UnitAura, UnitIsDeadOrGhost
-	local GroupIterator, UnitFullName = Skada.GroupIterator, Private.UnitFullName
-	local auraTable = nil
-
-	local function unit_buff(unit, i)
-		local t = wipe(auraTable)
-		t.name, t.rank, t.icon, _, _, t.duration, t.expires, t.source, _, _, t.id = UnitAura(unit, i, "HELPFUL")
-		return t
-	end
-
-	local function scan_group_buffs(unit, owner, curtime, timestamp)
-		-- why do you want to scan dead units?
-		if UnitIsDeadOrGhost(unit) then return end
-
-		-- call api functions only once
-		local actorid, actorname = UnitGUID(unit), UnitFullName(unit)
-
-		-- scan for buffs
-		for i = 1, 40 do
-			local buff = unit_buff(unit, i)
-			if not buff.id then
-				break -- nothing found!
-			elseif buff.source then
-				callbacks:Fire("Skada_UnitBuff", unit, owner, curtime, timestamp, actorid, actorname, buff)
-			end
-		end
-
-		-- fires when the unit scan is complete
-		callbacks:Fire("Skada_UnitScan", unit, owner, curtime, timestamp, actorid, actorname)
-	end
-
-	local function ScanGroupBuffs(self, curtime, timestamp)
-		if not self.global.inCombat and self.current and not self.current.stopped then
-			auraTable = auraTable or {}
-			GroupIterator(scan_group_buffs, curtime, timestamp)
-			-- wipe the table at the end of the scan
-			wipe(auraTable)
-		end
-	end
-
-	Skada.ScanGroupBuffs = Skada.EmptyFunc
-	function callbacks:OnUsed(_, eventname)
-		if eventname == "Skada_UnitScan" or eventname == "Skada_UnitBuff" then
-			Skada.ScanGroupBuffs = ScanGroupBuffs
-		end
 	end
 end
 
@@ -1604,10 +1565,86 @@ do
 			end
 		end
 
+		self.LastEvent = args
 		return self:OnCombatEvent(args)
 	end
 
 	function Skada:OnCombatEvent(args)
 		return self:CombatLogEvent(args)
+	end
+end
+
+-------------------------------------------------------------------------------
+-- group buffs scanner
+
+do
+	local UnitGUID, UnitIsDeadOrGhost, UnitBuff = UnitGUID, UnitIsDeadOrGhost, UnitBuff
+	local UnitIterator, UnitFullName = Skada.UnitIterator, Private.UnitFullName
+	local guidToClass, guidToName = Private.guidToClass, Private.guidToName
+	local actorflags = Private.DEFAULT_FLAGS
+	local clear = Private.clearTable
+
+	local function ScanUnitBuffs(unit, owner, t)
+		if UnitIsDeadOrGhost(unit) then return end
+
+		t.dstGUID = UnitGUID(unit)
+		t.dstName = UnitFullName(unit, owner)
+		t.dstFlags = not owner and actorflags or nil
+
+		t.class = guidToClass[t.dstGUID]
+		if guidToName[t.class] then
+			t.class = "PET"
+		end
+
+		t.unit, t.owner = unit, owner
+		t.auras = clear(t.auras) or new()
+
+		for i = 1, 41 do
+			local name, rank, icon, _, _, duration, expires, source, _, _, id = UnitBuff(unit, i)
+			if not id then
+				break -- nothing found
+			elseif source then
+				local aura = new()
+				aura.srcGUID = UnitGUID(source)
+				aura.srcName = UnitFullName(source)
+				aura.srcFlags = actorflags
+				aura.id = id
+				aura.name = name
+				aura.rank = rank
+				aura.icon = icon
+				aura.duration = duration
+				aura.expires = expires
+				t.auras[#t.auras + 1] = aura
+			end
+		end
+
+		if next(t.auras) then
+			callbacks:Fire("Skada_UnitBuffs", t)
+		end
+	end
+
+
+	local function ScanGroupBuffs(self, timestamp)
+		if self.global.inCombat then return end
+
+		local t = new()
+		t.event = "SPELL_AURA_APPLIED"
+		t.timestamp = timestamp
+		t.time = self._time
+		t.Time = self._time
+
+		for unit, owner in UnitIterator() do
+			if not UnitIsDeadOrGhost(unit) then
+				ScanUnitBuffs(unit, owner, t)
+			end
+		end
+		t = del(t, true)
+	end
+
+	Skada.ScanGroupBuffs = Skada.EmptyFunc
+	function callbacks:OnUsed(_, event)
+		if event == "Skada_UnitBuffs" then
+			Skada.ScanGroupBuffs = ScanGroupBuffs
+		end
 	end
 end

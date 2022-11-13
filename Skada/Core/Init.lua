@@ -144,7 +144,7 @@ end
 -- table pools
 
 -- creates a table pool
-function Private.table_pool()
+function Private.TablePool()
 	local pool = {tables = Private.WeakTable()}
 
 	-- reuses or creates a table
@@ -156,20 +156,17 @@ function Private.table_pool()
 
 	-- deletes a table to be reused later
 	pool.del = function(t, deep)
-		if type(t) ~= "table" then return end
-
-		for k, v in pairs(t) do
-			if deep and type(v) == "table" then
-				pool.del(v)
+		if type(t) == "table" then
+			for k, v in pairs(t) do
+				if deep and type(v) == "table" then
+					pool.del(v)
+				end
+				t[k] = nil
 			end
-			t[k] = nil
+			t[""] = true
+			t[""] = nil
+			pool.tables[t] = true
 		end
-
-		t[""] = true
-		t[""] = nil
-		setmetatable(t, nil)
-		pool.tables[t] = true
-
 		return nil
 	end
 
@@ -226,7 +223,7 @@ end
 
 -- create addon's default table pool
 do
-	local tablePool = Private.table_pool()
+	local tablePool = Private.TablePool()
 	ns.tablePool = tablePool
 
 	Private.newTable = tablePool.new
@@ -274,8 +271,8 @@ end
 -------------------------------------------------------------------------------
 -- class, roles ans specs registration
 
-function Private.register_classes()
-	Private.register_classes = nil
+function Private.RegisterClasses()
+	Private.RegisterClasses = nil
 
 	-- class, role and spec icons (sprite)
 	ns.classicons = [[Interface\AddOns\Skada\Media\Textures\icons]]
@@ -532,8 +529,8 @@ end
 -------------------------------------------------------------------------------
 -- spell schools registration
 
-function Private.register_schools()
-	Private.register_schools = nil
+function Private.RegisterSchools()
+	Private.RegisterSchools = nil
 
 	local spellschools = {}
 
@@ -633,8 +630,8 @@ end
 -------------------------------------------------------------------------------
 -- register LibSharedMedia stuff
 
-function Private.register_medias()
-	Private.register_medias = nil
+function Private.RegisterMedias()
+	Private.RegisterMedias = nil
 
 	local LSM = LibStub("LibSharedMedia-3.0", true)
 	if not LSM then
@@ -809,7 +806,7 @@ function Private.tCopy(to, from, ...)
 end
 
 -- prevents duplicates in a table to format strings
-function Private.prevent_duplicate(value, tbl, key)
+function Private.CheckDuplicate(value, tbl, key)
 	local num = 0
 	if type(tbl) == "table" then
 		local is_array = (#tbl > 0)
@@ -863,6 +860,21 @@ do
 	end
 end
 
+-- alternative to lua <print>
+do
+	local tostring = tostring
+	local tconcat = table.concat
+	local tmp, nr = {}, 0
+	function Private.Print(...)
+		nr = 0
+		for i = 1, select("#", ...) do
+			nr = nr + 1
+			tmp[nr] = tostring(select(i, ...))
+		end
+		DEFAULT_CHAT_FRAME:AddMessage(tconcat(tmp, " ", 1, nr))
+	end
+end
+
 -------------------------------------------------------------------------------
 -- Save/Restore frame positions to/from db
 
@@ -904,8 +916,8 @@ do
 	local toast_opt = nil
 
 	-- initialize LibToast
-	function Private.register_toast()
-		Private.register_toast = nil -- remove it
+	function Private.RegisterToast()
+		Private.RegisterToast = nil -- remove it
 
 		if not LibToast then
 			ns.Notify = ns.Print
@@ -939,8 +951,8 @@ do
 	end
 
 	-- returns toast options
-	function Private.toast_options()
-		Private.toast_options = nil -- remove it
+	function Private.ToastOptions()
+		Private.ToastOptions = nil -- remove it
 
 		if not LibToast or toast_opt then
 			return toast_opt
@@ -1035,8 +1047,8 @@ end
 do
 	local total_opt = nil
 
-	function Private.total_options()
-		Private.total_options = nil -- remove it
+	function Private.TotalOptions()
+		Private.TotalOptions = nil -- remove it
 
 		if total_opt then
 			return total_opt
@@ -1191,7 +1203,7 @@ end
 -- creates generic dialog
 
 local dialog_name = format("%sCommonConfirmDialog", folder)
-function Private.confirm_dialog(text, accept, cancel, override)
+function Private.ConfirmDialog(text, accept, cancel, override)
 	if type(cancel) == "table" and override == nil then
 		override = cancel
 		cancel = nil
@@ -1335,7 +1347,7 @@ do
 		[67545] = [[Interface\ICONS\spell_fire_flamebolt]] --> Empowered Fire
 	}
 
-	function Private.spell_info(spellid)
+	function Private.SpellInfo(spellid)
 		if spellid then
 			local res1, res2, res3, res4, res5, res6, res7, res8, res9
 			if customSpells[spellid] then
@@ -1351,7 +1363,7 @@ do
 		end
 	end
 
-	function Private.spell_link(spellid)
+	function Private.SpellLink(spellid)
 		if not customSpells[spellid] then
 			return GetSpellLink(spellid)
 		end
@@ -1359,7 +1371,7 @@ do
 
 	local strfind = string.find
 	-- used to split spell: [id].[school].[petname]
-	function Private.spell_split(spellid)
+	function Private.SpellSplit(spellid)
 		if type(spellid) == "string" and strfind(spellid, ".") then
 			local id, school, petname = strsplit(".", spellid, 3)
 			return tonumber(id), tonumber(school), petname
@@ -1368,15 +1380,15 @@ do
 	end
 
 	-- spell icon and name to speed up things
-	local spell_info = Private.spell_info
+	local SpellInfo = Private.SpellInfo
 	ns.spellnames = setmetatable({}, {__index = function(t, spellid)
-		local name, _, icon = spell_info(spellid)
+		local name, _, icon = SpellInfo(spellid)
 		ns.spellicons[spellid] = icon
 		t[spellid] = name
 		return name
 	end})
 	ns.spellicons = setmetatable({}, {__index = function(t, spellid)
-		local name, _, icon = spell_info(spellid)
+		local name, _, icon = SpellInfo(spellid)
 		ns.spellnames[spellid] = name
 		t[spellid] = icon
 		return icon
@@ -1398,7 +1410,7 @@ do
 	local BITMASK_PLAYER = Private.BITMASK_PLAYER
 
 	-- checks if the given guid/flags are those of a creature.
-	function Private.is_creature(guid, flags)
+	function Private.IsCreature(guid, flags)
 		if tonumber(guid) then
 			return (band(strsub(guid, 1, 5), 0x00F) == 3 or band(strsub(guid, 1, 5), 0x00F) == 5)
 		end
@@ -1416,8 +1428,8 @@ do
 		local __t1 = Private.WeakTable() -- cached players
 		local __t2 = Private.WeakTable() -- cached pets
 
-		-- checks if the guid is a player (extra: helps is_pet)
-		function Private.is_player(guid, name, flags)
+		-- checks if the guid is a player (extra: helps IsPet)
+		function Private.IsPlayer(guid, name, flags)
 			-- already cached?
 			if __t1[guid] ~= nil then
 				return __t1[guid]
@@ -1456,8 +1468,8 @@ do
 			return __t1[guid]
 		end
 
-		-- checks if the guid is a pet (extra: helps is_player)
-		function Private.is_pet(guid, flags)
+		-- checks if the guid is a pet (extra: helps IsPlayer)
+		function Private.IsPet(guid, flags)
 			-- already cached?
 			if __t2[guid] ~= nil then
 				return __t2[guid]
@@ -1490,14 +1502,14 @@ do
 	end
 
 	-- returns unit's full name
-	local function UnitFullName(unit)
+	local function UnitFullName(unit, ownerUnit)
 		local name, realm = UnitName(unit)
-		return realm and realm ~= "" and format("%s-%s", name, realm) or name
+		return not ownerUnit and realm and realm ~= "" and format("%s-%s", name, realm) or name
 	end
 	Private.UnitFullName = UnitFullName
 
 	-- adds a combatant
-	function Private.add_combatant(unit, ownerUnit)
+	function Private.AddCombatant(unit, ownerUnit)
 		local guid = UnitGUID(unit)
 		if guid and ownerUnit then
 			guidToClass[guid] = UnitGUID(ownerUnit)
@@ -1569,7 +1581,7 @@ do
 		UISpecialFrames[#UISpecialFrames + 1] = frame_name
 	end
 
-	function Private.open_import_export(title, data, clickfunc)
+	function Private.ImportExport(title, data, clickfunc)
 		return open_window(title, data, clickfunc)
 	end
 end
@@ -1626,5 +1638,210 @@ do
 			self.__index = self
 		end
 		return obj
+	end
+end
+
+-------------------------------------------------------------------------------
+-- combat log watch functions
+
+do
+	local IsWatching = false
+
+	function Private.StartWatching(obj)
+		if not IsWatching then
+			obj:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "ParseCombatLog")
+			IsWatching = true
+		end
+	end
+
+	function Private.StopWatching(obj)
+		if IsWatching then
+			obj:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+			IsWatching = nil
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
+-- window table
+do
+	local Window = {}
+	ns.Window = Window
+
+	-- yet another recycle bin
+	local window_bin = setmetatable({}, {__mode = "k"})
+
+	-- creates a new window
+	local new = Private.newTable
+	local window_mt = {__index = Window, __metatable = true}
+	function Window.new(tooltip)
+		local win = next(window_bin)
+		if win then
+			window_bin[win] = nil
+		else
+			win = setmetatable({}, window_mt)
+		end
+
+		win.dataset = new()
+		if not tooltip then
+			win.history = new()
+			win.metadata = new()
+		end
+		return win
+	end
+
+	-- deletes a window and recycles its tables
+	local del = Private.delTable
+	function Window.del(win)
+		win.dataset = del(win.dataset)
+		win.history = del(win.history)
+		win.metadata = del(win.metadata)
+		if win.ttwin then -- tooltip
+			win.ttwin = Window.del(win.ttwin)
+		end
+		window_bin[win] = true
+		return nil -- assign input reference
+	end
+
+	-- creates or reuses a dataset table
+	function Window:nr(index)
+		local d = self.dataset[index]
+		if d then
+			if d.ignore then
+				d.icon = nil
+				d.color = nil
+			end
+			d.id = nil
+			d.text = nil
+			d.class = nil
+			d.role = nil
+			d.spec = nil
+			d.ignore = nil
+			return d
+		end
+
+		d = new()
+		self.dataset[index] = d
+		return d
+	end
+
+	-- wipes window's dataset table
+	function Window:reset()
+		if not self.dataset then return end
+		for i = #self.dataset, 0, -1 do
+			if self.dataset[i] then
+				wipe(self.dataset[i])
+			end
+		end
+	end
+
+	-- generates a spell dataset/bar.
+	local math_abs = math.abs
+	local SpellSplit = Private.SpellSplit
+	local spellnames = ns.spellnames
+	local spellicons = ns.spellicons
+	function Window:spell(d, spell, is_hot)
+		if d and spell then
+			-- create the dataset?
+			if type(d) == "number" then
+				d = self:nr(d)
+			end
+
+			d.id = spell -- locked!
+
+			local spellid, school, suffix = SpellSplit(spell)
+			d.spellid = spellid
+			d.spellschool = school
+
+			local abs_id = math_abs(spellid)
+			d.icon = spellicons[abs_id]
+
+			-- for SPELL_EXTRA_ATTACKS
+			if tonumber(suffix) then
+				d.label = format("%s (%s)", spellnames[math_abs(suffix)], spellnames[abs_id])
+			else
+				d.label = spellnames[abs_id]
+				if suffix then -- has a suffix?
+					d.label = format("%s (%s)", d.label, suffix)
+				end
+			end
+
+			-- hots and dots?
+			if spellid < 0 and is_hot ~= false then
+				d.label = format("%s (%s)", d.label, is_hot and L["HoT"] or L["DoT"])
+			end
+		end
+		return d
+	end
+
+	-- generates actor's dataset/bar
+	function Window:actor(d, actor, is_enemy, actorname)
+		if d and actor then
+			-- create the dataset?
+			if type(d) == "number" then
+				d = self:nr(d)
+			end
+
+			if type(actor) == "string" then
+				d.id = actor
+				d.label = actorname or actor
+				return d
+			end
+
+			d.id = actor.id or actor.name or actorname
+			d.label = actor.name or actorname or L["Unknown"]
+
+			-- speed up things if it's a pet/enemy.
+			if strmatch(d.label, "%<(%a+)%>") then
+				d.class = "PET"
+				return d
+			end
+
+			-- no need to go further for enemies
+			if is_enemy then
+				d.class = actor.class or "ENEMY"
+				d.role = actor.role
+				d.spec = actor.spec
+				return d
+			end
+
+			d.class = actor.class or "UNKNOWN"
+			d.role = actor.role
+			d.spec = actor.spec
+
+			if actor.id and ns.validclass[d.class] then
+				d.text = ns:FormatName(actor.name or actorname, actor.id)
+			end
+		end
+		return d
+	end
+
+	-- determines whehter an actor's bar should be shown or not
+	-- prevents repeated code to check for class
+	function Window:show_actor(actor, set, strict)
+		if not actor then
+			return false
+		elseif self.class and actor.class ~= self.class then
+			return false
+		elseif strict and actor.fake then
+			return false
+		elseif strict and actor.enemy and not set.arena then
+			return false
+		else
+			return true
+		end
+	end
+
+	-- colorizes a database/bar for arena fights
+	function Window:color(d, set, is_enemy)
+		if not d or not set then
+			return
+		elseif set.arena and is_enemy then
+			d.color = ns.classcolors(set.faction and "ARENA_GREEN" or "ARENA_GOLD")
+		elseif set.arena then
+			d.color = ns.classcolors(set.faction and "ARENA_GOLD" or "ARENA_GREEN")
+		elseif d.color then
+			d.color = nil
+		end
 	end
 end

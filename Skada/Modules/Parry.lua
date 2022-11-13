@@ -7,19 +7,18 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 	local mode_cols = nil
 
 	local parrybosses = {
-		[L["Acidmaw"]] = true,
-		[L["Dreadscale"]] = true,
-		[L["Icehowl"]] = true,
-		[L["Onyxia"]] = true,
-		[L["Lady Deathwhisper"]] = true,
-		[L["Sindragosa"]] = true,
-		[L["Halion"]] = true,
-		-- UNCONFIRMED BOSSES
-		-- Suggested by shoggoth#9796
-		[L["General Vezax"]] = true,
-		[L["Gluth"]] = true,
-		[L["Kel'Thuzad"]] = true,
-		[L["Sapphiron"]] = true,
+		[10184] = true, -- Onyxia
+		[34797] = true, -- Icehowl
+		[34799] = true, -- Dreadscale
+		[35144] = true, -- Acidmaw
+		[36853] = true, -- Sindragosa
+		[36855] = true, -- Lady Deathwhisper
+		[39863] = true, -- Halion
+		-- UNCONFIRMED BOSSES - by shoggoth#9796
+		[15932] = true, -- Gluth
+		[15989] = true, -- Sapphiron
+		[15990] = true, -- Kel'Thuzad
+		[33271] = true, -- General Vezax
 	}
 
 	local function format_valuetext(d, columns, total, metadata, subview)
@@ -52,8 +51,17 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 		end
 	end
 
+	local GetCreatureId = Skada.GetCreatureId
+	local function is_parry_boss(name, guid)
+		if parrybosses[name] or parrybosses[GetCreatureId(guid)] then
+			parrybosses[name] = parrybosses[name] or true -- cache it
+			return true
+		end
+		return false
+	end
+
 	local function spell_missed(t)
-		if t.misstype == "PARRY" and t.dstName and parrybosses[t.dstName] then
+		if t.misstype == "PARRY" and t.dstName and is_parry_boss(t.dstName, t.dstGUID) then
 			data.actorid, data.actorname, data.actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
 			data.dstName = t.dstName
 

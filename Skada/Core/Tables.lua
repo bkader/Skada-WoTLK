@@ -424,6 +424,122 @@ do
 end
 
 -------------------------------------------------------------------------------
+-- grouped and custom units
+
+do
+	------------------------------------------------------
+	-- grouped units (fake)
+	------------------------------------------------------
+	--
+	-- holds the units to which the damage done is collected
+	-- into a single standalone fake unit.
+	--
+	-- table structure:
+	-- option #1:	[creature id] = "Group Name"
+	-- option #2:	[creature name] = "Group Name"
+	--
+
+	local grouped_units = {
+		-- The Lich King: Important targets
+		[36597] = L["Important targets"], -- The Lich King
+		[36609] = L["Important targets"], -- Val'kyr Shadowguard
+		[36633] = L["Important targets"], -- Ice Sphere
+		[36701] = L["Important targets"], -- Raging Spirit
+		[39190] = L["Important targets"], -- Wicked Spirit
+
+		-- Professor Putricide: Oozes
+		[37562] = L["Oozes"], -- Gas Cloud (Red Ooze)
+		[37697] = L["Oozes"], -- Volatile Ooze (Green Ooze)
+
+		-- Blood Prince Council: Princes overkilling
+		[37970] = L["Princes overkilling"], -- Prince Valanar
+		[37972] = L["Princes overkilling"], -- Prince Keleseth
+		[37973] = L["Princes overkilling"], -- Prince Taldaram
+
+		-- Lady Deathwhisper: Adds
+		[37949] = L["Adds"], -- Cult Adherent
+		[38136] = L["Adds"], -- Empowered Adherent
+		[38010] = L["Adds"], -- Reanimated Adherent
+		[37890] = L["Adds"], -- Cult Fanatic
+		[38135] = L["Adds"], -- Deformed Fanatic
+		[38009] = L["Adds"], -- Reanimated Fanatic
+		[38472] = L["Adds"], -- Darnavan
+
+		-- Halion: Halion and Inferno
+		[39863] = L["Halion and Inferno"], -- Halion
+		[40681] = L["Halion and Inferno"], -- Living Inferno
+	}
+
+	------------------------------------------------------
+	-- custom units (fake)
+	------------------------------------------------------
+	--
+	-- holds units that should craete a fake unit at certain
+	-- health or power percentage.
+	-- Useful in case you want to collect stuff done to units
+	-- at certain encounter phases for example.
+	--
+	-- table structure
+	-- 	name: 		name of the fake unit (optional)
+	-- 	text: 		text to use *format()* with (optional)
+	-- 	start: 		when to start collecting (1 = 100%)
+	-- 	stop: 		when to stop collecting (0.5 = 50%)
+	-- 	diff: 		table of allowed difficulties (omit for all)
+	-- 	power: 		which type of power to trach (omit for health)
+	-- 	values: 	table of difficulties to max health (optional)
+	--
+	-- **optional** fields will be generated and cached by the addon.
+	--
+
+	local custom_units = {
+		-- ICC: Lady Deathwhisper
+		[36855] = {
+			text = L["%s - Phase 2"],
+			start = 0,
+			power = 0
+		},
+
+		-- ICC: Professor Putricide
+		[36678] = {
+			text = L["%s - Phase 3"],
+			start = 0.35
+		},
+
+		-- ICC: Sindragosa
+		[36853] = {
+			text = L["%s - Phase 2"],
+			start = 0.35
+		},
+
+		-- ICC: The Lich King
+		[36597] = {
+			text = L["%s - Phase 3"],
+			start = 0.4,
+			stop = 0.1
+		},
+
+		-- ICC: Valkyrs overkilling
+		[36609] = {
+			name = L["Valkyrs overkilling"],
+			start = 0.5,
+			useful = true,
+			diff = {["10h"] = true, ["25h"] = true}
+		},
+
+		-- ToC: Anub'arak
+		[34564] = {
+			text = L["%s - Phase 2"],
+			start = 0.3
+		}
+	}
+
+	------------------------------------------------------
+
+	ns.grouped_units = grouped_units
+	ns.custom_units = custom_units
+end
+
+-------------------------------------------------------------------------------
 -- DO NOT EDIT THE CODE BELOW (unless you know what you're doing)
 -------------------------------------------------------------------------------
 

@@ -150,7 +150,7 @@ function Skada:OpenMenu(window)
 				info.text = L["Report"]
 				info.value = "report"
 				info.func = function()
-					Private.open_report(self.win)
+					Private.OpenReport(self.win)
 				end
 				info.notCheckable = 1
 				UIDropDownMenu_AddButton(info, level)
@@ -233,7 +233,7 @@ function Skada:OpenMenu(window)
 			wipe(info)
 			info.text = L["Configure"]
 			info.func = function()
-				Private.open_options(self.win)
+				Private.OpenOptions(self.win)
 			end
 			info.notCheckable = 1
 			UIDropDownMenu_AddButton(info, level)
@@ -1275,7 +1275,7 @@ do
 		frame:AddChild(report)
 	end
 
-	function Private.open_report(window)
+	function Private.OpenReport(window)
 		if Skada.testMode then
 			return -- nothing to do.
 		elseif IsShiftKeyDown() then

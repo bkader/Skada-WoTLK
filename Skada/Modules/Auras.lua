@@ -130,7 +130,7 @@ local special_buffs = {
 }
 
 do
-	local spell_split = Private.spell_split
+	local SpellSplit = Private.SpellSplit
 	local PercentToRGB = Private.PercentToRGB
 
 	-- formats value texts
@@ -158,11 +158,11 @@ do
 	end
 
 	-- handles SPELL_AURA_APPLIED event
-	function log_auraapplied(set)
+	function log_auraapplied(set, curtime)
 		local actor = find_or_create_actor(set, aura)
 		if not actor then return end
 
-		local curtime = Skada._time or time()
+		curtime = curtime or Skada._time or time()
 		local spell = actor.auras and actor.auras[aura.spellid]
 		if not spell then
 			actor.auras = actor.auras or {}
@@ -252,7 +252,7 @@ do
 
 			local count, uptime = 0, 0
 			for id, spell in pairs(spells) do
-				local spellid = spell_split(id)
+				local spellid = SpellSplit(id)
 				if (auratype == "BUFF" and spellid > 0) or (auratype == "DEBUFF" and spellid < 0) then
 					count = count + 1
 					uptime = uptime + spell.uptime
@@ -317,7 +317,7 @@ do
 
 		local nr = 0
 		for id, spell in pairs(spells) do
-			local spellid = spell_split(id)
+			local spellid = SpellSplit(id)
 			if
 				(auratype == "BUFF" and spellid > 0 and spell.uptime > 0) or
 				(auratype == "DEBUFF" and spellid < 0 and spell.uptime > 0)
@@ -544,7 +544,7 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 			if t.event == "SPELL_PERIODIC_ENERGIZE" then
 				Skada:DispatchSets(log_specialaura)
 			elseif t.event == "SPELL_AURA_APPLIED" then
-				Skada:DispatchSets(log_auraapplied)
+				Skada:DispatchSets(log_auraapplied, t.curtime)
 			elseif t.event == "SPELL_AURA_REMOVED" then
 				Skada:DispatchSets(log_auraremove)
 			else
@@ -635,22 +635,25 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 			end
 		end)
 
-		local actorflags = Private.DEFAULT_FLAGS -- default
-		function mode:Skada_UnitBuff(_, _, owner, _, _, actorid, actorname, args)
-			local spellstring = not owner and args.rank ~= SPELL_PASSIVE and not ignored_buffs[args.id] and spellstrings[args.id]
-			if not spellstring then return end
+		function mode:UnitBuff(_, args)
+			if args.owner or not args.auras then return end
 
-			local t = new()
-			t.event = "SPELL_AURA_APPLIED"
-			t.dstGUID = actorid
-			t.dstName = actorname
-			t.dstFlags = actorflags
-			t.spellid = args.id
-			t.spellstring = spellstring
-			t.auratype = "BUFF"
-			t.__temp = true
-			handle_buff(t)
-			t = del(t)
+			local dstGUID, dstName, dstFlags = args.dstGUID, args.dstName, args.dstFlags
+			for _, aura in pairs(args.auras) do
+				if aura.rank ~= SPELL_PASSIVE then
+					local t = new()
+					t.event = args.event
+					t.dstGUID = dstGUID
+					t.dstName = dstName
+					t.dstFlags = dstFlags
+					t.spellid = aura.id
+					t.spellstring = spellstrings[aura.id]
+					t.auratype = "BUFF"
+					t.__temp = true
+					handle_buff(t)
+					t = del(t)
+				end
+			end
 		end
 	end
 
@@ -680,12 +683,12 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 			"SPELL_PERIODIC_ENERGIZE"
 		)
 
-		Skada.RegisterCallback(self, "Skada_UnitBuff")
+		Skada.RegisterCallback(self, "Skada_UnitBuffs", "UnitBuff")
 		Skada:AddMode(self, "Buffs and Debuffs")
 	end
 
 	function mode:OnDisable()
-		Skada.UnregisterAllCallbacks(self)
+		Skada.UnregisterAllMessages(self)
 		Skada:RemoveMode(self)
 	end
 end)
