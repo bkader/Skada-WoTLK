@@ -513,16 +513,22 @@ function Window:Destroy()
 	self.selectedmode = nil
 
 	local name = self.db.name or Skada.windowdefaults.name
-	O.windows.args[name] = nil
+	O.windows.args[name] = del(O.windows.args[name], true)
 
 	Window.del(self)
 end
 
 -- change window display
-function Window:SetDisplay(name)
+function Window:SetDisplay(name, isnew)
 	if name ~= self.db.display or self.display == nil then
 		if self.display then
 			self.display:Destroy(self)
+		end
+
+		if isnew then -- don't use unexisting display!
+			name = displays[name] and name or "legacy"
+			name = displays[name] and name or "inline"
+			name = displays[name] and name or "broker"
 		end
 
 		self.db.display = name
@@ -947,7 +953,7 @@ function Skada:CreateWindow(name, db, display)
 		window.db.mode = "Damage"
 	end
 
-	window:SetDisplay(window.db.display or "bar")
+	window:SetDisplay(window.db.display, isnew)
 	if window.db.display and displays[window.db.display] then
 		window.display:Create(window, isnew)
 		windows[#windows + 1] = window
@@ -985,6 +991,7 @@ do
 		for i = 1, #wins do
 			local win = wins[i]
 			if win and win.name == name then
+				O.windows.args[name] = del(O.windows.args[name], true)
 				tremove(wins, i)
 			elseif win and win.sticked and win.sticked[name] then
 				win.sticked[name] = nil

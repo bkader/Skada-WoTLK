@@ -21,8 +21,6 @@
 ## SavedVariablesPerCharacter: SkadaImprovementDB
 ## DefaultState: disabled
 ## Author: Kader (|cff808080bkader#5341|r)
-## X-Website: https://github.com/bkader/Skada-WoTLK
-## X-Email: bkader@email.com
 
 Locales.lua
 SkadaImprovement.lua

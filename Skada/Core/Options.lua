@@ -87,6 +87,7 @@ Skada.windowdefaults = {
 	useframe = true,
 	-- legacy display
 	baraltcolor = {r = 0.45, g = 0.45, b = 0.8, a = 1},
+	menubutton = true,
 	barmax = 10
 }
 
