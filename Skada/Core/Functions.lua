@@ -1422,7 +1422,7 @@ do
 
 	local ARGS = {} -- reusable args table
 	do
-		local HasFlag = Private.HasFlag
+		local bit_band = bit.band
 		local ARGS_MT = {}
 
 		do -- source or destination in the group
@@ -1430,18 +1430,18 @@ do
 			local BITMASK_PETS = Private.BITMASK_PETS
 
 			function ARGS_MT.SourceInGroup(args, nopets)
-				if HasFlag(args.srcFlags, BITMASK_GROUP) then
+				if bit_band(args.srcFlags, BITMASK_GROUP) ~= 0 then
 					if nopets then
-						return not HasFlag(args.srcFlags, BITMASK_PETS)
+						return (bit_band(args.srcFlags, BITMASK_PETS) == 0)
 					end
 					return true
 				end
 				return false
 			end
 			function ARGS_MT.DestInGroup(args, nopets)
-				if HasFlag(args.dstFlags, BITMASK_GROUP) then
+				if bit_band(args.dstFlags, BITMASK_GROUP) ~= 0 then
 					if nopets then
-						return not HasFlag(args.dstFlags, BITMASK_PETS)
+						return (bit_band(args.dstFlags, BITMASK_PETS) == 0)
 					end
 					return true
 				end
@@ -1449,56 +1449,53 @@ do
 			end
 
 			function ARGS_MT.SourceIsPet(args)
-				return HasFlag(args.srcFlags, BITMASK_PETS)
+				return (bit_band(args.srcFlags, BITMASK_PETS) ~= 0)
 			end
 
 			-- checks whether the give guid/flags are pets
 			local guidToClass = Private.guidToClass
-			local function check_pet_flags(ownerFlags, petGUID, petFlags)
-				if HasFlag(ownerFlags, BITMASK_GROUP) then
-					return true -- owner is a group member?
-				end
-				if HasFlag(ownerFlags, BITMASK_PETS) then
-					return true -- summoned by another pet?
-				end
-				if HasFlag(petFlags, BITMASK_PETS) and guidToClass[petGUID] then
-					return true -- already known pet
-				end
-				return false
-			end
 			function ARGS_MT.DestIsPet(args, owner)
 				if owner then
-					return check_pet_flags(args.srcFlags, args.dstGUID, args.dstFlags)
+					if bit_band(args.srcFlags, BITMASK_GROUP) ~= 0 then
+						return true -- owner is a group member?
+					end
+					if bit_band(args.srcFlags, BITMASK_PETS) ~= 0 then
+						return true -- summoned by another pet?
+					end
+					if bit_band(args.dstFlags, BITMASK_PETS) ~= 0 and guidToClass[args.dstGUID] then
+						return true -- already known pet
+					end
+					return false
 				end
-				return HasFlag(args.dstFlags, BITMASK_PETS)
+				return (bit_band(args.dstFlags, BITMASK_PETS) ~= 0)
 			end
 		end
 
 		do -- source or destination are players
 			local BITMASK_PLAYER = Private.BITMASK_PLAYER
 			function ARGS_MT.SourceIsPlayer(args)
-				return HasFlag(args.srcFlags, BITMASK_PLAYER)
+				return (bit_band(args.srcFlags, BITMASK_PLAYER) == BITMASK_PLAYER)
 			end
 			function ARGS_MT.DestIsPlayer(args)
-				return HasFlag(args.dstFlags, BITMASK_PLAYER)
+				return (bit_band(args.dstFlags, BITMASK_PLAYER) == BITMASK_PLAYER)
 			end
 		end
 
 		do -- source and destination reactions
 			local BITMASK_FRIENDLY = Private.BITMASK_FRIENDLY
 			function ARGS_MT.SourceIsFriendly(args)
-				return HasFlag(args.srcFlags, BITMASK_FRIENDLY)
+				return (bit_band(args.srcFlags, BITMASK_FRIENDLY) ~= 0)
 			end
 			function ARGS_MT.DestIsFriendly(args)
-				return HasFlag(args.dstFlags, BITMASK_FRIENDLY)
+				return (bit_band(args.dstFlags, BITMASK_FRIENDLY) ~= 0)
 			end
 
 			local BITMASK_NEUTRAL = Private.BITMASK_NEUTRAL
 			function ARGS_MT.SourceIsNeutral(args)
-				return HasFlag(args.srcFlags, BITMASK_NEUTRAL)
+				return (bit_band(args.srcFlags, BITMASK_NEUTRAL) ~= 0)
 			end
 			function ARGS_MT.DestIsNeutral(args)
-				return HasFlag(args.dstFlags, BITMASK_NEUTRAL)
+				return (bit_band(args.dstFlags, BITMASK_NEUTRAL) ~= 0)
 			end
 		end
 

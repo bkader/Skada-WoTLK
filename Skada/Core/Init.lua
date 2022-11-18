@@ -44,15 +44,14 @@ ns.cacheTable2 = {} -- secondary cache table
 -------------------------------------------------------------------------------
 -- flags/bitmasks
 
-local HasFlag
 do
-	local bit_bor, bit_band = bit.bor, bit.band
+	local bit_bor = bit.bor
 
 	------------------------------------------------------
 	-- generic flag check function
 	------------------------------------------------------
-	function HasFlag(flags, flag)
-		return (bit_band(flags or 0, flag) ~= 0)
+	local function HasFlag(flags, flag)
+		return (band(flags or 0, flag) ~= 0)
 	end
 	Private.HasFlag = HasFlag
 
@@ -63,7 +62,7 @@ do
 	Private.BITMASK_MINE = BITMASK_MINE
 
 	function ns:IsMine(flags)
-		return HasFlag(flags, BITMASK_MINE)
+		return (band(flags or 0, BITMASK_MINE) ~= 0)
 	end
 
 	------------------------------------------------------
@@ -75,7 +74,7 @@ do
 	Private.BITMASK_GROUP = BITMASK_GROUP
 
 	function ns:InGroup(flags)
-		return HasFlag(flags, BITMASK_GROUP)
+		return (band(flags or 0, BITMASK_GROUP) ~= 0)
 	end
 
 	------------------------------------------------------
@@ -87,7 +86,7 @@ do
 	Private.BITMASK_PETS = BITMASK_PETS
 
 	function ns:IsPet(flags)
-		return HasFlag(flags, BITMASK_PETS)
+		return (band(flags or 0, BITMASK_PETS) ~= 0)
 	end
 
 	------------------------------------------------------
@@ -101,15 +100,15 @@ do
 	Private.BITMASK_HOSTILE = BITMASK_HOSTILE
 
 	function ns:IsFriendly(flags)
-		return HasFlag(flags, BITMASK_FRIENDLY)
+		return (band(flags or 0, BITMASK_FRIENDLY) ~= 0)
 	end
 
 	function ns:IsNeutral(flags)
-		return HasFlag(flags, BITMASK_NEUTRAL)
+		return (band(flags or 0, BITMASK_NEUTRAL) ~= 0)
 	end
 
 	function ns:IsHostile(flags)
-		return HasFlag(flags, BITMASK_HOSTILE)
+		return (band(flags or 0, BITMASK_HOSTILE) ~= 0)
 	end
 
 	------------------------------------------------------
@@ -123,15 +122,15 @@ do
 	Private.BITMASK_NONE = BITMASK_NONE
 
 	function ns:IsPlayer(flags)
-		return HasFlag(flags, BITMASK_PLAYER)
+		return (band(flags or 0, BITMASK_PLAYER) == BITMASK_PLAYER)
 	end
 
 	function ns:IsNPC(flags)
-		return HasFlag(flags, BITMASK_NPC)
+		return (band(flags or 0, BITMASK_NPC) ~= 0)
 	end
 
 	function ns:IsNone(flags)
-		return HasFlag(flags, BITMASK_NONE)
+		return (band(flags or 0, BITMASK_NONE) ~= 0)
 	end
 
 	------------------------------------------------------
@@ -591,7 +590,7 @@ function Private.RegisterSchools()
 		elseif colorTable then
 			for i = #order, 1, -1 do
 				local k = order[i]
-				if HasFlag(key, k) then
+				if band(key, k) ~= 0 then
 					r = colorTable[k].r or r
 					g = colorTable[k].g or g
 					b = colorTable[k].b or b
@@ -1056,7 +1055,7 @@ do
 
 		local values = {al = 0x10, rb = 0x01, rt = 0x02, db = 0x04, dt = 0x08}
 		local disabled = function()
-			return HasFlag(ns.db.totalflag, values.al)
+			return (band(ns.db.totalflag, values.al) ~= 0)
 		end
 
 		total_opt = {
@@ -1071,13 +1070,13 @@ do
 					inline = true,
 					order = 10,
 					get = function(i)
-						return HasFlag(ns.db.totalflag, values[i[#i]])
+						return (band(ns.db.totalflag, values[i[#i]]) ~= 0)
 					end,
 					set = function(i, val)
 						local v = values[i[#i]]
-						if val and HasFlag(ns.db.totalflag, v) then
+						if val and band(ns.db.totalflag, v) == 0 then
 							ns.db.totalflag = ns.db.totalflag + v
-						elseif not val and HasFlag(ns.db.totalflag, v) then
+						elseif not val and band(ns.db.totalflag, v) ~= 0 then
 							ns.db.totalflag = ns.db.totalflag - v
 						end
 					end,
@@ -1144,35 +1143,35 @@ do
 		end
 
 		-- raid bosses - 0x01
-		if HasFlag(totalflag, 0x01) then
+		if band(totalflag, 0x01) ~= 0 then
 			if set.type == "raid" and set.gotboss then
 				return true
 			end
 		end
 
 		-- raid trash - 0x02
-		if HasFlag(totalflag, 0x02) then
+		if band(totalflag, 0x02) ~= 0 then
 			if set.type == "raid" and not set.gotboss then
 				return true
 			end
 		end
 
 		-- dungeon boss - 0x04
-		if HasFlag(totalflag, 0x04) then
+		if band(totalflag, 0x04) ~= 0 then
 			if set.type == "party" and set.gotboss then
 				return true
 			end
 		end
 
 		-- dungeon trash - 0x08
-		if HasFlag(totalflag, 0x08) then
+		if band(totalflag, 0x08) ~= 0 then
 			if set.type == "party" and not set.gotboss then
 				return true
 			end
 		end
 
 		-- any combat - 0x10
-		if HasFlag(totalflag, 0x10) then
+		if band(totalflag, 0x10) ~= 0 then
 			return true
 		end
 
@@ -1414,14 +1413,20 @@ do
 		if tonumber(guid) then
 			return (band(strsub(guid, 1, 5), 0x00F) == 3 or band(strsub(guid, 1, 5), 0x00F) == 5)
 		end
-		return HasFlag(flags, BITMASK_NPC)
+		return (band(flags or 0, BITMASK_NPC) ~= 0)
 	end
 
+	-- players: [guid] = class / pets: [guid] = owner guid
 	local guidToClass = Private.guidToClass or {}
 	Private.guidToClass = guidToClass
 
+	-- players only: [guid] = name
 	local guidToName = Private.guidToName or {}
 	Private.guidToName = guidToName
+
+	-- pets only: [pet guid] = owner guid
+	local guidToOwner = Private.guidToOwner or {}
+	Private.guidToOwner = guidToOwner
 
 	do
 		-- tables used to cached results in order to speed up check
@@ -1450,7 +1455,7 @@ do
 			end
 
 			-- player by flgs?
-			if HasFlag(flags, BITMASK_PLAYER) then
+			if band(flags or 0, BITMASK_PLAYER) == BITMASK_PLAYER then
 				__t1[guid] = true
 				__t2[guid] = (__t2[guid] == nil) and false or __t2[guid]
 				return __t1[guid]
@@ -1490,8 +1495,8 @@ do
 			end
 
 			-- ungrouped pet?
-			if HasFlag(flags, BITMASK_PETS) then
-				__t2[guid] = HasFlag(flags, BITMASK_FRIENDLY) and 1 or true
+			if band(flags or 0, BITMASK_PETS) ~= 0 then
+				__t2[guid] = (band(flags or 0, BITMASK_FRIENDLY) ~= 0) and 1 or true
 				__t1[guid] = false
 				return __t2[guid]
 			end
@@ -1657,7 +1662,7 @@ do
 	function Private.StopWatching(obj)
 		if IsWatching then
 			obj:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-			IsWatching = nil
+			IsWatching = false
 		end
 	end
 end

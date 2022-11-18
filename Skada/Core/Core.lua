@@ -67,6 +67,7 @@ local check_for_join_and_leave
 -- list of players, pets and vehicles
 local guidToClass = Private.guidToClass
 local guidToName = Private.guidToName
+local guidToOwner = Private.guidToOwner
 local vehicles = {}
 
 -- targets table used when detecting boss fights.
@@ -294,9 +295,17 @@ local function formatted_set_time(set)
 	return Skada:FormatTime(Skada:GetSetTime(set))
 end
 
+local function summon_pet(petGUID, ownerGUID)
+	local guidOrClass = guidToClass[ownerGUID]
+	ownerGUID = guidToClass[guidOrClass] and guidOrClass or ownerGUID
+	guidToOwner[petGUID] = ownerGUID
+	guidToClass[petGUID] = ownerGUID
+end
+
 local dismiss_pet
 do
 	local function dismiss_handler(guid)
+		guidToOwner[guid] = nil
 		guidToClass[guid] = nil
 	end
 	function dismiss_pet(guid, delay)
@@ -1991,13 +2000,28 @@ function check_group()
 	-- throttle group check.
 	local checkTime = GetTime()
 	if not last_check_group or (checkTime - last_check_group) > 0.5 then
-		last_check_group = checkTime
+		last_check_group = checkTime -- update cooldown
 
+		-- wipe tables
 		wipe(guidToClass)
 		wipe(guidToName)
 
+		-- put back summoned pets
+		for petGUID, ownerGUID in pairs(guidToOwner) do
+			guidToClass[petGUID] = ownerGUID
+		end
+
+		-- add combatants
 		for unit, owner in UnitIterator() do
 			AddCombatant(unit, owner)
+		end
+
+		-- remove pet if the owner is gone
+		for petGUID, ownerGUID in pairs(guidToOwner) do
+			if not guidToClass[ownerGUID] then
+				guidToOwner[petGUID] = nil
+				guidToClass[petGUID] = nil
+			end
 		end
 	end
 end
@@ -3046,8 +3070,8 @@ do
 		end
 	end
 
+	local bit_band = bit.band
 	local BITMASK_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
-	local HasFlag = Private.HasFlag
 	local function check_boss_fight(set, t, src_is_interesting, dst_is_interesting)
 		-- set mobname
 		if not set.mobname then
@@ -3061,13 +3085,13 @@ do
 				end
 			elseif src_is_interesting and not t:DestIsFriendly() then
 				set.mobname = t.dstName
-				if HasFlag(t.dstFlags, BITMASK_CONTROL_PLAYER) then
+				if bit_band(t.dstFlags or 0, BITMASK_CONTROL_PLAYER) ~= 0 then
 					set.type = "pvp"
 					set.gotboss = false
 				end
 			elseif dst_is_interesting and not t:SourceIsFriendly() then
 				set.mobname = t.srcName
-				if HasFlag(t.srcFlags, BITMASK_CONTROL_PLAYER) then
+				if bit_band(t.srcFlags or 0, BITMASK_CONTROL_PLAYER) ~= 0 then
 					set.type = "pvp"
 					set.gotboss = false
 				end
@@ -3167,10 +3191,10 @@ do
 
 		-- pet summons.
 		if t.event == "SPELL_SUMMON" and t:DestIsPet(true) then
-			guidToClass[t.dstGUID] = t.srcGUID
+			summon_pet(t.dstGUID, t.srcGUID)
 		-- pet died?
-		elseif death_events[t.event] and t:SourceIsPet() then
-			dismiss_pet(t.srcGUID)
+		elseif death_events[t.event] and guidToOwner[t.dstGUID] then
+			dismiss_pet(t.dstGUID)
 		end
 
 		-- current segment not created?
@@ -3191,9 +3215,7 @@ do
 			local fail = false
 
 			if flags.src_is_interesting_nopets then
-				local src_is_interesting_nopets = t:SourceInGroup(true)
-
-				if src_is_interesting_nopets then
+				if t:SourceInGroup(true) then
 					src_is_interesting = true
 				else
 					fail = true
@@ -3201,29 +3223,22 @@ do
 			end
 
 			if not fail and flags.dst_is_interesting_nopets then
-				local dst_is_interesting_nopets = t:DestInGroup(true)
-				if dst_is_interesting_nopets then
+				if t:DestInGroup(true) then
 					dst_is_interesting = true
 				else
 					fail = true
 				end
 			end
 
-			if not fail and flags.src_is_interesting or flags.src_is_not_interesting then
-				if not src_is_interesting then
-					src_is_interesting = t:SourceInGroup() or Private.GetTempUnit(t.srcGUID)
-				end
-
+			if not fail and (flags.src_is_interesting or flags.src_is_not_interesting) then
+				src_is_interesting = src_is_interesting or t:SourceInGroup() or Private.GetTempUnit(t.srcGUID)
 				if (flags.src_is_interesting and not src_is_interesting) or (flags.src_is_not_interesting and src_is_interesting) then
 					fail = true
 				end
 			end
 
-			if not fail and flags.dst_is_interesting or flags.dst_is_not_interesting then
-				if not dst_is_interesting then
-					dst_is_interesting = t:DestInGroup()
-				end
-
+			if not fail and (flags.dst_is_interesting or flags.dst_is_not_interesting) then
+				dst_is_interesting = dst_is_interesting or t:DestInGroup()
 				if (flags.dst_is_interesting and not dst_is_interesting) or (flags.dst_is_not_interesting and dst_is_interesting) then
 					fail = true
 				end

@@ -999,7 +999,7 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 
 				local count, avoid = 0, 0
 				for _, spell in pairs(actor.damagedspells) do
-					count = count + spell.count
+					count = count + (spell.count or 0)
 
 					for k, v in pairs(missTypes) do
 						local num = spell[v] or spell[k]

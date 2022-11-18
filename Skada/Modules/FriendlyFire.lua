@@ -64,16 +64,16 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 			dmg.actorid = t.srcGUID
 			dmg.actorname = t.srcName
 			dmg.actorflags = t.srcFlags
+			dmg.dstName = t.dstName
 
 			dmg.spell = t.spellid
 			dmg.spellid = t.spellstring
-			dmg.amount = t.amount
 
+			dmg.amount = t.amount
 			if t.absorbed and t.absorbed > 0 then
 				dmg.amount = dmg.amount + t.absorbed
 			end
 
-			dmg.dstName = Skada:FixPetsName(t.dstGUID, t.dstName, t.dstFlags)
 			Skada:DispatchSets(log_damage)
 		end
 	end
@@ -215,7 +215,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		mode_spell.nototal = true
 		mode_target.nototal = true
 
-		local flags_src_dst = {src_is_interesting_nopets = true, dst_is_interesting = true}
+		local flags_src_dst = {src_is_interesting_nopets = true, dst_is_interesting_nopets = true}
 
 		Skada:RegisterForCL(
 			spell_damage,
