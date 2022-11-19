@@ -586,22 +586,13 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	function mode:OnEnable()
-		mode_spell_source.metadata = {
-			showspots = true,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"]
-		}
-		mode_useful.metadata = {
-			showspots = true,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"]
-		}
+		mode_spell_source.metadata = {showspots = true, filterclass = true}
+		mode_useful.metadata = {showspots = true, filterclass = true}
 		mode_source.metadata = {
 			showspots = true,
+			filterclass = true,
 			click1 = mode_source_spell,
-			click4 = Skada.FilterClass,
-			post_tooltip = mode_source_tooltip,
-			click4_label = L["Toggle Class Filter"]
+			post_tooltip = mode_source_tooltip
 		}
 		mode_spell.metadata = {click1 = mode_spell_source, valueorder = true}
 		self.metadata = {
@@ -997,17 +988,8 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	end
 
 	function mode:OnEnable()
-		mode_spell_target.metadata = {
-			showspots = true,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"]
-		}
-		mode_target.metadata = {
-			showspots = true,
-			click1 = mode_target_spell,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"]
-		}
+		mode_spell_target.metadata = {showspots = true, filterclass = true}
+		mode_target.metadata = {showspots = true, filterclass = true, click1 = mode_target_spell}
 		mode_spell.metadata = {click1 = mode_spell_target, valueorder = true}
 		self.metadata = {
 			click1 = mode_target,
@@ -1295,10 +1277,9 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		mode_spell.metadata = {valueorder = true}
 		self.metadata = {
 			showspots = true,
+			filterclass = true,
 			click1 = mode_spell,
 			click2 = mode_target,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Healing = true, HPS = true, Percent = true, sHPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_blessedlife]]
 		}

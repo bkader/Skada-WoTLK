@@ -18,6 +18,7 @@ local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, 
 local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
 local UnitExists, UnitGUID, UnitClass, UnitFullName = UnitExists, UnitGUID, UnitClass, Private.UnitFullName
 local GameTooltip, ReloadUI, GetScreenWidth = GameTooltip, ReloadUI, GetScreenWidth
+local IsShiftKeyDown, IsControlKeyDown = IsShiftKeyDown, IsControlKeyDown
 local GetSpellLink, spellnames, spellicons = GetSpellLink, Skada.spellnames, Skada.spellicons
 local SecondsToTime, time, GetTime = SecondsToTime, time, GetTime
 local IsInGroup, IsInRaid, IsInPvP = Skada.IsInGroup, Skada.IsInRaid, Skada.IsInPvP
@@ -133,13 +134,16 @@ do
 	local clear = Private.clearTable
 	local function clean_set(set)
 		if set then
-			if set.actors then
-				for k, v in pairs(set.actors) do
-					set.actors[k] = clear(v)
-					setmetatable(v, nil)
-				end
-			end
+			local actors = set.actors
 			setmetatable(set, nil)
+			wipe(set)
+			if actors then
+				for k, v in pairs(actors) do
+					setmetatable(v, nil)
+					actors[k] = clear(v)
+				end
+				set.actors = actors
+			end
 		end
 		return set
 	end
@@ -751,18 +755,10 @@ function Window:SetSelectedSet(set, step)
 	end
 end
 
-function Window:DisplayMode(mode, class)
+function Window:DisplayMode(mode)
 	if type(mode) ~= "table" then return end
 
-	-- remove filter for the same mode
-	if class and not self.class then
-		self.class = class
-	elseif not class and self.class and self.selectedmode == mode then
-		self.class = nil
-	end
-
 	self:Wipe()
-
 	self.selectedset = self.selectedset or "current"
 	self.selectedmode = mode
 	wipe(self.metadata)
@@ -789,6 +785,19 @@ function Window:DisplayMode(mode, class)
 	end
 
 	Skada:UpdateDisplay()
+end
+
+function Window:FilterClass(id, label)
+	if self.class then
+		self.class = nil
+		self:DisplayMode(self.selectedmode)
+		return
+	end
+
+	local set = self:GetSelectedSet()
+	local actor = set and set:GetActor(id, label)
+	self.class = actor and actor.class or nil
+	self:DisplayMode(self.selectedmode)
 end
 
 local user_sort_func
@@ -908,7 +917,8 @@ function Window:RightClick(bar, button)
 		if #self.history > 0 then
 			self:DisplayMode(tremove(self.history))
 		elseif self.class then
-			Skada:FilterClass(self)
+			self.class = nil
+			self:DisplayMode(self.selectedmode)
 		else
 			self.class = nil
 			self:DisplayModes(self.selectedset)
@@ -1159,9 +1169,6 @@ do
 				end
 				if mode.metadata.click3 then
 					scan_for_columns(mode.metadata.click3)
-				end
-				if mode.metadata.click4 then
-					scan_for_columns(mode.metadata.click4)
 				end
 			end
 		end
@@ -1567,10 +1574,10 @@ do
 			tsort(dataset, value_sort)
 		end
 
-		local nr = 0
+		local maxnr, nr = IsShiftKeyDown() and 10 or P.tooltiprows, 0
 		for i = 1, num_dataset do
 			local data = dataset[i]
-			if data and data.id and not data.ignore and nr < P.tooltiprows then
+			if data and data.id and not data.ignore and nr < maxnr then
 				nr = nr + 1
 				local color = white
 
@@ -1585,7 +1592,7 @@ do
 					title = format("\124cffffffff%d.\124r %s", nr, title)
 				end
 				tooltip:AddDoubleLine(title, data.valuetext, color.r, color.g, color.b)
-			elseif nr >= P.tooltiprows then
+			elseif nr >= maxnr then
 				break -- no need to continue
 			end
 		end
@@ -1620,9 +1627,9 @@ do
 			t:ClearLines()
 			add_subview_lines(t, win, find_mode(id), id, label)
 			t:Show()
-		elseif md.click1 or md.click2 or md.click3 or md.click4 or md.tooltip then
+		elseif md.click1 or md.click2 or md.click3 or md.filterclass or md.tooltip then
 			t:ClearLines()
-			local hasClick = md.click1 or md.click2 or md.click3 or md.click4 or nil
+			local hasClick = md.click1 or md.click2 or md.click3 or md.filterclass or nil
 
 			if md.tooltip then
 				local numLines = t:NumLines()
@@ -1637,7 +1644,6 @@ do
 				add_submode_lines(md.click1, win, id, label, t)
 				add_submode_lines(md.click2, win, id, label, t)
 				add_submode_lines(md.click3, win, id, label, t)
-				add_submode_lines(md.click4, win, id, label, t)
 			end
 
 			if md.post_tooltip then
@@ -1658,8 +1664,8 @@ do
 			if md.click3 then
 				add_click_lines(md.click3, md.click3_label, win, t, L["Control-Click for \124cff00ff00%s\124r"])
 			end
-			if md.click4 then
-				add_click_lines(md.click4, md.click4_label, win, t, L["Alt-Click for \124cff00ff00%s\124r"])
+			if md.filterclass then
+				t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], L["Toggle Class Filter"]))
 			end
 
 			t:Show()
@@ -2216,7 +2222,10 @@ function Skada:Reset(force)
 	if self.testMode then return end
 
 	if force then
-		wipe(self.sets)
+		local n = #self.sets
+		for i = n, 1, -1 do
+			delete_set(tremove(self.sets, i))
+		end
 	elseif not self:CanReset() then
 		self:Wipe()
 		self:UpdateDisplay(true)

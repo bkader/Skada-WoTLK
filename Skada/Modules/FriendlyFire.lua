@@ -201,10 +201,9 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		mode_spell.metadata = {click1 = mode_spell_target}
 		self.metadata = {
 			showspots = true,
+			filterclass = true,
 			click1 = mode_spell,
 			click2 = mode_target,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
 			icon = [[Interface\Icons\inv_gizmo_supersappercharge]]
 		}

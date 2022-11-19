@@ -480,7 +480,7 @@ do
 		local spell = actor and actor.auras and actor.auras[id]
 		if not spell then return end
 
-		tooltip:AddLine(format("%s: %s", actor.name, label))
+		tooltip:AddLine(uformat("%s - %s", win.actorname, label))
 		tooltip_school(tooltip, id)
 
 		if spell.count or spell.refresh then
@@ -510,7 +510,7 @@ do
 		local target = spell and spell.targets and spell.targets[label]
 		if not target then return end
 
-		tooltip:AddLine(actor.name .. ": " .. win.spellname)
+		tooltip:AddLine(uformat("%s - %s", win.actorname, win.spellname))
 		tooltip_school(tooltip, win.spellid)
 
 		if target.count then
@@ -661,9 +661,8 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 		mode_spell_target.metadata = {showspots = true, ordersort = true, tooltip = spelltarget_tooltip}
 		mode_spell.metadata = {valueorder = true, tooltip = spell_tooltip, click1 = mode_spell_target}
 		self.metadata = {
+			filterclass = true,
 			click1 = mode_spell,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_divinespirit]]
 		}
@@ -806,7 +805,7 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 		local spell = actor and actor.auras and actor.auras[win.spellid]
 		if not (spell and spell.count) then return end
 
-		tooltip:AddLine(label .. ": " .. win.spellname)
+		tooltip:AddLine(uformat("%s - %s", label, win.spellname))
 		tooltip_school(tooltip, win.spellid)
 
 		tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
@@ -817,19 +816,17 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 
 	function mode:OnEnable()
 		mode_spell_source.metadata = {
-			tooltip = spellsource_tooltip,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"]
+			filterclass = true,
+			tooltip = spellsource_tooltip
 		}
 
 		mode_spell_target.metadata = {tooltip = spelltarget_tooltip}
 		mode_spell.metadata = {click1 = mode_spell_target, click2 = mode_spell_source, tooltip = spell_tooltip}
 		mode_target.metadata = {click1 = mode_target_spell}
 		self.metadata = {
+			filterclass = true,
 			click1 = mode_spell,
 			click2 = mode_target,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_shadow_shadowwordpain]]
 		}
@@ -905,9 +902,8 @@ Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 	function mode:OnEnable()
 		mode_spell.metadata = {valueorder = true, tooltip = spell_tooltip}
 		self.metadata = {
+			filterclass = true,
 			click1 = mode_spell,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\ability_paladin_beaconoflight]]
 		}
@@ -1016,10 +1012,9 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 		mode_spell.metadata = {click1 = mode_spell_target, tooltip = spell_tooltip}
 		mode_target.metadata = {click1 = mode_target_spell}
 		self.metadata = {
+			filterclass = true,
 			click1 = mode_spell,
 			click2 = mode_target,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\ability_warlock_improvedsoulleech]]
 		}

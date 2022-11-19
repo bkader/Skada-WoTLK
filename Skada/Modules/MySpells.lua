@@ -33,7 +33,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 
 		if not spell then return end
 
-		tooltip:AddLine(actor.name .. " - " .. label)
+		tooltip:AddLine(format("%s - %s", userName, label))
 		tooltip_school(tooltip, id)
 
 		if not spell.count or spell.count == 0 then return end

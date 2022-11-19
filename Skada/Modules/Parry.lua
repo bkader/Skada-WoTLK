@@ -132,9 +132,8 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
+			filterclass = true,
 			click1 = mode_target,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\ability_parry]]
 		}

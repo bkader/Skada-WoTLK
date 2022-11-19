@@ -72,7 +72,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 			if actor.id == otherGUID then
 				if spell then
-					tooltip:AddLine(actor.name .. " - " .. win.spellname)
+					tooltip:AddLine(uformat("%s - %s", win.actorname, win.spellname))
 					tooltip_school(tooltip, win.spellid)
 
 					if label == L["Critical Hits"] and spell.c_amt then

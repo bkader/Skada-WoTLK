@@ -113,12 +113,7 @@ Skada:RegisterModule("Resources", function(L, P)
 		pmode.powername = powername
 		pmode.spells = spellTable[power]
 		instance.power = gainTable[power]
-		instance.metadata = {
-			showspots = true,
-			click1 = pmode,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"]
-		}
+		instance.metadata = {showspots = true, filterclass = true, click1 = pmode}
 
 		-- no total click.
 		pmode.nototal = true

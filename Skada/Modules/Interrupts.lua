@@ -201,11 +201,10 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
+			filterclass = true,
 			click1 = mode_extraspell,
 			click2 = mode_target,
 			click3 = mode_spell,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\ability_kick]]
 		}

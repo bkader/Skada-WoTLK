@@ -1828,7 +1828,7 @@ do
 			return false
 		elseif self.class and actor.class ~= self.class then
 			return false
-		elseif strict and actor.fake then
+		elseif strict and (actor.fake or actor.class == "PET") then
 			return false
 		elseif strict and actor.enemy and not set.arena then
 			return false

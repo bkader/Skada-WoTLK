@@ -104,9 +104,8 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	function mode:OnEnable()
 		self.metadata = {
 			valuesort = true,
+			filterclass = true,
 			click1 = mode_target,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_holy_resurrection]]
 		}

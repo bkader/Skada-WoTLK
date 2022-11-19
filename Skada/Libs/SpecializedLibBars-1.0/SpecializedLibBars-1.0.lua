@@ -580,18 +580,6 @@ end
 barListPrototype.SavePosition = SavePosition
 barListPrototype.RestorePosition = RestorePosition
 
-do
-	local UIFrameFadeIn = UIFrameFadeIn
-	local UIFrameFadeOut = UIFrameFadeOut
-	function lib:Fade(timeToFade, startAlpha, endAlpha)
-		if self == lib then return end
-		local func = (startAlpha > endAlpha) and UIFrameFadeOut or UIFrameFadeIn
-		return func(self, timeToFade, startAlpha, endAlpha)
-	end
-end
-barListPrototype.Fade = lib.Fade
-barPrototype.Fade = lib.Fade
-
 -- returns bar(s) height
 local function GetThickness(self)
 	return self.thickness

@@ -787,9 +787,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		}
 		mode_actor.metadata = {click1 = mode_deathlog}
 		self.metadata = {
+			filterclass = true,
 			click1 = mode_actor,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Time = true, Survivability = false, Source = false},
 			icon = icon_mode
 		}

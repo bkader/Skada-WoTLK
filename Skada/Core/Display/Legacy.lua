@@ -1250,7 +1250,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 			local click1 = win.metadata.click1
 			local click2 = win.metadata.click2
 			local click3 = win.metadata.click3
-			local click4 = win.metadata.click4
+			local filterclass = win.metadata.filterclass
 
 			if button == "RightButton" and IsShiftKeyDown() then
 				Skada:OpenMenu(win)
@@ -1264,8 +1264,8 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 				win:RightClick(bar, button)
 			elseif button == "LeftButton" and click2 and IsShiftKeyDown() then
 				showmode(win, id, label, click2)
-			elseif button == "LeftButton" and click4 and IsAltKeyDown() then
-				showmode(win, id, label, click4)
+			elseif button == "LeftButton" and filterclass and IsAltKeyDown() then
+				win:FilterClass(id, label)
 			elseif button == "LeftButton" and click3 and IsControlKeyDown() then
 				showmode(win, id, label, click3)
 			elseif button == "LeftButton" and click1 and not IsModifierKeyDown() then

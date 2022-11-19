@@ -1053,17 +1053,6 @@ function Skada:CheckMemory()
 	end
 end
 
--- filters by class
-function Skada:FilterClass(win, id, label)
-	if win.class then
-		win:DisplayMode(win.selectedmode, nil)
-	elseif win.GetSelectedSet and id then
-		local set = win:GetSelectedSet()
-		local actor = set and set:GetActor(id, label)
-		win:DisplayMode(win.selectedmode, actor and actor.class)
-	end
-end
-
 -------------------------------------------------------------------------------
 -- player & enemies functions
 

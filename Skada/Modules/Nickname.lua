@@ -111,8 +111,8 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 			"fucck",
 			"fuck",
 			"fuk",
-			"Fukin",
-			"Fukk",
+			"fukin",
+			"fukk",
 			"fuuck",
 			"gay",
 			"godammit",
@@ -331,8 +331,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 				return false, L["Only letters and two spaces are allowed."]
 			end
 
-			for i = 1, #blacklist do
-				local word = blacklist[i]
+			for _, word in pairs(blacklist) do
 				if strfind(strlower(name), word) then
 					return false, L["Your nickname contains a forbidden word."]
 				end

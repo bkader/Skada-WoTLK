@@ -193,7 +193,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		local spell = actor and actor.damagedspells and actor.damagedspells[id]
 		if not spell then return end
 
-		tooltip:AddLine(label .. " - " .. actor.name)
+		tooltip:AddLine(uformat("%s - %s", win.actorname, label))
 		tooltip_school(tooltip, id)
 
 		if spell.n_min then
@@ -225,7 +225,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 			local spell = actor and actor.damagedspells and actor.damagedspells[win.spellid]
 			if not spell then return end
 
-			tooltip:AddLine(actor.name .. " - " .. win.spellname)
+			tooltip:AddLine(uformat("%s - %s", win.actorname, win.spellname))
 			tooltip_school(tooltip, win.spellid)
 
 			if label == L["Critical Hits"] and spell.c_amt then
@@ -624,11 +624,10 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	function mode:OnInitialize()
 		self.metadata = {
 			showspots = true,
+			filterclass = true,
 			post_tooltip = damage_tooltip,
 			click1 = mode_spell,
 			click2 = mode_source,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Damage = true, DTPS = false, Percent = true, sDTPS = false, sPercent = true},
 			icon = [[Interface\Icons\ability_mage_frostfirebolt]]
 		}
@@ -652,7 +651,7 @@ Skada:RegisterModule("DTPS", function(L, P)
 		local activetime = actor:GetTime(set, true)
 		local dtps, damage = actor:GetDTPS(set)
 
-		tooltip:AddLine(actor.name .. " - " .. L["DTPS"])
+		tooltip:AddLine(uformat("%s - %s", label, L["DTPS"]))
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(damage), 1, 1, 1)
@@ -697,9 +696,8 @@ Skada:RegisterModule("DTPS", function(L, P)
 	function mode:OnEnable()
 		self.metadata = {
 			showspots = true,
+			filterclass = true,
 			tooltip = dtps_tooltip,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {DTPS = true, Percent = true},
 			icon = [[Interface\Icons\inv_weapon_shortblade_06]]
 		}
@@ -731,15 +729,15 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 	local C = Skada.cacheTable2
 	local mode_cols = nil
 
-	local function player_tooltip(win, id, label, tooltip)
+	local function actor_tooltip(win, id, label, tooltip)
 		local set = win.spellid and win:GetSelectedSet()
-		local player = set and set:GetActor(id, label)
-		if not player then return end
+		local actor = set and set:GetActor(id, label)
+		if not actor then return end
 
-		local spell = player.damagedspells and player.damagedspells[win.spellid]
+		local spell = actor.damagedspells and actor.damagedspells[win.spellid]
 		if not spell or not spell.count then return end
 
-		tooltip:AddLine(label .. " - " .. win.spellname)
+		tooltip:AddLine(uformat("%s - %s", label, win.spellname))
 
 		tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
 		local diff = spell.count -- used later
@@ -908,7 +906,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 	end
 
 	function mode:OnEnable()
-		mode_target.metadata = {showspots = true, tooltip = player_tooltip}
+		mode_target.metadata = {showspots = true, tooltip = actor_tooltip}
 		self.metadata = {
 			showspots = true,
 			click1 = mode_target,
@@ -1033,9 +1031,8 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 		mode_breakdown.metadata = {}
 		self.metadata = {
 			showspots = true,
+			filterclass = true,
 			click1 = mode_breakdown,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Percent = true, Count = true, Total = true},
 			icon = [[Interface\Icons\ability_warlock_avoidance]]
 		}

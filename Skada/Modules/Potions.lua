@@ -196,17 +196,13 @@ Skada:RegisterModule("Potions", function(L, P, G, C)
 	end
 
 	function mode:OnEnable()
-		mode_actor.metadata = {
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"]
-		}
+		mode_actor.metadata = {filterclass = true}
 		mode_spell.metadata = {click1 = mode_actor}
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
+			filterclass = true,
 			click1 = mode_spell,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\inv_potion_31]]
 		}

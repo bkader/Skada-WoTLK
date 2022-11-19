@@ -238,7 +238,7 @@ Skada:RegisterModule("Damage", function(L, P)
 		local spell = actor and actor.damagespells and actor.damagespells[id]
 		if not spell then return end
 
-		tooltip:AddLine(actor.name .. " - " .. label)
+		tooltip:AddLine(uformat("%s - %s", win.actorname, label))
 		tooltip_school(tooltip, id)
 
 		-- show the aura uptime in case of a debuff.
@@ -277,7 +277,7 @@ Skada:RegisterModule("Damage", function(L, P)
 			local spell = actor.damagespells and actor.damagespells[win.spellid]
 			if not spell then return end
 
-			tooltip:AddLine(actor.name .. " - " .. win.spellname)
+			tooltip:AddLine(uformat("%s - %s", win.actorname, win.spellname))
 			tooltip_school(tooltip, win.spellid)
 
 			if label == L["Critical Hits"] and spell.c_amt then
@@ -695,11 +695,10 @@ Skada:RegisterModule("Damage", function(L, P)
 	function mode:OnInitialize()
 		self.metadata = {
 			showspots = true,
+			filterclass = true,
 			post_tooltip = damage_tooltip,
 			click1 = mode_spell,
 			click2 = mode_target,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Damage = true, DPS = true, Percent = true, sDPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_fire_firebolt]]
 		}
@@ -754,7 +753,7 @@ Skada:RegisterModule("DPS", function(L, P)
 		local totaltime = set:GetTime()
 		local activetime = actor:GetTime(set, true)
 		local dps, damage = actor:GetDPS(set)
-		tooltip:AddLine(actor.name .. " - " .. L["DPS"])
+		tooltip:AddLine(uformat("%s - %s", label, L["DPS"]))
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(damage), 1, 1, 1)
@@ -815,8 +814,7 @@ Skada:RegisterModule("DPS", function(L, P)
 		if parent and parent.metadata then
 			self.metadata.click1 = parent.metadata.click1
 			self.metadata.click2 = parent.metadata.click2
-			self.metadata.click4 = parent.metadata.click4
-			self.metadata.click4_label = parent.metadata.click4_label
+			self.metadata.filterclass = parent.metadata.filterclass
 		end
 
 		Skada:AddMode(self, "Damage Done")
@@ -1136,10 +1134,9 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 		mode_target.metadata = {click1 = mode_target_spell}
 		self.metadata = {
 			showspots = true,
+			filterclass = true,
 			click1 = mode_spell,
 			click2 = mode_target,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Damage = true, DPS = true, Percent = true, sDPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_shaman_stormearthfire]]
 		}
@@ -1335,10 +1332,9 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 		mode_spell.metadata = {click1 = mode_spell_target}
 		self.metadata = {
 			showspots = true,
+			filterclass = true,
 			click1 = mode_spell,
 			click2 = mode_target,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
 			icon = [[Interface\Icons\spell_fire_incinerate]]
 		}

@@ -167,7 +167,9 @@ Skada:RegisterModule("Tweaks", function(L, P)
 			end
 
 			function mode:ClearFirstHit()
-				firsthit = firsthit:free()
+				if firsthit then
+					firsthit = firsthit:free()
+				end
 				if firsthittimer then
 					Skada:CancelTimer(firsthittimer, true)
 					firsthittimer = nil

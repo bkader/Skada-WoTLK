@@ -28,7 +28,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		if settime == 0 then return end
 
 		local activetime = actor:GetTime(set, true)
-		tooltip:AddLine(actor.name .. ": " .. L["Activity"])
+		tooltip:AddLine(uformat("%s - %s", label, L["Activity"]))
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, settime), nil, nil, nil, 1, 1, 1)
@@ -104,10 +104,9 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
+			filterclass = true,
 			tooltip = activity_tooltip,
 			click1 = mode_target,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {["Active Time"] = true, Percent = true, sPercent = true},
 			icon = [[Interface\Icons\spell_holy_borrowedtime]]
 		}

@@ -117,8 +117,8 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 			win:RightClick(bar, button)
 		elseif button == "LeftButton" and win.metadata.click2 and IsShiftKeyDown() then
 			showmode(win, id, label, win.metadata.click2)
-		elseif button == "LeftButton" and win.metadata.click4 and IsAltKeyDown() then
-			showmode(win, id, label, win.metadata.click4)
+		elseif button == "LeftButton" and win.metadata.filterclass and IsAltKeyDown() then
+			win:FilterClass(id, label)
 		elseif button == "LeftButton" and win.metadata.click3 and IsControlKeyDown() then
 			showmode(win, id, label, win.metadata.click3)
 		elseif button == "LeftButton" and win.metadata.click1 then

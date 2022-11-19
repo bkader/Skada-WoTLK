@@ -190,10 +190,9 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
+			filterclass = true,
 			click1 = mode_spell,
 			click2 = mode_target,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_frost_chainsofice]]
 		}
@@ -453,10 +452,9 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
+			filterclass = true,
 			click1 = mode_spell,
 			click2 = mode_source,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_magic_polymorphrabbit]]
 		}
@@ -708,10 +706,9 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		self.metadata = {
 			showspots = true,
 			ordersort = true,
+			filterclass = true,
 			click1 = mode_spell,
 			click2 = mode_target,
-			click4 = Skada.FilterClass,
-			click4_label = L["Toggle Class Filter"],
 			columns = {Count = true, Percent = false, sPercent = false},
 			icon = [[Interface\Icons\spell_holy_sealofvalor]]
 		}
