@@ -1836,7 +1836,8 @@ do
 		if lower(chan) == "self" or lower(chantype) == "self" then
 			Skada:Print(msg)
 			return
-		elseif lower(chan) == "auto" then
+		end
+		if lower(chan) == "auto" then
 			if not IsInGroup() then
 				return
 			elseif Skada.insType == "pvp" or Skada.insType == "arena" then
@@ -2679,6 +2680,7 @@ local function BossDefeated()
 
 	Skada:Debug("COMBAT_BOSS_DEFEATED: Skada")
 	Skada:SendMessage("COMBAT_BOSS_DEFEATED", set)
+	Skada:SmartStop(set)
 end
 
 -------------------------------------------------------------------------------
@@ -2763,6 +2765,7 @@ function combat_end()
 	Skada:SendMessage("COMBAT_PLAYER_LEAVE", Skada.current, curtime)
 	if Skada.current.gotboss then
 		Skada:SendMessage("COMBAT_ENCOUNTER_END", Skada.current, curtime)
+		Skada:ClearFirstHit()
 	end
 
 	-- process segment
@@ -2935,31 +2938,9 @@ do
 	local tentative, tentative_set, tentative_timer
 	local death_counter, starting_members = 0, 0
 
-	-- list of combat events that we don't care about
-	local ignored_events = {
-		SPELL_AURA_REMOVED_DOSE = true,
-		SPELL_CAST_START = true,
-		SPELL_CAST_SUCCESS = true,
-		SPELL_CAST_FAILED = true,
-		SPELL_DRAIN = true,
-		PARTY_KILL = true,
-		SPELL_PERIODIC_DRAIN = true,
-		SPELL_DISPEL_FAILED = true,
-		SPELL_DURABILITY_DAMAGE = true,
-		SPELL_DURABILITY_DAMAGE_ALL = true,
-		ENCHANT_APPLIED = true,
-		ENCHANT_REMOVED = true,
-		SPELL_CREATE = true
-	}
-
-	-- events used to trigger combat for aggressive combat detection
-	local trigger_events = {
-		RANGE_DAMAGE = true,
-		SPELL_BUILDING_DAMAGE = true,
-		SPELL_DAMAGE = true,
-		SPELL_PERIODIC_DAMAGE = true,
-		SWING_DAMAGE = true
-	}
+	-- Edit Skada\Core\Tables.lua
+	local ignored_events = Skada.ignored_events
+	local trigger_events = Skada.trigger_events
 
 	-- events used to count spell casts.
 	local spellcast_events = {
@@ -3136,6 +3117,7 @@ do
 						set.mobname = bossname or set.mobname or t.dstName
 						set.gotboss = bossid or true
 						Skada:SendMessage("COMBAT_ENCOUNTER_START", set)
+						Skada:PrintFirstHit()
 						_targets = del(_targets)
 					else
 						_targets = _targets or new()

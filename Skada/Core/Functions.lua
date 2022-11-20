@@ -1492,6 +1492,10 @@ do
 		ARGS_MT.__index = ARGS_MT
 	end
 
+	-- trigger events used for first hit check
+	-- Edit Skada\Core\Tables.lua <trigger_events>
+	local TRIGGERS = Skada.trigger_events
+
 	-- combat log handler
 	function Skada:ParseCombatLog(_, timestamp, event, ...)
 		-- disabled or test mode?
@@ -1549,6 +1553,11 @@ do
 			if args:SourceInGroup() or args:DestInGroup() then
 				callbacks:Fire("Skada_SpellString", args, args.extraspellid, args.extrastring)
 			end
+		end
+
+		-- check first hit!
+		if self.db.firsthit and TRIGGERS[args.event] and not self.firsthit and (args:SourceInGroup() or args:DestInGroup()) then
+			self:CheckFirstHit(args)
 		end
 
 		self.LastEvent = args
@@ -1632,5 +1641,155 @@ do
 		if event == "Skada_UnitBuffs" then
 			Skada.ScanGroupBuffs = ScanGroupBuffs
 		end
+	end
+end
+
+-------------------------------------------------------------------------------
+-- first hit check
+
+do
+	local UnitExists, UnitClass = UnitExists, UnitClass
+	local UnitName, UnitFullName = UnitName, Private.UnitFullName
+	local SpellLink = Private.SpellLink or GetSpellLink
+	local TempTable = Private.TempTable
+	local IsPet, uformat = Private.IsPet, Private.uformat
+	local ignored_spells = Skada.ignored_spells.firsthit
+	local firsthit_fmt = {"%s (%s)", "%s (\124c%s%s\124r)", "\124c%s%s\124r", "\124c%s%s\124r (%s)"}
+
+	local boss_units = Skada.Units.boss
+	local function WhoPulled(hit_line)
+		hit_line = hit_line or L["\124cffffbb00First Hit\124r: *?*"] -- first hit
+
+		local target_table = nil
+		for _, unit in next, boss_units do
+			if not UnitExists(unit) then break end
+
+			local target_unit = format("%starget", unit)
+			local target = UnitFullName(target_unit)
+			if target then
+				local _, class = UnitClass(target_unit)
+				if class then
+					target = Skada.classcolors.format(class, target)
+				end
+
+				target_table = target_table or TempTable()
+				target_table:insert(uformat("%s > %s", UnitName(unit), target))
+			end
+		end
+
+		local target_line = nil
+		if target_table then
+			target_line = format(L["\124cffffbb00Boss First Target\124r: %s"], target_table:concat(" \124\124 "))
+			target_table = target_table:free()
+		end
+
+		return hit_line, target_line
+	end
+
+	function Skada:CheckFirstHit(t)
+		-- ignored spell?
+		if t.event ~= "SWING_DAMAGE" and t.spellid and ignored_spells[t.spellid] then return end
+
+		local output = nil -- initial ouptut
+
+		if self:IsBoss(t.srcGUID) then -- boss started?
+			if IsPet(t.dstGUID, t.dstFlags) then
+				output = uformat(firsthit_fmt[1], t.srcName, t.dstName)
+			elseif t.dstName then
+				local _, class = UnitClass(t.dstName)
+				if class then
+					output = uformat(firsthit_fmt[2], t.srcName, self.classcolors.str(class), t.dstName)
+				else
+					output = uformat(firsthit_fmt[1], t.srcName, t.dstName)
+				end
+			end
+		elseif self:IsBoss(t.dstGUID) then -- a player/pet started?
+			local _, ownerName, ownerClass = self:GetPetOwner(t.srcGUID)
+			if ownerName then
+				if ownerClass then
+					output = uformat(firsthit_fmt[4], self.classcolors.str(ownerClass), ownerName, L["PET"])
+				else
+					output = uformat(firsthit_fmt[1], ownerName, L["PET"])
+				end
+			elseif t.srcName then
+				local _, class = UnitClass(t.srcName)
+				if class and self.classcolors[class] then
+					output = uformat(firsthit_fmt[3], self.classcolors.str(class), t.srcName)
+				else
+					output = t.srcName
+				end
+			end
+		end
+
+		if output then
+			local spell = SpellLink(t.spellid) or t.spellname or L["Unknown"]
+			self.firsthit = self.firsthit or TempTable()
+			self.firsthit.hitline = WhoPulled(uformat(L["\124cffffff00First Hit\124r: %s from %s"], spell, output))
+		end
+	end
+
+	do
+		local firsthit_timer = nil
+		local function PrintFirstHit()
+			local t = Skada.firsthit
+			if t then
+				t.hitline, t.targetline = WhoPulled(t.hitline)
+				Skada:Print(t.hitline)
+				if t.targetline then
+					Skada:Print(t.targetline)
+				end
+				Skada:Debug("First Hit: Printed!")
+			end
+		end
+
+		function Skada:PrintFirstHit()
+			if not self.db.firsthit then
+				return self:ClearFirstHit()
+			end
+
+			if firsthit_timer then return end
+			firsthit_timer = self:ScheduleTimer(PrintFirstHit, 0.5)
+		end
+
+		function Skada:ClearFirstHit()
+			if self.firsthit then
+				self.firsthit = self.firsthit:free()
+				self:Debug("First Hit: Cleared!")
+			end
+			if firsthit_timer then
+				self:CancelTimer(firsthit_timer, true)
+				firsthit_timer = nil
+			end
+		end
+	end
+end
+
+-------------------------------------------------------------------------------
+-- smart stop
+
+do
+	-- list of creature IDs to be ignored
+	local ignored_creature = {
+		[37217] = true, -- ICC: Precious
+		[37025] = true -- iCC: Stinky
+	}
+
+	local function SmartStop(set)
+		if set.endtime then return end
+		Skada:StopSegment(L["Smart Stop"])
+	end
+
+	function Skada:SmartStop(set)
+		if
+			not self.db.smartstop and -- feature disabled?
+			not set or set.stopped and -- no set or already stopped?
+			not set.gotboss and -- not a boss fight?
+			not ignored_creature[set.gotboss] -- an ignored boss fight?
+		then
+			return
+		end
+
+		-- schedule smart stop.
+		self:ScheduleTimer(SmartStop, self.db.smartwait or 3, set)
 	end
 end

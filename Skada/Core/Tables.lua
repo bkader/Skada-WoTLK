@@ -707,3 +707,30 @@ ns.missTypes = {
 	REFLECT = "ref_n",
 	RESIST = "res_n",
 }
+
+-- list of combat events that we don't care about
+ns.ignored_events = {
+	ENCHANT_APPLIED = true,
+	ENCHANT_REMOVED = true,
+	PARTY_KILL = true,
+	SPELL_AURA_REMOVED_DOSE = true,
+	SPELL_CAST_FAILED = true,
+	SPELL_CAST_START = true,
+	SPELL_CAST_SUCCESS = true,
+	SPELL_CREATE = true,
+	SPELL_DISPEL_FAILED = true,
+	SPELL_DRAIN = true,
+	SPELL_DURABILITY_DAMAGE = true,
+	SPELL_DURABILITY_DAMAGE_ALL = true,
+	SPELL_PERIODIC_DRAIN = true
+}
+
+-- events used to start combat in aggressive combat detection
+-- mode as well as boss encounter detection.
+ns.trigger_events = {
+	RANGE_DAMAGE = true,
+	SPELL_BUILDING_DAMAGE = true,
+	SPELL_DAMAGE = true,
+	SPELL_PERIODIC_DAMAGE = true,
+	SWING_DAMAGE = true
+}

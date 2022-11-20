@@ -96,34 +96,35 @@ Private.tCopy(windefaultscopy, Skada.windowdefaults)
 
 Skada.defaults = {
 	profile = {
-		reset = {instance = 1, join = 3, leave = 1},
-		icon = {radius = 80, minimapPos = 195},
-		numberformat = 1,
-		decimals = 1,
-		setformat = 3,
-		setnumber = true,
-		numbersystem = 1,
-		brackets = 1,
-		separator = 1,
-		showranks = true,
-		setstokeep = 15,
-		setslimit = 15,
-		memorycheck = true,
-		tooltips = true,
-		tooltippos = "smart",
-		tooltiprows = 3,
-		informativetooltips = true,
-		timemesure = 2,
+		firsthit = true,
 		hidedisables = true,
+		informativetooltips = true,
+		memorycheck = true,
 		mergepets = true,
-		feed = "",
-		updatefrequency = 0.5,
+		setnumber = true,
+		showranks = true,
+		tooltips = true,
+		brackets = 1,
+		decimals = 1,
 		minsetlength = 5,
+		numberformat = 1,
+		numbersystem = 1,
+		separator = 1,
+		setformat = 3,
+		setslimit = 15,
+		setstokeep = 15,
+		timemesure = 2,
+		tooltiprows = 3,
 		totalflag = 0x10,
-		modules = {},
+		updatefrequency = 0.5,
+		feed = "",
+		tooltippos = "smart",
 		columns = {},
-		toast = {spawn_point = "BOTTOM", duration = 5, opacity = 0.75},
+		icon = {radius = 80, minimapPos = 195},
+		modules = {},
 		report = {mode = "Damage", set = "current", channel = "Say", chantype = "preset", number = 10},
+		reset = {instance = 1, join = 3, leave = 1},
+		toast = {spawn_point = "BOTTOM", duration = 5, opacity = 0.75},
 		modulesBlocked = {
 			["Avoidance & Mitigation"] = true,
 			["CC Breaks"] = true,
@@ -811,6 +812,12 @@ options.args.tweaks = {
 			desc = format(L["General options for %s."], L["Tweaks"]),
 			order = 10,
 			args = {
+				firsthit = {
+					type = "toggle",
+					name = L["First hit"],
+					desc = L["opt_tweaks_firsthit_desc"],
+					order = 10
+				},
 				absdamage = {
 					type = "toggle",
 					name = L["Absorbed Damage"],
@@ -825,6 +832,39 @@ options.args.tweaks = {
 			desc = format(L["Advanced options for %s."], L["Tweaks"]),
 			order = 900,
 			args = {
+				smarthalt = {
+					type = "group",
+					name = L["Smart Stop"],
+					desc = format(L["Options for %s."], L["Smart Stop"]),
+					order = 10,
+					args = {
+						smartdesc = {
+							type = "description",
+							name = L["opt_tweaks_smarthalt_desc"],
+							fontSize = "medium",
+							order = 10,
+							width = "full"
+						},
+						smartstop = {
+							type = "toggle",
+							name = L["Enable"],
+							order = 20
+						},
+						smartwait = {
+							type = "range",
+							name = L["Duration"],
+							desc = L["opt_tweaks_smartwait_desc"],
+							disabled = function()
+								return not Skada.db.smartstop
+							end,
+							min = 0,
+							max = 10,
+							step = 0.01,
+							bigStep = 0.1,
+							order = 30
+						}
+					}
+				},
 				toast_opt = Private.ToastOptions(),
 				total_opt = Private.TotalOptions()
 			}
