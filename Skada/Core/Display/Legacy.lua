@@ -1,10 +1,11 @@
-local _, Skada = ...
+local folder, Skada = ...
 local Private = Skada.Private
 Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 	-- common stuff
 	local pairs, type, tsort = pairs, type, table.sort
 	local lib = {} -- LegacyLibBars-1.0
+	local _
 
 	----------------------------------------------------------------
 	-- LegacyLibBars-1.0 -- stripped down to minimum
@@ -156,7 +157,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 				barLists[self] = barLists[self] or {}
 				if barLists[self][name] then
-					error("A bar list named " .. name .. " already exists.")
+					error(format("A bar list named %s already exists.", name))
 				end
 
 				orientation = orientation or 1
@@ -204,7 +205,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 				list.optbutton:SetHeight(16)
 				list.optbutton:SetWidth(16)
 				list.optbutton:SetNormalTexture([[Interface\AddOns\Skada\Media\Textures\toolbar1\config]])
-				list.optbutton:SetHighlightTexture([[Interface\AddOns\Skada\Media\Textures\toolbar1\config]], 0.5)
+				list.optbutton:SetHighlightTexture([[Interface\AddOns\Skada\Media\Textures\toolbar1\config]], "ADD")
 				list.optbutton:SetAlpha(0.3)
 				list.optbutton:SetPoint("TOPRIGHT", list.button, "TOPRIGHT", -5, 0 - (max(list.button:GetHeight() - list.optbutton:GetHeight(), 2) / 2))
 				list.optbutton:Show()
@@ -599,8 +600,8 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 						v:Show()
 						shown = shown + 1
 						totalHeight = totalHeight + v:GetHeight() + y1
-						v:SetPoint(from .. "LEFT", lastBar, to .. "LEFT", x1, y1)
-						v:SetPoint(from .. "RIGHT", lastBar, to .. "RIGHT", x2, y2)
+						v:SetPoint(format("%sLEFT", from), lastBar, format("%sLEFT", to), x1, y1)
+						v:SetPoint(format("%sRIGHT", from), lastBar, format("%sRIGHT", to), x2, y2)
 						lastBar = v
 					end
 					to = origTo
@@ -1180,9 +1181,17 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		-- Called when a Skada window starts using this display provider.
 		function mod:Create(window)
 			-- Re-use bargroup if it exists.
-			window.bargroup = lib.GetBarGroup(mod, window.db.name)
+			local p = window.db
+			window.bargroup = lib.GetBarGroup(mod, p.name)
 			if not window.bargroup then
-				window.bargroup = lib.NewBarGroup(mod, window.db.name, nil, window.db.barwidth, window.db.barheight, "SkadaBarWindow" .. window.db.name)
+				window.bargroup = lib.NewBarGroup(
+					mod,
+					p.name, -- window name
+					p.barorientation, -- bars orientation
+					p.barwidth, -- bars width
+					p.barheight, -- bars height
+					format("%sLegacyWindow%s", folder, p.name) -- frame name
+				)
 			end
 
 			window.bargroup.win = window
@@ -1195,7 +1204,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 			window.bargroup:HideIcon()
 
 			-- Restore window position.
-			RestorePosition(window.bargroup, window.db)
+			RestorePosition(window.bargroup, p)
 		end
 
 		-- Called by Skada windows when the window is to be destroyed/cleared.
@@ -1402,12 +1411,12 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 					if metadata.showspots and P.showranks then
 						if win.db.barorientation == 2 then
-							bar:SetLabel(format("%s .%2u", data.label, nr))
+							bar:SetLabel(format("%s .%2u", data.text or data.label or L["Unknown"], nr))
 						else
-							bar:SetLabel(format("%2u. %s", nr, data.label))
+							bar:SetLabel(format("%2u. %s", nr, data.text or data.label or L["Unknown"]))
 						end
 					else
-						bar:SetLabel(data.label)
+						bar:SetLabel(data.text or data.label or L["Unknown"])
 					end
 					bar:SetTimerLabel(data.valuetext)
 
@@ -1586,7 +1595,8 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 			g:SetLocked(p.barslocked)
 
 			-- Header
-			local fo = CreateFont("TitleFont" .. win.db.name)
+			local fo = g.TitleFont or CreateFont(format("TitleFont%s", win.db.name))
+			g.TitleFont = fo
 			fo:SetFont(Skada:MediaFetch("font", p.title.font), p.title.fontsize)
 			g.button:SetNormalFontObject(fo)
 			local inset = p.title.borderinsets
@@ -1633,7 +1643,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 			-- Window
 			if p.enablebackground then
 				if g.bgframe == nil then
-					g.bgframe = CreateFrame("Frame", p.name .. "BG", g)
+					g.bgframe = CreateFrame("Frame", "$parentBG", g)
 					g.bgframe:SetFrameStrata("BACKGROUND")
 					g.bgframe:EnableMouse()
 					g.bgframe:EnableMouseWheel()

@@ -238,8 +238,8 @@ local set = Skada:GetSet("current")
 -- called like so: set:Func(...)
 set:GetTime() -- returns the segment time
 
-set:GetActor(guid, name) -- attempts to retrieve a player or an enemy.
-set:GetActorTime(guid, name, active) -- returns the actor's time if found or 0.
+set:GetActor(name, guid) -- attempts to retrieve a player or an enemy.
+set:GetActorTime(name, guid, active) -- returns the actor's time if found or 0.
 
 set:GetDamage(useful) -- returns the segment damage amount, exlucing overkill if "useful" is true
 set:GetDPS(useful) -- returns the dps and damage amount, excluding overkill if "useful" is true
@@ -247,16 +247,12 @@ set:GetDPS(useful) -- returns the dps and damage amount, excluding overkill if "
 set:GetDamageTaken() -- returns the damage taken by players.
 set:GetDTPS() -- returns the damage taken by players per second and damage amount.
 
-set:GetActorDamage(guid, name, useful) -- returns the damage done by the given actor.
-set:GetActorDPS(guid, name, useful, active) -- returns the dps and damage for the given actor.
-set:GetActorDamageTargets(guid, name, tbl) -- returns the table of damage targets.
-set:GetActorDamageOnTarget(guid, name, targetname) -- returns the damage, overkill [and useful for enemies]
+set:GetActorDamage(name, guid, useful) -- returns the damage done by the given actor.
+set:GetActorDPS(name, guid, useful, active) -- returns the dps and damage for the given actor.
+set:GetActorDamageTargets(name, guid, tbl) -- returns the table of damage targets.
 
-set:GetActorDamageTaken(guid, name) -- returns the damage taken by the actor.
-set:GetActorDTPS(guid, name, active) -- returns the damage taken by the actor per second and damage amount.
-set:GetActorDamageSources(guid, name, tbl) -- returns the table of damage taken sources.
-set:GetActorDamageTakenSpells(guid, name) -- returns the table of damage taken spells.
-set:GetActorDamageFromSource(guid, name, targetname) -- returns the damage, overkill [and useful for enemies].
+set:GetActorDamageSources(name, guid, tbl) -- returns the table of damage taken sources.
+set:GetActorDamageFromSource(name, guid, targetname) -- returns the damage, overkill [and useful for enemies].
 
 set:GetOverkill() -- returns the amount of overkill
 
@@ -299,7 +295,7 @@ First, you would want to get the segment, then the actor. After, you will have a
 ```lua
 -- After retrieving and actor like so:
 local set = Skada:GetSet("current")
-local actor = set:GetActor(guid, name)
+local actor = set:GetActor(name, guid)
 
 -- here is the list of common functions.
 actor:GetTime(active) -- returns actor's active/effective time.
@@ -360,7 +356,7 @@ Now in order to use the function, you simply do like so:
 
 ```lua
 local set = Skada:GetSet("current")
-local player = set:GetActor(Skada.userGUID, Skada.userName) -- get my own table
+local player = set:GetActor(Skada.userName, Skada.userGUID) -- get my own table
 
 -- dummy aura: 12345
 local uptime = player:GetAuraUptime(12345)

@@ -2,12 +2,13 @@ local folder, Skada = ...
 local Private = Skada.Private
 
 local select, pairs, type = select, pairs, type
-local tonumber, format = tonumber, string.format
+local tonumber, format, gsub = tonumber, string.format, string.gsub
 local setmetatable, wipe = setmetatable, wipe
 local next, time, GetTime = next, time, GetTime
 local _
 
-local tablePool, new, del = Skada.tablePool, Private.newTable, Private.delTable
+local tablePool, TempTable = Skada.tablePool, Private.TempTable
+local new, del = Private.newTable, Private.delTable
 local L, callbacks = Skada.Locale, Skada.callbacks
 local userName = Skada.userName
 
@@ -36,8 +37,6 @@ do
 	Skada.OnModuleCreated = on_module_created
 
 	local tconcat = table.concat
-	local TempTable = Private.TempTable
-
 	local function module_table(...)
 		local args = TempTable(...)
 		if #args >= 2 then
@@ -238,7 +237,7 @@ function Skada:FormatPercent(value, total, dec)
 
 	-- no value? 0%
 	if not value then
-		return format("%." .. dec .. "f%%", 0)
+		return format(format("%%.%df%%%%", dec), 0)
 	end
 
 	-- correct values.
@@ -246,10 +245,10 @@ function Skada:FormatPercent(value, total, dec)
 
 	-- below 0? clamp to -999
 	if value <= 0 then
-		return format("%." .. dec .. "f%%", max(-999, value / total))
+		return format(format("%%.%df%%%%", dec), max(-999, value / total))
 	-- otherwise, clamp to 999
 	else
-		return format("%." .. dec .. "f%%", min(999, value / total))
+		return format(format("%%.%df%%%%", dec), min(999, value / total))
 	end
 end
 
@@ -1073,7 +1072,7 @@ do
 	local dummy_actor = {} -- used as fallback
 
 	-- attempts to find and actor
-	function Skada:FindActor(set, actorid, actorname, is_strict)
+	function Skada:FindActor(set, actorname, actorid, is_strict)
 		-- make sure we have all data
 		actorid = actorid or actorname
 		actorname = actorname or actorid
@@ -1096,25 +1095,23 @@ do
 		-- speed up things with pets
 		if strmatch(actorname, "%<(%a+)%>") then
 			dummy_actor.id = actorid
-			dummy_actor.name = actorname
 			dummy_actor.class = "PET"
 			return actorPrototype:Bind(dummy_actor)
 		end
 
 		-- well.. our last hope!
 		dummy_actor.id = actorid
-		dummy_actor.name = actorname
 		dummy_actor.class = (set.mobname == actorname) and "ENEMY" or "UNKNOWN" -- can be wrong
 		return actorPrototype:Bind(dummy_actor)
 	end
 
 	-- generic: finds a player/enemy or creates it.
-	function Skada:GetActor(set, actorid, actorname, actorflags)
+	function Skada:GetActor(set, actorname, actorid, actorflags)
 		-- no set/actors table, sorry!
 		if not set or not set.actors then return end
 
 		-- attempt to find the actor (true: no dummy_actor)
-		local actor = self:FindActor(set, actorid, actorname, true)
+		local actor = self:FindActor(set, actorname, actorid, true)
 
 		-- not found? try to creat it then
 		if not actor then
@@ -1127,7 +1124,6 @@ do
 			-- create a new actor table...
 			actor = new()
 			actor.id = actorid
-			actor.name = actorname
 			actor.__new = true
 
 			-- is it me? move on..
@@ -1259,8 +1255,7 @@ end
 
 do
 	local loadstring, rawset = loadstring, rawset
-	local gsub, strsub = string.gsub, string.sub
-	local strlen, strlower = string.len, string.lower
+	local strsub, strlen, strlower = string.sub, string.len, string.lower
 
 	-- args associated to each event name prefix
 	local PREFIXES = {
@@ -1651,7 +1646,6 @@ do
 	local UnitExists, UnitClass = UnitExists, UnitClass
 	local UnitName, UnitFullName = UnitName, Private.UnitFullName
 	local SpellLink = Private.SpellLink or GetSpellLink
-	local TempTable = Private.TempTable
 	local IsPet, uformat = Private.IsPet, Private.uformat
 	local ignored_spells = Skada.ignored_spells.firsthit
 	local firsthit_fmt = {"%s (%s)", "%s (\124c%s%s\124r)", "\124c%s%s\124r", "\124c%s%s\124r (%s)"}

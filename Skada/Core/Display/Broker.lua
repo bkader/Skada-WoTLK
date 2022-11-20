@@ -126,7 +126,7 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 
 		-- Optional internal frame
 		if not frame then
-			frame = CreateFrame("Frame", p.name .. "BrokerFrame", UIParent)
+			frame = CreateFrame("Frame", format("%sBrokerWindow%s", folder, p.name), UIParent)
 			frame:SetHeight(p.height or 30)
 			frame:SetWidth(p.width or 200)
 			frame:SetPoint("CENTER", 0, 0)
@@ -221,7 +221,7 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 		local data = (#dataset > 0) and dataset[1]
 		if not data or not data.id then return end
 
-		local label = (formatLabel(win, data) or "") .. " - " .. (formatValue(win, data) or "")
+		local label = format("%s - %s", formatLabel(win, data) or "", formatValue(win, data) or "")
 
 		if win.obj then
 			win.obj.text = label

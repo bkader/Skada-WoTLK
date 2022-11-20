@@ -59,7 +59,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local function log_deathlog(set, override)
 		if not set or (set == Skada.total and not P.totalidc) then return end
 
-		local actor = Skada:GetActor(set, data.actorid, data.actorname, data.actorflags)
+		local actor = Skada:GetActor(set, data.actorname, data.actorid, data.actorflags)
 		if not actor then return end
 
 		local deathlog = actor.deathlog and actor.deathlog[1]
@@ -71,7 +71,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		-- seet actor maxhp if not already set
 		if not deathlog.hpm or deathlog.hpm == 0 then
-			_, _, deathlog.hpm = UnitHealthInfo(actor.name, actor.id, "group")
+			_, _, deathlog.hpm = UnitHealthInfo(data.actorname, actor.id, "group")
 			deathlog.hpm = deathlog.hpm or 0
 		end
 
@@ -80,7 +80,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		log.src = data.srcName
 		log.cri = data.critical
 		log.time = Skada._Time or GetTime()
-		_, log.hp = UnitHealthInfo(actor.name, actor.id, "group")
+		_, log.hp = UnitHealthInfo(data.actorname, actor.id, "group")
 
 		if data.amount then
 			deathlog.time = log.time
@@ -128,8 +128,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 	end
 
-	local function log_death(set, actorid, actorname, actorflags)
-		local actor = Skada:GetActor(set, actorid, actorname, actorflags)
+	local function log_death(set, actorname, actorid, actorflags)
+		local actor = Skada:GetActor(set, actorname, actorid, actorflags)
 		if not actor then return end
 
 		set.death = (set.death or 0) + 1
@@ -168,7 +168,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		-- announce death
 		if M.deathannounce and set ~= Skada.total then
-			mode:Announce(deathlog.log, actor.name)
+			mode:Announce(deathlog.log, actorname)
 		end
 	end
 
@@ -298,8 +298,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local dead = {}
 	local function unit_died(t)
 		if not UnitIsFeignDeath(t.dstName) then
-			dead[t.dstGUID] = true
-			Skada:DispatchSets(log_death, t.dstGUID, t.dstName, t.dstFlags)
+			dead[t.dstName] = true
+			Skada:DispatchSets(log_death, t.dstName, t.dstGUID, t.dstFlags)
 		end
 		if t.__temp then t = del(t) end
 	end
@@ -383,7 +383,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			-- not a debuff or an ignored one?
 			if t.auratype ~= "DEBUFF" or not t.spellid or ignored_debuff[t.spellid] then return end
 			-- invalid destination or already dead?
-			if not t.dstGUID or dead[t.dstGUID] then return end
+			if not t.dstName or dead[t.dstName] then return end
 
 			-- all tests passed.
 			handle_aura(t.dstGUID, t.dstName, t.dstFlags, t.srcName, t.spellstring, t.event == "SPELL_AURA_REMOVED")
@@ -393,7 +393,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			-- not a buff or the spell isn't tracked?
 			if t.auratype ~= "BUFF" or not t.spellname or not tracked_buff[t.spellname] then return end
 			-- no spellid, an ignored spell or the destination isn't valid or is dead?
-			if not t.spellid or ignored_buff[t.spellid] or not t.dstGUID or dead[t.dstGUID] then return end
+			if not t.spellid or ignored_buff[t.spellid] or not t.dstGUID or dead[t.dstName] then return end
 
 			-- all tests passed.
 			handle_aura(t.dstGUID, t.dstName, t.dstFlags, t.srcName, t.spellstring, t.event == "SPELL_AURA_REMOVED")
@@ -424,7 +424,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		function mode_deathlog:Update(win, set)
 			win.title = uformat(L["%s's death log"], win.actorname)
 
-			local actor = win.datakey and Skada:FindActor(set, win.actorid, win.actorname)
+			local actor = win.datakey and Skada:FindActor(set, win.actorname, win.actorid)
 			local deathlog = actor and actor.deathlog and actor.deathlog[win.datakey]
 			if not deathlog then return end
 
@@ -466,7 +466,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 					d.icon = icon_mode
 					d.color = nil
 					d.value = 0
-					d.valuetext = format(L["%s dies"], actor.name)
+					d.valuetext = format(L["%s dies"], win.actorname)
 				end
 			end
 
@@ -579,7 +579,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		win.title = uformat(L["%s's deaths"], win.actorname)
 		if not set or not win.actorid then return end
 
-		local actor = set:GetActor(win.actorid, win.actorname)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		if not actor or actor.enemy then return end
 
 		local deathlog = (actor.death or WATCH) and actor.deathlog
@@ -732,7 +732,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 	local function entry_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local actor = set and set:GetActor(win.actorid, win.actorname)
+		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local deathlog = actor and actor.deathlog and win.datakey and actor.deathlog[win.datakey]
 		local entry = deathlog and deathlog.log and deathlog.log[id]
 		if not entry or not entry.id then return end

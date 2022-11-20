@@ -154,7 +154,7 @@ do
 		if not info or not info.spellid then return end
 
 		-- 3. retrieve the actor.
-		return Skada:GetActor(set, info.actorid, info.actorname, info.actorflags)
+		return Skada:GetActor(set, info.actorname, info.actorid, info.actorflags)
 	end
 
 	-- handles SPELL_AURA_APPLIED event
@@ -305,7 +305,7 @@ do
 
 	-- list actor's auras by type
 	function spell_update_func(self, auratype, win, set, cols)
-		local actor = set and auratype and set:GetActor(win.actorid, win.actorname)
+		local actor = set and auratype and set:GetActor(win.actorname, win.actorid)
 		local maxtime = actor and floor(actor:GetTime(set))
 		local spells = (maxtime and maxtime > 0) and actor.auras
 
@@ -372,7 +372,7 @@ do
 
 		-- list actor's auras targets by type
 		function target_update_func(self, auratype, win, set, cols, tbl)
-			local actor = set and auratype and set:GetActor(win.actorid, win.actorname)
+			local actor = set and auratype and set:GetActor(win.actorname, win.actorid)
 			if not actor then return end
 
 			local targets, maxtime = get_actor_auras_targets(actor, set, auratype, tbl)
@@ -409,7 +409,7 @@ do
 
 		-- list targets of the given aura
 		function spelltarget_update_func(self, auratype, win, set, cols, tbl)
-			local actor = set and auratype and set:GetActor(win.actorid, win.actorname)
+			local actor = set and auratype and set:GetActor(win.actorname, win.actorid)
 			if not actor then return end
 
 			local targets, maxtime = get_actor_aura_targets(actor, set, win.spellid, tbl)
@@ -451,7 +451,7 @@ do
 
 		-- list auras done on the given target
 		function targetspell_update_func(self, auratype, win, set, cols, tbl)
-			local actor = set and auratype and set:GetActor(win.actorid, win.actorname)
+			local actor = set and auratype and set:GetActor(win.actorname, win.actorid)
 			if not actor then return end
 
 			local spells, maxtime = get_actor_target_auras(actor, win.targetname, tbl)
@@ -476,7 +476,7 @@ do
 		local set = win:GetSelectedSet()
 		local settime = set and set:GetTime()
 		if not settime or settime == 0 then return end
-		local actor = set:GetActor(win.actorid, win.actorname)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local spell = actor and actor.auras and actor.auras[id]
 		if not spell then return end
 
@@ -505,7 +505,7 @@ do
 
 	function spelltarget_tooltip(win, id, label, tooltip)
 		local set = win.spellid and win:GetSelectedSet()
-		local actor = set and set:GetActor(win.actorid, win.actorname)
+		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local spell = actor and actor.auras and actor.auras[win.spellid]
 		local target = spell and spell.targets and spell.targets[label]
 		if not target then return end
@@ -801,7 +801,7 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 
 	local function spellsource_tooltip(win, id, label, tooltip)
 		local set = win.spellid and win:GetSelectedSet()
-		local actor = set and set:GetActor(id, label)
+		local actor = set and set:GetActor(label, id)
 		local spell = actor and actor.auras and actor.auras[win.spellid]
 		if not (spell and spell.count) then return end
 

@@ -579,8 +579,6 @@ L["actor debuffs"] = function(n1, n2) return ((not n2 or n1 == n2) and "%s's deb
 L["%s's <%s> targets"] = true
 L["%s's <%s> sources"] = true
 L["Sunder Counter"] = true
-L["Sunder target list"] = true
-L["Sunder source list"] = true
 L["Number of seconds after application to count refreshs."] = true
 L["Enemy Buffs"] = true
 L["Enemy Debuffs"] = true
@@ -719,10 +717,6 @@ L["Power gained: Mana"] = true
 L["Power gained: Rage"] = true
 L["Power gained: Energy"] = true
 L["Power gained: Runic Power"] = true
-L["Mana gained spells"] = true
-L["Rage gained spells"] = true
-L["Energy gained spells"] = true
-L["Runic Power gained spells"] = true
 L["%s's gained %s"] = true
 -- Parry module lines --
 L["Parry-Haste"] = true

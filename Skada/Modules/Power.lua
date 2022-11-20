@@ -58,19 +58,21 @@ Skada:RegisterModule("Resources", function(L, P)
 
 	local gain = {}
 	local function log_gain(set)
-		if not (gain and gain.type and gainTable[gain.type]) then return end
+		local key = gain.type and gainTable[gain.type]
+		if not key then return end
 
-		local actor = Skada:GetActor(set, gain.actorid, gain.actorname, gain.actorflags)
+		local actor = Skada:GetActor(set, gain.actorname, gain.actorid, gain.actorflags)
 		if not actor then return end
 
-		actor[gainTable[gain.type]] = (actor[gainTable[gain.type]] or 0) + gain.amount
-		set[gainTable[gain.type]] = (set[gainTable[gain.type]] or 0) + gain.amount
+		actor[key] = (actor[key] or 0) + gain.amount
+		set[key] = (set[key] or 0) + gain.amount
 
 		-- saving this to total set may become a memory hog deluxe.
 		if (set == Skada.total and not P.totalidc) or not gain.spellid then return end
 
-		actor[spellTable[gain.type]] = actor[spellTable[gain.type]] or {}
-		actor[spellTable[gain.type]][gain.spellid] = (actor[spellTable[gain.type]][gain.spellid] or 0) + gain.amount
+		key = spellTable[gain.type]
+		actor[key] = actor[key] or {}
+		actor[key][gain.spellid] = (actor[key][gain.spellid] or 0) + gain.amount
 	end
 
 	local function spell_energize(t)
@@ -105,7 +107,7 @@ Skada:RegisterModule("Resources", function(L, P)
 		local instance = Skada:NewModule(format("Power gained: %s", powername))
 		setmetatable(instance, mode_base_mt)
 
-		local pmode = instance:NewModule(format("%s gained spells", powername))
+		local pmode = instance:NewModule("Spell List")
 		setmetatable(pmode, mode_actor_mt)
 
 		pmode.powerid = power
@@ -168,7 +170,7 @@ Skada:RegisterModule("Resources", function(L, P)
 		win.title = uformat(L["%s's gained %s"], win.actorname, L[self.powername])
 		if not set or not win.actorname then return end
 
-		local actor = set:GetActor(win.actorid, win.actorname)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		if not actor or actor.enemy then return end -- unavailable for enemies yet
 
 		local total = actor and self.power and actor[self.power]
@@ -198,7 +200,7 @@ Skada:RegisterModule("Resources", function(L, P)
 	local mode_runic = mode_base:Create(SPELL_POWER_RUNIC_POWER)
 
 	function mode:OnEnable()
-		self.metadata = {columns = {Amount = true, Percent = true, sPercent = true}}
+		self.metadata = {columns = {Amount = true, Percent = false, sPercent = true}}
 		mode_cols = self.metadata.columns
 		Skada:AddColumnOptions(self)
 

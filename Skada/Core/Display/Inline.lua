@@ -4,7 +4,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 	local mod = Skada:NewModule("Inline Bar Display")
 
 	local pairs, tostring, type = pairs, tostring, type
-	local strrep, format, strmatch = string.rep, string.format, string.match
+	local format, strmatch = string.format, string.match
 	local tinsert, tremove, tsort = table.insert, table.remove, table.sort
 	local GameTooltip = GameTooltip
 	local GetScreenWidth = GetScreenWidth
@@ -35,33 +35,6 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 	end
 
 	local buttonTexture = [[Interface\AddOns\Skada\Media\Textures\toolbar%s\config.blp]]
-
-	local function serial(val, name, skipnewlines, depth)
-		skipnewlines = skipnewlines or false
-		depth = depth or 0
-
-		local tmp = strrep("·", depth)
-		if name then
-			tmp = tmp .. name .. "="
-		end
-
-		if type(val) == "table" then
-			tmp = tmp .. "{" .. (not skipnewlines and "\n" or "")
-			for k, v in pairs(val) do
-				tmp = tmp .. serial(v, k, skipnewlines, depth + 1) .. "," .. (not skipnewlines and "\n" or "")
-			end
-			tmp = tmp .. strrep(" ", depth) .. "}"
-		elseif type(val) == "number" then
-			tmp = tmp .. tostring(val)
-		elseif type(val) == "string" then
-			tmp = tmp .. format("%q", val)
-		elseif type(val) == "boolean" then
-			tmp = tmp .. (val and "true" or "false")
-		else
-			tmp = tmp .. '"[inserializeable datatype:' .. type(val) .. ']"'
-		end
-		return tmp
-	end
 
 	local function BarLeave(bar)
 		if ttactive then
@@ -167,7 +140,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		local frame = window.frame
 
 		if not frame then
-			frame = CreateFrame("Frame", p.name .. "InlineFrame", UIParent)
+			frame = CreateFrame("Frame", format("%sInlineWindow%s", folder, p.name), UIParent)
 			frame:SetFrameLevel(1)
 
 			if p.height == 15 then
@@ -222,7 +195,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		menu:SetWidth(12)
 		menu:SetHeight(12)
 		menu:SetNormalTexture(format(buttonTexture, p.title.toolbar or 1))
-		menu:SetHighlightTexture(format(buttonTexture, p.title.toolbar or 1), 1.0)
+		menu:SetHighlightTexture(format(buttonTexture, p.title.toolbar or 1), "ADD")
 		menu:SetAlpha(0.5)
 		menu:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 		menu:SetPoint("LEFT", frame, "LEFT", 6, 0)
@@ -270,9 +243,9 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		bar.value = 0
 		bar.win = win
 
-		bar.bg = CreateFrame("Frame", "$parentBackground" .. bar.uuid, win.frame)
+		bar.bg = CreateFrame("Frame", format("$parentBackground%d", bar.uuid), win.frame)
 		bar.bg:SetFrameLevel(win.frame:GetFrameLevel() + 6)
-		bar.label = bar.bg:CreateFontString("label" .. bar.uuid)
+		bar.label = win.frame:CreateFontString(format("$parentLabel%d", bar.uuid))
 		bar.label:SetFont(mod:GetFont(win.db))
 		bar.label:SetTextColor(mod:GetFontColor(win.db))
 		bar.label:SetJustifyH("LEFT")
@@ -353,12 +326,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		end
 
 		if bardata.valuetext then
-			if db.isonnewline and db.barfontsize * 2 < db.height then
-				label = label .. "\n"
-			else
-				label = label .. " - "
-			end
-			label = label .. bardata.valuetext
+			label = format("%s%s%s", label, (db.isonnewline and db.barfontsize * 2 < db.height) and "\n" or " - ", bardata.valuetext)
 		end
 
 		bar.label:SetFont(mod:GetFont(db))
@@ -426,9 +394,9 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		for key, bar in pairs(mybars) do
 			bar.bg:SetHeight(win.db.height)
 			bar.bg:SetPoint("BOTTOMLEFT", win.frame, "BOTTOMLEFT", left, 0)
+			bar.bg:SetWidth(bar.label:GetStringWidth())
 			bar.label:SetHeight(win.db.height)
 			bar.label:SetPoint("BOTTOMLEFT", win.frame, "BOTTOMLEFT", left, 0)
-			bar.bg:SetWidth(bar.label:GetStringWidth())
 
 			if win.db.fixedbarwidth then
 				left = left + win.db.barwidth

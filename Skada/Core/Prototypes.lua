@@ -19,14 +19,14 @@ function setPrototype:GetTime()
 end
 
 -- returns the actor's time if found (player or enemy)
-function setPrototype:GetActorTime(id, name, active)
-	local actor = self:GetActor(id, name)
+function setPrototype:GetActorTime(name, id, active)
+	local actor = self:GetActor(name, id)
 	return actor and actor:GetTime(self, active) or self:GetTime()
 end
 
 -- attempts to find an actor (player or enemy)
-function setPrototype:GetActor(id, name, no_strict)
-	return Skada:FindActor(self, id, name, no_strict)
+function setPrototype:GetActor(name, id, no_strict)
+	return Skada:FindActor(self, name, id, no_strict)
 end
 
 do
@@ -117,14 +117,14 @@ function setPrototype:GetOverkill(class)
 end
 
 -- returns the actor's damage amount
-function setPrototype:GetActorDamage(id, name, useful)
-	local actor = self:GetActor(id, name)
+function setPrototype:GetActorDamage(name, id, useful)
+	local actor = self:GetActor(name, id)
 	return actor and actor:GetDamage(useful) or 0
 end
 
 -- returns the actor's dps and damage amount.
-function setPrototype:GetActorDPS(id, name, useful, active)
-	local actor = self:GetActor(id, name)
+function setPrototype:GetActorDPS(name, id, useful, active)
+	local actor = self:GetActor(name, id)
 	if actor then
 		return actor:GetDPS(self, useful, active)
 	end
@@ -132,21 +132,12 @@ function setPrototype:GetActorDPS(id, name, useful, active)
 end
 
 -- returns the actor's damage targets table if found
-function setPrototype:GetActorDamageTargets(id, name, tbl)
-	local actor = self:GetActor(id, name)
+function setPrototype:GetActorDamageTargets(name, id, tbl)
+	local actor = self:GetActor(name, id)
 	if actor then
-		local targets, total = actor:GetDamageTargets(self, tbl)
-		return targets, total, actor
+		local targets, total, overkill = actor:GetDamageTargets(self, tbl)
+		return targets, total, actor, overkill
 	end
-end
-
--- returns the actor's damage on the given target
-function setPrototype:GetActorDamageOnTarget(id, name, targetname)
-	local actor = self:GetActor(id, name)
-	if actor then
-		return actor:GetDamageOnTarget(targetname)
-	end
-	return 0, 0, 0
 end
 
 -- ------------------------------------
@@ -171,30 +162,9 @@ function setPrototype:GetDTPS(class, enemy)
 	return total / self:GetTime(), total
 end
 
--- returns the actor's damage taken amount
-function setPrototype:GetActorDamageTaken(id, name)
-	local actor = self:GetActor(id, name)
-	return actor and actor:GetDamageTaken()
-end
-
--- returns the actor's dtps and damage taken amount
-function setPrototype:GetActorDTPS(id, name)
-	local actor = self:GetActor(id, name)
-	if actor then
-		return actor:GetDTPS(self)
-	end
-	return 0, 0
-end
-
--- returns the actor's damage taken spells table if found
-function setPrototype:GetActorDamageTakenSpells(id, name)
-	local actor = self:GetActor(id, name)
-	return actor and actor.damagedspells or nil
-end
-
 -- returns the actor's damage taken sources table if found
-function setPrototype:GetActorDamageSources(id, name, tbl)
-	local actor = self:GetActor(id, name)
+function setPrototype:GetActorDamageSources(name, id, tbl)
+	local actor = self:GetActor(name, id)
 	if actor then
 		local sources, total = actor:GetDamageSources(self, tbl)
 		return sources, total, actor
@@ -202,8 +172,8 @@ function setPrototype:GetActorDamageSources(id, name, tbl)
 end
 
 -- returns the damage, overkill and useful
-function setPrototype:GetActorDamageFromSource(id, name, targetname)
-	local actor = self:GetActor(id, name)
+function setPrototype:GetActorDamageFromSource(name, id, targetname)
+	local actor = self:GetActor(name, id)
 	if actor then
 		return actor:GetDamageFromSource(targetname)
 	end
@@ -211,8 +181,8 @@ function setPrototype:GetActorDamageFromSource(id, name, targetname)
 end
 
 -- actor heal targets
-function setPrototype:GetActorHealTargets(id, name, tbl)
-	local actor = self:GetActor(id, name)
+function setPrototype:GetActorHealTargets(name, id, tbl)
+	local actor = self:GetActor(name, id)
 	if actor then
 		local targets, total = actor:GetHealTargets(self, tbl)
 		return targets, total, actor
@@ -378,7 +348,7 @@ do
 				end
 			end
 		end
-		return tbl, damage
+		return tbl, damage, self.overkill or 0
 	end
 end
 

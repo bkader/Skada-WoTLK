@@ -21,7 +21,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 
 	local function activity_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local actor = set and set:GetActor(id, label)
+		local actor = set and set:GetActor(label, id)
 		if not actor then return end
 
 		local settime = set:GetTime()
@@ -43,7 +43,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		win.title = uformat(L["%s's activity"], win.actorname)
 		if not win.actorname then return end
 
-		local actor = set:GetActor(win.actorid, win.actorname)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local maxtime = actor and actor:GetTime(set, true)
 		local targets = maxtime and get_activity_targets(actor, set)
 

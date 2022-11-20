@@ -1805,6 +1805,7 @@ do
 		self.iconFrame = self.iconFrame or CreateFrame("Frame", nil, self)
 		self.iconFrame:SetPoint("LEFT", self, "LEFT")
 		self.iconFrame:SetFrameLevel(self:GetFrameLevel() + 1)
+		self.iconFrame.bar = self
 
 		self.icon = self.icon or self.iconFrame:CreateTexture(nil, "OVERLAY")
 		self.icon:SetAllPoints(self.iconFrame)

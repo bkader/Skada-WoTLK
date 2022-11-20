@@ -43,7 +43,7 @@ Skada.windowdefaults = {
 		font = "Accidental Presidency",
 		fontsize = 13,
 		fontflags = "",
-		color = {r = 0.3, g = 0.3, b = 0.3, a = 1},
+		color = {r = 0.15, g = 0.15, b = 0.15, a = 1},
 		texture = "Armory",
 		textcolor = {r = 0.9, g = 0.9, b = 0.9, a = 1},
 		bordercolor = {r = 0, g = 0, b = 0, a = 1},
@@ -907,7 +907,7 @@ do
 			local fields = {"Version", "Date", "Author", "Credits", "License", "Website", "Discord", "Localizations", "Thanks"}
 			for i = 1, #fields do
 				local field = fields[i]
-				local meta = GetAddOnMetadata(folder, field) or GetAddOnMetadata(folder, "X-" .. field)
+				local meta = GetAddOnMetadata(folder, field) or GetAddOnMetadata(folder, format("X-%s", field))
 				if meta then
 					if meta:match("^http[s]://[a-zA-Z0-9_/]-%.[a-zA-Z]") or meta:match("^[%w.]+@%w+%.%w+$") then
 						meta = format("\124cff20ff20%s\124r", meta)
@@ -989,7 +989,7 @@ do
 			set = function(info, value)
 				local colname = info[#info]
 				columns[colname] = value
-				db[mod.name .. "_" .. colname] = value
+				db[format("%s_%s", mod.name, colname)] = value
 				Skada:UpdateDisplay(true)
 			end,
 			args = {}
@@ -997,7 +997,7 @@ do
 
 		local order = 0
 		for colname in next, columns do
-			local c = mod.name .. "_" .. colname
+			local c = format("%s_%s", mod.name, colname)
 
 			-- Set initial value from db if available, otherwise use mod default value.
 			if db[c] ~= nil then

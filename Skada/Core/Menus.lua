@@ -36,18 +36,18 @@ local function get_dropdown_point()
 	x = x / UIParent:GetEffectiveScale()
 	y = y / UIParent:GetEffectiveScale()
 
-	local point, point2 = "LEFT", "LEFT"
+	local point, point2 = "%sLEFT", "%sLEFT"
 	if x > GetScreenWidth() * 0.5 then
-		point = "RIGHT"
-		point2 = "RIGHT"
+		point = "%sRIGHT"
+		point2 = "%sRIGHT"
 	end
 
 	if y > GetScreenHeight() * 0.5 then
-		point = "TOP" .. point
-		point2 = "BOTTOM" .. point2
+		point = format(point, "TOP")
+		point2 = format(point2, "BOTTOM")
 	else
-		point = "BOTTOM" .. point
-		point2 = "TOP" .. point2
+		point = format(point, "BOTTOM")
+		point2 = format(point2, "TOP")
 	end
 
 	return point, point2, x, y
@@ -1134,7 +1134,7 @@ do
 		frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
 
 		if window then
-			frame:SetTitle(L["Report"] .. format(" - %s", window.db.name))
+			frame:SetTitle(format("%s - %s", L["Report"], window.db.name))
 		else
 			frame:SetTitle(L["Report"])
 		end

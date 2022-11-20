@@ -4,7 +4,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 	local mode = Skada:NewModule("Threat")
 
 	local format, max = string.format, math.max
-	local UnitExists, UnitName = UnitExists, UnitName
+	local UnitExists, UnitName, UnitFullName = UnitExists, UnitName, Private.UnitFullName
 	local UnitDetailedThreatSituation, InCombatLockdown = UnitDetailedThreatSituation, InCombatLockdown
 	local GroupIterator, GetUnitRole, GetUnitSpec = Skada.GroupIterator, Skada.GetUnitRole, Skada.GetUnitSpec
 	local PlaySoundFile = PlaySoundFile
@@ -18,7 +18,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 		local GetItemInfo, IsItemInRange = GetItemInfo, IsItemInRange
 		local UnitGUID, UnitClass = UnitGUID, UnitClass
 		local nr, max_threat, last_warn, my_percent = 0, 0, time(), nil
-		local threat_table, we_should_warn = nil, false
+		local threat_table, we_should_warn = {}, false
 		local tank_threat, tank_value, ruby_acorn, queried
 
 		-- bar colors
@@ -57,21 +57,21 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 				end
 
 				return
-			elseif mode.db.ignorePets and owner then -- ignore pets
-				return
 			end
 
-			local guid = UnitGUID(unit)
-			local actor = threat_table and threat_table[guid]
+			-- ignore pets
+			if mode.db.ignorePets and owner then return end
+
+			local actorname = UnitFullName(unit, owner, true)
+			local actor = threat_table[actorname]
 
 			if not actor then
 				actor = new()
-				actor.id = guid
 				actor.unit = unit
-				actor.name = UnitName(unit)
 
+				local guid = UnitGUID(unit)
+				actor.id = guid
 				if owner ~= nil then
-					actor.name = actor.name .. " (" .. UnitName(owner) .. ")"
 					actor.class = "PET"
 				else
 					_, actor.class = UnitClass(unit)
@@ -80,8 +80,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 				end
 
 				-- cache the actor.
-				threat_table = threat_table or {}
-				threat_table[guid] = actor
+				threat_table[actorname] = actor
 			end
 
 			if not actor or not actor.unit then return end
@@ -91,9 +90,9 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 				nr = nr + 1
 				local d = win:nr(nr)
 
-				d.id = actor.id or actor.name
-				d.label = actor.name
-				d.text = actor.id and Skada:FormatName(actor.name, actor.id)
+				d.id = actor.id or actorname
+				d.label = actorname
+				d.text = actor.id and Skada:FormatName(actorname, actor.id)
 
 				d.class = actor.class
 				d.role = actor.role

@@ -32,22 +32,21 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 		end
 	end
 
-	local data = {}
-	local function log_parry(set)
-		local actor = Skada:GetActor(set, data.actorid, data.actorname, data.actorflags)
+	local function log_parry(set, actorname, actorid, actorflags, dstName)
+		local actor = Skada:GetActor(set, actorname, actorid, actorflags)
 		if not actor then return end
 
 		actor.parry = (actor.parry or 0) + 1
 		set.parry = (set.parry or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
-		if (set == Skada.total and not P.totalidc) or not data.dstName then return end
+		if (set == Skada.total and not P.totalidc) or not dstName then return end
 
 		actor.parrytargets = actor.parrytargets or {}
-		actor.parrytargets[data.dstName] = (actor.parrytargets[data.dstName] or 0) + 1
+		actor.parrytargets[dstName] = (actor.parrytargets[dstName] or 0) + 1
 
 		if M.parryannounce and set ~= Skada.total then
-			Skada:SendChat(format(L["%s parried %s (%s)"], data.dstName, data.actorname, actor.parrytargets[data.dstName] or 1), M.parrychannel, "preset")
+			Skada:SendChat(format(L["%s parried %s (%s)"], dstName, actorname, actor.parrytargets[dstName] or 1), M.parrychannel, "preset")
 		end
 	end
 
@@ -62,10 +61,8 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 
 	local function spell_missed(t)
 		if t.misstype == "PARRY" and t.dstName and is_parry_boss(t.dstName, t.dstGUID) then
-			data.actorid, data.actorname, data.actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
-			data.dstName = t.dstName
-
-			Skada:DispatchSets(log_parry)
+			local actorid, actorname, actorflags = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
+			Skada:DispatchSets(log_parry, actorname, actorid, actorflags, t.dstName)
 		end
 	end
 
@@ -78,7 +75,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 		win.title = uformat(L["%s's parry targets"], win.actorname)
 		if not set or not win.actorname then return end
 
-		local actor = set:GetActor(win.actorid, win.actorname)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local total = (actor and not actor.enemy) and actor.parry
 		local targets = (total and total > 0) and actor.parrytargets
 

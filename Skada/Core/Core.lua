@@ -790,14 +790,14 @@ end
 function Window:FilterClass(id, label)
 	if self.class then
 		self.class = nil
-		self:DisplayMode(self.selectedmode)
-		return
+	else
+		local set = self:GetSelectedSet()
+		local actor = set and set:GetActor(label, id)
+		self.class = actor and actor.class or nil
 	end
 
-	local set = self:GetSelectedSet()
-	local actor = set and set:GetActor(id, label)
-	self.class = actor and actor.class or nil
-	self:DisplayMode(self.selectedmode)
+	self:Wipe()
+	self:UpdateDisplay()
 end
 
 local user_sort_func
@@ -914,11 +914,12 @@ end
 
 function Window:RightClick(bar, button)
 	if self.selectedmode then
-		if #self.history > 0 then
-			self:DisplayMode(tremove(self.history))
-		elseif self.class then
+		if self.class then
 			self.class = nil
-			self:DisplayMode(self.selectedmode)
+			self:Wipe()
+			self:UpdateDisplay()
+		elseif #self.history > 0 then
+			self:DisplayMode(tremove(self.history))
 		else
 			self.class = nil
 			self:DisplayModes(self.selectedset)
@@ -1345,7 +1346,7 @@ do
 				for actorname, actor in pairs(actors) do
 					local name = not actor.enemy and gsub(actorname, "%-.*", "")
 					if name and ((LOCALE_ruRU and find_name_declension(text, name)) or validate_pet_owner(text, name)) then
-						return actor.id, actor.name
+						return actor.id, actorname
 					end
 				end
 			end

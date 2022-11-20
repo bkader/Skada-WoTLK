@@ -786,7 +786,6 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 								end
 
 								if bar.link then
-									bar.iconFrame.bar = bar
 									bar.iconFrame:EnableMouse(true)
 									bar.iconFrame:SetScript("OnEnter", iconOnEnter)
 									bar.iconFrame:SetScript("OnLeave", GameTooltip_Hide)
@@ -1056,7 +1055,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			end
 
 			-- Header
-			local fo = CreateFont("TitleFont" .. win.db.name)
+			local fo = g.TitleFont or CreateFont(format("TitleFont%s", win.db.name))
+			g.TitleFont = fo
 			fo:SetFont(p.title.fontpath or Skada:MediaFetch("font", p.title.font), p.title.fontsize, p.title.fontflags)
 			if p.title.textcolor then
 				fo:SetTextColor(p.title.textcolor.r, p.title.textcolor.g, p.title.textcolor.b, p.title.textcolor.a)

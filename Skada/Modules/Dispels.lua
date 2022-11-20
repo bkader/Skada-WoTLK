@@ -27,7 +27,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 
 	local dispel = {}
 	local function log_dispel(set)
-		local actor = Skada:GetActor(set, dispel.actorid, dispel.actorname, dispel.actorflags)
+		local actor = Skada:GetActor(set, dispel.actorname, dispel.actorid, dispel.actorflags)
 		if not actor then return end
 
 		-- increment actor's and set's dispels count
@@ -82,7 +82,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	function mode_extraspell:Update(win, set)
 		win.title = uformat(L["%s's dispelled spells"], win.actorname)
 
-		local spells, total, actor = get_actor_dispelled_spells(set, win.actorid, win.actorname)
+		local spells, total, actor = get_actor_dispelled_spells(set, win.actorname, win.actorid)
 		if not spells then
 			return
 		elseif win.metadata then
@@ -107,7 +107,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's dispelled targets"], win.actorname)
 
-		local targets, total, actor = get_actor_dispelled_targets(set, win.actorid, win.actorname)
+		local targets, total, actor = get_actor_dispelled_targets(set, win.actorname, win.actorid)
 		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
@@ -132,7 +132,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	function mode_spell:Update(win, set)
 		win.title = uformat(L["%s's dispel spells"], win.actorname)
 
-		local actor = set and set:GetActor(win.actorid, win.actorname)
+		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.dispel
 		local spells = (total and total > 0) and actor.dispelspells
 
@@ -217,8 +217,8 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 
 	---------------------------------------------------------------------------
 
-	get_actor_dispelled_spells = function(self, id, name, tbl)
-		local actor = self:GetActor(id, name)
+	get_actor_dispelled_spells = function(self, name, id, tbl)
+		local actor = self:GetActor(name, id)
 		local total = actor and actor.dispel
 		local spells = total and total > 0 and actor.dispelspells
 		if not spells then return end
@@ -234,8 +234,8 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 		return tbl, total, actor
 	end
 
-	get_actor_dispelled_targets = function(self, id, name, tbl)
-		local actor = self:GetActor(id, name)
+	get_actor_dispelled_targets = function(self, name, id, tbl)
+		local actor = self:GetActor(name, id)
 		local total = actor and actor.dispel
 		local spells = total and total > 0 and actor.dispelspells
 		if not spells then return end

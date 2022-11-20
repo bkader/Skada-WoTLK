@@ -2,8 +2,8 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 	local mode = Skada:NewModule("Sunder Counter")
-	local mode_target = mode:NewModule("Sunder target list")
-	local mode_target_source = mode_target:NewModule("Sunder source list")
+	local mode_target = mode:NewModule("Target List")
+	local mode_target_source = mode_target:NewModule("Source List")
 	local get_actor_sunder_sources = nil
 	local get_actor_sunder_targets = nil
 
@@ -29,19 +29,18 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		end
 	end
 
-	local data = {}
-	local function log_sunder(set)
-		local actor = Skada:GetActor(set, data.actorid, data.actorname, data.actorflags)
+	local function log_sunder(set, actorname, actorid, actorflags, dstName)
+		local actor = Skada:GetActor(set, actorname, actorid, actorflags)
 		if not actor then return end
 
 		set.sunder = (set.sunder or 0) + 1
 		actor.sunder = (actor.sunder or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
-		if (set == Skada.total and not P.totalidc) or not data.dstName then return end
+		if (set == Skada.total and not P.totalidc) or not dstName then return end
 
 		actor.sundertargets = actor.sundertargets or {}
-		actor.sundertargets[data.dstName] = (actor.sundertargets[data.dstName] or 0) + 1
+		actor.sundertargets[dstName] = (actor.sundertargets[dstName] or 0) + 1
 	end
 
 	local function sunder_dropped(dstGUID)
@@ -74,12 +73,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 			active_sunders[t.dstGUID] = GetTime() + M.sunderdelay
 		end
 
-		data.actorid = last_srcGUID
-		data.actorname = last_srcName
-		data.actorflags = last_srcFlags
-		data.dstName = t.dstName
-
-		Skada:DispatchSets(log_sunder)
+		Skada:DispatchSets(log_sunder, last_srcName, last_srcGUID, last_srcFlags, t.dstName)
 
 		-- announce disabled or only for bosses
 		if not M.sunderannounce or (M.sunderbossonly and not Skada:IsBoss(t.dstGUID, true)) then return end
@@ -169,7 +163,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		win.title = uformat(L["%s's <%s> targets"], win.actorname, spell_sunder)
 		if not set or not win.actorname then return end
 
-		local targets, total, actor = get_actor_sunder_targets(set, win.actorid, win.actorname)
+		local targets, total, actor = get_actor_sunder_targets(set, win.actorname, win.actorid)
 		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
@@ -270,7 +264,6 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 	end
 
 	function mode:CombatLeave()
-		clear(data)
 		clear(sunder_targets)
 		last_srcGUID, last_srcName, last_srcFlags = nil, nil, nil
 	end
@@ -376,8 +369,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		return tbl, total
 	end
 
-	get_actor_sunder_targets = function(self, id, name, tbl)
-		local actor = self:GetActor(id, name)
+	get_actor_sunder_targets = function(self, name, id, tbl)
+		local actor = self:GetActor(name, id)
 		local total = actor and actor.sunder
 		if not actor.sundertargets then return end
 

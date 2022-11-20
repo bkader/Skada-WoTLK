@@ -21,28 +21,23 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		end
 	end
 
-	local ress = {}
-	local function log_resurrect(set)
-		local actor = Skada:GetActor(set, ress.actorid, ress.actorname, ress.actorflags)
+	local function log_resurrect(set, actorname, actorid, actorflags, dstName)
+		local actor = Skada:GetActor(set, actorname, actorid, actorflags)
 		if not actor then return end
 
 		actor.ress = (actor.ress or 0) + 1
 		set.ress = (set.ress or 0) + 1
 
 		-- saving this to total set may become a memory hog deluxe.
-		if (set == Skada.total and not P.totalidc) or not ress.dstName then return end
+		if (set == Skada.total and not P.totalidc) or not dstName then return end
 		actor.resstargets = actor.resstargets or {}
-		actor.resstargets[ress.dstName] = (actor.resstargets[ress.dstName] or 0) + 1
+		actor.resstargets[dstName] = (actor.resstargets[dstName] or 0) + 1
 	end
 
 	local function spell_resurrect(t)
 		if t.spellid and (t.event == "SPELL_RESURRECT" or ress_spells[t.spellid]) then
-			ress.actorid = t.srcGUID
-			ress.actorname = t.srcName
-			ress.actorflags = t.srcFlags
-			ress.dstName = (t.event == "SPELL_RESURRECT") and t.dstName or t.srcName
-
-			Skada:DispatchSets(log_resurrect)
+			local dstName = (t.event == "SPELL_RESURRECT") and t.dstName or t.srcName
+			Skada:DispatchSets(log_resurrect, t.srcName, t.srcGUID, t.srcFlags, dstName)
 		end
 	end
 
@@ -55,7 +50,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		win.title = uformat(L["%s's resurrect targets"], win.actorname)
 		if not set or not win.actorname then return end
 
-		local targets, total, actor = get_actor_ress_targets(set, win.actorid, win.actorname)
+		local targets, total, actor = get_actor_ress_targets(set, win.actorname, win.actorid)
 		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
@@ -133,8 +128,8 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 
 	---------------------------------------------------------------------------
 
-	get_actor_ress_targets = function(self, id, name, tbl)
-		local actor = self:GetActor(id, name)
+	get_actor_ress_targets = function(self, name, id, tbl)
+		local actor = self:GetActor(name, id)
 		local total = actor and actor.ress
 		local targets = total and actor.restargets
 		if not targets then return end

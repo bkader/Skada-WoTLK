@@ -28,7 +28,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 
 	local data = {}
 	local function log_interrupt(set)
-		local actor = Skada:GetActor(set, data.actorid, data.actorname, data.actorflags)
+		local actor = Skada:GetActor(set, data.actorname, data.actorid, data.actorflags)
 		if not actor then return end
 
 		-- increment actor's and set's interrupts count
@@ -96,7 +96,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		win.title = uformat(L["%s's interrupted spells"], win.actorname)
 		if not set or not win.actorname then return end
 
-		local spells, total, actor = get_actor_interrupted_spells(set, win.actorid, win.actorname)
+		local spells, total, actor = get_actor_interrupted_spells(set, win.actorname, win.actorid)
 		if not spells or not actor or total == 0 then
 			return
 		elseif win.metadata then
@@ -122,7 +122,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		win.title = uformat(L["%s's interrupted targets"], win.actorname)
 		if not set or not win.actorname then return end
 
-		local targets, total, actor = get_actor_interrupt_targets(set, win.actorid, win.actorname)
+		local targets, total, actor = get_actor_interrupt_targets(set, win.actorname, win.actorid)
 		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
@@ -148,7 +148,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		win.title = uformat(L["%s's interrupt spells"], win.actorname)
 		if not set or not win.actorname then return end
 
-		local actor = set:GetActor(win.actorid, win.actorname)
+		local actor = set:GetActor(win.actorname, win.actorid)
 		local total = (actor and not actor.enemy) and actor.interrupt
 		local spells = (total and total > 0) and actor.interruptspells
 
@@ -274,8 +274,8 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 
 	---------------------------------------------------------------------------
 
-	get_actor_interrupted_spells = function(self, id, name, tbl)
-		local actor = self:GetActor(id, name)
+	get_actor_interrupted_spells = function(self, name, id, tbl)
+		local actor = self:GetActor(name, id)
 		local total = actor and actor.interrupt
 		local spells = total and actor.interruptspells
 		if not spells then return end
@@ -291,8 +291,8 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 		return tbl, total, actor
 	end
 
-	get_actor_interrupt_targets = function(self, id, name, tbl)
-		local actor = self:GetActor(id, name)
+	get_actor_interrupt_targets = function(self, name, id, tbl)
+		local actor = self:GetActor(name, id)
 		local total = actor and actor.interrupt
 		local spells = total and actor.interruptspells
 		if not spells then return end

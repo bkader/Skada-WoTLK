@@ -25,8 +25,9 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		end
 	end
 
-	local function log_fail(set, actorid, actorname, spellid, failname)
-		local actor = Skada:GetActor(set, actorid, actorname, 0)
+	local actorflags = Private.DEFAULT_FLAGS
+	local function log_fail(set, actorname, actorid, spellid, failname)
+		local actor = Skada:GetActor(set, actorname, actorid, actorflags)
 		if not actor or (actor.role == "TANK" and tank_events[failname]) then return end
 
 		actor.fail = (actor.fail or 0) + 1
@@ -43,7 +44,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 		local actorid = spellid and not ignored_spells[spellid] and UnitGUID(actorname)
 		if not actorid then return end
 
-		Skada:DispatchSets(log_fail, actorid, actorname, tostring(spellid), failname)
+		Skada:DispatchSets(log_fail, actorname, actorid, tostring(spellid), failname)
 	end
 
 	function mode_spell_target:Enter(win, id, label)
@@ -84,7 +85,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 	function mode_spell:Update(win, set)
 		win.title = uformat(L["%s's fails"], win.actorname)
 
-		local actor = set and set:GetActor(win.actorid, win.actorname)
+		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.fail
 		local spells = (total and total > 0) and actor.failspells
 

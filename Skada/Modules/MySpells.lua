@@ -19,7 +19,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 
 	local function spell_tooltip(win, id, label, tooltip)
 		local set = win:GetSelectedSet()
-		local actor = set and set:GetActor(userGUID, userName)
+		local actor = set and set:GetActor(userName, userGUID)
 		if not actor then return end
 
 		local spell, damage = nil, nil
@@ -85,7 +85,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 	function mode:Update(win, set)
 		win.title = L["My Spells"]
 
-		local player = set and set:GetActor(userGUID, userName)
+		local player = set and set:GetActor(userName, userGUID)
 		if not player then
 			return
 		elseif win.metadata then

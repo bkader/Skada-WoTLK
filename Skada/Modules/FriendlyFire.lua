@@ -30,7 +30,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local function log_damage(set)
 		if not dmg.amount or dmg.amount == 0 then return end
 
-		local actor = Skada:GetActor(set, dmg.actorid, dmg.actorname, dmg.actorflags)
+		local actor = Skada:GetActor(set, dmg.actorname, dmg.actorid, dmg.actorflags)
 		if not actor then
 			return
 		elseif not passive_spells[dmg.spell] then
@@ -86,7 +86,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's targets"], win.actorname)
 
-		local targets, total, actor = get_actor_friendfire_targets(set, win.actorid, win.actorname)
+		local targets, total, actor = get_actor_friendfire_targets(set, win.actorname, win.actorid)
 		if not targets or not actor or total == 0 then
 			return
 		elseif win.metadata then
@@ -113,7 +113,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	function mode_spell:Update(win, set)
 		win.title = L["actor damage"](win.actorname or L["Unknown"])
 
-		local actor = set and set:GetActor(win.actorid, win.actorname)
+		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.friendfire
 		local spells = (total and total > 0) and actor.friendfirespells
 
@@ -144,7 +144,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		win.title = uformat(L["%s's <%s> damage"], win.actorname, win.spellname)
 		if not win.spellid then return end
 
-		local targets, total, actor = get_spell_friendfire_targets(set, win.actorid, win.actorname, win.spellid)
+		local targets, total, actor = get_spell_friendfire_targets(set, win.actorname, win.actorid, win.spellid)
 		if not targets or not actor then
 			return
 		elseif win.metadata then
@@ -262,8 +262,8 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 	---------------------------------------------------------------------------
 
-	get_actor_friendfire_targets = function(self, id, name, tbl)
-		local actor = self:GetActor(id, name)
+	get_actor_friendfire_targets = function(self, name, id, tbl)
+		local actor = self:GetActor(name, id)
 		local total = actor and actor.friendfire
 		local spells = total and actor.friendfirespells
 		if not spells then return end
@@ -287,8 +287,8 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		return tbl, total, actor
 	end
 
-	get_spell_friendfire_targets = function(self, id, name, spellid, tbl)
-		local actor = spellid and self:GetActor(id, name)
+	get_spell_friendfire_targets = function(self, name, id, spellid, tbl)
+		local actor = spellid and self:GetActor(name, id)
 		local spell = actor and actor.friendfirespells and actor.friendfirespells[spellid]
 		if not spell or not spell.targets then return end
 
