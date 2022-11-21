@@ -891,7 +891,7 @@ do
 		if not initOptions then
 			initOptions = {
 				type = "group",
-				name = format("\124T%s:18:18:0:0:32:32:2:30:2:30\124t \124cffffd200Skada\124r \124cffffffff%s\124r", Skada.logo, Skada.version),
+				name = format("\124T%s:18:18:0:0:32:32:2:30:2:30\124t \124cffffd200Skada\124r \124cffffffff%s\124r", Skada.logo, L["A damage meter."]),
 				args = {
 					open = {
 						type = "execute",
@@ -899,28 +899,44 @@ do
 						width = "full",
 						order = 0,
 						func = Private.OpenOptions
+					},
+					version = {
+						type = "description",
+						name = format("\n\124cffffd200%s\124r:  %s", L["Version"], Skada.version),
+						fontSize = "medium",
+						width = "double",
+						order = 10
+					},
+					date = {
+						type = "description",
+						name = format("\n\124cffffd200%s\124r:  %s", L["Date"], GetAddOnMetadata(folder, "X-Date")),
+						fontSize = "medium",
+						width = "double",
+						order = 20
+					},
+					author = {
+						type = "description",
+						name = format("\n\124cffffd200%s\124r:  %s", L["Author"], GetAddOnMetadata(folder, "Author")),
+						fontSize = "medium",
+						width = "double",
+						order = 30
+					},
+					license = {
+						type = "description",
+						name = format("\n\124cffffd200%s\124r:  %s", L["License"], GetAddOnMetadata(folder, "X-License")),
+						fontSize = "medium",
+						width = "double",
+						order = 40
+					},
+					credits = {
+						type = "description",
+						name = format("\n\124cffffd200%s\124r:  %s", L["Credits"], GetAddOnMetadata(folder, "X-Credits")),
+						fontSize = "medium",
+						width = "double",
+						order = 50
 					}
 				}
 			}
-
-			-- about args
-			local fields = {"Version", "Date", "Author", "Credits", "License", "Website", "Discord", "Localizations", "Thanks"}
-			for i = 1, #fields do
-				local field = fields[i]
-				local meta = GetAddOnMetadata(folder, field) or GetAddOnMetadata(folder, format("X-%s", field))
-				if meta then
-					if meta:match("^http[s]://[a-zA-Z0-9_/]-%.[a-zA-Z]") or meta:match("^[%w.]+@%w+%.%w+$") then
-						meta = format("\124cff20ff20%s\124r", meta)
-					end
-					initOptions.args[field] = {
-						type = "description",
-						name = format("\n\124cffffd200%s\124r:  %s", L[field], meta),
-						fontSize = "medium",
-						width = "double",
-						order = i
-					}
-				end
-			end
 		end
 		return initOptions
 	end

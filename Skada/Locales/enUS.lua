@@ -814,15 +814,10 @@ L["%s vs %s: Spells"] = true
 L["%s vs %s: Targets"] = true
 L["%s vs %s: Damage on %s"] = true
 -- about
-L["About"] = true
 L["Author"] = true
 L["Credits"] = true
 L["Date"] = true
-L["Discord"] = true
 L["License"] = true
-L["Localizations"] = true
-L["Revision"] = true
-L["Thanks"] = true
 L["Version"] = true
 L["Website"] = true
 -- custom class names using globals

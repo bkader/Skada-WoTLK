@@ -128,7 +128,7 @@ local create_set
 local delete_set
 do
 	-- recycle sets
-	local recycle_bin = setmetatable({}, {__mode = "k"})
+	local recycle_bin = Private.WeakTable()
 
 	-- cleans a set before reusing or deleting
 	local clear = Private.clearTable
@@ -315,6 +315,16 @@ do
 	function dismiss_pet(guid, delay)
 		if guid and guidToClass[guid] and not guidToName[guid] then
 			Skada:ScheduleTimer(dismiss_handler, delay or 0.1, guid)
+		end
+	end
+end
+
+local function debug_pets()
+	check_group()
+	Skada:Print(L["Pets"])
+	for guid, guidOrClass in pairs(guidToClass) do
+		if guidToName[guidOrClass] then
+			Skada:Printf("%s > %s", guid, classcolors.format(guidToClass[guidOrClass], guidToName[guidOrClass]))
 		end
 	end
 end
@@ -1285,183 +1295,6 @@ function Skada:DeleteSet(set, index)
 end
 
 -------------------------------------------------------------------------------
--- pet functions
-
-do
-	local get_pet_owner_from_tooltip
-	do
-		local pettooltip = CreateFrame("GameTooltip", "SkadaPetTooltip", nil, "GameTooltipTemplate")
-		local GetNumDeclensionSets, DeclineName = GetNumDeclensionSets, DeclineName
-
-		local validate_pet_owner
-		do
-			local ownerPatterns = {}
-			do
-				local i = 1
-				local title = _G["UNITNAME_SUMMON_TITLE" .. i]
-				while (title and title ~= "%s" and find(title, "%s")) do
-					ownerPatterns[#ownerPatterns + 1] = title
-					i = i + 1
-					title = _G["UNITNAME_SUMMON_TITLE" .. i]
-				end
-			end
-
-			function validate_pet_owner(text, name)
-				for i = 1, #ownerPatterns do
-					local pattern = ownerPatterns[i]
-					if pattern and EscapeStr(format(pattern, name)) == text then
-						return true
-					end
-				end
-				return false
-			end
-		end
-
-		-- attempts to find the player guid on Russian clients.
-		local function find_name_declension(text, actorname)
-			for gender = 2, 3 do
-				for decset = 1, GetNumDeclensionSets(actorname, gender) do
-					local ownerName = DeclineName(actorname, gender, decset)
-					if validate_pet_owner(text, ownerName) or find(text, ownerName) then
-						return true
-					end
-				end
-			end
-			return false
-		end
-
-		-- attempt to get the pet's owner from tooltip
-		function get_pet_owner_from_tooltip(guid)
-			local set = guid and Skada.current
-			local actors = set and set.actors
-			if not actors then return end
-
-			pettooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
-			pettooltip:ClearLines()
-			pettooltip:SetHyperlink(format("unit:%s", guid))
-
-			-- we only need to scan the 2nd line.
-			local text = _G["SkadaPetTooltipTextLeft2"] and _G["SkadaPetTooltipTextLeft2"]:GetText()
-			if text and text ~= "" then
-				for actorname, actor in pairs(actors) do
-					local name = not actor.enemy and gsub(actorname, "%-.*", "")
-					if name and ((LOCALE_ruRU and find_name_declension(text, name)) or validate_pet_owner(text, name)) then
-						return actor.id, actorname
-					end
-				end
-			end
-		end
-	end
-
-	local function get_pet_owner_unit(guid)
-		for unit, owner in UnitIterator() do
-			if owner ~= nil and UnitGUID(unit) == guid then
-				return owner
-			end
-		end
-	end
-
-	local function fix_pets_handler(guid, flag)
-		local guidOrClass = guid and guidToClass[guid]
-		if guidOrClass and guidToName[guidOrClass] then
-			return guidOrClass, guidToName[guidOrClass]
-		end
-
-		-- flag is provided and it is mine.
-		if guid and flag and Skada:IsMine(flag) then
-			guidToClass[guid] = userGUID
-			return userGUID, userName
-		end
-
-		-- no owner yet?
-		if guid then
-			-- guess the pet from roster.
-			local ownerUnit = get_pet_owner_unit(guid)
-			if ownerUnit then
-				local ownerGUID = UnitGUID(ownerUnit)
-				guidToClass[guid] = UnitGUID(ownerUnit)
-				return ownerGUID, UnitFullName(ownerUnit)
-			end
-
-			-- guess the pet from tooltip.
-			local ownerGUID, ownerName = get_pet_owner_from_tooltip(guid)
-			if ownerGUID and ownerName then
-				guidToClass[guid] = ownerGUID
-				return ownerGUID, ownerName
-			end
-		end
-	end
-
-	function Skada:FixPets(action)
-		if not action then return end
-		action.petname = nil -- clear it
-
-		-- 1: group member / true: player / false: everything else
-		if IsPlayer(action.actorid, action.actorname, action.actorflags) ~= false then return end
-
-		local ownerGUID, ownerName = fix_pets_handler(action.actorid, action.actorflags)
-		if ownerGUID and ownerName then
-			if P.mergepets then
-				action.petname = action.actorname
-				action.actorid = ownerGUID
-				action.actorname = ownerName
-
-				if action.spellid and action.petname then
-					action.spellid = format("%s.%s", action.spellid, action.petname)
-				end
-				if action.spellname and action.petname then
-					action.spellname = format("%s (%s)", action.spellname, action.petname)
-				end
-			else
-				action.actorname = format("%s <%s>", action.actorname, ownerName)
-			end
-		else
-			-- if for any reason we fail to find the pets, we simply
-			-- adds them separately as a single entry.
-			action.actorid = action.actorname
-		end
-	end
-
-	function Skada:FixMyPets(guid, name, flags)
-		if not IsPet(guid, flags) then
-			return guid, name, flags
-		end
-
-		local ownerGUID, ownerName = fix_pets_handler(guid, flags)
-		if ownerGUID and ownerName then
-			return ownerGUID or guid, ownerName or name, flags
-		end
-
-		return guid, name, flags
-	end
-
-	function Skada:FixPetsName(guid, name, flags)
-		local _, ownerName = self:FixMyPets(guid, name, flags)
-		if ownerName and ownerName ~= name then
-			return format("%s <%s>", name, ownerName)
-		end
-		return name
-	end
-end
-
-function Skada:GetPetOwner(petGUID)
-	local guidOrClass = guidToClass[petGUID]
-	if guidOrClass and guidToName[guidOrClass] then
-		return guidOrClass, guidToName[guidOrClass], guidToClass[guidOrClass]
-	end
-end
-
-local function debug_pets()
-	check_group()
-	Skada:Print(L["Pets"])
-	for guid, guidOrClass in pairs(guidToClass) do
-		if guidToName[guidOrClass] then
-			Skada:Printf("%s > %s", guid, classcolors.format(guidToClass[guidOrClass], guidToName[guidOrClass]))
-		end
-	end
-end
-
--------------------------------------------------------------------------------
 -- tooltip functions
 
 -- sets the tooltip position
@@ -1728,7 +1561,7 @@ local function slash_command(param)
 	local cmd, arg1, arg2, arg3 = Skada:GetArgs(param, 4)
 	cmd = (cmd and cmd ~= "") and lower(cmd) or cmd
 
-	if cmd == "pets" then
+	if cmd == "pets" or cmd == "pet" then
 		debug_pets()
 	elseif cmd == "reset" then
 		Skada:Reset(IsShiftKeyDown())
@@ -1772,8 +1605,6 @@ local function slash_command(param)
 		check_version()
 	elseif cmd == "website" or cmd == "github" then
 		Skada:Printf("\124cffffbb00%s\124r", Skada.website)
-	elseif cmd == "discord" then
-		Skada:Printf("\124cffffbb00%s\124r", Skada.discord)
 	elseif cmd == "timemesure" or cmd == "measure" then
 		if P.timemesure == 2 then
 			P.timemesure = 1
@@ -1821,7 +1652,7 @@ local function slash_command(param)
 		Print("\124cffffaeae/skada\124r \124cffffff33newsegment\124r / \124cffffff33newphase\124r")
 		Print("\124cffffaeae/skada\124r \124cffffff33numformat\124r / \124cffffff33measure\124r")
 		Print("\124cffffaeae/skada\124r \124cffffff33import\124r / \124cffffff33export\124r")
-		Print("\124cffffaeae/skada\124r \124cffffff33about\124r / \124cffffff33version\124r / \124cffffff33website\124r / \124cffffff33discord\124r")
+		Print("\124cffffaeae/skada\124r \124cffffff33about\124r / \124cffffff33version\124r / \124cffffff33website\124r")
 		Print("\124cffffaeae/skada\124r \124cffffff33reset\124r / \124cffffff33reinstall\124r")
 		Print("\124cffffaeae/skada\124r \124cffffff33config\124r / \124cffffff33debug\124r")
 	end
@@ -3154,7 +2985,7 @@ do
 		tentative = nil
 	end
 
-	function Skada:CombatLogEvent(t)
+	function Skada:OnCombatEvent(t)
 		-- ignored combat event?
 		if (not t.event or ignored_events[t.event]) and not (spellcast_events[t.event] and self.current) then return end
 

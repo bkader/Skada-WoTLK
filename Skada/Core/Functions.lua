@@ -10,7 +10,6 @@ local _
 local tablePool, TempTable = Skada.tablePool, Private.TempTable
 local new, del = Private.newTable, Private.delTable
 local L, callbacks = Skada.Locale, Skada.callbacks
-local userName = Skada.userName
 
 -------------------------------------------------------------------------------
 -- debug function
@@ -692,7 +691,7 @@ do
 
 	-- "PURR" is a special key to whisper with progress window.
 	local function send_comm_message(self, channel, target, ...)
-		if target == userName then
+		if target == self.userName then
 			return -- to yourself? really...
 		elseif channel ~= "WHISPER" and channel ~= "PURR" and not IsInGroup() then
 			return -- only for group members!
@@ -732,7 +731,7 @@ do
 	end
 
 	local function on_comm_received(self, prefix, message, channel, sender)
-		if prefix == folder and channel and sender and sender ~= userName then
+		if prefix == folder and channel and sender and sender ~= self.userName then
 			dispatch_comm(sender, Private.deserialize(message))
 		end
 	end
@@ -1066,7 +1065,6 @@ do
 	local actorPrototype = Skada.actorPrototype
 	local playerPrototype = Skada.playerPrototype
 	local enemyPrototype = Skada.enemyPrototype
-	local userGUID, userClass = Skada.userGUID, Skada.userClass
 	local modes = Skada.modes
 
 	local dummy_actor = {} -- used as fallback
@@ -1127,10 +1125,10 @@ do
 			actor.__new = true
 
 			-- is it me? move on..
-			if actorid == userGUID then
-				actor.class = userClass
-				actor.role = GetUnitRole(userGUID)
-				actor.spec = GetUnitSpec(userGUID)
+			if actorid == self.userGUID then
+				actor.class = self.userClass
+				actor.role = GetUnitRole(self.userGUID)
+				actor.spec = GetUnitSpec(self.userGUID)
 			end
 
 			-- actorflags:true => fake actor
@@ -1247,6 +1245,185 @@ do
 			return (actor.enemy and enemyPrototype or playerPrototype):Bind(actor), true
 		end
 		return actor
+	end
+end
+
+-------------------------------------------------------------------------------
+-- pet functions
+
+do
+	local guidToClass = Private.guidToClass
+	local guidToName = Private.guidToName
+	do
+		local GetPetOwnerFromTooltip
+		do
+			local pettooltip = CreateFrame("GameTooltip", format("%sPetTooltip", folder), nil, "GameTooltipTemplate")
+
+			local ValidatePetOwner
+			do
+				local ownerPatterns = {}
+				do
+					local i = 1
+					local title = _G["UNITNAME_SUMMON_TITLE" .. i]
+					while (title and title ~= "%s" and find(title, "%s")) do
+						ownerPatterns[#ownerPatterns + 1] = title
+						i = i + 1
+						title = _G["UNITNAME_SUMMON_TITLE" .. i]
+					end
+				end
+
+				local EscapeStr = Private.EscapeStr
+				function ValidatePetOwner(text, name)
+					for i = 1, #ownerPatterns do
+						local pattern = ownerPatterns[i]
+						if pattern and EscapeStr(format(pattern, name)) == text then
+							return true
+						end
+					end
+					return false
+				end
+			end
+
+			-- attempts to find the player guid on Russian clients.
+			local GetNumDeclensionSets, DeclineName = GetNumDeclensionSets, DeclineName
+			local function FindNameDeclension(text, actorname)
+				for gender = 2, 3 do
+					for decset = 1, GetNumDeclensionSets(actorname, gender) do
+						local ownerName = DeclineName(actorname, gender, decset)
+						if ValidatePetOwner(text, ownerName) or find(text, ownerName) then
+							return true
+						end
+					end
+				end
+				return false
+			end
+
+			-- attempt to get the pet's owner from tooltip
+			function GetPetOwnerFromTooltip(guid)
+				local set = guid and Skada.current
+				local actors = set and set.actors
+				if not actors then return end
+
+				pettooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
+				pettooltip:ClearLines()
+				pettooltip:SetHyperlink(format("unit:%s", guid))
+
+				-- we only need to scan the 2nd line.
+				local text = _G["SkadaPetTooltipTextLeft2"] and _G["SkadaPetTooltipTextLeft2"]:GetText()
+				if text and text ~= "" then
+					for actorname, actor in pairs(actors) do
+						local name = not actor.enemy and gsub(actorname, "%-.*", "")
+						if name and ((LOCALE_ruRU and FindNameDeclension(text, name)) or ValidatePetOwner(text, name)) then
+							return actor.id, actorname
+						end
+					end
+				end
+			end
+		end
+
+		local UnitIterator = Skada.UnitIterator
+		local function GetPetOwnerUnit(guid)
+			for unit, owner in UnitIterator() do
+				if owner ~= nil and UnitGUID(unit) == guid then
+					return owner
+				end
+			end
+		end
+
+		local UnitGUID, UnitFullName = UnitGUID, Private.UnitFullName
+		local function FixPetsHandler(guid, flag)
+			local guidOrClass = guid and guidToClass[guid]
+			if guidOrClass and guidToName[guidOrClass] then
+				return guidOrClass, guidToName[guidOrClass]
+			end
+
+			-- flag is provided and it is mine.
+			if guid and flag and Skada:IsMine(flag) then
+				guidToClass[guid] = Skada.userGUID
+				return Skada.userGUID, Skada.userName
+			end
+
+			-- no owner yet?
+			if guid then
+				-- guess the pet from roster.
+				local ownerUnit = GetPetOwnerUnit(guid)
+				if ownerUnit then
+					local ownerGUID = UnitGUID(ownerUnit)
+					guidToClass[guid] = UnitGUID(ownerUnit)
+					return ownerGUID, UnitFullName(ownerUnit)
+				end
+
+				-- guess the pet from tooltip.
+				local ownerGUID, ownerName = GetPetOwnerFromTooltip(guid)
+				if ownerGUID and ownerName then
+					guidToClass[guid] = ownerGUID
+					return ownerGUID, ownerName
+				end
+			end
+		end
+
+		local IsPlayer = Private.IsPlayer
+		function Skada:FixPets(action)
+			if not action then return end
+			action.petname = nil -- clear it
+
+			-- 1: group member / true: player / false: everything else
+			if IsPlayer(action.actorid, action.actorname, action.actorflags) ~= false then return end
+
+			local ownerGUID, ownerName = FixPetsHandler(action.actorid, action.actorflags)
+			if ownerGUID and ownerName then
+				if self.db.mergepets then
+					action.petname = action.actorname
+					action.actorid = ownerGUID
+					action.actorname = ownerName
+
+					if action.actorflags then
+						action.actorflags = self:GetOwnerFlags(action.actorflags)
+					end
+					if action.spellid and action.petname then
+						action.spellid = format("%s.%s", action.spellid, action.petname)
+					end
+					if action.spellname and action.petname then
+						action.spellname = format("%s (%s)", action.spellname, action.petname)
+					end
+				else
+					action.actorname = format("%s <%s>", action.actorname, ownerName)
+				end
+			else
+				-- if for any reason we fail to find the pets, we simply
+				-- adds them separately as a single entry.
+				action.actorid = action.actorname
+			end
+		end
+
+		local IsPet = Private.IsPet
+		function Skada:FixMyPets(guid, name, flags)
+			if not IsPet(guid, flags) then
+				return guid, name, flags
+			end
+
+			local ownerGUID, ownerName = FixPetsHandler(guid, flags)
+			if ownerGUID and ownerName then
+				return ownerGUID, ownerName, self:GetOwnerFlags(flags)
+			end
+
+			return guid, name, flags
+		end
+
+		function Skada:FixPetsName(guid, name, flags)
+			local _, ownerName = self:FixMyPets(guid, name, flags)
+			if ownerName and ownerName ~= name then
+				return format("%s <%s>", name, ownerName)
+			end
+			return name
+		end
+	end
+
+	function Skada:GetPetOwner(petGUID)
+		local guidOrClass = guidToClass[petGUID]
+		if guidOrClass and guidToName[guidOrClass] then
+			return guidOrClass, guidToName[guidOrClass], guidToClass[guidOrClass]
+		end
 	end
 end
 
@@ -1558,10 +1735,6 @@ do
 		self.LastEvent = args
 		return self:OnCombatEvent(args)
 	end
-
-	function Skada:OnCombatEvent(args)
-		return self:CombatLogEvent(args)
-	end
 end
 
 -------------------------------------------------------------------------------
@@ -1590,7 +1763,7 @@ do
 		t.auras = clear(t.auras) or new()
 
 		for i = 1, 41 do
-			local name, rank, icon, _, _, duration, expires, source, _, _, id = UnitBuff(unit, i)
+			local name, _, icon, _, _, duration, expires, source, _, _, id = UnitBuff(unit, i)
 			if not id then
 				break -- nothing found
 			elseif source then
@@ -1600,7 +1773,6 @@ do
 				aura.srcFlags = actorflags
 				aura.id = id
 				aura.name = name
-				aura.rank = rank
 				aura.icon = icon
 				aura.duration = duration
 				aura.expires = expires

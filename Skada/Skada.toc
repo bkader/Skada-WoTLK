@@ -16,16 +16,11 @@
 ## DefaultState: enabled
 ## Author: Kader (|cff808080bkader#5341|r)
 ## Version: 1.8.84
-## X-Date: 2022-11-20 @ 17:14 |cff808080UTC|r
+## X-Date: 2022-11-21 @ 09:22 |cff808080UTC|r
 ## X-Credits: Zarnivoop
 ## X-Curse-Project-ID: 623633
 ## X-Category: Combat
 ## X-License: MIT/X
-## X-Email: bkader@mail.com
-## X-Website: https://github.com/bkader/Skada-WoTLK
-## X-Discord: https://discord.gg/a8z5CyS3eW
-## X-Localizations: meatgaga (CN), Ícar & Septimun (ES), Kader (FR), NGL (RU)
-## X-Thanks: Abel, Iqui, Jeb, Nomadra, Shoggoth, Havi & Ganrod, WotLK Community
 
 Libs\Load.xml
 Locales\Load.xml

@@ -8,30 +8,33 @@ Skada:RegisterModule("Tweaks", function(L, P)
 	local channel_events, fofrostmourne
 
 	---------------------------------------------------------------------------
-	-- CombatLogEvent Hook
+	-- OnCombatEvent Hook
 
-	function Skada:OnCombatEvent(args)
-		-- The Lich King fight & Fury of Frostmourne
-		if args.spellid == 72350 or args.spellname == fofrostmourne then
-			if self.current and not self.current.success then
-				self.current.success = true
-				self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
+	do
+		local Skada_OnCombatEvent = Skada.OnCombatEvent
+		function Skada:OnCombatEvent(args)
+			-- The Lich King fight & Fury of Frostmourne
+			if args.spellid == 72350 or args.spellname == fofrostmourne then
+				if self.current and not self.current.success then
+					self.current.success = true
+					self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
 
-				if self.tempsets then -- phases
-					for i = 1, #self.tempsets do
-						local set = self.tempsets[i]
-						if set and not set.success then
-							set.success = true
-							self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+					if self.tempsets then -- phases
+						for i = 1, #self.tempsets do
+							local set = self.tempsets[i]
+							if set and not set.success then
+								set.success = true
+								self:SendMessage("COMBAT_BOSS_DEFEATED", set)
+							end
 						end
 					end
 				end
+				-- ignore the spell
+				if P.fofrostmourne then return end
 			end
-			-- ignore the spell
-			if P.fofrostmourne then return end
-		end
 
-		return self:CombatLogEvent(args)
+			return Skada_OnCombatEvent(self, args)
+		end
 	end
 
 	---------------------------------------------------------------------------

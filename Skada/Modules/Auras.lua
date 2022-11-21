@@ -640,19 +640,17 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 
 			local dstGUID, dstName, dstFlags = args.dstGUID, args.dstName, args.dstFlags
 			for _, aura in pairs(args.auras) do
-				if aura.rank ~= SPELL_PASSIVE then
-					local t = new()
-					t.event = args.event
-					t.dstGUID = dstGUID
-					t.dstName = dstName
-					t.dstFlags = dstFlags
-					t.spellid = aura.id
-					t.spellstring = spellstrings[aura.id]
-					t.auratype = "BUFF"
-					t.__temp = true
-					handle_buff(t)
-					t = del(t)
-				end
+				local t = new()
+				t.event = args.event
+				t.dstGUID = dstGUID
+				t.dstName = dstName
+				t.dstFlags = dstFlags
+				t.spellid = aura.id
+				t.spellstring = spellstrings[aura.id]
+				t.auratype = "BUFF"
+				t.__temp = true
+				handle_buff(t)
+				t = del(t)
 			end
 		end
 	end
