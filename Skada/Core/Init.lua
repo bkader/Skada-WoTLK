@@ -17,6 +17,7 @@ local strsplit, format, strmatch, gsub = strsplit, string.format, string.match, 
 local setmetatable, rawset, wipe = setmetatable, rawset, wipe
 local EmptyFunc = Multibar_EmptyFunc
 local Private, L = ns.Private, ns.Locale
+local _
 
 -- options table
 ns.options = {
@@ -1280,7 +1281,7 @@ do
 	local lshift, tconcat = bit.lshift, table.concat
 
 	-- only used for backwards compatibility
-	local function hex_decode(str)
+	local function HexDecode(str)
 		str = gsub(gsub(str, "%[.-%]", ""), "[^0123456789ABCDEF]", "")
 		if (#str == 0) or (#str % 2 ~= 0) then
 			return false, "Invalid Hex string"
@@ -1300,16 +1301,16 @@ do
 		return tconcat(t)
 	end
 
-	function Private.serialize(hex, title, ...)
+	function Private.serialize(comm, ...)
 		local result = LD:CompressDeflate(AS:Serialize(...), LL)
-		if hex then
-			return LD:EncodeForPrint(result)
+		if comm then
+			return LD:EncodeForWoWChatChannel(result)
 		end
-		return LD:EncodeForWoWChatChannel(result)
+		return LD:EncodeForPrint(result)
 	end
 
-	function Private.deserialize(data, hex)
-		local result = hex and LD:DecodeForPrint(data) or LD:DecodeForWoWChatChannel(data)
+	function Private.deserialize(data, comm)
+		local result = comm and LD:DecodeForWoWChatChannel(data) or LD:DecodeForPrint(data)
 		result = result and LD:DecompressDeflate(result) or nil
 		if result then
 			return AS:Deserialize(result)
@@ -1317,11 +1318,11 @@ do
 
 		-- backwards compatibility
 		local err
-		if hex then
-			data, err = hex_decode(data)
-		else
+		if comm then
 			encodeTable = encodeTable or LC:GetAddonEncodeTable()
 			data, err = encodeTable:Decode(data), "Error decoding"
+		else
+			data, err = HexDecode(data)
 		end
 
 		if data then
@@ -1338,7 +1339,9 @@ end
 -- custom "GetSpellInfo" and "GetSpellLink"
 
 do
+	local math_abs = math.abs
 	local GetSpellInfo, GetSpellLink = GetSpellInfo, GetSpellLink
+
 	local customSpells = {
 		[3] = {L["Falling"], [[Interface\ICONS\ability_rogue_quickrecovery]]},
 		[4] = {L["Drowning"], [[Interface\ICONS\spell_shadow_demonbreath]]},
@@ -1369,6 +1372,7 @@ do
 
 	function Private.SpellInfo(spellid)
 		if spellid then
+			spellid = math_abs(spellid)
 			local res1, res2, res3, res4, res5, res6, res7, res8, res9
 			if customSpells[spellid] then
 				res1, res3 = customSpells[spellid][1], customSpells[spellid][2]
@@ -1385,7 +1389,7 @@ do
 
 	function Private.SpellLink(spellid)
 		if not customSpells[spellid] then
-			return GetSpellLink(spellid)
+			return GetSpellLink(math_abs(spellid))
 		end
 	end
 
@@ -1550,6 +1554,10 @@ do
 			guidToName[guid] = UnitFullName(unit)
 		end
 	end
+
+	ns.userGUID = UnitGUID('player')
+	_, ns.userClass = UnitClass('player')
+	ns.userName = UnitFullName("player")
 end
 
 -------------------------------------------------------------------------------
@@ -1559,7 +1567,7 @@ do
 	local AceGUI = nil
 
 	local frame_name = format("%sImportExportFrame", folder)
-	local function open_window(title, data, clickfunc)
+	local function open_window(title, data, clickfunc, fontsize)
 		AceGUI = AceGUI or LibStub("AceGUI-3.0")
 		local frame = AceGUI:Create("Frame")
 		frame:SetTitle(L["Import/Export"])
@@ -1573,6 +1581,8 @@ do
 
 		local editbox = AceGUI:Create("MultiLineEditBox")
 		editbox.editBox:SetFontObject(GameFontHighlightSmall)
+		local fontpath = ns:MediaFetch("font", "Fira Mono Medium")
+		if fontpath then editbox.editBox:SetFont(fontpath, fontsize or 10) end
 		editbox:SetLabel(title)
 		editbox:SetFullWidth(true)
 		editbox:SetFullHeight(true)
@@ -1612,8 +1622,8 @@ do
 		UISpecialFrames[#UISpecialFrames + 1] = frame_name
 	end
 
-	function Private.ImportExport(title, data, clickfunc)
-		return open_window(title, data, clickfunc)
+	function Private.ImportExport(title, data, clickfunc, fontsize)
+		return open_window(title, data, clickfunc, fontsize)
 	end
 end
 
@@ -1748,6 +1758,8 @@ do
 			d.role = nil
 			d.spec = nil
 			d.ignore = nil
+			d.reportlabel = nil
+			d.reportvalue = nil
 			return d
 		end
 
@@ -1767,7 +1779,6 @@ do
 	end
 
 	-- generates a spell dataset/bar.
-	local math_abs = math.abs
 	local SpellSplit = Private.SpellSplit
 	local spellnames = ns.spellnames
 	local spellicons = ns.spellicons
@@ -1783,15 +1794,13 @@ do
 			local spellid, school, suffix = SpellSplit(spell)
 			d.spellid = spellid
 			d.spellschool = school
-
-			local abs_id = math_abs(spellid)
-			d.icon = spellicons[abs_id]
+			d.icon = spellicons[spellid]
 
 			-- for SPELL_EXTRA_ATTACKS
 			if tonumber(suffix) then
-				d.label = format("%s (%s)", spellnames[math_abs(suffix)], spellnames[abs_id])
+				d.label = format("%s (%s)", spellnames[suffix], spellnames[spellid])
 			else
-				d.label = spellnames[abs_id]
+				d.label = spellnames[spellid]
 				if suffix then -- has a suffix?
 					d.label = format("%s (%s)", d.label, suffix)
 				end

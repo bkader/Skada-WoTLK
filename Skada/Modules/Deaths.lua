@@ -485,12 +485,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 					d.label = d.label or L["Unknown"]
 					d.icon = d.icon or icon_death
 					d.text = format("%s%02.2fs: %s", diff > 0 and "+" or "", diff, d.label)
-
-					-- used for tooltip
-					d.value = log.hp or 0
+					d.value = log.hp or 0 -- used for tooltip
 
 					local src = log.src or L["Unknown"]
-
 					if d.spellid and ress_spells[d.spellid] then
 						d.color = nil
 						d.valuetext = src
@@ -524,13 +521,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 						-- only format report for ended logs
 						if deathlog.timeod ~= nil then
-							d.reportlabel = "%02.2fs: %s (%s)   %s [%s]"
-
-							if P.reportlinks and log.id then
-								d.reportlabel = format(d.reportlabel, diff, GetSpellLink(log.id) or d.label, src, change, Skada:FormatNumber(d.value))
-							else
-								d.reportlabel = format(d.reportlabel, diff, d.label, src, change, Skada:FormatNumber(d.value))
-							end
+							d.reportlabel = d.text
+							d.reportvalue = format("%s [%s]", change, Skada:FormatNumber(d.value))
 
 							local extra = new()
 
@@ -551,7 +543,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 							end
 
 							if next(extra) then
-								d.reportlabel = format("%s (%s)", d.reportlabel, tconcat(extra, " - "))
+								d.reportvalue = format("%s (%s)", d.reportvalue, tconcat(extra, " - "))
 							end
 
 							extra = del(extra)
@@ -603,6 +595,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 				d.label = d.label or L["Unknown"]
 				if mode_cols.Source and death.src then
 					d.text = format("%s (%s)", d.label, death.src)
+					d.reportlabel = d.text
 				end
 
 				d.value = death.time or curtime
@@ -696,11 +689,11 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 						local src = mode_cols.Source and death.src
 						if num ~= 1 then
-							d.text = format(src and "%s (%d) (%s)" or "%s (%d)", d.text or d.label, num, src)
-							d.reportlabel = format("%s   %s", d.text, d.valuetext)
+							d.text = format(src and "%s (%d) (%s)" or "%s (%d)", d.label, num, src)
+							d.reportlabel = d.text
 						else
-							d.text = src and format("%s (%s)", d.text or d.label, src) or nil
-							d.reportlabel = d.text and format("%s   %s", d.text, d.valuetext) or nil
+							d.text = src and format("%s (%s)", d.label, src) or d.label
+							d.reportlabel = d.text
 						end
 
 						num = num - 1

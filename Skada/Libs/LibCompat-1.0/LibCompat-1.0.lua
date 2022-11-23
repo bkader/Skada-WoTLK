@@ -22,8 +22,9 @@ local GetUnitIdFromGUID
 
 local Units
 do
-	-- solo and target targets
+	-- solo, group, pets and targets
 	local solo = {"player", "pet"}
+	local group = {player = true}
 	local target = {"target", "targettarget", "focus", "focustarget", "mouseover", "mouseovertarget"}
 
 	-- boss
@@ -37,7 +38,10 @@ do
 	local party = {}
 	local partypet = {}
 	for i = 1, 4 do
-		party[i] = format("party%d", i)
+		local unit = format("party%d", i)
+		party[i] = unit
+		group[unit] = true
+
 		partypet[i] = format("partypet%d", i)
 		target[#target + 1] = format("party%dtarget", i)
 	end
@@ -46,7 +50,10 @@ do
 	local raid = {}
 	local raidpet = {}
 	for i = 1, 40 do
-		raid[i] = format("raid%d", i)
+		local unit = format("raid%d", i)
+		raid[i] = unit
+		group[unit] = true
+
 		raidpet[i] = format("raidpet%d", i)
 		target[#target + 1] = format("raid%dtarget", i)
 	end
@@ -63,6 +70,7 @@ do
 	lib.Units = {
 		-- solo and targets
 		solo = solo,
+		group = group,
 		target = target,
 		-- party units and pets
 		party = party,

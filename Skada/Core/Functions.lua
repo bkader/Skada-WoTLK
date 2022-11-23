@@ -330,6 +330,196 @@ do
 end
 
 -------------------------------------------------------------------------------
+-- report function
+
+do
+	local tsort = table.sort
+	local SendChatMessage, BNSendWhisper = SendChatMessage, BNSendWhisper
+	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
+	local Window, windows = Skada.Window, Skada.windows
+	local EscapeStr = Private.EscapeStr
+
+	function Skada:SendChat(msg, chan, chantype, noescape)
+		if strlower(chan) == "self" or strlower(chantype) == "self" then
+			Skada:Print(msg)
+			return
+		end
+		if strlower(chan) == "auto" then
+			if not IsInGroup() then
+				return
+			elseif Skada.insType == "pvp" or Skada.insType == "arena" then
+				chan = "battleground"
+			else
+				chan = IsInRaid() and "raid" or "party"
+			end
+		end
+
+		if not noescape then
+			msg = EscapeStr(msg)
+		end
+
+		if chantype == "channel" then
+			SendChatMessage(msg, "CHANNEL", nil, chan)
+		elseif chantype == "preset" then
+			SendChatMessage(msg, chan:upper())
+		elseif chantype == "whisper" then
+			SendChatMessage(msg, "WHISPER", nil, chan)
+		elseif chantype == "bnet" then
+			BNSendWhisper(chan, msg)
+		end
+	end
+
+	local strrep = strrep or string.rep
+	local SpellLink = Private.SpellLink
+
+	local function BuildReportTable(mode, firstline, dataset, maxlines, fmt, barid)
+		local temp = TempTable(EscapeStr(firstline))
+
+		local num = #dataset
+		local nr, max_length = 0, 0
+		for i = 1, num do
+			if nr >= maxlines then break end
+
+			local data = dataset[i]
+			if data and not data.ignore and ((barid and barid == data.id) or (data.id and not barid)) then
+				nr = nr + 1
+				local label = nil
+				if Skada.db.reportlinks and (data.spellid or data.hyperlink) then
+					label = TempTable(EscapeStr(data.hyperlink or SpellLink(data.spellid) or data.reportlabel or data.label), "   ")
+				else
+					label = TempTable(EscapeStr(data.reportlabel or data.label), "   ")
+				end
+
+				if label then
+					label[#label + 1] = EscapeStr(data.reportvalue or data.valuetext)
+					if mode.metadata and mode.metadata.showspots then
+						if fmt and maxlines >= 10 and num >= 10 and not barid then
+							label[1] = format(nr >= 10 and "%s. %s" or " %s. %s", nr, label[1])
+						else
+							label[1] = format("%s. %s", nr, label[1])
+						end
+					end
+				end
+
+				label.n = #label[1]
+				if label[3] then
+					label.n = label.n + #label[3]
+				end
+
+				if label.n > max_length then
+					max_length = label.n
+				end
+
+				temp[#temp + 1] = label
+
+				if barid then break end
+			end
+		end
+
+		for i = #temp, 2, -1 do
+			local label = tremove(temp, i)
+			if label[2] and fmt then
+				label[2] = strrep(" ", max_length - label.n + 3)
+			end
+			tinsert(temp, i, label:concat(""))
+			label = label:free()
+		end
+
+		return temp
+	end
+
+	local function value_id_sort(a, b)
+		if not a or a.value == nil or a.id == nil then
+			return false
+		elseif not b or b.value == nil or b.id == nil then
+			return true
+		else
+			return a.value > b.value
+		end
+	end
+
+	local GetChannelList = GetChannelList
+	local OpenExport = Private.ImportExport
+
+	function Skada:Report(channel, chantype, modename, setname, maxlines, window, barid)
+		if chantype == "channel" then
+			local list = TempTable(GetChannelList())
+			for i = 1, #list * 0.5 do
+				if (self.db.report.channel == list[i * 2]) then
+					channel = list[i * 2 - 1]
+					break
+				end
+			end
+			list:free()
+		end
+
+		chantype = chantype or "preset"
+		local set, mode = nil, nil
+
+		if window == nil then
+			set = self:GetSet(setname or "current")
+			if set == nil then
+				self:Print(L["No mode or segment selected for report."])
+				return
+			end
+
+			mode = self:GetModule(modename or "Damage", true)
+			window = Window.new(true)
+			mode:Update(window, set)
+		elseif type(window) == "string" then
+			for i = 1, #windows do
+				local win = windows[i]
+				local db = win and win.db
+				if db and strlower(db.name) == strlower(window) then
+					window = win
+					set = win:GetSelectedSet()
+					mode = win.selectedmode
+					break
+				end
+			end
+		else
+			set = window:GetSelectedSet()
+			mode = window.selectedmode
+		end
+
+		if not set then
+			Skada:Print(L["There is nothing to report."])
+			return
+		end
+
+		local metadata = window.metadata
+		local dataset = window.dataset
+
+		if not metadata or not metadata.ordersort then
+			tsort(dataset, value_id_sort)
+		end
+
+		if not mode then
+			self:Print(L["No mode or segment selected for report."])
+			return
+		end
+
+		local title = (window and window.title) or mode.title or mode.localeName
+		local label = (modename == L["Improvement"]) and self.userName or Skada:GetSetLabel(set)
+		maxlines = maxlines or 10
+
+		local firstline = format(L["Skada: %s for %s:"], title, label)
+		local temp = BuildReportTable(mode, firstline, dataset, maxlines, channel == "text", barid)
+
+		if channel == "text" then
+			tinsert(temp, 2, "") -- extra line
+			OpenExport(nil, temp:concat("\n"), nil, 12)
+		else
+			for i = 1, #temp do
+				self:SendChat(temp[i], channel, chantype)
+			end
+		end
+
+		temp = temp:free()
+	end
+end
+
+-------------------------------------------------------------------------------
 -- boss and creature functions
 
 do
@@ -710,9 +900,9 @@ do
 		end
 
 		if channel == "PURR" then
-			self:SendCommMessage(folder, Private.serialize(nil, nil, ...), "WHISPER", target, "NORMAL", show_progress_window, self)
+			self:SendCommMessage(folder, Private.serialize(true, ...), "WHISPER", target, "NORMAL", show_progress_window, self)
 		elseif channel then
-			self:SendCommMessage(folder, Private.serialize(nil, nil, ...), channel, target)
+			self:SendCommMessage(folder, Private.serialize(true, ...), channel, target)
 		end
 	end
 
@@ -732,7 +922,7 @@ do
 
 	local function on_comm_received(self, prefix, message, channel, sender)
 		if prefix == folder and channel and sender and sender ~= self.userName then
-			dispatch_comm(sender, Private.deserialize(message))
+			dispatch_comm(sender, Private.deserialize(message, true))
 		end
 	end
 

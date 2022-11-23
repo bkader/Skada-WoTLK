@@ -2227,7 +2227,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				wipe(temp)
 				copy(temp, theme)
 				temp.__name = applytheme
-				return ImportExport(L["This is your current theme in text format."], serialize(true, nil, temp))
+				return ImportExport(L["This is your current theme in text format."], serialize(false, temp))
 			end
 
 			local function theme_import(data)
@@ -2236,7 +2236,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 					return false
 				end
 
-				local success, theme = deserialize(data, true)
+				local success, theme = deserialize(data)
 				if not success or theme.bartexture == nil then -- sanity check!
 					Skada:Print("Import theme failed!")
 					return false

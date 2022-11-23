@@ -478,6 +478,7 @@ L["Raid"] = _G.CHAT_MSG_RAID
 L["Guild"] = _G.CHAT_MSG_GUILD
 L["Officer"] = _G.CHAT_MSG_OFFICER
 L["Raid Warning"] = _G.CHAT_MSG_RAID_WARNING
+L["Copy & Paste"] = true
 L["[General]"] = "General"
 L["[LocalDefense]"] = "LocalDefense"
 L["[LookingForGroup]"] = "LookingForGroup"

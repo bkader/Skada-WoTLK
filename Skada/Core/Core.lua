@@ -7,25 +7,18 @@ local ACR = LibStub("AceConfigRegistry-3.0")
 local DBI = LibStub("LibDBIcon-1.0", true)
 
 -- cache frequently used globals
+local _G = _G
+local pairs, type, tonumber, tostring, min, max = pairs, type, tonumber, tostring, math.min, math.max
+local strmatch, format, gsub, strlower, strfind = strmatch, string.format, string.gsub, string.lower, string.find
 local Private = ns.Private
-local _G, GetAddOnMetadata = _G, GetAddOnMetadata
+local tsort, tremove, wipe, setmetatable = table.sort, Private.tremove, wipe, setmetatable
 local TempTable, new, del, copy = Private.TempTable, Private.newTable, Private.delTable, Private.tCopy
-local tsort, tinsert, tremove, wipe = table.sort, table.insert, Private.tremove, wipe
-local next, pairs, type, setmetatable = next, pairs, type, setmetatable
-local tonumber, tostring, strmatch, format, gsub, lower, find = tonumber, tostring, strmatch, string.format, string.gsub, string.lower, string.find
-local max, min, abs = math.max, math.min, math.abs
-local IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction = IsInInstance, GetInstanceInfo, GetBattlefieldArenaFaction
 local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
-local UnitExists, UnitGUID, UnitClass, UnitFullName = UnitExists, UnitGUID, UnitClass, Private.UnitFullName
-local GameTooltip, ReloadUI, GetScreenWidth = GameTooltip, ReloadUI, GetScreenWidth
+local UnitGUID, GameTooltip, ReloadUI = UnitGUID, GameTooltip, ReloadUI
 local IsShiftKeyDown, IsControlKeyDown = IsShiftKeyDown, IsControlKeyDown
-local GetSpellLink, spellnames, spellicons = GetSpellLink, Skada.spellnames, Skada.spellicons
 local SecondsToTime, time, GetTime = SecondsToTime, time, GetTime
 local IsInGroup, IsInRaid, IsInPvP = Skada.IsInGroup, Skada.IsInRaid, Skada.IsInPvP
-local GetNumGroupMembers, GetGroupTypeAndCount = Skada.GetNumGroupMembers, Skada.GetGroupTypeAndCount
-local GetCreatureId, UnitIterator, IsGroupDead = Skada.GetCreatureId, Skada.UnitIterator, Skada.IsGroupDead
-local CheckDuplicate, uformat, EscapeStr = Private.CheckDuplicate, Private.uformat, Private.EscapeStr
-local AddCombatant, IsPlayer, IsPet = Private.AddCombatant, Private.IsPlayer, Private.IsPet
+local GetNumGroupMembers, CheckDuplicate = Skada.GetNumGroupMembers, Private.CheckDuplicate
 local L, callbacks, O = Skada.Locale, Skada.callbacks, Skada.options.args
 local P, G, _
 
@@ -47,14 +40,9 @@ BINDING_NAME_SKADA_NEWPHASE = L["Start New Phase"]
 BINDING_NAME_SKADA_STOP = L["Stop"]
 
 -- things we need
-local userGUID = UnitGUID("player")
-Skada.userGUID = userGUID
-
-local userName = UnitFullName("player")
-Skada.userName = userName
-
-local _, userClass = UnitClass("player")
-Skada.userClass = userClass
+local userGUID = Skada.userGUID
+local userName = Skada.userName
+local userClass = Skada.userClass
 
 -- available display types
 local displays = ns.displays or {}
@@ -203,6 +191,7 @@ local function check_set_name(set)
 end
 
 -- process the given set and stores into sv.
+local tinsert = table.insert
 local function process_set(set, curtime, mobname)
 	if not set then
 		set = delete_set(set) -- just in case
@@ -609,7 +598,7 @@ function Window:UpdateDisplay()
 					d.ignore = true
 					d.value = value + 1 -- to be always first
 					d.valuetext = valuetext or tostring(value)
-					d.icon = P.moduleicons and self.selectedmode.metadata and self.selectedmode.metadata.icon or ns.logo
+					d.icon = P.moduleicons and self.selectedmode.metadata and self.selectedmode.metadata.icon or Skada.logo
 				end
 			end
 		end
@@ -1298,14 +1287,15 @@ end
 -- tooltip functions
 
 -- sets the tooltip position
+local GetScreenWidth = GetScreenWidth
 function Skada:SetTooltipPosition(tooltip, frame, display, win)
 	local db = win and win.db
 	if db and db.tooltippos and db.tooltippos ~= "NONE" then
 		tooltip:SetOwner(UIParent, "ANCHOR_NONE")
 
-		local anchor = find(db.tooltippos, "TOP") and "TOP" or "BOTTOM"
-		if find(db.tooltippos, "LEFT") or find(db.tooltippos, "RIGHT") then
-			anchor = format("%s%s", anchor, find(db.tooltippos, "LEFT") and "RIGHT" or "LEFT")
+		local anchor = strfind(db.tooltippos, "TOP") and "TOP" or "BOTTOM"
+		if strfind(db.tooltippos, "LEFT") or strfind(db.tooltippos, "RIGHT") then
+			anchor = format("%s%s", anchor, strfind(db.tooltippos, "LEFT") and "RIGHT" or "LEFT")
 			tooltip:SetPoint(anchor, frame, db.tooltippos)
 		elseif anchor == "TOP" then
 			tooltip:SetPoint("BOTTOM", frame, anchor)
@@ -1337,14 +1327,13 @@ function Skada:SetTooltipPosition(tooltip, frame, display, win)
 			tooltip:SetPoint("TOPRIGHT", frame, "TOPLEFT")
 		end
 	else
-		local anchor = find(P.tooltippos, "top") and "TOP" or "BOTTOM"
-		anchor = format("%s%s", anchor, find(P.tooltippos, "left") and "RIGHT" or "LEFT")
+		local anchor = strfind(P.tooltippos, "top") and "TOP" or "BOTTOM"
+		anchor = format("%s%s", anchor, strfind(P.tooltippos, "left") and "RIGHT" or "LEFT")
 		tooltip:SetOwner(frame, "ANCHOR_NONE")
 		tooltip:SetPoint(anchor, frame, P.tooltippos)
 	end
 end
 
-local value_id_sort
 do
 	local function value_sort(a, b)
 		if not a or a.value == nil then
@@ -1361,16 +1350,6 @@ do
 			return true
 		else
 			return a.label > b.label
-		end
-	end
-
-	function value_id_sort(a, b)
-		if not a or a.value == nil or a.id == nil then
-			return false
-		elseif not b or b.value == nil or b.id == nil then
-			return true
-		else
-			return a.value > b.value
 		end
 	end
 
@@ -1442,6 +1421,7 @@ do
 		end
 	end
 
+	local uformat = Private.uformat
 	local function add_click_lines(mode, label, win, t, fmt)
 		if type(mode) == "function" then
 			t:AddLine(uformat(fmt, label))
@@ -1556,10 +1536,11 @@ local function generate_total()
 	ReloadUI()
 end
 
+local GetAddOnMetadata = GetAddOnMetadata
 local Print = Private.Print
 local function slash_command(param)
 	local cmd, arg1, arg2, arg3 = Skada:GetArgs(param, 4)
-	cmd = (cmd and cmd ~= "") and lower(cmd) or cmd
+	cmd = (cmd and cmd ~= "") and strlower(cmd) or cmd
 
 	if cmd == "pets" or cmd == "pet" then
 		debug_pets()
@@ -1659,141 +1640,6 @@ local function slash_command(param)
 end
 
 -------------------------------------------------------------------------------
--- report function
-
-do
-	local SendChatMessage = SendChatMessage
-
-	function Skada:SendChat(msg, chan, chantype, noescape)
-		if lower(chan) == "self" or lower(chantype) == "self" then
-			Skada:Print(msg)
-			return
-		end
-		if lower(chan) == "auto" then
-			if not IsInGroup() then
-				return
-			elseif Skada.insType == "pvp" or Skada.insType == "arena" then
-				chan = "battleground"
-			else
-				chan = IsInRaid() and "raid" or "party"
-			end
-		end
-
-		if not noescape then
-			msg = EscapeStr(msg)
-		end
-
-		if chantype == "channel" then
-			SendChatMessage(msg, "CHANNEL", nil, chan)
-		elseif chantype == "preset" then
-			SendChatMessage(msg, chan:upper())
-		elseif chantype == "whisper" then
-			SendChatMessage(msg, "WHISPER", nil, chan)
-		elseif chantype == "bnet" then
-			BNSendWhisper(chan, msg)
-		end
-	end
-
-	local GetChannelList = GetChannelList
-	function Skada:Report(channel, chantype, report_mode_name, report_set_name, maxlines, window, barid)
-		if chantype == "channel" then
-			local list = TempTable(GetChannelList())
-			for i = 1, table.getn(list) * 0.5 do
-				if (P.report.channel == list[i * 2]) then
-					channel = list[i * 2 - 1]
-					break
-				end
-			end
-			list:free()
-		elseif chantype == nil then
-			chantype = "preset"
-		end
-
-		local report_table, report_set, report_mode
-
-		if window == nil then
-			report_mode = find_mode(report_mode_name or "Damage")
-			report_set = self:GetSet(report_set_name or "current")
-			if report_set == nil then
-				self:Print(L["No mode or segment selected for report."])
-				return
-			end
-
-			report_table = Window.new(true)
-			report_mode:Update(report_table, report_set)
-		elseif type(window) == "string" then
-			for i = 1, #windows do
-				local win = windows[i]
-				local db = win and win.db
-				if db and lower(db.name) == lower(window) then
-					report_table = win
-					report_set = win:GetSelectedSet()
-					report_mode = win.selectedmode
-					break
-				end
-			end
-		else
-			report_table = window
-			report_set = window:GetSelectedSet()
-			report_mode = window.selectedmode
-		end
-
-		if not report_set then
-			Skada:Print(L["There is nothing to report."])
-			return
-		end
-
-		local metadata = report_table.metadata
-		local dataset = report_table.dataset
-
-		if metadata and not metadata.ordersort then
-			tsort(dataset, value_id_sort)
-		end
-
-		if not report_mode then
-			self:Print(L["No mode or segment selected for report."])
-			return
-		end
-
-		local title = (window and window.title) or report_mode.title or report_mode.localeName
-		local label = (report_mode_name == L["Improvement"]) and userName or Skada:GetSetLabel(report_set)
-		self:SendChat(format(L["Skada: %s for %s:"], title, label), channel, chantype)
-
-		maxlines = maxlines or 10
-		local nr = 0
-		for i = 1, #dataset do
-			local data = dataset[i]
-			if data and not data.ignore and ((barid and barid == data.id) or (data.id and not barid)) and nr < maxlines then
-				nr = nr + 1
-				label = nil
-
-				if data.reportlabel then
-					label = data.reportlabel
-				elseif P.reportlinks and (data.spellid or data.hyperlink) then
-					label = format("%s   %s", data.hyperlink or GetSpellLink(abs(data.spellid)) or data.label, data.valuetext)
-				else
-					label = format("%s   %s", data.label, data.valuetext)
-				end
-
-				if label and report_mode.metadata and report_mode.metadata.showspots then
-					self:SendChat(format("%s. %s", nr, label), channel, chantype)
-				elseif label then
-					self:SendChat(label, channel, chantype)
-				end
-
-				if barid then
-					break
-				end
-			elseif nr >= maxlines then
-				break
-			end
-		end
-
-		report_table, report_set, report_mode = nil, nil, nil
-	end
-end
-
--------------------------------------------------------------------------------
 -- feed functions
 
 function Skada:SetFeed(name)
@@ -1834,38 +1680,44 @@ function Skada:PLAYER_ENTERING_WORLD()
 	self:ApplySettings()
 end
 
-local last_check_group
-function check_group()
-	-- throttle group check.
-	local checkTime = GetTime()
-	if not last_check_group or (checkTime - last_check_group) > 0.5 then
-		last_check_group = checkTime -- update cooldown
+do
+	local UnitIterator = Skada.UnitIterator
+	local AddCombatant = Private.AddCombatant
+	local last_check_group = nil
 
-		-- wipe tables
-		wipe(guidToClass)
-		wipe(guidToName)
+	function check_group()
+		-- throttle group check.
+		local checkTime = GetTime()
+		if not last_check_group or (checkTime - last_check_group) > 0.5 then
+			last_check_group = checkTime -- update cooldown
 
-		-- put back summoned pets
-		for petGUID, ownerGUID in pairs(guidToOwner) do
-			guidToClass[petGUID] = ownerGUID
-		end
+			-- wipe tables
+			wipe(guidToClass)
+			wipe(guidToName)
 
-		-- add combatants
-		for unit, owner in UnitIterator() do
-			AddCombatant(unit, owner)
-		end
+			-- put back summoned pets
+			for petGUID, ownerGUID in pairs(guidToOwner) do
+				guidToClass[petGUID] = ownerGUID
+			end
 
-		-- remove pet if the owner is gone
-		for petGUID, ownerGUID in pairs(guidToOwner) do
-			if not guidToClass[ownerGUID] then
-				guidToOwner[petGUID] = nil
-				guidToClass[petGUID] = nil
+			-- add combatants
+			for unit, owner in UnitIterator() do
+				AddCombatant(unit, owner)
+			end
+
+			-- remove pet if the owner is gone
+			for petGUID, ownerGUID in pairs(guidToOwner) do
+				if not guidToClass[ownerGUID] then
+					guidToOwner[petGUID] = nil
+					guidToClass[petGUID] = nil
+				end
 			end
 		end
 	end
 end
 
 do
+	local IsInInstance = IsInInstance
 	local inInstance, instanceType, isininstance, isinpvp
 	local was_in_instance, was_in_pvp
 
@@ -1962,6 +1814,7 @@ do
 		was_in_party = IsInGroup()
 	end
 
+	local GetGroupTypeAndCount = Skada.GetGroupTypeAndCount
 	function Skada:UpdateRoster()
 		check_for_join_and_leave()
 		check_group()
@@ -1984,32 +1837,21 @@ do
 end
 
 do
-	local UnitHasVehicleUI = UnitHasVehicleUI
-	local ignoredUnits = {target = true, focus = true, npc = true, NPC = true, mouseover = true}
-
-	local function get_pet_from_owner(owner)
-		if owner == "player" then
-			return "pet"
-		elseif find(owner, "raid") then
-			return gsub(owner, "raid", "raidpet")
-		elseif find(owner, "party") then
-			return gsub(owner, "party", "partypet")
-		else
-			return nil
-		end
-	end
+	local UnitExists, UnitHasVehicleUI = UnitExists, UnitHasVehicleUI
+	local groupUnits = Skada.Units.group
 
 	function Skada:UNIT_PET(owners)
 		for owner in pairs(owners) do
-			local unit = not ignoredUnits[owner] and get_pet_from_owner(owner)
-			if unit and UnitExists(unit) then
-				guidToClass[UnitGUID(unit)] = UnitGUID(owner)
+			local unit = groupUnits[owner] and format("%spet", owner)
+			local guid = unit and UnitGUID(unit)
+			if guid then
+				guidToClass[guid] = UnitGUID(owner)
 			end
 		end
 	end
 
-	local function process_check_vehicle(unit)
-		local guid = unit and not ignoredUnits[unit] and UnitGUID(unit)
+	local function CheckVehicle(unit)
+		local guid = unit and UnitGUID(unit)
 		if not guid or not guidToName[guid] then
 			return
 		elseif UnitHasVehicleUI(unit) then
@@ -2027,7 +1869,9 @@ do
 
 	function Skada:CheckVehicle(units)
 		for unit in pairs(units) do
-			process_check_vehicle(unit)
+			if groupUnits[unit] then
+				CheckVehicle(unit)
+			end
 		end
 	end
 end
@@ -2204,13 +2048,13 @@ do
 			-- title set enabled?
 			if self.db.titleset and self.selectedmode.metadata and not self.selectedmode.metadata.notitleset then
 				if self.selectedset == "current" then
-					name = format("%s%s %s", name, find(name, ":") and " -" or ":", L["Current"])
+					name = format("%s%s %s", name, strfind(name, ":") and " -" or ":", L["Current"])
 				elseif self.selectedset == "total" then
-					name = format("%s%s %s", name, find(name, ":") and " -" or ":", L["Total"])
+					name = format("%s%s %s", name, strfind(name, ":") and " -" or ":", L["Total"])
 				else
 					local set = self:GetSelectedSet()
 					if set then
-						name = format("%s%s %s", name, find(name, ":") and " -" or ":", Skada:GetSetLabel(set))
+						name = format("%s%s %s", name, strfind(name, ":") and " -" or ":", Skada:GetSetLabel(set))
 					end
 				end
 			end
@@ -2445,7 +2289,6 @@ function Skada:OnInitialize()
 	self.maxmeme = min(60, max(30, self.maxsets + 10))
 
 	-- update references
-	GetSpellLink = Private.SpellLink or GetSpellLink
 	classcolors = self.classcolors
 
 	-- early loading of modules
@@ -2588,102 +2431,105 @@ function Skada:NewPhase()
 	self:Printf(L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r started."], set.mobname or L["Unknown"], set.phase)
 end
 
-function combat_end()
-	if not Skada.current then return end
-	Private.ClearTempUnits()
+do
+	local IsGroupDead = Skada.IsGroupDead
+	function combat_end()
+		if not Skada.current then return end
+		Private.ClearTempUnits()
 
-	-- trigger events.
-	local curtime = time()
-	Skada:SendMessage("COMBAT_PLAYER_LEAVE", Skada.current, curtime)
-	if Skada.current.gotboss then
-		Skada:SendMessage("COMBAT_ENCOUNTER_END", Skada.current, curtime)
-		Skada:ClearFirstHit()
-	end
-
-	-- process segment
-	process_set(Skada.current, curtime)
-
-	-- process phase segments
-	if Skada.tempsets then
-		local setname = Skada.current.name
-		for i = 1, #Skada.tempsets do
-			local set = Skada.tempsets[i]
-			process_set(set, curtime, setname)
+		-- trigger events.
+		local curtime = time()
+		Skada:SendMessage("COMBAT_PLAYER_LEAVE", Skada.current, curtime)
+		if Skada.current.gotboss then
+			Skada:SendMessage("COMBAT_ENCOUNTER_END", Skada.current, curtime)
+			Skada:ClearFirstHit()
 		end
-		Skada.tempsets = del(Skada.tempsets)
-	end
 
-	-- clear total semgnt
-	if P.totalidc then
-		for i = 1, #modes do
-			local mode = modes[i]
-			if mode and mode.SetComplete then
-				mode:SetComplete(Skada.total)
+		-- process segment
+		process_set(Skada.current, curtime)
+
+		-- process phase segments
+		if Skada.tempsets then
+			local setname = Skada.current.name
+			for i = 1, #Skada.tempsets do
+				local set = Skada.tempsets[i]
+				process_set(set, curtime, setname)
 			end
+			Skada.tempsets = del(Skada.tempsets)
 		end
-	end
 
-	-- remove players ".last" key from total segment.
-	local actors = Skada.total and Skada.total.actors
-	if actors then
-		for _, actor in pairs(actors) do
-			if actor.last then
-				actor.last = nil
-			end
-		end
-	end
-
-	if Skada.current.time and Skada.current.time >= P.minsetlength then
-		Skada.total.time = (Skada.total.time or 0) + Skada.current.time
-	end
-
-	Skada.last = Skada.current
-	Skada.current = nil
-	Skada.inCombat = false
-	G.inCombat = false
-	_targets = del(_targets)
-
-	clean_sets()
-	wipe(vehicles)
-
-	for i = 1, #windows do
-		local win = windows[i]
-		if win then
-			if win.selectedset ~= "current" and win.selectedset ~= "total" then
-				win:SetSelectedSet(nil, 1) -- move to next set
-			end
-
-			win:Wipe()
-			Skada.changed = true
-
-			if win.db.wipemode ~= "" and IsGroupDead() then
-				restore_window_view(win, "current", win.db.wipemode)
-			elseif win.db.returnaftercombat and win.restore_mode and win.restore_set then
-				if win.restore_set ~= win.selectedset or win.restore_mode ~= win.selectedmode then
-					restore_window_view(win, win.restore_set, win.restore_mode)
-					win.restore_mode, win.restore_set = nil, nil
+		-- clear total semgnt
+		if P.totalidc then
+			for i = 1, #modes do
+				local mode = modes[i]
+				if mode and mode.SetComplete then
+					mode:SetComplete(Skada.total)
 				end
 			end
-
-			win:Toggle()
 		end
-	end
 
-	Skada:UpdateDisplay(true)
+		-- remove players ".last" key from total segment.
+		local actors = Skada.total and Skada.total.actors
+		if actors then
+			for _, actor in pairs(actors) do
+				if actor.last then
+					actor.last = nil
+				end
+			end
+		end
 
-	if update_timer then
-		Skada:CancelTimer(update_timer, true)
-		update_timer = nil
-	end
+		if Skada.current.time and Skada.current.time >= P.minsetlength then
+			Skada.total.time = (Skada.total.time or 0) + Skada.current.time
+		end
 
-	if tick_timer then
-		Skada:CancelTimer(tick_timer, true)
-		tick_timer = nil
-	end
+		Skada.last = Skada.current
+		Skada.current = nil
+		Skada.inCombat = false
+		G.inCombat = false
+		_targets = del(_targets)
 
-	if toggle_timer then
-		Skada:CancelTimer(toggle_timer, true)
-		toggle_timer = nil
+		clean_sets()
+		wipe(vehicles)
+
+		for i = 1, #windows do
+			local win = windows[i]
+			if win then
+				if win.selectedset ~= "current" and win.selectedset ~= "total" then
+					win:SetSelectedSet(nil, 1) -- move to next set
+				end
+
+				win:Wipe()
+				Skada.changed = true
+
+				if win.db.wipemode ~= "" and IsGroupDead() then
+					restore_window_view(win, "current", win.db.wipemode)
+				elseif win.db.returnaftercombat and win.restore_mode and win.restore_set then
+					if win.restore_set ~= win.selectedset or win.restore_mode ~= win.selectedmode then
+						restore_window_view(win, win.restore_set, win.restore_mode)
+						win.restore_mode, win.restore_set = nil, nil
+					end
+				end
+
+				win:Toggle()
+			end
+		end
+
+		Skada:UpdateDisplay(true)
+
+		if update_timer then
+			Skada:CancelTimer(update_timer, true)
+			update_timer = nil
+		end
+
+		if tick_timer then
+			Skada:CancelTimer(tick_timer, true)
+			tick_timer = nil
+		end
+
+		if toggle_timer then
+			Skada:CancelTimer(toggle_timer, true)
+			toggle_timer = nil
+		end
 	end
 end
 
@@ -2893,7 +2739,11 @@ do
 	end
 
 	local bit_band = bit.band
+	local GetInstanceInfo = GetInstanceInfo
+	local GetBattlefieldArenaFaction = GetBattlefieldArenaFaction
+	local GetCreatureId = Skada.GetCreatureId
 	local BITMASK_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
+
 	local function check_boss_fight(set, t, src_is_interesting, dst_is_interesting)
 		-- set mobname
 		if not set.mobname then
@@ -2985,6 +2835,7 @@ do
 		tentative = nil
 	end
 
+	local next = next
 	function Skada:OnCombatEvent(t)
 		-- ignored combat event?
 		if (not t.event or ignored_events[t.event]) and not (spellcast_events[t.event] and self.current) then return end

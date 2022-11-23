@@ -148,22 +148,12 @@ function Skada:OpenMenu(window)
 			if not self.win or (self.win and self.win.selectedmode) then
 				wipe(info)
 				info.text = L["Report"]
-				info.value = "report"
 				info.func = function()
 					Private.OpenReport(self.win)
 				end
 				info.notCheckable = 1
 				UIDropDownMenu_AddButton(info, level)
-			end
 
-			if self.win and (not self.win.db.enabletitle or (self.win.db.enabletitle and not self.win.db.buttons.segment)) then
-				wipe(info)
-				info.text = L["Select Segment"]
-				info.value = "segment"
-				info.hasArrow = 1
-				info.notCheckable = 1
-				UIDropDownMenu_AddButton(info, level)
-			else
 				wipe(info)
 				info.disabled = 1
 				info.notCheckable = 1
@@ -186,6 +176,15 @@ function Skada:OpenMenu(window)
 				info.value = "keep"
 				info.hasArrow = 1
 				info.disabled = (not Skada.sets or #Skada.sets == 0)
+				info.notCheckable = 1
+				UIDropDownMenu_AddButton(info, level)
+			end
+
+			if self.win and (not self.win.db.enabletitle or (self.win.db.enabletitle and not self.win.db.buttons.segment)) then
+				wipe(info)
+				info.text = L["Select Segment"]
+				info.value = "segment"
+				info.hasArrow = 1
 				info.notCheckable = 1
 				UIDropDownMenu_AddButton(info, level)
 			end
@@ -1065,19 +1064,6 @@ do
 		end
 	end
 
-	local function destroy_report_window()
-		if Skada.reportwindow then
-			-- remove AceGUI hacks before recycling the widget
-			local frame = Skada.reportwindow
-			frame.LayoutFinished = frame.orig_LayoutFinished
-			frame.frame:SetScript("OnKeyDown", nil)
-			frame.frame:EnableKeyboard(false)
-			frame:ReleaseChildren()
-			frame:Release()
-			Skada.reportwindow = nil
-		end
-	end
-
 	local channellist
 	local build_report_channels
 	do
@@ -1094,14 +1080,8 @@ do
 			party = {L["Party"], "preset", function() return GetNumSubgroupMembers() > 0 end},
 			guild = {L["Guild"], "preset", IsInGuild},
 			officer = {L["Officer"], "preset", IsInGuild},
-			self = {L["Self"], "self"}
-		}
-
-		local blacklist = {
-			[L["[Trade]"]] = true,
-			[L["[General]"]] = true,
-			[L["[LocalDefense]"]] = true,
-			[L["[LookingForGroup]"]] = true
+			self = {L["Self"], "self"},
+			text = {L["Copy & Paste"], "text"}
 		}
 
 		function build_report_channels()
@@ -1115,13 +1095,33 @@ do
 			local list = TempTable(GetChannelList())
 			for i = 1, #list, 2 do
 				local channel = list[i + 1]
-				if not blacklist[channel] then
+				-- what's the purpose of spamming these channels other than flexing?
+				if channel ~= L["[Trade]"] and channel ~= L["[General]"] and channel ~= L["[LocalDefense]"] and channel ~= L["[LookingForGroup]"] then
 					channels[channel] = TempTable(format("%s: %d/%s", L["Channel"], list[i], channel), "channel")
 				end
 			end
 			list:free()
 			return channels
 		end
+	end
+
+	local function destroy_report_window()
+		if not Skada.reportwindow then return end
+
+		-- remove AceGUI hacks before recycling the widget
+		local frame = Skada.reportwindow
+		frame.LayoutFinished = frame.orig_LayoutFinished
+		frame.frame:EnableKeyboard(false)
+		frame:ReleaseChildren()
+		frame:Release()
+		Skada.reportwindow = nil
+
+		if not channellist then return end
+
+		for k, v in pairs(channellist) do
+			channellist[k] = v:free()
+		end
+		channellist = channellist:free()
 	end
 
 	local function create_report_window(window)
@@ -1199,7 +1199,6 @@ do
 			frame:AddChild(setbox)
 		end
 
-		if channellist then channellist:free() end
 		channellist = build_report_channels()
 
 		-- Channel, default last chosen or Say.
