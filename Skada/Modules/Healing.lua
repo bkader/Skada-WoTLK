@@ -41,7 +41,7 @@ Skada:RegisterModule("Healing", function(L, P)
 	-- list of spells used to queue units.
 	local queued_spells = {[49005] = 50424}
 	local heal = {}
-	local function log_heal(set, ishot)
+	local function log_heal(set)
 		if not heal.amount then return end
 
 		local actor = Skada:GetActor(set, heal.actorname, heal.actorid, heal.actorflags)
@@ -331,7 +331,7 @@ Skada:RegisterModule("Healing", function(L, P)
 
 		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.heal then
-				local hps, amount = actor:GetHPS(set, nil, not mode_cols.sHPS)
+				local hps, amount = actor:GetHPS(set, nil, not mode_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
 

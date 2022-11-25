@@ -649,15 +649,12 @@ Skada:RegisterModule("DTPS", function(L, P)
 
 		local totaltime = set:GetTime()
 		local activetime = actor:GetTime(set, true)
-		local dtps, damage = actor:GetDTPS(set)
+		local dtps, damage = actor:GetDTPS(set, nil, false)
 
 		tooltip:AddLine(uformat("%s - %s", label, L["DTPS"]))
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(damage), 1, 1, 1)
-
-		local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
-		tooltip:AddDoubleLine(Skada:FormatNumber(damage) .. "/" .. suffix, Skada:FormatNumber(dtps), 1, 1, 1)
 	end
 
 	function mode:Update(win, set)

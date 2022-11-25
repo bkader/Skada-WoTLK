@@ -1084,6 +1084,15 @@ do
 			text = {L["Copy & Paste"], "text"}
 		}
 
+		-- what's the purpose of spamming these
+		-- channels other than flexing?
+		local ignored_channels = {
+			[L["[Trade]"]] = true,
+			[L["[General]"]] = true,
+			[L["[LocalDefense]"]] = true,
+			[L["[LookingForGroup]"]] = true
+		}
+
 		function build_report_channels()
 			local channels = TempTable()
 			for k, v in pairs(defaults) do
@@ -1095,8 +1104,7 @@ do
 			local list = TempTable(GetChannelList())
 			for i = 1, #list, 2 do
 				local channel = list[i + 1]
-				-- what's the purpose of spamming these channels other than flexing?
-				if channel ~= L["[Trade]"] and channel ~= L["[General]"] and channel ~= L["[LocalDefense]"] and channel ~= L["[LookingForGroup]"] then
+				if type(channel) ~= "boolean" and not ignored_channels[channel] then
 					channels[channel] = TempTable(format("%s: %d/%s", L["Channel"], list[i], channel), "channel")
 				end
 			end

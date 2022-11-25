@@ -116,19 +116,19 @@ local create_set
 local delete_set
 do
 	-- recycle sets
-	local recycle_bin = Private.WeakTable()
+	local recycle_bin = {}
 
 	-- cleans a set before reusing or deleting
 	local clear = Private.clearTable
 	local function clean_set(set)
 		if set then
 			local actors = set.actors
-			setmetatable(set, nil)
 			wipe(set)
+			setmetatable(set, nil)
 			if actors then
 				for k, v in pairs(actors) do
-					setmetatable(v, nil)
 					actors[k] = clear(v)
+					setmetatable(v, nil)
 				end
 				set.actors = actors
 			end
@@ -141,12 +141,17 @@ do
 	-- @param 	set 		the set to override/reuse
 	function create_set(setname, set)
 		if set then
-			Skada:Debug("create_set: Reuse", set.name, setname)
+			Skada:Debug("Rused set for", setname, ">>", set, "<<")
 			set = clean_set(set)
 		else
-			Skada:Debug("create_set: New", setname)
-			set = next(recycle_bin) or {}
-			recycle_bin[set] = nil
+			set = next(recycle_bin)
+			if set then
+				Skada:Debug("Rused set for", setname, ">>", set, "<<")
+				recycle_bin[set] = nil
+			else
+				set = {}
+				Skada:Debug("Created set for", setname, ">>", set, "<<")
+			end
 		end
 
 		-- add stuff.
@@ -207,7 +212,7 @@ local function process_set(set, curtime, mobname)
 	if not P.onlykeepbosses or set.gotboss then
 		set.mobname = mobname or set.mobname -- override name
 		if set.mobname ~= nil and curtime - set.starttime >= (P.minsetlength or 5) then
-			set.endtime = set.endtime or curtime
+			set.endtime = set.endtime and set.endtime > set.starttime and set.endtime or curtime
 			set.time = max(1, set.endtime - set.starttime)
 			set.name = check_set_name(set)
 
@@ -483,15 +488,6 @@ do
 		end
 
 		O.windows.args[db.name] = opt
-	end
-
-	-- fires a callback event
-	function Window:Fire(event, ...)
-		if self.bargroup and self.bargroup.callbacks then
-			self.callbacks:Fire(event, self, ...)
-		elseif self.frame and self.frame.callbacks then
-			self.callbacks:Fire(event, self, ...)
-		end
 	end
 end
 
@@ -2534,80 +2530,80 @@ do
 end
 
 function Skada:StopSegment(msg, phase)
-	if self.current then
-		local curtime = time()
+	local curtime = self.current and time()
+	if not curtime then return end
 
-		-- stop phase segment?
-		if phase and self.tempsets and #self.tempsets > 0 then
-			local set = self.tempsets[tonumber(phase) or 0] or self.tempsets[#self.tempsets]
+	-- stop phase segment?
+	if phase then
+		phase = self.tempsets and (tonumber(phase) or #self.tempsets)
+		local set = phase and self.tempsets[phase]
+		if set and not set.stopped then
+			set.stopped = true
+			set.endtime = curtime
+			set.time = max(1, set.endtime - set.starttime)
+			self:Printf(L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r stopped."], set.mobname or L["Unknown"], set.phase)
+		end
+		return
+	end
+
+	if self.current.stopped then return end
+
+	-- stop current segment?
+	self.current.stopped = true
+	self.current.endtime = curtime
+	self.current.time = max(1, self.current.endtime - self.current.starttime)
+
+	-- stop phase segments?
+	if self.tempsets then
+		for i = 1, #self.tempsets do
+			local set = self.tempsets[i]
 			if set and not set.stopped then
 				set.stopped = true
 				set.endtime = curtime
 				set.time = max(1, set.endtime - set.starttime)
-				self:Printf(L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r stopped."], set.mobname or L["Unknown"], set.phase)
 			end
-			return
-		end
-
-		-- stop current segment?
-		if not self.current.stopped then
-			self.current.stopped = true
-			self.current.endtime = curtime
-			self.current.time = max(1, self.current.endtime - self.current.starttime)
-
-			-- stop phase segments?
-			if self.tempsets and not phase then
-				for i = 1, #self.tempsets do
-					local set = self.tempsets[i]
-					if set and not set.stopped then
-						set.stopped = true
-						set.endtime = curtime
-						set.time = max(1, set.endtime - set.starttime)
-					end
-				end
-			end
-
-			self:Print(msg or L["Segment Stopped."])
-			self:RegisterEvent("PLAYER_REGEN_ENABLED")
 		end
 	end
+
+	self:Print(msg or L["Segment Stopped."])
+	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 end
 
-function Skada:ResumeSegment(msg, phase)
-	if self.current then
-		-- resume phase segment?
-		if phase and self.tempsets and #self.tempsets > 0 then
-			local set = self.tempsets[tonumber(phase) or 0] or self.tempsets[#self.tempsets]
+function Skada:ResumeSegment(msg, index)
+	if not self.current then return end
+
+	-- resume phase segment?
+	if index then
+		index = self.tempsets and (tonumber(index) or #self.tempsets)
+		local set = index and self.tempsets[index]
+		if set and set.stopped then
+			set.stopped = nil
+			set.endtime = nil
+			set.time = 0
+			self:Printf(L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r resumed."], set.mobname or L["Unknown"], set.phase)
+		end
+		return
+	end
+	if not self.current.stopped then return end
+
+	-- resume current segment?
+	self.current.stopped = nil
+	self.current.endtime = nil
+	self.current.time = 0
+
+	-- resume phase segments?
+	if self.tempsets then
+		for i = 1, #self.tempsets do
+			local set = self.tempsets[i]
 			if set and set.stopped then
 				set.stopped = nil
 				set.endtime = nil
 				set.time = 0
-				self:Printf(L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r resumed."], set.mobname or L["Unknown"], set.phase)
 			end
-			return
-		end
-
-		-- resume current segment?
-		if self.current.stopped then
-			self.current.stopped = nil
-			self.current.endtime = nil
-			self.current.time = 0
-
-			-- resume phase segments?
-			if self.tempsets and not phase then
-				for i = 1, #self.tempsets do
-					local set = self.tempsets[i]
-					if set and set.stopped then
-						set.stopped = nil
-						set.endtime = nil
-						set.time = 0
-					end
-				end
-			end
-
-			self:Print(msg or L["Segment Resumed."])
 		end
 	end
+
+	self:Print(msg or L["Segment Resumed."])
 end
 
 -------------------------------------------------------------------------------
@@ -2675,10 +2671,10 @@ do
 			Skada:Debug("StartCombat: Segment Created!")
 			Skada.current = create_set(L["Current"], tentative_set)
 		end
-		tentative_set = delete_set(tentative_set)
+		tentative_set = nil
 
 		if Skada.total == nil then
-			Skada.total = create_set(L["Total"])
+			Skada.total = create_set(L["Total"], Skada.sets[0])
 			Skada.sets[0] = Skada.total
 		end
 
@@ -2829,7 +2825,7 @@ do
 
 	local function tentative_handler()
 		tentative_set = Skada.current
-		Skada.current = delete_set(Skada.current)
+		Skada.current = nil
 		Skada:CancelTimer(tentative_timer, true)
 		tentative_timer = nil
 		tentative = nil
@@ -2852,9 +2848,7 @@ do
 
 			if src_is_interesting or dst_is_interesting then
 				self.current = create_set(L["Current"], tentative_set)
-				if not self.total then
-					self.total = create_set(L["Total"])
-				end
+				self.total = self.total or create_set(L["Total"])
 
 				tentative_timer = self:ScheduleTimer(tentative_handler, 1)
 				tentative = P.tentativecombatstart and 4 or 0
@@ -2931,6 +2925,8 @@ do
 					end
 				end
 
+				-- avoid the rest of the code out of combat
+				if not self.inCombat then return end
 				func(t)
 			end
 		end

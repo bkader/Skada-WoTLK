@@ -557,9 +557,7 @@ function actorPrototype:GetHealOnTarget(name, inc_overheal)
 
 	for _, spell in pairs(spells) do
 		local target = spell.targets and spell.targets[name]
-		if type(target) == "number" then
-			heal = heal + target
-		elseif target then
+		if target then
 			heal = heal + target.amount
 			if inc_overheal and target.o_amt then
 				overheal = overheal + target.o_amt
@@ -597,9 +595,7 @@ function actorPrototype:GetTotalHealOnTarget(name)
 	local total = 0
 	for _, spell in pairs(spells) do
 		local target = spell.targets and spell.targets[name]
-		if type(target) == "number" then
-			total = total + target
-		elseif target then
+		if target then
 			total = total + target.amount
 			if target.o_amt then
 				total = total + target.o_amt
@@ -668,9 +664,7 @@ function actorPrototype:GetAbsorbHealOnTarget(name, inc_overheal)
 	if spells then
 		for _, spell in pairs(spells) do
 			local target = spell.targets and spell.targets[name]
-			if type(target) == "number" then
-				heal = heal + target
-			elseif target then
+			if target then
 				heal = heal + target.amount
 				if inc_overheal and target.o_amt then
 					overheal = overheal + target.o_amt
@@ -700,13 +694,9 @@ do
 		local tbl = t[name] or new()
 		t[name] = tbl
 
-		if type(info) == "number" then
-			tbl.amount = (tbl.amount or 0) + info
-		else
-			tbl.amount = (tbl.amount or 0) + info.amount
-			if info.o_amt then
-				tbl.o_amt = (tbl.o_amt or 0) + info.o_amt
-			end
+		tbl.amount = (tbl.amount or 0) + info.amount
+		if info.o_amt then
+			tbl.o_amt = (tbl.o_amt or 0) + info.o_amt
 		end
 
 		set:_fill_actor_table(tbl, name)
@@ -818,13 +808,9 @@ do
 		local tbl = t[name] or new()
 		t[name] = tbl
 
-		if type(info) == "number" then
-			tbl.amount = (tbl.amount or 0) + info
-		else
-			tbl.amount = (tbl.amount or 0) + info.amount
-			if info.o_amt then
-				tbl.amount = tbl.amount + info.o_amt
-			end
+		tbl.amount = (tbl.amount or 0) + info.amount
+		if info.o_amt then
+			tbl.amount = tbl.amount + info.o_amt
 		end
 
 		set:_fill_actor_table(tbl, name)

@@ -1,7 +1,7 @@
 local _, Skada = ...
 local Private = Skada.Private
 
-local pairs, format, uformat = pairs, string.format, Private.uformat
+local pairs, format, max, uformat = pairs, string.format, math.max, Private.uformat
 local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 
 local function format_valuetext(d, columns, total, dps, metadata, subview)
@@ -590,7 +590,7 @@ Skada:RegisterModule("Damage", function(L, P)
 
 		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.damage then
-				local dps, amount = actor:GetDPS(set)
+				local dps, amount = actor:GetDPS(set, nil, nil, not mode_cols.DPS)
 				if amount > 0 then
 					nr = nr + 1
 
@@ -752,14 +752,11 @@ Skada:RegisterModule("DPS", function(L, P)
 
 		local totaltime = set:GetTime()
 		local activetime = actor:GetTime(set, true)
-		local dps, damage = actor:GetDPS(set)
+		local dps, damage = actor:GetDPS(set, nil, nil, false)
 		tooltip:AddLine(uformat("%s - %s", label, L["DPS"]))
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(damage), 1, 1, 1)
-
-		local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
-		tooltip:AddDoubleLine(Skada:FormatNumber(damage) .. "/" .. suffix, Skada:FormatNumber(dps), 1, 1, 1)
 
 		local petdamage = P.absdamage and actor.pettotaldamage or actor.petdamage
 		if not petdamage then return end
@@ -788,7 +785,7 @@ Skada:RegisterModule("DPS", function(L, P)
 
 					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = dps
-					format_valuetext(d, mode_cols, total, dps, win.metadata)
+					format_valuetext(d, mode_cols, max(dps, total), dps, win.metadata)
 					win:color(d, set, actor.enemy)
 				end
 			end
@@ -990,7 +987,6 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 	local mode_spell = mode:NewModule("Spell List")
 	local mode_target = mode:NewModule("Target List")
 	local mode_target_spell = mode_target:NewModule("Spell List")
-	local max = math.max
 	local mode_cols = nil
 
 	function mode_spell:Enter(win, id, label)
@@ -1110,7 +1106,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 
 		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.damage then
-				local dps, amount = actor:GetDPS(set, true)
+				local dps, amount = actor:GetDPS(set, true, nil, not mode_cols.DPS)
 				if amount > 0 then
 					nr = nr + 1
 

@@ -1135,30 +1135,52 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	local heal = {}
 	local function log_heal(set)
 		if not set or (set == Skada.total and not P.totalidc) then return end
-		if not heal.amount or heal.amount == 0 then return end
+		if not heal.amount then return end
 
-		local e = Skada:GetActor(set, heal.actorname, heal.actorid, heal.actorflags)
-		if not e then
-			return
-		elseif (set.type == "arena" or set.type == "pvp") then
-			add_actor_time(set, e, heal.spell, heal.dstName)
+		local actor = Skada:GetActor(set, heal.actorname, heal.actorid, heal.actorflags)
+		if not actor then return end
+
+		-- get rid of overheal
+		if (set.type == "arena" or set.type == "pvp") and heal.amount > 0 then
+			add_actor_time(set, actor, heal.spell, heal.dstName)
 		end
 
+		actor.heal = (actor.heal or 0) + heal.amount
 		set.eheal = (set.eheal or 0) + heal.amount
-		e.heal = (e.heal or 0) + heal.amount
 
-		local spell = e.healspells and e.healspells[heal.spellid]
+		local overheal = (heal.overheal > 0) and heal.overheal or nil
+		if overheal then
+			actor.overheal = (actor.overheal or 0) + overheal
+			set.eoverheal = (set.eoverheal or 0) + overheal
+		end
+
+		local spell = actor.healspells and actor.healspells[heal.spellid]
 		if not spell then
-			e.healspells = e.healspells or {}
-			e.healspells[heal.spellid] = {amount = heal.amount}
-			spell = e.healspells[heal.spellid]
+			actor.healspells = actor.healspells or {}
+			actor.healspells[heal.spellid] = {amount = heal.amount, count = 1}
+			spell = actor.healspells[heal.spellid]
 		else
 			spell.amount = spell.amount + heal.amount
+			spell.count = spell.count + 1
 		end
 
-		if heal.dstName then
+		if overheal then
+			spell.o_amt = (spell.o_amt or 0) + overheal
+		end
+
+		if not heal.dstName then return end
+
+		local target = spell.targets and spell.targets[heal.dstName]
+		if not target then
 			spell.targets = spell.targets or {}
-			spell.targets[heal.dstName] = (spell.targets[heal.dstName] or 0) + heal.amount
+			spell.targets[heal.dstName] = {amount = heal.amount}
+			target = spell.targets[heal.dstName]
+		else
+			target.amount = target.amount + heal.amount
+		end
+
+		if overheal then
+			target.o_amt = (target.o_amt or 0) + overheal
 		end
 	end
 
@@ -1171,7 +1193,8 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 
 			heal.spell = t.spellid
 			heal.spellid = t.spellstring
-			heal.amount = max(0, t.amount - t.overheal)
+			heal.overheal = t.overheal or 0
+			heal.amount = max(0, t.amount - heal.overheal)
 
 			Skada:DispatchSets(log_heal)
 		end
@@ -1252,7 +1275,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 
 		for actorname, actor in pairs(actors) do
 			if actor.enemy and not actor.fake then
-				local hps, amount = actor:GetHPS(set)
+				local hps, amount = actor:GetHPS(set, nil, not mode_cols.HPS)
 				if amount > 0 then
 					nr = nr + 1
 
