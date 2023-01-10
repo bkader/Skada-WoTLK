@@ -63,32 +63,32 @@ do
 		if not can_clear_actor(actor) then return end
 
 		for spellid, spell in pairs(actor.auras) do
-			if spell.active ~= nil and spell.start then
-				spell.uptime = min(maxtime, spell.uptime + floor((curtime - spell.start) + 0.5))
+			if spell.a ~= nil and spell.s then
+				spell.u = min(maxtime, spell.u + floor((curtime - spell.s) + 0.5))
 			end
 			-- remove temporary keys
-			spell.active, spell.start = nil, nil
+			spell.a, spell.s = nil, nil
 
-			if spell.uptime == 0 then
+			if spell.u == 0 then
 				-- remove spell with 0 uptime.
 				actor.auras[spellid] = del(actor.auras[spellid], true)
-			elseif spell.targets then
+			elseif spell.t then
 				-- debuff targets
-				for name, target in pairs(spell.targets) do
-					if target.active ~= nil and target.start then
-						target.uptime = min(spell.uptime, target.uptime + floor((curtime - target.start) + 0.5))
+				for name, target in pairs(spell.t) do
+					if target.a ~= nil and target.s then
+						target.u = min(spell.u, target.u + floor((curtime - target.s) + 0.5))
 					end
 					-- remove temporary keys
-					target.active, target.start = nil, nil
+					target.a, target.s = nil, nil
 
 					-- remove targets with 0 uptime.
-					if target.uptime == 0 then
-						spell.targets[name] = del(spell.targets[name])
+					if target.u == 0 then
+						spell.t[name] = del(spell.t[name])
 					end
 				end
 
 				-- an empty targets table? Remove it
-				if next(spell.targets) == nil then
+				if next(spell.t) == nil then
 					actor.auras[spellid] = del(actor.auras[spellid])
 				end
 			end
@@ -166,25 +166,26 @@ do
 		local spell = actor.auras and actor.auras[aura.spellid]
 		if not spell then
 			actor.auras = actor.auras or {}
-			actor.auras[aura.spellid] = {uptime = 0, count = 1, active = 1, start = curtime}
+			actor.auras[aura.spellid] = {u = 0, n = 1, a = 1, s = curtime}
 			spell = actor.auras[aura.spellid]
 		else
-			spell.active = (spell.active or 0) + 1
-			spell.count = (spell.count or 0) + 1
-			spell.start = spell.start or curtime
+			spell.n = (spell.n or 0) + 1
+			spell.a = (spell.a or 0) + 1
+			spell.s = spell.s or curtime
 		end
 
 		-- only record targets for debuffs
-		if aura.type == "BUFF" or not aura.dstName then return end
+		local name = aura.type == "DEBUFF" and aura.dstName
+		if not name then return end
 
-		local target = spell.targets and spell.targets[aura.dstName]
+		local target = spell.t and spell.t[name]
 		if not target then
-			spell.targets = spell.targets or {}
-			spell.targets[aura.dstName] = {uptime = 0, count = 1, active = 1, start = curtime}
+			spell.t = spell.t or {}
+			spell.t[name] = {u = 0, n = 1, a = 1, s = curtime}
 		else
-			target.active = (target.active or 0) + 1
-			target.count = (target.count or 0) + 1
-			target.start = target.start or curtime
+			target.a = (target.a or 0) + 1
+			target.n = (target.n or 0) + 1
+			target.s = target.s or curtime
 		end
 	end
 
@@ -195,13 +196,13 @@ do
 
 		-- spell
 		local spell = actor.auras and actor.auras[aura.spellid]
-		if not spell or not spell.active or spell.active == 0 then return end
-		spell.refresh = (spell.refresh or 0) + 1
+		if not spell or not spell.a or spell.a == 0 then return end
+		spell.r = (spell.r or 0) + 1
 
 		-- target
-		local target = spell.targets and aura.dstName and spell.targets[aura.dstName]
-		if not target or not target.active or target.active == 0 then return end
-		target.refresh = (target.refresh or 0) + 1
+		local target = spell.t and aura.dstName and spell.t[aura.dstName]
+		if not target or not target.a or target.a == 0 then return end
+		target.r = (target.r or 0) + 1
 	end
 
 	-- handles SPELL_AURA_REMOVED event
@@ -211,23 +212,21 @@ do
 
 		-- spell
 		local spell = actor.auras and actor.auras[aura.spellid]
-		if not spell or not spell.active or spell.active == 0 then return end
+		if not spell or not spell.a or spell.a == 0 then return end
 
 		local curtime = Skada._time or time()
-		spell.active = spell.active - 1
-		if spell.active == 0 and spell.start then
-			spell.uptime = spell.uptime + floor((curtime - spell.start) + 0.5)
-			spell.start = nil
+		spell.a = spell.a - 1
+		if spell.a == 0 and spell.s then
+			spell.u = spell.u + floor((curtime - spell.s) + 0.5)
 		end
 
 		-- target
-		local target = spell.targets and aura.dstName and spell.targets[aura.dstName]
-		if not target or not target.active or target.active == 0 then return end
+		local target = spell.t and aura.dstName and spell.t[aura.dstName]
+		if not target or not target.a or target.a == 0 then return end
 
-		target.active = target.active - 1
-		if target.active == 0 and target.start then
-			target.uptime = target.uptime + floor((curtime - target.start) + 0.5)
-			target.start = nil
+		target.a = target.a - 1
+		if target.a == 0 and target.s then
+			target.u = target.u + floor((curtime - target.s) + 0.5)
 		end
 	end
 
@@ -239,9 +238,9 @@ do
 		local spell = actor.auras and actor.auras[aura.spellid]
 		if not spell then
 			actor.auras = actor.auras or {}
-			actor.auras[aura.spellid] = {uptime = 1}
+			actor.auras[aura.spellid] = {u = 1}
 		else
-			spell.uptime = (spell.uptime or 0) + 1
+			spell.u = (spell.u or 0) + 1
 		end
 	end
 
@@ -255,7 +254,7 @@ do
 				local spellid = SpellSplit(id)
 				if (auratype == "BUFF" and spellid > 0) or (auratype == "DEBUFF" and spellid < 0) then
 					count = count + 1
-					uptime = uptime + spell.uptime
+					uptime = uptime + spell.u
 				end
 			end
 			return count, uptime
@@ -319,23 +318,23 @@ do
 		for id, spell in pairs(spells) do
 			local spellid = SpellSplit(id)
 			if
-				(auratype == "BUFF" and spellid > 0 and spell.uptime > 0) or
-				(auratype == "DEBUFF" and spellid < 0 and spell.uptime > 0)
+				(auratype == "BUFF" and spellid > 0 and spell.u > 0) or
+				(auratype == "DEBUFF" and spellid < 0 and spell.u > 0)
 			then
 				nr = nr + 1
 
 				local d = win:spell(nr, id, false)
-				d.value = min(maxtime, spell.uptime)
-				format_valuetext(d, cols, spell.count, maxtime, win.metadata, true)
+				d.value = min(maxtime, spell.u)
+				format_valuetext(d, cols, spell.n, maxtime, win.metadata, true)
 			end
 		end
 	end
 
 	local function new_aura_table(info)
 		local t = new()
-		t.count = info.count
-		t.refresh = info.refresh
-		t.uptime = info.uptime
+		t.n = info.n
+		t.r = info.r
+		t.u = info.u
 		return t
 	end
 
@@ -347,18 +346,18 @@ do
 			tbl = clear(tbl)
 			local maxtime = 0
 			for _, spell in pairs(spells) do
-				if spell.targets then
-					maxtime = maxtime + spell.uptime
-					for name, target in pairs(spell.targets) do
+				if spell.t then
+					maxtime = maxtime + spell.u
+					for name, target in pairs(spell.t) do
 						local t = tbl[name]
 						if not t then
 							t = new_aura_table(target)
 							tbl[name] = t
 						else
-							t.count = t.count + target.count
-							t.uptime = t.uptime + target.uptime
-							if target.refresh then
-								t.refresh = (t.refresh or 0) + target.refresh
+							t.n = t.n + target.n
+							t.u = t.u + target.u
+							if target.r then
+								t.r = (t.r or 0) + target.r
 							end
 						end
 
@@ -387,8 +386,8 @@ do
 				nr = nr + 1
 
 				local d = win:actor(nr, target, target.enemy, name)
-				d.value = target.uptime
-				format_valuetext(d, cols, target.count, maxtime, win.metadata, true)
+				d.value = target.u
+				format_valuetext(d, cols, target.n, maxtime, win.metadata, true)
 			end
 		end
 	end
@@ -396,7 +395,7 @@ do
 	do
 		local function get_actor_aura_targets(self, set, spellid, tbl)
 			local spell = set and spellid and self.auras and self.auras[spellid]
-			local targets = spell and spell.targets
+			local targets = spell and spell.t
 			if not targets then return end
 
 			tbl = clear(tbl)
@@ -404,7 +403,7 @@ do
 				tbl[name] = new_aura_table(target)
 				set:_fill_actor_table(tbl[name], name)
 			end
-			return tbl, spell.uptime
+			return tbl, spell.u
 		end
 
 		-- list targets of the given aura
@@ -424,8 +423,8 @@ do
 				nr = nr + 1
 
 				local d = win:actor(nr, target, target.enemy, name)
-				d.value = min(target.uptime, maxtime)
-				format_valuetext(d, cols, target.count, maxtime, win.metadata, true)
+				d.value = min(target.u, maxtime)
+				format_valuetext(d, cols, target.n, maxtime, win.metadata, true)
 			end
 		end
 	end
@@ -438,8 +437,8 @@ do
 			tbl = clear(tbl)
 			local maxtime = 0
 			for spellid, spell in pairs(spells) do
-				local target = spell.targets and spell.targets[name]
-				local uptime = target and target.uptime
+				local target = spell.t and spell.t[name]
+				local uptime = target and target.u
 				if uptime then
 					maxtime = maxtime + uptime
 					tbl[spellid] = new_aura_table(target)
@@ -466,8 +465,8 @@ do
 				nr = nr + 1
 
 				local d = win:spell(nr, spellid, false)
-				d.value = spell.uptime
-				format_valuetext(d, cols, spell.count, maxtime, win.metadata, true)
+				d.value = spell.u
+				format_valuetext(d, cols, spell.n, maxtime, win.metadata, true)
 			end
 		end
 	end
@@ -483,12 +482,12 @@ do
 		tooltip:AddLine(uformat("%s - %s", win.actorname, label))
 		tooltip_school(tooltip, id)
 
-		if spell.count or spell.refresh then
-			if spell.count then
-				tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
+		if spell.n or spell.r then
+			if spell.n then
+				tooltip:AddDoubleLine(L["Count"], spell.n, 1, 1, 1)
 			end
-			if spell.refresh then
-				tooltip:AddDoubleLine(L["Refresh"], spell.refresh, 1, 1, 1)
+			if spell.r then
+				tooltip:AddDoubleLine(L["Refresh"], spell.r, 1, 1, 1)
 			end
 			tooltip:AddLine(" ")
 		end
@@ -496,10 +495,10 @@ do
 		-- add segment and active times
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(actor:GetTime(set, true)), 1, 1, 1)
-		tooltip:AddDoubleLine(L["Duration"], Skada:FormatTime(spell.uptime), 1, 1, 1)
+		tooltip:AddDoubleLine(L["Duration"], Skada:FormatTime(spell.u), 1, 1, 1)
 
 		-- display aura uptime in colored percent
-		local uptime = 100 * (spell.uptime / actor:GetTime(set))
+		local uptime = 100 * (spell.u / actor:GetTime(set))
 		tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), nil, nil, nil, PercentToRGB(uptime, actor.enemy))
 	end
 
@@ -507,17 +506,17 @@ do
 		local set = win.spellid and win:GetSelectedSet()
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local spell = actor and actor.auras and actor.auras[win.spellid]
-		local target = spell and spell.targets and spell.targets[label]
+		local target = spell and spell.t and spell.t[label]
 		if not target then return end
 
 		tooltip:AddLine(uformat("%s - %s", win.actorname, win.spellname))
 		tooltip_school(tooltip, win.spellid)
 
-		if target.count then
-			tooltip:AddDoubleLine(L["Count"], target.count, 1, 1, 1)
+		if target.n then
+			tooltip:AddDoubleLine(L["Count"], target.n, 1, 1, 1)
 		end
-		if target.refresh then
-			tooltip:AddDoubleLine(L["Refresh"], target.refresh, 1, 1, 1)
+		if target.r then
+			tooltip:AddDoubleLine(L["Refresh"], target.r, 1, 1, 1)
 		end
 	end
 end
@@ -578,9 +577,9 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 				local spell = not actor.enemy and actor.auras and actor.auras[spellid]
 				if spell then
 					local t = new_actor_table(actor)
-					t.count = spell.count
-					t.maxtime = floor(actor:GetTime(self))
-					t.uptime = min(t.maxtime, spell.uptime)
+					t.n = spell.n
+					t.m = floor(actor:GetTime(self))
+					t.u = min(t.m, spell.u)
 					tbl[actorname] = t
 				end
 			end
@@ -602,8 +601,8 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 				nr = nr + 1
 
 				local d = win:actor(nr, target, target.enemy, name)
-				d.value = target.uptime
-				format_valuetext(d, mode_cols, target.count, target.maxtime, win.metadata, true)
+				d.value = target.u
+				format_valuetext(d, mode_cols, target.n, target.m, win.metadata, true)
 			end
 		end
 	end
@@ -766,8 +765,8 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 				nr = nr + 1
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
-				d.value = spell.uptime
-				format_valuetext(d, mode_cols, spell.count, actor:GetTime(set), win.metadata, true, true)
+				d.value = spell.u
+				format_valuetext(d, mode_cols, spell.n, actor:GetTime(set), win.metadata, true, true)
 			end
 		end
 	end
@@ -801,14 +800,14 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 		local set = win.spellid and win:GetSelectedSet()
 		local actor = set and set:GetActor(label, id)
 		local spell = actor and actor.auras and actor.auras[win.spellid]
-		if not (spell and spell.count) then return end
+		if not (spell and spell.n) then return end
 
 		tooltip:AddLine(uformat("%s - %s", label, win.spellname))
 		tooltip_school(tooltip, win.spellid)
 
-		tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
-		if spell.refresh then
-			tooltip:AddDoubleLine(L["Refresh"], spell.refresh, 1, 1, 1)
+		tooltip:AddDoubleLine(L["Count"], spell.n, 1, 1, 1)
+		if spell.r then
+			tooltip:AddDoubleLine(L["Refresh"], spell.r, 1, 1, 1)
 		end
 	end
 

@@ -774,7 +774,6 @@ L["Modes Icons"] = true
 L["Show modes icons on bars and menus."] = true
 L["Combat Log"] = _G.COMBAT_LOG
 L["opt_tweaks_combatlogfix_desc"] = "Keeps the combat log from breaking without munging it completely."
-L["Conservative Mode"] = true
 L["Enable this if you want to ignore \124cffffbb00%s\124r."] = true
 L["Colors"] = _G.COLORS
 L["Custom Colors"] = true

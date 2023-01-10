@@ -1,7 +1,7 @@
 local L = LibStub("AceLocale-3.0"):NewLocale(..., "zhTW")
 if not L then return end
 
-L["A damage meter."] = "一個傷害統計。"
+L["A damage meter."] = "模組化的傷害統計。"
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "記憶體使用過高，你或許想要重置Skada，並且啟用一個自動重設的選項。"
 L["Skada is out of date. You can download the newest version from \124cffffbb00%s\124r"] = "Skada 已過期. 你可以在 \124cffffbb00%s\124r 下載到最新的版本."
 L["Skada: Modes"] = "Skada:模組"
@@ -707,7 +707,6 @@ L["opt_tweaks_smartwait_desc"] = "Skada 在停止該段之前應等待多長時�
 L["Modes Icons"] = "模式圖標"
 L["Show modes icons on bars and menus."] = "在欄和菜單上顯示模式圖標。"
 L["opt_tweaks_combatlogfix_desc"] = "從斷裂而沒有完全破壞它可以防止戰鬥記錄。"
-L["Conservative Mode"] = "保守的"
 L["Enable this if you want to ignore \124cffffbb00%s\124r."] = "如果您想忽略\124cffffbb00%s\124r，請啟用此功能。"
 L["Custom Colors"] = "定制色彩"
 L["Arena Teams"] = "競技場隊伍"

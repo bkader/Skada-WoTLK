@@ -242,7 +242,7 @@ Skada:RegisterModule("Damage", function(L, P)
 		tooltip_school(tooltip, id)
 
 		-- show the aura uptime in case of a debuff.
-		local uptime = actor.auras and actor.auras[id] and actor.auras[id].uptime
+		local uptime = actor.auras and actor.auras[id] and actor.auras[id].u
 		if uptime and uptime > 0 then
 			uptime = 100 * (uptime / actor:GetTime(set))
 			tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), nil, nil, nil, PercentToRGB(uptime))

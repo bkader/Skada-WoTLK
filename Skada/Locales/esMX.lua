@@ -712,7 +712,6 @@ L["opt_tweaks_smartwait_desc"] = "¿Por cu\195\161nto tiempo debe esperar antes 
 L["Modes Icons"] = "Iconos de modos"
 L["Show modes icons on bars and menus."] = "Muestra los iconos de los modos en las barras y los men\195\186s."
 L["opt_tweaks_combatlogfix_desc"] = "Evita que el registro de combate se rompa sin estropearlo por completo."
-L["Conservative Mode"] = "Modo conservador"
 L["Enable this if you want to ignore \124cffffbb00%s\124r."] = "Active esta opci\195\179n si quiere ignorar \124cffffbb00%s\124r."
 L["Custom Colors"] = "Colores personalizados"
 L["Arena Teams"] = "Equipos de arena"

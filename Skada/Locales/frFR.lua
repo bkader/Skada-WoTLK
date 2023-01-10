@@ -713,7 +713,6 @@ L["opt_tweaks_smartwait_desc"] = "Combien de temps Skada doit attendre avant d'a
 L["Modes Icons"] = "Ic\195\180nes des modes"
 L["Show modes icons on bars and menus."] = "Afficher les ic\195\180nes des modes sur les barres et les menus."
 L["opt_tweaks_combatlogfix_desc"] = "Emp\195\170che le journal de combat de bugger sans le ronger compl\195\168tement."
-L["Conservative Mode"] = "Mode conservateur"
 L["Enable this if you want to ignore \124cffffbb00%s\124r."] = "Si activ\195\169, \124cffffbb00%s\124r sera compl\195\168tement ignor\195\169(e)."
 L["Custom Colors"] = "Couleurs personnalisées"
 L["Arena Teams"] = "\195\137quipes d'ar\195\168ne"

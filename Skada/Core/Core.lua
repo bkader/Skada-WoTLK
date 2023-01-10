@@ -1881,6 +1881,11 @@ function Skada:CanReset()
 	end
 
 	local sets = self.sets
+
+	if not sets then
+		return false
+	end
+
 	for i = 1, #sets do
 		local set = sets[i]
 		if set and not set.keep then
@@ -2115,7 +2120,7 @@ function dataobj:OnEnter()
 end
 
 function dataobj:OnLeave()
-	self.tooltip:Hide()
+	(self.tooltip or GameTooltip):Hide()
 end
 
 function dataobj:OnClick(button)

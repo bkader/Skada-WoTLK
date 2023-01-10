@@ -708,7 +708,6 @@ L["opt_tweaks_smartwait_desc"] = "Wie lange Skada warten soll, bevor die Strecke
 L["Modes Icons"] = "Modussymbole"
 L["Show modes icons on bars and menus."] = "Modussymbole in Balken und Men\195\188s anzeigen."
 L["opt_tweaks_combatlogfix_desc"] = "Verhindert, dass das Kampfprotokoll zerbricht, ohne es vollst\195\164ndig zu zerst\195\182ren."
-L["Conservative Mode"] = "Konservativer Modus"
 L["Enable this if you want to ignore \124cffffbb00%s\124r."] = "Aktivieren Sie dies, wenn Sie \124cffffbb00%s\124r ignorieren m\195\182chten."
 L["Custom Colors"] = "Farben \195\164ndern"
 L["Arena Teams"] = "Arenateams"

@@ -51,6 +51,7 @@ Skada.windowdefaults = {
 		borderthickness = 2,
 		borderinsets = 0,
 		toolbar = 1,
+		toolbaropacity = 0.5,
 		spacing = 1
 	},
 	background = {

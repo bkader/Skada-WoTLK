@@ -45,15 +45,15 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		local spell = actor.ccdonespells and actor.ccdonespells[cc_table.spellid]
 		if not spell then
 			actor.ccdonespells = actor.ccdonespells or {}
-			actor.ccdonespells[cc_table.spellid] = {count = 0}
+			actor.ccdonespells[cc_table.spellid] = {n = 0}
 			spell = actor.ccdonespells[cc_table.spellid]
 		end
-		spell.count = spell.count + 1
+		spell.n = spell.n + 1
 
 		-- record the target.
 		if cc_table.dstName then
-			spell.targets = spell.targets or {}
-			spell.targets[cc_table.dstName] = (spell.targets[cc_table.dstName] or 0) + 1
+			spell.t = spell.t or {}
+			spell.t[cc_table.dstName] = (spell.t[cc_table.dstName] or 0) + 1
 		end
 	end
 
@@ -95,7 +95,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, false)
-			d.value = spell.count
+			d.value = spell.n
 			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
@@ -120,7 +120,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 			nr = nr + 1
 
 			local d = win:actor(nr, target, target.enemy, targetname)
-			d.value = target.count
+			d.value = target.n
 			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
@@ -146,7 +146,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 			nr = nr + 1
 
 			local d = win:actor(nr, source, source.enemy, sourcename)
-			d.value = source.count
+			d.value = source.n
 			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
@@ -227,15 +227,15 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 		local actors = self.actors
 		for actorname, actor in pairs(actors) do
 			local spell = not actor.enemy and actor.ccdonespells and actor.ccdonespells[spellid]
-			if spell and spell.count then
+			if spell and spell.n then
 				tbl[actorname] = new()
 				tbl[actorname].id = actor.id
 				tbl[actorname].class = actor.class
 				tbl[actorname].role = actor.role
 				tbl[actorname].spec = actor.spec
 				tbl[actorname].enemy = actor.enemy
-				tbl[actorname].count = spell.count
-				total = total + spell.count
+				tbl[actorname].count = spell.n
+				total = total + spell.n
 			end
 		end
 
@@ -249,15 +249,15 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 		tbl = clear(tbl or C)
 		for _, spell in pairs(spells) do
-			if spell.targets then
-				for targetname, count in pairs(spell.targets) do
+			if spell.t then
+				for targetname, count in pairs(spell.t) do
 					local t = tbl[targetname]
 					if not t then
 						t = new()
-						t.count = count
+						t.n = count
 						tbl[targetname] = t
 					else
-						t.count = t.count + count
+						t.n = t.n + count
 					end
 					self:_fill_actor_table(t, targetname)
 				end
@@ -308,10 +308,10 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		local spell = actor.cctakenspells and actor.cctakenspells[cc_table.spellid]
 		if not spell then
 			actor.cctakenspells = actor.cctakenspells or {}
-			actor.cctakenspells[cc_table.spellid] = {count = 0}
+			actor.cctakenspells[cc_table.spellid] = {n = 0}
 			spell = actor.cctakenspells[cc_table.spellid]
 		end
-		spell.count = spell.count + 1
+		spell.n = spell.n + 1
 
 		-- record the source.
 		if cc_table.srcName then
@@ -357,7 +357,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, false)
-			d.value = spell.count
+			d.value = spell.n
 			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
@@ -382,7 +382,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 			nr = nr + 1
 
 			local d = win:actor(nr, source, true, sourcename)
-			d.value = source.count
+			d.value = source.n
 			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
@@ -408,7 +408,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 			nr = nr + 1
 
 			local d = win:actor(nr, target, target.enemy, targetname)
-			d.value = target.count
+			d.value = target.n
 			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
@@ -489,15 +489,15 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 		local actors = self.actors
 		for actorname, actor in pairs(actors) do
 			local spell = not actor.enemy and actor.cctakenspells and actor.cctakenspells[spellid]
-			if spell and spell.count then
+			if spell and spell.n then
 				tbl[actorname] = new()
 				tbl[actorname].id = actor.id
 				tbl[actorname].class = actor.class
 				tbl[actorname].role = actor.role
 				tbl[actorname].spec = actor.spec
 				tbl[actorname].enemy = actor.enemy
-				tbl[actorname].count = spell.count
-				total = total + spell.count
+				tbl[actorname].count = spell.n
+				total = total + spell.n
 			end
 		end
 
@@ -516,10 +516,10 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 					local t = tbl[sourcename]
 					if not t then
 						t = new()
-						t.count = count
+						t.n = count
 						tbl[sourcename] = t
 					else
-						t.count = t.count + count
+						t.n = t.n + count
 					end
 					self:_fill_actor_table(t, sourcename)
 				end
@@ -559,15 +559,15 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 		local spell = actor.ccbreakspells and actor.ccbreakspells[cc_table.spellid]
 		if not spell then
 			actor.ccbreakspells = actor.ccbreakspells or {}
-			actor.ccbreakspells[cc_table.spellid] = {count = 0}
+			actor.ccbreakspells[cc_table.spellid] = {n = 0}
 			spell = actor.ccbreakspells[cc_table.spellid]
 		end
-		spell.count = spell.count + 1
+		spell.n = spell.n + 1
 
 		-- record the target.
 		if cc_table.dstName then
-			spell.targets = spell.targets or {}
-			spell.targets[cc_table.dstName] = (spell.targets[cc_table.dstName] or 0) + 1
+			spell.t = spell.t or {}
+			spell.t[cc_table.dstName] = (spell.t[cc_table.dstName] or 0) + 1
 		end
 	end
 
@@ -638,7 +638,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 			nr = nr + 1
 
 			local d = win:spell(nr, spellid, false)
-			d.value = spell.count
+			d.value = spell.n
 			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
@@ -663,7 +663,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 			nr = nr + 1
 
 			local d = win:actor(nr, target, target.enemy, targetname)
-			d.value = target.count
+			d.value = target.n
 			format_valuetext(d, mode_cols, total, win.metadata, true)
 		end
 	end
@@ -779,15 +779,15 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 
 		tbl = clear(tbl or C)
 		for _, spell in pairs(spells) do
-			if spell.targets then
-				for targetname, count in pairs(spell.targets) do
+			if spell.t then
+				for targetname, count in pairs(spell.t) do
 					local t = tbl[targetname]
 					if not t then
 						t = new()
-						t.count = count
+						t.n = count
 						tbl[targetname] = t
 					else
-						t.count = t.count + count
+						t.n = t.n + count
 					end
 					self:_fill_actor_table(t, targetname)
 				end
