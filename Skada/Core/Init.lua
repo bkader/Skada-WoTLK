@@ -1582,7 +1582,7 @@ do
 		local editbox = AceGUI:Create("MultiLineEditBox")
 		editbox.editBox:SetFontObject(GameFontHighlightSmall)
 		local fontpath = ns:MediaFetch("font", "Fira Mono Medium")
-		if fontpath then editbox.editBox:SetFont(fontpath, fontsize or 10) end
+		if fontpath then editbox.editBox:SetFont(fontpath, fontsize or 10, "") end
 		editbox:SetLabel(title)
 		editbox:SetFullWidth(true)
 		editbox:SetFullHeight(true)
