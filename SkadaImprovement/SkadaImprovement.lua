@@ -226,17 +226,6 @@ Skada:RegisterModule("Improvement", function(L)
 		if self.db then return end
 
 		SkadaImprovementDB = SkadaImprovementDB or {}
-
-		-- get back old data
-		if Skada.char.improvement then
-			if Skada.char.improvement.bosses then
-				SkadaImprovementDB = CopyTable(Skada.char.improvement.bosses or {})
-			else
-				SkadaImprovementDB = CopyTable(Skada.char.improvement)
-			end
-			Skada.char.improvement = nil
-		end
-
 		self.db = SkadaImprovementDB
 	end
 
