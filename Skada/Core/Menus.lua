@@ -169,7 +169,7 @@ function Skada:OpenMenu(window)
 			info.notCheckable = 1
 			UIDropDownMenu_AddButton(info, level)
 
-			if Skada.db.setstokeep > 0 then
+			if Skada.profile.setstokeep > 0 then
 				-- keep segment
 				wipe(info)
 				info.text = L["Keep Segment"]
@@ -328,7 +328,7 @@ function Skada:OpenMenu(window)
 					info.notCheckable = 1
 					UIDropDownMenu_AddButton(info, level)
 
-					if Skada.db.showself ~= true then
+					if Skada.profile.showself ~= true then
 						wipe(info)
 						info.text = L["Always show self"]
 						info.func = function()
@@ -339,7 +339,7 @@ function Skada:OpenMenu(window)
 						UIDropDownMenu_AddButton(info, level)
 					end
 
-					if Skada.db.showtotals ~= true then
+					if Skada.profile.showtotals ~= true then
 						wipe(info)
 						info.text = L["Show totals"]
 						info.func = function()
@@ -499,19 +499,19 @@ function Skada:OpenMenu(window)
 				wipe(info)
 				info.text = L["Activity Time"]
 				info.func = function()
-					Skada.db.timemesure = 1
+					Skada.profile.timemesure = 1
 					Skada:ApplySettings(true)
 				end
-				info.checked = (Skada.db.timemesure == 1)
+				info.checked = (Skada.profile.timemesure == 1)
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
 				info.text = L["Effective Time"]
 				info.func = function()
-					Skada.db.timemesure = 2
+					Skada.profile.timemesure = 2
 					Skada:ApplySettings(true)
 				end
-				info.checked = (Skada.db.timemesure == 2)
+				info.checked = (Skada.profile.timemesure == 2)
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
@@ -529,28 +529,28 @@ function Skada:OpenMenu(window)
 				wipe(info)
 				info.text = L["Condensed"]
 				info.func = function()
-					Skada.db.numberformat = 1
+					Skada.profile.numberformat = 1
 					Skada:ApplySettings(true)
 				end
-				info.checked = (Skada.db.numberformat == 1)
+				info.checked = (Skada.profile.numberformat == 1)
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
 				info.text = L["Comma"]
 				info.func = function()
-					Skada.db.numberformat = 2
+					Skada.profile.numberformat = 2
 					Skada:ApplySettings(true)
 				end
-				info.checked = (Skada.db.numberformat == 2)
+				info.checked = (Skada.profile.numberformat == 2)
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
 				info.text = L["Detailed"]
 				info.func = function()
-					Skada.db.numberformat = 3
+					Skada.profile.numberformat = 3
 					Skada:ApplySettings(true)
 				end
-				info.checked = (Skada.db.numberformat == 3)
+				info.checked = (Skada.profile.numberformat == 3)
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
@@ -568,60 +568,60 @@ function Skada:OpenMenu(window)
 				wipe(info)
 				info.text = L["Show totals"]
 				info.func = function()
-					Skada.db.showtotals = (Skada.db.showtotals ~= true) and true or nil
+					Skada.profile.showtotals = (Skada.profile.showtotals ~= true) and true or nil
 					Skada:Wipe()
 					Skada:UpdateDisplay(true)
 				end
-				info.checked = (Skada.db.showtotals == true)
+				info.checked = (Skada.profile.showtotals == true)
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
 				info.text = L["Show rank numbers"]
 				info.func = function()
-					Skada.db.showranks = (Skada.db.showranks ~= true) and true or nil
+					Skada.profile.showranks = (Skada.profile.showranks ~= true) and true or nil
 					Skada:ApplySettings()
 				end
-				info.checked = (Skada.db.showranks == true)
+				info.checked = (Skada.profile.showranks == true)
 				info.keepShownOnClick = 1
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
 				info.text = L["Always show self"]
 				info.func = function()
-					Skada.db.showself = (Skada.db.showself ~= true) and true or nil
+					Skada.profile.showself = (Skada.profile.showself ~= true) and true or nil
 					Skada:ApplySettings()
 				end
-				info.checked = (Skada.db.showself == true)
+				info.checked = (Skada.profile.showself == true)
 				info.keepShownOnClick = 1
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
 				info.text = L["Aggressive combat detection"]
 				info.func = function()
-					Skada.db.tentativecombatstart = (Skada.db.tentativecombatstart ~= true) and true or nil
+					Skada.profile.tentativecombatstart = (Skada.profile.tentativecombatstart ~= true) and true or nil
 					Skada:ApplySettings()
 				end
-				info.checked = (Skada.db.tentativecombatstart == true)
+				info.checked = (Skada.profile.tentativecombatstart == true)
 				info.keepShownOnClick = 1
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
 				info.text = L["Merge pets"]
 				info.func = function()
-					Skada.db.mergepets = not Skada.db.mergepets
+					Skada.profile.mergepets = not Skada.profile.mergepets
 					Skada:ApplySettings()
 				end
-				info.checked = (Skada.db.mergepets == true)
+				info.checked = (Skada.profile.mergepets == true)
 				info.keepShownOnClick = 1
 				UIDropDownMenu_AddButton(info, level)
 
 				wipe(info)
 				info.text = L["Absorbed Damage"]
 				info.func = function()
-					Skada.db.absdamage = (Skada.db.absdamage ~= true) and true or nil
+					Skada.profile.absdamage = (Skada.profile.absdamage ~= true) and true or nil
 					Skada:ApplySettings()
 				end
-				info.checked = (Skada.db.absdamage == true)
+				info.checked = (Skada.profile.absdamage == true)
 				info.keepShownOnClick = 1
 				UIDropDownMenu_AddButton(info, level)
 			end
@@ -1000,7 +1000,7 @@ do
 					local mode = categorized[UIDROPDOWNMENU_MENU_VALUE][i]
 					wipe(info)
 
-					if Skada.db.moduleicons and mode.metadata and mode.metadata.icon then
+					if Skada.profile.moduleicons and mode.metadata and mode.metadata.icon then
 						info.text = format(iconName, mode.metadata.icon, mode.localeName)
 					else
 						info.text = mode.localeName
@@ -1033,14 +1033,14 @@ do
 
 	-- handles reporting
 	local function do_report(window, barid)
-		local mode = Skada.db.report.mode
-		local set = Skada.db.report.set
-		local channel = Skada.db.report.channel
-		local chantype = Skada.db.report.chantype
-		local number = Skada.db.report.number
+		local mode = Skada.profile.report.mode
+		local set = Skada.profile.report.set
+		local channel = Skada.profile.report.channel
+		local chantype = Skada.profile.report.chantype
+		local number = Skada.profile.report.number
 
 		if channel == "whisper" then
-			channel = Skada.db.report.target
+			channel = Skada.profile.report.target
 			if channel and #strtrim(channel) == 0 then
 				channel = nil
 			end
@@ -1161,8 +1161,8 @@ do
 
 		local barid
 		if window then
-			Skada.db.report.set = window.selectedset
-			Skada.db.report.mode = window.db.mode
+			Skada.profile.report.set = window.selectedset
+			Skada.profile.report.mode = window.db.mode
 
 			-- report a specific line
 			if window.selectedset and window.selectedmode then
@@ -1190,8 +1190,8 @@ do
 			for _, mode in pairs(modes)do
 				modebox:AddItem(mode.moduleName, mode.localeName)
 			end
-			modebox:SetCallback("OnValueChanged", function(f, e, value) Skada.db.report.mode = value end)
-			modebox:SetValue(Skada.db.report.mode or modes[1])
+			modebox:SetCallback("OnValueChanged", function(f, e, value) Skada.profile.report.mode = value end)
+			modebox:SetValue(Skada.profile.report.mode or modes[1])
 			frame:AddChild(modebox)
 
 			-- Segment, default last chosen or last set.
@@ -1202,8 +1202,8 @@ do
 			for i = 1, #sets do
 				setbox:AddItem(i, sets[i].name)
 			end
-			setbox:SetCallback("OnValueChanged", function(f, e, value) Skada.db.report.set = value end)
-			setbox:SetValue(Skada.db.report.set or Skada.sets[1])
+			setbox:SetCallback("OnValueChanged", function(f, e, value) Skada.profile.report.set = value end)
+			setbox:SetValue(Skada.profile.report.set or Skada.sets[1])
 			frame:AddChild(setbox)
 		end
 
@@ -1217,15 +1217,15 @@ do
 			channelbox:AddItem(chan, kind[1])
 		end
 
-		local origchan = Skada.db.report.channel or "say"
+		local origchan = Skada.profile.report.channel or "say"
 		if not channellist[origchan] then
 			origchan = "say"
 		end
 
 		channelbox:SetValue(origchan)
 		channelbox:SetCallback("OnValueChanged", function(f, e, value)
-			Skada.db.report.channel = value
-			Skada.db.report.chantype = channellist[value][2]
+			Skada.profile.report.channel = value
+			Skada.profile.report.chantype = channellist[value][2]
 			if origchan ~= value then
 				-- redraw in-place to add/remove whisper widget
 				local point, relativeTo, relativePoint, xOfs, yOfs = frame:GetPoint()
@@ -1238,10 +1238,10 @@ do
 
 		local lines = AceGUI:Create("Slider")
 		lines:SetLabel(L["Lines"])
-		lines:SetValue(Skada.db.report.number ~= nil and Skada.db.report.number or 10)
+		lines:SetValue(Skada.profile.report.number ~= nil and Skada.profile.report.number or 10)
 		lines:SetSliderValues(1, 25, 1)
 		lines:SetCallback("OnValueChanged", function(self, event, value)
-			Skada.db.report.number = value
+			Skada.profile.report.number = value
 		end)
 		lines:SetFullWidth(true)
 		frame:AddChild(lines)
@@ -1249,7 +1249,7 @@ do
 		if origchan == "whisper" then
 			local whisperbox = AceGUI:Create("EditBox")
 			whisperbox:SetLabel(L["Whisper Target"])
-			whisperbox:SetText(Skada.db.report.target or "")
+			whisperbox:SetText(Skada.profile.report.target or "")
 
 			whisperbox:SetCallback("OnEnterPressed", function(box, event, text)
 				-- remove spaces which are always non-meaningful and can sometimes cause problems
@@ -1260,12 +1260,12 @@ do
 						whisperbox:SetText(text)
 					end
 				end
-				Skada.db.report.target = text
+				Skada.profile.report.target = text
 				frame.button.frame:Click()
 			end)
 
 			whisperbox:SetCallback("OnTextChanged", function(box, event, text)
-				Skada.db.report.target = text
+				Skada.profile.report.target = text
 			end)
 			whisperbox:SetFullWidth(true)
 			frame:AddChild(whisperbox)

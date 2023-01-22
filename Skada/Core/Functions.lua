@@ -18,7 +18,7 @@ do
 	local Print = Private.Print
 	local debug_str = format("\124cff33ff99%s Debug\124r:", folder)
 	function Skada:Debug(...)
-		if not self.db.debug then return end
+		if not self.profile.debug then return end
 		Print(debug_str, ...)
 	end
 end
@@ -146,7 +146,7 @@ do
 	-- checks whether the select module(s) are disabled
 	function Skada:IsDisabled(...)
 		for i = 1, select("#", ...) do
-			if self.db.modulesBlocked[select(i, ...)] == true then
+			if self.profile.modulesBlocked[select(i, ...)] == true then
 				return true
 			end
 		end
@@ -161,7 +161,7 @@ do
 			local mod = tremove(self.LoadableModules, 1)
 			while mod do
 				if mod.name and mod.func and not self:IsDisabled(mod.name) and not (mod.deps and self:IsDisabled(unpack(mod.deps))) then
-					mod.func(L, self.db, self.global, self.cacheTable, self.db.modules)
+					mod.func(L, self.profile, self.global, self.cacheTable, self.profile.modules)
 				end
 				mod = tremove(self.LoadableModules, 1)
 			end
@@ -217,7 +217,7 @@ do
 
 		Skada.FormatNumber = function(self, num, fmt)
 			if not num then return end
-			fmt = fmt or self.db.numberformat or 1
+			fmt = fmt or self.profile.numberformat or 1
 
 			if fmt == 1 and (num >= 1e3 or num <= -1e3) then
 				return ShortenValue(num)
@@ -232,7 +232,7 @@ do
 end
 
 function Skada:FormatPercent(value, total, dec)
-	dec = dec or self.db.decimals or 1
+	dec = dec or self.profile.decimals or 1
 
 	-- no value? 0%
 	if not value then
@@ -268,10 +268,10 @@ end
 
 local Translit = LibStub("LibTranslit-1.0", true)
 function Skada:FormatName(name)
-	if self.db.realmless then
+	if self.profile.realmless then
 		name = gsub(name, ("%-.*"), "")
 	end
-	if self.db.translit and Translit then
+	if self.profile.translit and Translit then
 		return Translit:Transliterate(name, "!")
 	end
 	return name
@@ -384,7 +384,7 @@ do
 			if data and not data.ignore and ((barid and barid == data.id) or (data.id and not barid)) then
 				nr = nr + 1
 				local label = nil
-				if Skada.db.reportlinks and (data.spellid or data.hyperlink) then
+				if Skada.profile.reportlinks and (data.spellid or data.hyperlink) then
 					label = TempTable(EscapeStr(data.hyperlink or SpellLink(data.spellid) or data.reportlabel or data.label), "   ")
 				else
 					label = TempTable(EscapeStr(data.reportlabel or data.label), "   ")
@@ -445,7 +445,7 @@ do
 		if chantype == "channel" then
 			local list = TempTable(GetChannelList())
 			for i = 1, #list * 0.5 do
-				if (self.db.report.channel == list[i * 2]) then
+				if (self.profile.report.channel == list[i * 2]) then
 					channel = list[i * 2 - 1]
 					break
 				end
@@ -682,7 +682,7 @@ do
 	end
 
 	local function update_fake_data(self)
-		randomize_fake_data(self.current, self.db.updatefrequency or 0.25)
+		randomize_fake_data(self.current, self.profile.updatefrequency or 0.25)
 		self:UpdateDisplay(true)
 	end
 
@@ -709,7 +709,7 @@ do
 
 		self:Wipe()
 		self.current = generate_fake_data()
-		updateTimer = self:ScheduleRepeatingTimer(update_fake_data, self.db.updatefrequency or 0.25, self)
+		updateTimer = self:ScheduleRepeatingTimer(update_fake_data, self.profile.updatefrequency or 0.25, self)
 	end
 end
 
@@ -1043,7 +1043,7 @@ function Skada:GetActiveTime(set, actor, active)
 	local settime = self:GetSetTime(set)
 
 	-- active: actor's time.
-	if (self.db.timemesure ~= 2 or active) and actor.time and actor.time > 0 then
+	if (self.profile.timemesure ~= 2 or active) and actor.time and actor.time > 0 then
 		return max(1, min(actor.time, settime))
 	end
 
@@ -1069,7 +1069,7 @@ function Skada:AddActiveTime(set, actor, target, override)
 	actor.time = (actor.time or 0) + adding
 
 	-- to save up memory, we only record the rest to the current set.
-	if (set == self.total and not self.db.totalidc) or not target then return end
+	if (set == self.total and not self.profile.totalidc) or not target then return end
 
 	actor.timespent = actor.timespent or {}
 	actor.timespent[target] = (actor.timespent[target] or 0) + adding
@@ -1086,7 +1086,7 @@ do
 	function Skada:ShowPopup(win, popup)
 		if Skada.testMode then return end
 
-		if Skada.db.skippopup and not popup then
+		if Skada.profile.skippopup and not popup then
 			Skada:Reset(IsShiftKeyDown())
 			return
 		end
@@ -1233,7 +1233,7 @@ end
 
 -- memory usage check
 function Skada:CheckMemory()
-	if not self.db.memorycheck then return end
+	if not self.profile.memorycheck then return end
 	UpdateAddOnMemoryUsage()
 	local memory = GetAddOnMemoryUsage(folder)
 	if memory > (self.maxmeme * 1024) then
@@ -1562,7 +1562,7 @@ do
 
 			local ownerGUID, ownerName = FixPetsHandler(action.actorid, action.actorflags)
 			if ownerGUID and ownerName then
-				if self.db.mergepets then
+				if self.profile.mergepets then
 					action.petname = action.actorname
 					action.actorid = ownerGUID
 					action.actorname = ownerName
@@ -1918,7 +1918,7 @@ do
 		end
 
 		-- check first hit!
-		if self.db.firsthit and TRIGGERS[args.event] and not self.firsthit and (args:SourceInGroup() or args:DestInGroup()) then
+		if self.profile.firsthit and TRIGGERS[args.event] and not self.firsthit and (args:SourceInGroup() or args:DestInGroup()) then
 			self:CheckFirstHit(args)
 		end
 
@@ -2099,7 +2099,7 @@ do
 		end
 
 		function Skada:PrintFirstHit()
-			if not self.db.firsthit then
+			if not self.profile.firsthit then
 				return self:ClearFirstHit()
 			end
 
@@ -2137,7 +2137,7 @@ do
 
 	function Skada:SmartStop(set)
 		if
-			not self.db.smartstop and -- feature disabled?
+			not self.profile.smartstop and -- feature disabled?
 			not set or set.stopped and -- no set or already stopped?
 			not set.gotboss and -- not a boss fight?
 			not ignored_creature[set.gotboss] -- an ignored boss fight?
@@ -2146,6 +2146,6 @@ do
 		end
 
 		-- schedule smart stop.
-		self:ScheduleTimer(SmartStop, self.db.smartwait or 3, set)
+		self:ScheduleTimer(SmartStop, self.profile.smartwait or 3, set)
 	end
 end

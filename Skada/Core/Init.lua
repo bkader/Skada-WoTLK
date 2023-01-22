@@ -825,9 +825,10 @@ end
 
 -- prevents duplicates in a table to format strings
 function Private.CheckDuplicate(value, tbl, key)
-	local num = 0
 	if type(tbl) == "table" then
+		local num = 0
 		local is_array = (#tbl > 0)
+
 		for k, v in pairs(tbl) do
 			local val = is_array and v[key] or k
 			if val == value and num == 0 then
@@ -839,10 +840,12 @@ function Private.CheckDuplicate(value, tbl, key)
 				end
 			end
 		end
+
 		if num > 0 then
 			value = format("%s (%d)", value, num + 1)
 		end
 	end
+
 	return value
 end
 

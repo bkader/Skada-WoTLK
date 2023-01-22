@@ -50,8 +50,7 @@ Skada.windowdefaults = {
 		bordertexture = "None",
 		borderthickness = 2,
 		borderinsets = 0,
-		toolbar = 1,
-		toolbaropacity = 0.5,
+		toolbar = 2,
 		spacing = 1
 	},
 	background = {
@@ -204,12 +203,12 @@ local newwindow = nil
 local options = Skada.options
 
 options.get = function(info)
-	return Skada.db[info[#info]]
+	return Skada.profile[info[#info]]
 end
 
 options.set = function(info, value)
 	local key = info[#info]
-	Skada.db[key] = value
+	Skada.profile[key] = value
 	Skada:ApplySettings()
 
 	if key == "showtotals" then
@@ -218,11 +217,11 @@ options.set = function(info, value)
 	elseif key == "syncoff" then
 		Skada:RegisterComms(value ~= true)
 	elseif key == "setstokeep" or key == "setslimit" then
-		Skada.maxsets = Skada.db.setstokeep + Skada.db.setslimit
+		Skada.maxsets = Skada.profile.setstokeep + Skada.profile.setslimit
 		Skada.maxmeme = min(60, max(30, Skada.maxsets + 10))
 	elseif key == "sortmodesbyusage" then
 		if not value then -- clear the table.
-			Skada.db.modeclicks = del(Skada.db.modeclicks)
+			Skada.profile.modeclicks = del(Skada.profile.modeclicks)
 		end
 	end
 end
@@ -310,10 +309,10 @@ options.args.generaloptions = {
 					desc = L["Toggles showing the minimap button."],
 					order = 10,
 					get = function()
-						return not Skada.db.icon.hide
+						return not Skada.profile.icon.hide
 					end,
 					set = function()
-						Skada.db.icon.hide = not Skada.db.icon.hide
+						Skada.profile.icon.hide = not Skada.profile.icon.hide
 						Private.RefreshButton()
 					end
 				},
@@ -359,9 +358,9 @@ options.args.generaloptions = {
 					desc = L["Hides Skada's window when in combat."],
 					order = 80,
 					set = function(_, value)
-						Skada.db.hidecombat = value or nil
-						if Skada.db.hidecombat then
-							Skada.db.showcombat = nil
+						Skada.profile.hidecombat = value or nil
+						if Skada.profile.hidecombat then
+							Skada.profile.showcombat = nil
 						end
 						Skada:ApplySettings()
 					end
@@ -372,9 +371,9 @@ options.args.generaloptions = {
 					desc = L["Shows Skada's window when in combat."],
 					order = 90,
 					set = function(_, value)
-						Skada.db.showcombat = value or nil
-						if Skada.db.showcombat then
-							Skada.db.hidecombat = nil
+						Skada.profile.showcombat = value or nil
+						if Skada.profile.showcombat then
+							Skada.profile.hidecombat = nil
 						end
 						Skada:ApplySettings()
 					end
@@ -446,7 +445,7 @@ options.args.generaloptions = {
 							desc = L["Shows subview summaries in the tooltips."],
 							order = 2,
 							disabled = function()
-								return not Skada.db.tooltips
+								return not Skada.profile.tooltips
 							end
 						},
 						tooltiprows = {
@@ -458,7 +457,7 @@ options.args.generaloptions = {
 							max = 10,
 							step = 1,
 							disabled = function()
-								return not Skada.db.tooltips
+								return not Skada.profile.tooltips
 							end
 						},
 						tooltippos = {
@@ -476,7 +475,7 @@ options.args.generaloptions = {
 								["cursor"] = L["Follow Cursor"]
 							},
 							disabled = function()
-								return not Skada.db.tooltips
+								return not Skada.profile.tooltips
 							end
 						}
 					}
@@ -668,10 +667,10 @@ options.args.resetoptions = {
 	desc = format(L["Options for %s."], L["Data Resets"]),
 	order = 40,
 	get = function(info)
-		return Skada.db.reset[info[#info]]
+		return Skada.profile.reset[info[#info]]
 	end,
 	set = function(info, value)
-		Skada.db.reset[info[#info]] = value
+		Skada.profile.reset[info[#info]] = value
 	end,
 	args = {
 		instance = {
@@ -725,10 +724,10 @@ options.args.modules = {
 	order = 50,
 	width = "double",
 	get = function(info)
-		return Skada.db.modules[info[#info]]
+		return Skada.profile.modules[info[#info]]
 	end,
 	set = function(info, value)
-		Skada.db.modules[info[#info]] = value or nil
+		Skada.profile.modules[info[#info]] = value or nil
 		Skada:ApplySettings()
 	end,
 	args = {
@@ -752,10 +751,10 @@ options.args.modules = {
 			inline = true,
 			order = 30,
 			get = function(info)
-				return Skada.db.modulesBlocked[info[#info]]
+				return Skada.profile.modulesBlocked[info[#info]]
 			end,
 			set = function(info, value)
-				Skada.db.modulesBlocked[info[#info]] = value
+				Skada.profile.modulesBlocked[info[#info]] = value
 				options.args.modules.args.apply.disabled = nil
 			end,
 			args = {
@@ -777,9 +776,9 @@ options.args.modules = {
 			func = function()
 				for name in pairs(options.args.modules.args.blocked.args) do
 					if Skada.defaults.profile.modulesBlocked[name] then
-						Skada.db.modulesBlocked[name] = false
+						Skada.profile.modulesBlocked[name] = false
 					else
-						Skada.db.modulesBlocked[name] = nil
+						Skada.profile.modulesBlocked[name] = nil
 					end
 				end
 				options.args.modules.args.apply.disabled = nil
@@ -791,7 +790,7 @@ options.args.modules = {
 			name = L["Disable All"],
 			func = function()
 				for name in pairs(options.args.modules.args.blocked.args) do
-					Skada.db.modulesBlocked[name] = true
+					Skada.profile.modulesBlocked[name] = true
 				end
 				options.args.modules.args.apply.disabled = nil
 			end,
@@ -857,7 +856,7 @@ options.args.tweaks = {
 							name = L["Duration"],
 							desc = L["opt_tweaks_smartwait_desc"],
 							disabled = function()
-								return not Skada.db.smartstop
+								return not Skada.profile.smartstop
 							end,
 							min = 0,
 							max = 10,
@@ -985,7 +984,7 @@ do
 		local columns = metadata and metadata.columns
 		if not columns then return end
 
-		local db = self.db.columns
+		local db = self.profile.columns
 		local category = mod.category or "Other"
 
 		if not options.args.columns.args[category] then
@@ -1509,7 +1508,7 @@ do
 	local temp = {}
 	function serialize_profile()
 		wipe(temp)
-		copy(temp, Skada.db, "modeclicks")
+		copy(temp, Skada.profile, "modeclicks")
 		temp.__name = Skada.data:GetCurrentProfile()
 		return serialize(false, temp)
 	end
@@ -1541,7 +1540,7 @@ do
 		local Old_ReloadSettings = Private.ReloadSettings
 		Private.ReloadSettings = function()
 			Private.ReloadSettings = Old_ReloadSettings
-			copy(Skada.db, profile)
+			copy(Skada.profile, profile)
 			Private.ReloadSettings()
 			LibStub("AceConfigRegistry-3.0"):NotifyChange(folder)
 		end
@@ -1602,7 +1601,7 @@ do
 					name = L["Network Sharing"],
 					inline = true,
 					order = 10,
-					hidden = function() return Skada.db.syncoff end,
+					hidden = function() return Skada.profile.syncoff end,
 					args = {
 						name = {
 							type = "input",

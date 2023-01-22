@@ -1017,6 +1017,7 @@ do
 	function Skada:DeleteWindow(name, internal)
 		if internal then
 			delete_window(name)
+			ACR:NotifyChange(folder)
 			Skada:CloseMenus()
 			return
 		end
@@ -2259,8 +2260,11 @@ function Skada:OnInitialize()
 	end
 
 	-- global references
-	self.db = self.data.profile
+	self.profile = self.data.profile
 	self.global = self.data.global
+
+	-- backwards compatibility.
+	self.db = self.data
 
 	-- local references
 	P = self.data.profile

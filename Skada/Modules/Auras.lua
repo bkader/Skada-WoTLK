@@ -63,7 +63,7 @@ do
 		if not can_clear_actor(actor) then return end
 
 		for spellid, spell in pairs(actor.auras) do
-			if spell.a ~= nil and spell.s then
+			if spell.a and spell.a > 0 and spell.s then
 				spell.u = min(maxtime, spell.u + floor((curtime - spell.s) + 0.5))
 			end
 			-- remove temporary keys
@@ -75,7 +75,7 @@ do
 			elseif spell.t then
 				-- debuff targets
 				for name, target in pairs(spell.t) do
-					if target.a ~= nil and target.s then
+					if target.a and target.a > 0 and target.s then
 						target.u = min(spell.u, target.u + floor((curtime - target.s) + 0.5))
 					end
 					-- remove temporary keys
@@ -148,7 +148,7 @@ do
 
 	local function find_or_create_actor(set, info)
 		-- 1. make sure we can record to the segment.
-		if not set or (set == Skada.total and not Skada.db.totalidc) then return end
+		if not set or (set == Skada.total and not Skada.profile.totalidc) then return end
 
 		-- 2. make sure we have valid data.
 		if not info or not info.spellid then return end

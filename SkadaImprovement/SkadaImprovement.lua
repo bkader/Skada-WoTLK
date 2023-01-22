@@ -298,7 +298,7 @@ Skada:RegisterModule("Improvement", function(L)
 	function mod:Reset()
 		Skada:Wipe()
 		SkadaImprovementDB = wipe(SkadaImprovementDB or {})
-		self.db = nil
+		self.db = SkadaImprovementDB
 		self:OnInitialize()
 
 		for i = 1, #windows do
