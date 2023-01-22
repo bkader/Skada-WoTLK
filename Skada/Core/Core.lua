@@ -13,7 +13,7 @@ local strmatch, format, gsub, strlower, strfind = strmatch, string.format, strin
 local Private = ns.Private
 local tsort, tremove, wipe, setmetatable = table.sort, Private.tremove, wipe, setmetatable
 local TempTable, new, del, copy = Private.TempTable, Private.newTable, Private.delTable, Private.tCopy
-local InCombatLockdown, IsGroupInCombat = InCombatLockdown, Skada.IsGroupInCombat
+local InCombatLockdown, IsGroupInCombat, IsGroupDead = InCombatLockdown, Skada.IsGroupInCombat, Skada.IsGroupDead
 local UnitGUID, GameTooltip, ReloadUI = UnitGUID, GameTooltip, ReloadUI
 local IsShiftKeyDown, IsControlKeyDown = IsShiftKeyDown, IsControlKeyDown
 local SecondsToTime, time, GetTime = SecondsToTime, time, GetTime
@@ -1108,6 +1108,9 @@ function Skada:Wipe(changed)
 			win:Wipe(changed)
 		end
 	end
+
+	-- reset windows mode swap.
+	self.modes_set = false
 end
 
 function set_active(enable)
@@ -2436,105 +2439,79 @@ function Skada:NewPhase()
 	self:Printf(L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r started."], set.mobname or L["Unknown"], set.phase)
 end
 
-do
-	local IsGroupDead = Skada.IsGroupDead
-	function combat_end()
-		if not Skada.current then return end
-		Private.ClearTempUnits()
+function combat_end()
+	if not Skada.current then return end
+	Private.ClearTempUnits()
 
-		-- trigger events.
-		local curtime = time()
-		Skada:SendMessage("COMBAT_PLAYER_LEAVE", Skada.current, curtime)
-		if Skada.current.gotboss then
-			Skada:SendMessage("COMBAT_ENCOUNTER_END", Skada.current, curtime)
-			Skada:ClearFirstHit()
+	-- trigger events.
+	local curtime = time()
+	Skada:SendMessage("COMBAT_PLAYER_LEAVE", Skada.current, curtime)
+	if Skada.current.gotboss then
+		Skada:SendMessage("COMBAT_ENCOUNTER_END", Skada.current, curtime)
+		Skada:ClearFirstHit()
+	end
+
+	-- process segment
+	process_set(Skada.current, curtime)
+
+	-- process phase segments
+	if Skada.tempsets then
+		local setname = Skada.current.name
+		for i = 1, #Skada.tempsets do
+			local set = Skada.tempsets[i]
+			process_set(set, curtime, setname)
 		end
+		Skada.tempsets = del(Skada.tempsets)
+	end
 
-		-- process segment
-		process_set(Skada.current, curtime)
-
-		-- process phase segments
-		if Skada.tempsets then
-			local setname = Skada.current.name
-			for i = 1, #Skada.tempsets do
-				local set = Skada.tempsets[i]
-				process_set(set, curtime, setname)
-			end
-			Skada.tempsets = del(Skada.tempsets)
-		end
-
-		-- clear total semgnt
-		if P.totalidc then
-			for i = 1, #modes do
-				local mode = modes[i]
-				if mode and mode.SetComplete then
-					mode:SetComplete(Skada.total)
-				end
+	-- clear total semgnt
+	if P.totalidc then
+		for i = 1, #modes do
+			local mode = modes[i]
+			if mode and mode.SetComplete then
+				mode:SetComplete(Skada.total)
 			end
 		end
+	end
 
-		-- remove players ".last" key from total segment.
-		local actors = Skada.total and Skada.total.actors
-		if actors then
-			for _, actor in pairs(actors) do
-				if actor.last then
-					actor.last = nil
-				end
+	-- remove players ".last" key from total segment.
+	local actors = Skada.total and Skada.total.actors
+	if actors then
+		for _, actor in pairs(actors) do
+			if actor.last then
+				actor.last = nil
 			end
 		end
+	end
 
-		if Skada.current.time and Skada.current.time >= P.minsetlength then
-			Skada.total.time = (Skada.total.time or 0) + Skada.current.time
-		end
+	if Skada.current.time and Skada.current.time >= P.minsetlength then
+		Skada.total.time = (Skada.total.time or 0) + Skada.current.time
+	end
 
-		Skada.last = Skada.current
-		Skada.current = nil
-		Skada.inCombat = false
-		G.inCombat = false
-		_targets = del(_targets)
+	Skada.last = Skada.current
+	Skada.current = nil
+	Skada.inCombat = false
+	G.inCombat = false
+	_targets = del(_targets)
 
-		clean_sets()
-		wipe(vehicles)
+	clean_sets()
+	wipe(vehicles)
 
-		for i = 1, #windows do
-			local win = windows[i]
-			if win then
-				if win.selectedset ~= "current" and win.selectedset ~= "total" then
-					win:SetSelectedSet(nil, 1) -- move to next set
-				end
+	Skada:SetModes()
 
-				win:Wipe()
-				Skada.changed = true
+	if update_timer then
+		Skada:CancelTimer(update_timer, true)
+		update_timer = nil
+	end
 
-				if win.db.wipemode ~= "" and IsGroupDead() then
-					restore_window_view(win, "current", win.db.wipemode)
-				elseif win.db.returnaftercombat and win.restore_mode and win.restore_set then
-					if win.restore_set ~= win.selectedset or win.restore_mode ~= win.selectedmode then
-						restore_window_view(win, win.restore_set, win.restore_mode)
-						win.restore_mode, win.restore_set = nil, nil
-					end
-				end
+	if tick_timer then
+		Skada:CancelTimer(tick_timer, true)
+		tick_timer = nil
+	end
 
-				win:Toggle()
-			end
-		end
-
-		Skada:UpdateDisplay(true)
-
-		if update_timer then
-			Skada:CancelTimer(update_timer, true)
-			update_timer = nil
-		end
-
-		if tick_timer then
-			Skada:CancelTimer(tick_timer, true)
-			tick_timer = nil
-		end
-
-		if toggle_timer then
-			Skada:CancelTimer(toggle_timer, true)
-			toggle_timer = nil
-		end
+	if toggle_timer then
+		Skada:CancelTimer(toggle_timer, true)
+		toggle_timer = nil
 	end
 end
 
@@ -2613,6 +2590,36 @@ function Skada:ResumeSegment(msg, index)
 	end
 
 	self:Print(msg or L["Segment Resumed."])
+end
+
+function Skada:SetModes()
+	if self.modes_set then return end
+	self.modes_set = true
+
+	for i = 1, #windows do
+		local win = windows[i]
+		if win then
+			if win.selectedset ~= "current" and win.selectedset ~= "total" then
+				win:SetSelectedSet(nil, 1) -- move to next set
+			end
+
+			win:Wipe()
+			Skada.changed = true
+
+			if win.db.wipemode ~= "" and IsGroupDead() then
+				restore_window_view(win, "current", win.db.wipemode)
+			elseif win.db.returnaftercombat and win.restore_mode and win.restore_set then
+				if win.restore_set ~= win.selectedset or win.restore_mode ~= win.selectedmode then
+					restore_window_view(win, win.restore_set, win.restore_mode)
+					win.restore_mode, win.restore_set = nil, nil
+				end
+			end
+
+			win:Toggle()
+		end
+	end
+
+	Skada:UpdateDisplay(true)
 end
 
 -------------------------------------------------------------------------------
