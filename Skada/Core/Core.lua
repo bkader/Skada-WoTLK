@@ -1326,7 +1326,7 @@ function Skada:SetTooltipPosition(tooltip, frame, display, win)
 		else
 			tooltip:SetPoint("TOPRIGHT", frame, "TOPLEFT")
 		end
-	else
+	elseif frame then
 		local anchor = strfind(P.tooltippos, "top") and "TOP" or "BOTTOM"
 		anchor = format("%s%s", anchor, strfind(P.tooltippos, "left") and "RIGHT" or "LEFT")
 		tooltip:SetOwner(frame, "ANCHOR_NONE")
@@ -2332,6 +2332,13 @@ function Skada:OnEnable()
 	end
 
 	self:SetupStorage()
+
+	-- deprecated table structure.
+	if self.sets.version then
+		self.sets.sets, self.sets.version = nil, nil
+		self:Debug("Fixed deprecated table structure!")
+	end
+
 	Private.ReloadSettings()
 	self:ScheduleTimer("CheckMemory", 3)
 	self:ScheduleTimer("CleanGarbage", 4)
