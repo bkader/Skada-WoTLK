@@ -325,7 +325,7 @@ function Private.RegisterClasses()
 	-- alias to enemy for now...
 	classcolors.PLAYER = classcolors.ENEMY
 
-	local P = ns.db
+	local P = ns.profile
 
 	-- some useful functions
 	classcolors.unpack = function(class)
@@ -946,7 +946,7 @@ do
 		end
 
 		-- install default options
-		local P = ns.db
+		local P = ns.profile
 		P.toast = P.toast or ns.defaults.toast
 
 		LibToast:Register(format("%sToastFrame", folder), function(toast, text, title, icon, urgency)
@@ -983,10 +983,10 @@ do
 			type = "group",
 			name = L["Notifications"],
 			get = function(i)
-				return ns.db.toast[i[#i]] or LibToast.config[i[#i]]
+				return ns.profile.toast[i[#i]] or LibToast.config[i[#i]]
 			end,
 			set = function(i, val)
-				ns.db.toast[i[#i]] = val
+				ns.profile.toast[i[#i]] = val
 				LibToast.config[i[#i]] = val
 			end,
 			order = 990,
@@ -1051,7 +1051,7 @@ do
 					type = "execute",
 					name = L["Test Notifications"],
 					func = function() ns:Notify() end,
-					disabled = function() return ns.db.toast.hide_toasts end,
+					disabled = function() return ns.profile.toast.hide_toasts end,
 					width = "double",
 					order = 60
 				}
@@ -1077,7 +1077,7 @@ do
 
 		local values = {al = 0x10, rb = 0x01, rt = 0x02, db = 0x04, dt = 0x08}
 		local disabled = function()
-			return (band(ns.db.totalflag or 0, values.al) ~= 0)
+			return (band(ns.profile.totalflag or 0, values.al) ~= 0)
 		end
 
 		total_opt = {
@@ -1092,14 +1092,14 @@ do
 					inline = true,
 					order = 10,
 					get = function(i)
-						return (band(ns.db.totalflag or 0, values[i[#i]]) ~= 0)
+						return (band(ns.profile.totalflag or 0, values[i[#i]]) ~= 0)
 					end,
 					set = function(i, val)
 						local v = values[i[#i]]
-						if val and band(ns.db.totalflag or 0, v) == 0 then
-							ns.db.totalflag = (ns.db.totalflag or 0) + v
-						elseif not val and band(ns.db.totalflag or 0, v) ~= 0 then
-							ns.db.totalflag = max(0, (ns.db.totalflag or 0) - v)
+						if val and band(ns.profile.totalflag or 0, v) == 0 then
+							ns.profile.totalflag = (ns.profile.totalflag or 0) + v
+						elseif not val and band(ns.profile.totalflag or 0, v) ~= 0 then
+							ns.profile.totalflag = max(0, (ns.profile.totalflag or 0) - v)
 						end
 					end,
 					args = {
@@ -1153,11 +1153,11 @@ do
 	end
 
 	function Private.total_noclick(set, mode)
-		return (not ns.db.totalidc and set == "total" and type(mode) == "table" and mode.nototal == true)
+		return (not ns.profile.totalidc and set == "total" and type(mode) == "table" and mode.nototal == true)
 	end
 
 	local function total_record(set)
-		local totalflag = ns.total and set and ns.db.totalflag
+		local totalflag = ns.total and set and ns.profile.totalflag
 
 		-- something missing
 		if not totalflag then
