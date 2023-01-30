@@ -209,7 +209,7 @@ do
 				elseif num >= 1e4 or num <= -1e4 then
 					return format("%.2f%s", num * 0.0001, symbol_10k)
 				elseif num >= 1e3 or num <= -1e3 then
-					return format("%.1f%s", num * 0.0001, symbol_1k)
+					return format("%.1f%s", num * 0.001, symbol_1k)
 				end
 				return format("%.0f", num)
 			end
