@@ -2219,6 +2219,10 @@ function Private.ReloadSettings()
 	P = Skada.data.profile
 	G = Skada.data.global
 
+	-- global references
+	Skada.profile = Skada.data.profile
+	Skada.global = Skada.data.global
+
 	local wins = P.windows
 	for i = 1, #wins do
 		local win = wins[i]
