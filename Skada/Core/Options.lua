@@ -129,6 +129,7 @@ Skada.defaults = {
 		modulesBlocked = {
 			["Avoidance & Mitigation"] = true,
 			["CC Breaks"] = true,
+			["Damage Done By School"] = true,
 			["Damage Done By Spell"] = true,
 			["DTPS"] = true,
 			["Enemy Buffs"] = true,
@@ -751,6 +752,7 @@ options.args.modules = {
 			inline = true,
 			order = 30,
 			get = function(info)
+				Skada.profile.modulesBlocked = Skada.profile.modulesBlocked or {}
 				return Skada.profile.modulesBlocked[info[#info]]
 			end,
 			set = function(info, value)

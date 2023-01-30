@@ -565,6 +565,8 @@ L["RDPS"] = "團隊DPS"
 L["Damage: Raid DPS"] = "傷害:團隊的DPS"
 L["Absorbed Damage"] = "吸收傷害"
 L["Enable this if you want the damage absorbed to be included in the damage done."] = "如果你想包括吸收傷害到造成的傷害啟用此。"
+L["Damage Done By School"] = "学校造成的伤害"
+L["%s Damage"] = "%s傷害"
 -- damage taken module
 L["Damage Taken"] = "承受傷害"
 L["Damage taken by %s"] = "%s的承受傷害"

@@ -1378,3 +1378,153 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 		return tbl, total, actor
 	end
 end, "Damage")
+
+-- ===================== --
+-- Damage Done By School --
+-- ===================== --
+
+Skada:RegisterModule("Damage Done By School", function(L, P, _, C)
+	local mode = Skada:NewModule("Damage Done By School")
+	local mode_source = mode:NewModule("Source List")
+
+	local SpellSplit = Private.SpellSplit
+	local spellschools = Skada.spellschools
+
+	local get_schools_for_set = nil
+	local get_damage_for_school = nil
+	local mode_cols = nil
+
+	function mode_source:Enter(win, id, label)
+		win.spellid, win.spellname = id, label
+		win.title = format(L["%s Damage"], label)
+	end
+
+	function mode_source:Update(win, set)
+		win.title = format(L["%s Damage"], win.spellname)
+		if not set or not win.spellname then return end
+
+		local total, actors = get_damage_for_school(set, win.spellid)
+		if not total or total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
+
+		local nr = 0
+		for actorname, actor in pairs(actors) do
+			nr = nr + 1
+
+			local d = win:actor(nr, actor, false, actorname)
+			d.value = actor.amount
+			format_valuetext(d, mode_cols, total, actor.time and d.value / actor.time, win.metadata, true)
+		end
+	end
+
+	function mode:Update(win, set)
+		win.title = L["Damage Done By School"]
+
+		local total, schools = get_schools_for_set(set)
+		if not total or not schools then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
+
+		local nr = 0
+		local settime = mode_cols.DPS and set:GetTime()
+
+		for school, amount in pairs(schools) do
+			nr = nr + 1
+
+			local d = win:nr(nr)
+			d.id = school
+			d.label = spellschools(school)
+			d.spellschool = school
+			d.value = amount
+
+			format_valuetext(d, mode_cols, total, settime and amount / settime, win.metadata)
+		end
+	end
+
+	function mode:OnEnable()
+		mode_source.metadata = {showspots = true}
+		self.metadata = {
+			click1 = mode_source,
+			showspots = true,
+			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
+			icon = [[Interface\Icons\spell_fire_firebolt]]
+		}
+
+		mode_cols = self.metadata.columns
+
+		Skada:AddMode(self, "Damage Done")
+	end
+
+	function mode:OnDisable()
+		Skada:RemoveMode(self)
+	end
+
+	get_schools_for_set = function(self, tbl)
+		local total = self.damage or 0
+		local actors = total > 0 and self.actors
+		if not actors then return end
+
+		tbl = clear(tbl or C)
+
+		for _, actor in pairs(actors) do
+			if actor.damagespells and not actor.enemy then
+				for spellid, spell in pairs(actor.damagespells) do
+					local _, school = SpellSplit(spellid)
+					if school and P.absdamage and spell.total then
+						tbl[school] = (tbl[school] or 0) + spell.total
+					elseif school and spell.amount then
+						tbl[school] = (tbl[school] or 0) + spell.amount
+					end
+
+				end
+			end
+		end
+
+		return total, tbl
+	end
+
+	get_damage_for_school = function(self, school, tbl)
+		local actors = self.damage and school and self.actors
+		if not actors then return end
+
+		local total = 0
+
+		tbl = clear(tbl or C)
+
+		for actorname, actor in pairs(actors) do
+			if actor.damagespells and not actor.enemy then
+				for spellid, spell in pairs(actor.damagespells) do
+					local _, s = SpellSplit(spellid)
+					if s == school then
+						local amount = P.absdamage and spell.total or spell.amount
+						local t = tbl[actorname]
+
+						if not t then
+							t = new()
+
+							t.id = actor.id
+							t.class = actor.class
+							t.role = actor.role
+							t.spec = actor.spec
+
+							t.amount = amount
+							t.time = mode_cols.sDPS and actor:GetTime(self)
+							tbl[actorname] = t
+						else
+							t.amount = t.amount + amount
+						end
+
+						total = total + amount
+					end
+				end
+			end
+		end
+
+		return total, tbl
+	end
+end, "Damage")

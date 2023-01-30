@@ -566,6 +566,8 @@ L["RDPS"] = "RDPS"
 L["Damage: Raid DPS"] = "Schaden: Raid-DPS"
 L["Absorbed Damage"] = "Absorbierter Schaden"
 L["Enable this if you want the damage absorbed to be included in the damage done."] = "Aktivieren Sie diese Option, wenn der verursachte Schaden den absorbierten Schaden einschlie\195\159en soll."
+L["Damage Done By School"] = "Schaden durch die Schule"
+L["%s Damage"] = "%s Schaden"
 -- damage taken module
 L["Damage Taken"] = "Schaden erhalten"
 L["Damage taken by %s"] = "%s : Schaden erhalten"
