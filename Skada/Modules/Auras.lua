@@ -218,6 +218,7 @@ do
 		spell.a = spell.a - 1
 		if spell.a == 0 and spell.s then
 			spell.u = spell.u + floor((curtime - spell.s) + 0.5)
+			spell.s = nil
 		end
 
 		-- target
@@ -227,6 +228,7 @@ do
 		target.a = target.a - 1
 		if target.a == 0 and target.s then
 			target.u = target.u + floor((curtime - target.s) + 0.5)
+			target.s = nil
 		end
 	end
 
