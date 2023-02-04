@@ -28,7 +28,7 @@ Skada:RegisterModule("Damage", function(L, P)
 	local mode_target = mode:NewModule("Target List")
 	local mode_target_spell = mode_target:NewModule("Spell List")
 
-	local wipe = wipe
+	local wipe, min = wipe, math.min
 	local PercentToRGB = Private.PercentToRGB
 	local tooltip_school = Skada.tooltip_school
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
@@ -244,7 +244,8 @@ Skada:RegisterModule("Damage", function(L, P)
 		-- show the aura uptime in case of a debuff.
 		local uptime = actor.auras and actor.auras[id] and actor.auras[id].u
 		if uptime and uptime > 0 then
-			uptime = 100 * (uptime / actor:GetTime(set))
+			local actortime = actor:GetTime(set)
+			uptime = 100 * (min(uptime, actortime) / actortime)
 			tooltip:AddDoubleLine(L["Uptime"], Skada:FormatPercent(uptime), nil, nil, nil, PercentToRGB(uptime))
 		end
 
