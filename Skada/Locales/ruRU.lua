@@ -751,7 +751,7 @@ L["%s vs %s: Damage on %s"] = "%s vs %s: Урон по %s"
 -- about
 L["Author"] = "Автор"
 L["Credits"] = "Благодарности"
-L["Date"] = "日期"
+L["Date"] = "Дата"
 L["License"] = "Лицензия"
 L["Version"] = "Версия"
 L["Website"] = "Сайт"

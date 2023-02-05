@@ -1104,7 +1104,7 @@ do
 			local list = TempTable(GetChannelList())
 			for i = 1, #list, 2 do
 				local channel = list[i + 1]
-				if type(channel) ~= "boolean" and not ignored_channels[channel] then
+				if channel and type(channel) ~= "boolean" and not ignored_channels[channel] then
 					channels[channel] = TempTable(format("%s: %d/%s", L["Channel"], list[i], channel), "channel")
 				end
 			end
