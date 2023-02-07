@@ -1130,7 +1130,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			g.showself = P.showself or p.showself
 
 			g:SetClickthrough(p.clickthrough)
-			g:SetClampedToScreen(p.clamped)
+			g:SetClampedToScreen(p.clamped == true)
 			g:SetSmoothing(p.smoothing)
 			g:SetShown(not p.hidden)
 			g:SetScale(p.scale or 1)

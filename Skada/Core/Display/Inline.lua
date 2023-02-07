@@ -481,7 +481,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		end
 		f.menu:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 6, p.height * 0.5 - 8)
 
-		f:SetClampedToScreen(p.clamped)
+		f:SetClampedToScreen(p.clamped == true)
 		f:EnableMouse(not p.clickthrough)
 		f:SetScale(p.scale)
 
