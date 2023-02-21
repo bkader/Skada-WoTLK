@@ -1613,7 +1613,7 @@ do
 
 		function Skada:FixPetsName(guid, name, flags)
 			local _, ownerName = self:FixMyPets(guid, name, flags)
-			if ownerName and ownerName ~= name then
+			if name and ownerName and ownerName ~= name then
 				return format("%s <%s>", name, ownerName)
 			end
 			return name
