@@ -1773,6 +1773,7 @@ do
 
 	-- wipes window's dataset table
 	function Window:reset()
+		self.title = nil -- reset title
 		if not self.dataset then return end
 		for i = #self.dataset, 0, -1 do
 			if self.dataset[i] then
