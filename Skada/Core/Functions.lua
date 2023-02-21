@@ -385,7 +385,12 @@ do
 				nr = nr + 1
 				local label = nil
 				if Skada.profile.reportlinks and (data.spellid or data.hyperlink) then
-					label = TempTable(EscapeStr(data.hyperlink or SpellLink(data.spellid) or data.reportlabel or data.label), "   ")
+					if data.reportlabel and data.spellid then
+						label = data.reportlabel:gsub(data.label, SpellLink(data.spellid))
+					else
+						label = data.hyperlink or SpellLink(data.spellid) or data.reportlabel or data.label
+					end
+					label = TempTable(EscapeStr(label), "   ")
 				else
 					label = TempTable(EscapeStr(data.reportlabel or data.label), "   ")
 				end
