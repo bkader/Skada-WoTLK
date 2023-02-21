@@ -188,6 +188,10 @@ local function check_set_name(set)
 	end
 
 	if P.setnumber then
+		-- remove old data
+		if Skada.sets.version then
+			Skada.sets.sets, Skada.sets.version = nil, nil
+		end
 		setname = CheckDuplicate(setname, Skada.sets, "name")
 	end
 
