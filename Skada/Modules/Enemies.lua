@@ -18,28 +18,31 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	local mode_useful = mode:NewModule("Useful Damage")
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
 	local grouped_units = Skada.grouped_units -- Edit Skada\Core\Tables.lua
-	local custom_units = Skada.custom_units -- Edit Skada\Core\Tables.lua
+	local user_custom_units = Skada.custom_units -- Edit Skada\Core\Tables.lua
 	local mode_cols = nil
 
-	local instanceDiff, customGroupsTable, customUnitsTable
 	local GetUnitIdFromGUID, GetCreatureId = Skada.GetUnitIdFromGUID, Skada.GetCreatureId
-	local UnitHealthInfo, UnitPowerInfo = Skada.UnitHealthInfo, Skada.UnitPowerInfo
-	local UnitExists, UnitGUID = UnitExists, UnitGUID
 	local UnitHealthMax, UnitPowerMax = UnitHealthMax, UnitPowerMax
 	local del = Private.delTable
+
+	local instanceDiff = nil
+	local current_custom_groups = {}
+	local current_custom_units = {}
+	local current_custom_units_by_guid = {}
+	local ignored_custom_units = {}
 
 	-- table of acceptable/trackable instance difficulties
 	-- uncomments those you want to use or add custom ones.
 	local allowed_diffs = {
-		["5n"] = false, -- 5man Normal
-		["5h"] = false, -- 5man Heroic
-		["mc"] = false, -- Mythic Dungeons
-		["tw"] = false, -- Time Walker
-		["wb"] = false, -- World Boss
 		["10n"] = true, -- 10man Normal
 		["10h"] = true, -- 10man Heroic
 		["25n"] = true, -- 25man Normal
 		["25h"] = true, -- 25man Heroic
+		-- ["5n"] = true, -- 5man Normal
+		-- ["5h"] = true, -- 5man Heroic
+		-- ["mc"] = true, -- Mythic Dungeons
+		-- ["tw"] = true, -- Time Walker
+		["wb"] = true, -- World Boss
 	}
 
 	local function format_valuetext(d, columns, total, dtps, metadata, subview, dont_sort)
@@ -61,48 +64,38 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		return instanceDiff
 	end
 
-	local function custom_units_max_value(guid, unit)
+	local function get_custom_unit_max_value(guid, unit)
 		local diff = get_instance_diff()
 		local maxval = unit.values and unit.values[diff]
-		if not maxval then
-			local uid = GetUnitIdFromGUID(guid)
-			if uid then
-				maxval = (unit.power ~= nil) and UnitPowerMax(uid, unit.power) or UnitHealthMax(uid)
-			end
+		if maxval then return maxval end
 
-			if maxval then
-				unit.values = unit.values or {}
-				unit.values[diff] = maxval
-			end
+		local uid = GetUnitIdFromGUID(guid)
+		if not uid then return 0 end
+
+		maxval = type(unit.power) == "number" and UnitPowerMax(uid, unit.power) or UnitHealthMax(uid)
+		if maxval then
+			unit.values = unit.values or {}
+			unit.values[diff] = maxval
 		end
 		return maxval
 	end
 
-	local function is_custom_unit(guid, name, amount, overkill)
-		if guid and customUnitsTable and customUnitsTable[guid] then
-			return (customUnitsTable[guid] ~= -1)
-		end
+	local function get_custom_unit_name_format_string(unit)
+		return type(unit.text) == "string" and unit.text
+		or unit.stop and L["%s - %s%% to %s%%"]
+		or L["%s below %s%%"]
+	end
 
-		local unit = custom_units[GetCreatureId(guid)]
-		if not unit then
-			-- prevent constant checking...
-			customUnitsTable = customUnitsTable or {}
-			customUnitsTable[guid] = -1
-			return false
-		end
+	local function get_custom_unit(unit, guid, name, amount, overkill)
+		if ignored_custom_units[guid] then return end
 
-		customUnitsTable = customUnitsTable or {}
+		local t = unit[guid]
+		if t then return t end
 
-		if unit.diff ~= nil and ((type(unit.diff) == "table" and not unit.diff[get_instance_diff()]) or (type(unit.diff) == "string" and get_instance_diff() ~= unit.diff)) then
-			customUnitsTable[guid] = -1
-			return false
-		end
-
-		-- get the unit max value.
-		local maxval = custom_units_max_value(guid, unit)
-		if not maxval or maxval == 0 then
-			customUnitsTable[guid] = -1
-			return false
+		local maxval = get_custom_unit_max_value(guid, unit)
+		if maxval == 0 then
+			ignored_custom_units[guid] = true
+			return
 		end
 
 		-- calculate the current value and the point where to stop.
@@ -111,13 +104,12 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 		-- ignore units below minimum required.
 		if curval <= minval then
-			customUnitsTable[guid] = -1
-			return false
+			ignored_custom_units[guid] = true
+			return
 		end
 
-		local t = new()
+		t = new()
 		t.oname = name or L["Unknown"]
-		t.name = unit.name
 		t.guid = guid
 		t.curval = curval
 		t.minval = minval
@@ -126,13 +118,67 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		t.power = (unit.power ~= nil)
 		t.useful = unit.useful
 
-		if unit.name == nil then
-			local str = unit.text or (unit.stop and L["%s - %s%% to %s%%"] or L["%s below %s%%"])
-			t.name = format(str, t.oname, (unit.start or 1) * 100, (unit.stop or 0) * 100)
+		if type(unit.name) == "string" then
+			t.name = unit.name
+		else
+			local str = get_custom_unit_name_format_string(unit)
+			t.name = str:format(t.oname, (unit.start or 1) * 100, (unit.stop or 0) * 100)
 		end
 
-		customUnitsTable[guid] = t
-		return true
+		unit[guid] = t
+		return t
+	end
+
+	local function is_allowed_difficulty(diff)
+		return not diff
+		or type(diff) == "table" and diff[get_instance_diff()]
+		or get_instance_diff() == diff
+	end
+
+	local function get_custom_units(guid)
+		if ignored_custom_units[guid] then return end
+
+		if current_custom_units_by_guid[guid] then
+			return current_custom_units_by_guid[guid]
+		end
+
+		local guid_id = GetCreatureId(guid)
+		local custom_units_filtered = current_custom_units[guid_id]
+		if custom_units_filtered then
+			current_custom_units_by_guid[guid] = custom_units_filtered
+			return custom_units_filtered
+		end
+
+		local custom_units_group = user_custom_units[guid_id]
+		if not custom_units_group then
+			ignored_custom_units[guid] = true
+			return
+		end
+
+		custom_units_filtered = {}
+		current_custom_units[guid_id] = custom_units_filtered
+
+		if #custom_units_group == 0 then
+			-- legacy support for 1 unit per unit id
+			if is_allowed_difficulty(custom_units_group.diff) then
+				custom_units_filtered[1] = custom_units_group
+			end
+		else
+			for i=1,#custom_units_group do
+				local unit = custom_units_group[i]
+				if is_allowed_difficulty(unit.diff) then
+					custom_units_filtered[#custom_units_filtered+1] = unit
+				end
+			end
+		end
+
+		if #custom_units_filtered == 0 then
+			ignored_custom_units[guid] = true
+			return
+		end
+
+		current_custom_units_by_guid[guid] = custom_units_filtered
+		return custom_units_filtered
 	end
 
 	local function log_custom_unit(set, name, playername, spellid, amount, absorbed)
@@ -186,11 +232,10 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			grouped_units[name] = group_name
 		end
 		if group_name == L["Halion and Inferno"] and get_instance_diff() ~= "25h" then return end -- rs25hm only
-		if customGroupsTable and customGroupsTable[id] then return end -- a custom unit with useful damage.
+		if current_custom_groups[id] then return end -- a custom unit with useful damage.
 
 		if group_name == L["Princes overkilling"] then
-			log_custom_unit(set, group_name, playername, spellid, overkill, absorbed)
-			return
+			amount = overkill
 		end
 		log_custom_unit(set, group_name, playername, spellid, amount, absorbed)
 	end
@@ -267,10 +312,16 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		-- the rest of the code is only for allowed instance diffs.
 		if not allowed_diffs[get_instance_diff()] then return end
 
-		if is_custom_unit(dmg.actorid, dmg.actorname, dmg.amount, overkill) then
-			local unit = customUnitsTable[dmg.actorid]
-			-- started with less than max?
-			if unit.full then
+		log_custom_group(set, dmg.actorname, dmg.actorid, dmg.srcName, dmg.spellid, dmg.amount, overkill, absorbed)
+
+		local custom_units = get_custom_units(dmg.actorid)
+		if not custom_units then return end
+
+		for i=1,#custom_units do
+			local unit = get_custom_unit(custom_units[i], dmg.actorid, dmg.actorname, dmg.amount, overkill)
+			if not unit then
+				-- continue
+			elseif unit.full then
 				local amount = unit.full - unit.curval
 				if unit.useful then
 					e.usefuldamaged = (e.usefuldamaged or 0) + amount
@@ -290,8 +341,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 					amount = amount - (unit.maxval - unit.curval)
 					if grouped_units[unit.oname] and unit.useful then
 						log_custom_group(set, unit.oname, unit.guid, dmg.srcName, dmg.spellid, amount, overkill, absorbed)
-						customGroupsTable = customGroupsTable or {}
-						customGroupsTable[unit.guid] = true
+						current_custom_groups[unit.guid] = true
 					end
 					if grouped_units[unit.name] then
 						log_custom_group(set, unit.name, unit.guid, dmg.srcName, dmg.spellid, unit.maxval - unit.curval, overkill, absorbed)
@@ -311,22 +361,16 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 				end
 
 				if unit.curval <= unit.minval then
-					log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, amount - (unit.minval - unit.curval), absorbed)
-
-					-- remove it
+					amount = amount - (unit.minval - unit.curval)
 					local guid = unit.guid
-					customUnitsTable[guid] = del(customUnitsTable[guid])
-					customUnitsTable[guid] = -1
-				else
-					log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, amount, absorbed)
+					unit[guid] = del(unit[guid])
+					unit[guid] = -1
 				end
+				log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, amount, absorbed)
 			elseif unit.power then
 				log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, dmg.amount - (unit.useful and overkill or 0), absorbed)
 			end
 		end
-
-		-- custom groups
-		log_custom_group(set, dmg.actorname, dmg.actorid, dmg.srcName, dmg.spellid, dmg.amount, overkill, absorbed)
 	end
 
 	local function spell_damage(t)
@@ -644,8 +688,10 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	function mode:CombatLeave()
 		instanceDiff = nil
 		wipe(dmg)
-		clear(customUnitsTable)
-		clear(customGroupsTable)
+		clear(current_custom_groups)
+		clear(ignored_custom_units)
+		clear(current_custom_units)
+		clear(current_custom_units_by_guid)
 	end
 
 	---------------------------------------------------------------------------
