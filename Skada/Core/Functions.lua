@@ -95,6 +95,7 @@ do
 	end
 
 	-- adds a module to the loadable modules table.
+	local unpack = unpack
 	function Skada:RegisterModule(...)
 		local module = module_table(...)
 		if not module then return end
@@ -106,7 +107,12 @@ do
 		-- add its check button
 		self.options.args.modules.args.blocked.args[module.name] = {
 			type = "toggle",
-			name = L[module.name],
+			name = function()
+				if module.deps and self:IsDisabled(unpack(module.deps)) then
+					return format("\124cffff0000%s\124r", L[module.name])
+				end
+				return L[module.name]
+			end,
 			desc = module.desc
 		}
 
@@ -154,7 +160,6 @@ do
 	end
 
 	-- loads registered modules
-	local unpack = unpack
 	function Skada:LoadModules(release)
 		-- loadable modules
 		if self.LoadableModules then
@@ -1790,33 +1795,50 @@ do
 		do -- source or destination in the group
 			local BITMASK_GROUP = Private.BITMASK_GROUP
 			local BITMASK_PETS = Private.BITMASK_PETS
+			local guidToName = Private.guidToName
+			local guidToClass = Private.guidToClass
+			local guidToOwner = Private.guidToOwner
 
 			function ARGS_MT.SourceInGroup(args, nopets)
-				if bit_band(args.srcFlags, BITMASK_GROUP) ~= 0 then
-					if nopets then
-						return (bit_band(args.srcFlags, BITMASK_PETS) == 0)
-					end
-					return true
+				if bit_band(args.srcFlags, BITMASK_GROUP) == 0 then
+					return false
 				end
-				return false
+				if nopets then
+					return (bit_band(args.srcFlags, BITMASK_PETS) == 0)
+				end
+				return true
 			end
+
 			function ARGS_MT.DestInGroup(args, nopets)
-				if bit_band(args.dstFlags, BITMASK_GROUP) ~= 0 then
-					if nopets then
-						return (bit_band(args.dstFlags, BITMASK_PETS) == 0)
-					end
-					return true
+				if bit_band(args.dstFlags, BITMASK_GROUP) == 0 then
+					return false
 				end
-				return false
+				if nopets then
+					return (bit_band(args.dstFlags, BITMASK_PETS) == 0)
+				end
+				return true
 			end
 
-			function ARGS_MT.SourceIsPet(args)
-				return (bit_band(args.srcFlags, BITMASK_PETS) ~= 0)
+			function ARGS_MT.SourceIsPet(args, ingroup)
+				if (bit_band(args.srcFlags, BITMASK_PETS) == 0) then
+					return false
+				end
+				if ingroup then
+					return (guidToOwner[args.srcGUID] ~= nil)
+				end
+				return true
 			end
 
-			-- checks whether the give guid/flags are pets
-			local guidToClass = Private.guidToClass
+			-- owner=true? acts like "ingroup" (SourceIsPet)
 			function ARGS_MT.DestIsPet(args, owner)
+				if (bit_band(args.dstFlags, BITMASK_PETS) == 0) then
+					return false
+				end
+				if owner == true then
+					return (guidToOwner[args.dstGUID] ~= nil)
+				end
+
+				-- owner provided? check for affiliation.
 				if owner then
 					if bit_band(args.srcFlags, BITMASK_GROUP) ~= 0 then
 						return true -- owner is a group member?
@@ -1824,12 +1846,13 @@ do
 					if bit_band(args.srcFlags, BITMASK_PETS) ~= 0 then
 						return true -- summoned by another pet?
 					end
-					if bit_band(args.dstFlags, BITMASK_PETS) ~= 0 and guidToClass[args.dstGUID] then
+					if guidToClass[args.dstGUID] then
 						return true -- already known pet
 					end
 					return false
 				end
-				return (bit_band(args.dstFlags, BITMASK_PETS) ~= 0)
+
+				return true
 			end
 		end
 

@@ -234,7 +234,7 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 				tbl[actorname].role = actor.role
 				tbl[actorname].spec = actor.spec
 				tbl[actorname].enemy = actor.enemy
-				tbl[actorname].count = spell.n
+				tbl[actorname].n = spell.n
 				total = total + spell.n
 			end
 		end
@@ -496,7 +496,7 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 				tbl[actorname].role = actor.role
 				tbl[actorname].spec = actor.spec
 				tbl[actorname].enemy = actor.enemy
-				tbl[actorname].count = spell.n
+				tbl[actorname].n = spell.n
 				total = total + spell.n
 			end
 		end

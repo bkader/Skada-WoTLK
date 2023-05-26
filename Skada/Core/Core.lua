@@ -913,7 +913,8 @@ end
 
 function Window:RightClick(bar, button)
 	if self.selectedmode then
-		if self.class then
+		-- only remove class filter on parent mode.
+		if self.class and self.selectedmode == self.parentmode then
 			self.class = nil
 			self:Wipe()
 			self:UpdateDisplay()
@@ -2863,18 +2864,21 @@ do
 	end
 
 	local next = next
+	local src_is_interesting = nil
+	local dst_is_interesting = nil
+
 	function Skada:OnCombatEvent(t)
 		-- ignored combat event?
 		if (not t.event or ignored_events[t.event]) and not (spellcast_events[t.event] and self.current) then return end
 
-		local src_is_interesting = nil
-		local dst_is_interesting = nil
+		src_is_interesting = nil
+		dst_is_interesting = nil
 
 		if not self.current and trigger_events[t.event] and t.srcName and t.dstName and t.srcGUID ~= t.dstGUID then
-			src_is_interesting = t:SourceInGroup()
+			src_is_interesting = t:SourceInGroup() or t:SourceIsPet(true) or guidToName[t.srcGUID]
 
 			if t.event ~= "SPELL_PERIODIC_DAMAGE" then
-				dst_is_interesting = t:DestInGroup()
+				dst_is_interesting = t:DestInGroup() or t:DestIsPet(true) or guidToName[t.dstGUID]
 			end
 
 			if src_is_interesting or dst_is_interesting then
@@ -2914,7 +2918,7 @@ do
 			local fail = false
 
 			if flags.src_is_interesting_nopets then
-				if t:SourceInGroup(true) then
+				if t:SourceInGroup(true) or guidToName[t.srcGUID] then
 					src_is_interesting = true
 				else
 					fail = true
@@ -2922,7 +2926,7 @@ do
 			end
 
 			if not fail and flags.dst_is_interesting_nopets then
-				if t:DestInGroup(true) then
+				if t:DestInGroup(true) or guidToName[t.dstGUID] then
 					dst_is_interesting = true
 				else
 					fail = true
@@ -2930,14 +2934,14 @@ do
 			end
 
 			if not fail and (flags.src_is_interesting or flags.src_is_not_interesting) then
-				src_is_interesting = src_is_interesting or t:SourceInGroup() or Private.GetTempUnit(t.srcGUID)
+				src_is_interesting = t:SourceInGroup() or t:SourceIsPet(true) or guidToName[t.srcGUID] or Private.GetTempUnit(t.srcGUID)
 				if (flags.src_is_interesting and not src_is_interesting) or (flags.src_is_not_interesting and src_is_interesting) then
 					fail = true
 				end
 			end
 
 			if not fail and (flags.dst_is_interesting or flags.dst_is_not_interesting) then
-				dst_is_interesting = dst_is_interesting or t:DestInGroup()
+				dst_is_interesting = t:DestInGroup() or t:DestIsPet(true) or guidToName[t.dstGUID]
 				if (flags.dst_is_interesting and not dst_is_interesting) or (flags.dst_is_not_interesting and dst_is_interesting) then
 					fail = true
 				end

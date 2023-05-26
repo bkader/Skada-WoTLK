@@ -59,7 +59,9 @@ local ignored_spells = {
 	-- friendfire = {},
 
 	-- [[ healing / enemy healing done modules ]] --
-	-- heal = {},
+	-- heal = {
+	-- 	[20267] = true, -- Judgement of Light
+	-- },
 
 	-- [[ interrupts module ]] --
 	-- interrupt = {},
@@ -468,6 +470,10 @@ do
 		-- Halion: Halion and Inferno
 		[39863] = L["Halion and Inferno"], -- Halion
 		[40681] = L["Halion and Inferno"], -- Living Inferno
+
+		-- Anub'arak: Adds
+		[34605] = L["Adds"], -- Swarm Scarab
+		[34607] = L["Adds"], -- Nerubian Burrower
 	}
 
 	------------------------------------------------------
@@ -479,14 +485,23 @@ do
 	-- Useful in case you want to collect stuff done to units
 	-- at certain encounter phases for example.
 	--
-	-- table structure
+	-- table structure (all fields are optional and will be generated and cached by the addon)
+	--	start: 		when to start collecting (0.01 = 1%, default: 100%)
+	--	stop:		when to stop collecting (0.01 = 1%, default: 0%)
+	--	power:		whether to track the speficied power or health
+	--		0 - Mana
+	--		1 - Rage
+	--		2 - Focus
+	--		3 - Energy
+	--		4 - Happiness
+	--		5 - Runes
+	--		6 - Runic Power
+	--
 	-- 	name: 		name of the fake unit (optional)
 	-- 	text: 		text to use *format()* with (optional)
-	-- 	start: 		when to start collecting (1 = 100%)
-	-- 	stop: 		when to stop collecting (0.5 = 50%)
-	-- 	diff: 		table of allowed difficulties (omit for all)
-	-- 	power: 		which type of power to trach (omit for health)
 	-- 	values: 	table of difficulties to max health (optional)
+	-- 	diff: 		table of whitelisted difficulties (optional, default: all)
+	--		{["10h"] = true, ["25h"] = true}
 	--
 	-- **optional** fields will be generated and cached by the addon.
 	--
@@ -494,9 +509,15 @@ do
 	local custom_units = {
 		-- ICC: Lady Deathwhisper
 		[36855] = {
-			text = L["%s - Phase 2"],
-			start = 0,
-			power = 0
+			{
+				text = L["%s - Phase 1"],
+				start = 1,
+				power = 0
+			},
+			{
+				text = L["%s - Phase 2"],
+				start = 1
+			}
 		},
 
 		-- ICC: Professor Putricide
@@ -530,6 +551,11 @@ do
 		[34564] = {
 			text = L["%s - Phase 2"],
 			start = 0.3
+		},
+
+		-- Baltharus the Warborn
+		[39751] = {
+			text = L["%s (Main Boss)"]
 		}
 	}
 

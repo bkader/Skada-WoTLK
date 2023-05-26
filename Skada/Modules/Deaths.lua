@@ -714,7 +714,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	function mode:GetSetSummary(set, win)
 		if not set then return end
 		local deaths = set:GetTotal(win and win.class, nil, "death") or 0
-		return Skada._Time or GetTime(), deaths
+		return set.endtime or Skada._time or time(), deaths
 	end
 
 	function mode:AddToTooltip(set, tooltip)

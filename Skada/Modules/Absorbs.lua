@@ -627,6 +627,11 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 				s.amount = floor((hpmax or 0) * 0.1)
 			elseif s and s.spellid == 25228 then -- Soul Link
 				s.amount = floor(total * 0.2)
+			elseif s and s.spellid == 62606 then -- Savage Defense
+				local base, posBuff, negBuff = UnitAttackPower(t.dstName)
+				if base > 0 then -- only works if you're the bear
+					s.amount = floor((base + posBuff + negBuff) * 0.25)
+				end
 			end
 		end
 

@@ -1529,3 +1529,200 @@ Skada:RegisterModule("Damage Done By School", function(L, P, _, C)
 		return total, tbl
 	end
 end, "Damage")
+
+-- ====================== --
+-- Absorbed Damage Module --
+-- ====================== --
+
+Skada:RegisterModule("Absorbed Damage", function(L, _, _, C)
+	local mode = Skada:NewModule("Absorbed Damage")
+	local mode_spell = mode:NewModule("Spell List")
+	local mode_target = mode:NewModule("Target List")
+	local get_set_absorbed_damage = nil
+	local get_actor_absorbed_damage_targets = nil
+	local mode_cols = nil
+
+	function mode_spell:Enter(win, id, label)
+		win.actorid, win.actorname = id, label
+		win.title = L["actor damage"](label)
+	end
+
+	function mode_spell:Update(win, set)
+		win.title = L["actor damage"](win.actorname or L["Unknown"])
+		if not set or not win.actorname then return end
+
+		local actor = set:GetActor(win.actorname, win.actorid)
+		local total = (actor and actor.totaldamage and actor.damage) and max(0, actor.totaldamage - actor.damage)
+		local spells = (total and total > 0) and actor.damagespells
+
+		if not spells then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
+
+		local nr = 0
+		local actortime = mode_cols.sDPS and actor:GetTime(set)
+
+		for spellid, spell in pairs(spells) do
+			if spell.total and spell.amount then
+				nr = nr + 1
+
+				local d = win:spell(nr, spellid)
+				d.value = max(0, spell.total - spell.amount)
+				format_valuetext(d, mode_cols, total, actortime and (d.value / actortime), win.metadata, true)
+			end
+		end
+	end
+
+	function mode_target:Enter(win, id, label)
+		win.actorid, win.actorname = id, label
+		win.title = format(L["%s's targets"], label)
+	end
+
+	function mode_target:Update(win, set)
+		win.title = uformat(L["%s's targets"], win.actorname)
+		if not set or not win.actorname then return end
+
+		local targets, total, actor = get_actor_absorbed_damage_targets(set, win.actorname, win.actorid)
+		if not targets or not actor or not total or total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
+
+		local nr = 0
+		local actortime = mode_cols.sDPS and actor:GetTime(set)
+
+		for targetname, target in pairs(targets) do
+			nr = nr + 1
+
+			local d = win:actor(nr, target, target.enemy, targetname)
+			d.value = target.amount
+			format_valuetext(d, mode_cols, total, actortime and (d.value / actortime), win.metadata, true)
+		end
+	end
+
+	function mode:Update(win, set)
+		win.title = win.class and format("%s (%s)", L["Absorbed Damage"], L[win.class]) or L["Absorbed Damage"]
+
+		local total = set and get_set_absorbed_damage(set, win.class)
+		if not total or total == 0 then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
+
+		local nr = 0
+		local actors = set.actors
+
+		for actorname, actor in pairs(actors) do
+			if win:show_actor(actor, set, true) and actor.totaldamage and actor.damage then
+				nr = nr + 1
+
+				local d = win:actor(nr, actor, actor.enemy, actorname)
+				d.value = max(0, actor.totaldamage - actor.damage)
+				format_valuetext(d, mode_cols, total, mode_cols.DPS and (d.value / actor:GetTime(set)), win.metadata)
+				win:color(d, set, actor.enemy)
+			end
+		end
+	end
+
+	function mode:OnEnable()
+		self.metadata = {
+			showspots = true,
+			filterclass = true,
+			click1 = mode_spell,
+			click2 = mode_target,
+			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
+			icon = [[Interface\Icons\spell_fire_playingwithfire]]
+		}
+
+		mode_cols = self.metadata.columns
+
+		-- no total click.
+		mode_spell.nototal = true
+		mode_target.nototal = true
+
+		Skada:AddMode(self, "Damage Done")
+	end
+
+	function mode:OnDisable()
+		Skada:RemoveMode(self)
+	end
+
+	function mode:GetSetSummary(set, win)
+		local amount = set and get_set_absorbed_damage(set, win and win.class) or 0
+		local valuetext = Skada:FormatValueCols(
+			mode_cols.Damage and Skada:FormatNumber(amount),
+			mode_cols.DPS and Skada:FormatNumber(amount / set:GetTime())
+		)
+		return amount, valuetext
+	end
+
+	---------------------------------------------------------------------------
+
+	get_set_absorbed_damage = function(self, class)
+		-- no actors?
+		if not self.actors then return end
+
+		local total = 0
+		local combined = (Skada.forPVP and self.type == "arena")
+
+		-- no class filter?
+		if not class then
+			-- group members.
+			if self.totaldamage and self.damage then
+				total = max(0, self.totaldamage - self.damage)
+			end
+
+			-- arena enemies
+			if combined and self.etotaldamage and self.edamage then
+				total = total + max(0, self.etotaldamage - self.edamage)
+			end
+
+			return total
+		end
+
+		-- filtered by class
+		for _, actor in pairs(self.actors) do
+			if actor.class == class and actor.totaldamage and actor.damage and (combined or not actor.enemy) then
+				total = total + max(0, actor.totaldamage - actor.damage)
+			end
+		end
+		return total
+	end
+
+	get_actor_absorbed_damage_targets = function(set, name, id, tbl)
+		local actor = name and id and set:GetActor(name, id)
+		local spells = actor and actor.damagespells
+		if not spells then return end
+
+		local total = (actor.totaldamage and actor.damage) and max(0, actor.totaldamage - actor.damage)
+		if not total or total == 0 then return end -- not total or 0
+
+		tbl = clear(tbl or C)
+
+		for _, spell in pairs(spells) do
+			if spell.total and spell.amount and spell.targets then
+				for targetname, target in pairs(spell.targets) do
+					if target.total and target.amount then
+						local t = tbl[targetname]
+						if not t then
+							t = new()
+							t.amount = max(0, target.total - target.amount)
+							tbl[targetname] = t
+						else
+							t.amount = t.amount + max(0, target.total - target.amount)
+						end
+
+						set:_fill_actor_table(tbl[targetname], targetname)
+					end
+				end
+			end
+		end
+
+		return tbl, total, actor
+	end
+
+end, "Damage")

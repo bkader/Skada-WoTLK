@@ -645,6 +645,7 @@ L["%s - Phase %s"] = true
 L["%s - Phase 1"] = true
 L["%s - Phase 2"] = true
 L["%s - Phase 3"] = true
+L["%s (Main Boss)"] = true
 L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r started."] = true
 L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r stopped."] = true
 L["\124cffffbb00%s\124r - \124cff00ff00Phase %s\124r resumed."] = true

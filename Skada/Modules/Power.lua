@@ -77,9 +77,9 @@ Skada:RegisterModule("Resources", function(L, P)
 
 	local function spell_energize(t)
 		if t.spellid and not ignored_spells[t.spellid] then
-			gain.actorid = t.srcGUID
-			gain.actorname = t.srcName
-			gain.actorflags = t.srcFlags
+			gain.actorid = t.dstGUID
+			gain.actorname = t.dstName
+			gain.actorflags = t.dstFlags
 
 			gain.spellid = t.spellstring
 			gain.amount = t.amount

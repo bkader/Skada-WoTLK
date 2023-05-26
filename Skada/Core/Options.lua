@@ -127,6 +127,7 @@ Skada.defaults = {
 		reset = {instance = 1, join = 3, leave = 1},
 		toast = {spawn_point = "BOTTOM", duration = 5, opacity = 0.75},
 		modulesBlocked = {
+			["Absorbed Damage"] = true,
 			["Avoidance & Mitigation"] = true,
 			["CC Breaks"] = true,
 			["Damage Done By School"] = true,

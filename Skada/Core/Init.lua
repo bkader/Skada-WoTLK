@@ -277,8 +277,12 @@ do
 	}
 
 	function Private.TempTable(...)
-		local t = next(tables) or setmetatable({}, table_mt)
-		if t then tables[t] = nil end
+		local t = next(tables)
+		if t then
+			tables[t] = nil
+		else
+			t = setmetatable({}, table_mt)
+		end
 		for i = 1, select("#", ...) do
 			t[i] = (select(i, ...))
 		end
