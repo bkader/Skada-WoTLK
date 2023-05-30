@@ -141,16 +141,13 @@ do
 	-- @param 	set 		the set to override/reuse
 	function create_set(setname, set)
 		if set then
-			Skada:Debug("Rused set for", setname, ">>", set, "<<")
 			set = clean_set(set)
 		else
 			set = next(recycle_bin)
 			if set then
-				Skada:Debug("Rused set for", setname, ">>", set, "<<")
 				recycle_bin[set] = nil
 			else
 				set = {}
-				Skada:Debug("Created set for", setname, ">>", set, "<<")
 			end
 		end
 
