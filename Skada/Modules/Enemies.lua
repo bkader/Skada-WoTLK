@@ -123,7 +123,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	local function start_custom_unit(unit, index, creatureId, guid, name, amount, overkill)
-		if unit.diff ~= nil and ((type(unit.diff) == "table" and not unit.diff[get_instance_diff()]) or (type(unit.diff) == "string" and get_instance_diff() ~= unit.diff)) then
+		if unit.diff ~= nil and ((type(unit.diff) == "table" and not unit.diff[get_instance_diff()]) or unit.diff ~= get_instance_diff()) then
 			ignored_units[guid] = true
 			return false
 		end
