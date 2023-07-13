@@ -23,16 +23,17 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 	local GetUnitIdFromGUID, GetCreatureId = Skada.GetUnitIdFromGUID, Skada.GetCreatureId
 	local UnitHealthMax, UnitPowerMax = UnitHealthMax, UnitPowerMax
+	local UnitHealth, UnitPower = UnitHealth, UnitPower
 	local del = Private.delTable
 
 	local instanceDiff = nil
-	local current_custom_groups = {}
+	local ignored_in_custom_groups = {}
+	local current_custom_units_by_id = {}
 	local current_custom_units = {}
-	local current_custom_units_by_guid = {}
 	local ignored_custom_units = {}
 
 	-- table of acceptable/trackable instance difficulties
-	-- uncomments those you want to use or add custom ones.
+	-- uncomment those you want to use or add custom ones.
 	local allowed_diffs = {
 		["10n"] = true, -- 10man Normal
 		["10h"] = true, -- 10man Heroic
@@ -42,7 +43,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		-- ["5h"] = true, -- 5man Heroic
 		-- ["mc"] = true, -- Mythic Dungeons
 		-- ["tw"] = true, -- Time Walker
-		["wb"] = true, -- World Boss
+		-- ["wb"] = true, -- World Boss
 	}
 
 	local function format_valuetext(d, columns, total, dtps, metadata, subview, dont_sort)
@@ -64,65 +65,46 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		return instanceDiff
 	end
 
-	local function get_custom_unit_max_value(guid, unit)
-		local diff = get_instance_diff()
-		local maxval = unit.values and unit.values[diff]
-		if maxval then return maxval end
-
+	local function get_custom_unit_hitpoints(unit, guid)
 		local uid = GetUnitIdFromGUID(guid)
-		if not uid then return 0 end
+		if not uid then return end
 
-		maxval = type(unit.power) == "number" and UnitPowerMax(uid, unit.power) or UnitHealthMax(uid)
-		if maxval then
-			unit.values = unit.values or {}
-			unit.values[diff] = maxval
-		end
-		return maxval
+		local track_power = type(unit.power) == "number"
+		local maxval = track_power and UnitPowerMax(uid, unit.power) or UnitHealthMax(uid)
+		if maxval == 0 then return end
+
+		local curval = track_power and UnitPower(uid, unit.power) or UnitHealth(uid)
+		return maxval, curval
 	end
 
 	local function get_custom_unit_name_format_string(unit)
 		return type(unit.text) == "string" and unit.text
-		or unit.stop and L["%s - %s%% to %s%%"]
+		or unit.stop > 0 and L["%s - %s%% to %s%%"]
 		or L["%s below %s%%"]
 	end
 
-	local function get_custom_unit(unit, guid, name, amount, overkill)
+	local function get_custom_unit(unit, guid, name, damage)
 		if ignored_custom_units[guid] then return end
 
 		local t = unit[guid]
-		if t then return t end
+		if t ~= nil then return t end
 
-		local maxval = get_custom_unit_max_value(guid, unit)
-		if maxval == 0 then
-			ignored_custom_units[guid] = true
-			return
-		end
-
-		-- calculate the current value and the point where to stop.
-		local curval = maxval - amount - overkill
-		local minval = floor(maxval * (unit.stop or 0))
-
-		-- ignore units below minimum required.
-		if curval <= minval then
-			ignored_custom_units[guid] = true
-			return
-		end
+		local maxval, curval = get_custom_unit_hitpoints(unit, guid)
+		if not maxval then return end
 
 		t = new()
-		t.oname = name or L["Unknown"]
+		t.uname = name or L["Unknown"]
 		t.guid = guid
-		t.curval = curval
-		t.minval = minval
-		t.maxval = floor(maxval * (unit.start or 1))
-		t.full = maxval
-		t.power = (unit.power ~= nil)
+		t.minval = floor(maxval * unit.stop)
+		t.maxval = floor(maxval * unit.start)
+		t.curval = curval + damage
 		t.useful = unit.useful
 
 		if type(unit.name) == "string" then
 			t.name = unit.name
 		else
 			local str = get_custom_unit_name_format_string(unit)
-			t.name = str:format(t.oname, (unit.start or 1) * 100, (unit.stop or 0) * 100)
+			t.name = str:format(t.uname, unit.start * 100, unit.stop * 100)
 		end
 
 		unit[guid] = t
@@ -135,17 +117,30 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		or get_instance_diff() == diff
 	end
 
-	local function get_custom_units(guid)
-		if ignored_custom_units[guid] then return end
+	local function copy_unit(unit)
+		if not unit.start then
+			unit.start = 1
+		end
+		if not unit.stop then
+			unit.stop = 0
+		end
+		local t = new()
+		for key, value in pairs(unit) do
+			t[key] = value
+		end
+		return t
+	end
 
-		if current_custom_units_by_guid[guid] then
-			return current_custom_units_by_guid[guid]
+	local function get_custom_units(guid)
+		if ignored_custom_units[guid] then return
+		elseif current_custom_units[guid] then
+			return current_custom_units[guid]
 		end
 
 		local guid_id = GetCreatureId(guid)
-		local custom_units_filtered = current_custom_units[guid_id]
+		local custom_units_filtered = current_custom_units_by_id[guid_id]
 		if custom_units_filtered then
-			current_custom_units_by_guid[guid] = custom_units_filtered
+			current_custom_units[guid] = custom_units_filtered
 			return custom_units_filtered
 		end
 
@@ -156,18 +151,20 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		custom_units_filtered = {}
-		current_custom_units[guid_id] = custom_units_filtered
+		current_custom_units_by_id[guid_id] = custom_units_filtered
 
 		if #custom_units_group == 0 then
 			-- legacy support for 1 unit per unit id
 			if is_allowed_difficulty(custom_units_group.diff) then
-				custom_units_filtered[1] = custom_units_group
+				custom_units_filtered[1] = copy_unit(custom_units_group)
 			end
 		else
 			for i=1,#custom_units_group do
-				local unit = custom_units_group[i]
-				if is_allowed_difficulty(unit.diff) then
-					custom_units_filtered[#custom_units_filtered+1] = unit
+				if next(custom_units_group[i]) then
+					local unit = copy_unit(custom_units_group[i])
+					if is_allowed_difficulty(unit.diff) then
+						custom_units_filtered[#custom_units_filtered+1] = unit
+					end
 				end
 			end
 		end
@@ -177,12 +174,12 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			return
 		end
 
-		current_custom_units_by_guid[guid] = custom_units_filtered
+		current_custom_units[guid] = custom_units_filtered
 		return custom_units_filtered
 	end
 
-	local function log_custom_unit(set, name, playername, spellid, amount, absorbed)
-		local e = Skada:GetActor(set, name, name, true)
+	local function log_custom_unit(set, unit_name, source_name, spellid, amount, absorbed)
+		local e = Skada:GetActor(set, unit_name, unit_name, true)
 		if not e then return end
 
 		e.damaged = (e.damaged or 0) + amount
@@ -191,7 +188,6 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			e.totaldamaged = e.totaldamaged + absorbed
 		end
 
-		-- spell
 		local spell = e.damagedspells and e.damagedspells[spellid]
 		if not spell then
 			e.damagedspells = e.damagedspells or {}
@@ -207,12 +203,11 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			spell.total = spell.amount + absorbed
 		end
 
-		-- source
-		local source = spell.sources and spell.sources[playername]
+		local source = spell.sources and spell.sources[source_name]
 		if not source then
 			spell.sources = spell.sources or {}
-			spell.sources[playername] = {amount = amount}
-			source = spell.sources[playername]
+			spell.sources[source_name] = {amount = amount}
+			source = spell.sources[source_name]
 		else
 			source.amount = source.amount + amount
 		end
@@ -232,7 +227,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			grouped_units[name] = group_name
 		end
 		if group_name == L["Halion and Inferno"] and get_instance_diff() ~= "25h" then return end -- rs25hm only
-		if current_custom_groups[id] then return end -- a custom unit with useful damage.
+		if ignored_in_custom_groups[id] then return end -- a custom unit with useful damage.
 
 		if group_name == L["Princes overkilling"] then
 			amount = overkill
@@ -250,38 +245,41 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		local e = Skada:GetActor(set, dmg.actorname, dmg.actorid, dmg.actorflags)
 		if not e then return end
 
-		e.damaged = (e.damaged or 0) + dmg.amount
-		set.edamaged = (set.edamaged or 0) + dmg.amount
+		local spellID = dmg.spellid
+		local amount = dmg.amount
+		local overkill = dmg.overkill or 0
+
+		e.damaged = (e.damaged or 0) + amount
+		set.edamaged = (set.edamaged or 0) + amount
 
 		if e.totaldamaged then
-			e.totaldamaged = e.totaldamaged + dmg.amount + absorbed
+			e.totaldamaged = e.totaldamaged + amount + absorbed
 		elseif absorbed > 0 then
 			e.totaldamaged = e.damaged + absorbed
 		end
 
 		if set.etotaldamaged then
-			set.etotaldamaged = set.etotaldamaged + dmg.amount + absorbed
+			set.etotaldamaged = set.etotaldamaged + amount + absorbed
 		elseif absorbed > 0 then
 			set.etotaldamaged = set.edamaged + absorbed
 		end
 
 		-- damage spell.
-		local spell = e.damagedspells and e.damagedspells[dmg.spellid]
+		local spell = e.damagedspells and e.damagedspells[spellID]
 		if not spell then
+			spell = {amount = amount}
 			e.damagedspells = e.damagedspells or {}
-			e.damagedspells[dmg.spellid] = {amount = dmg.amount}
-			spell = e.damagedspells[dmg.spellid]
+			e.damagedspells[spellID] = spell
 		else
-			spell.amount = spell.amount + dmg.amount
+			spell.amount = spell.amount + amount
 		end
 
 		if spell.total then
-			spell.total = spell.total + dmg.amount + absorbed
+			spell.total = spell.total + amount + absorbed
 		elseif absorbed > 0 then
 			spell.total = spell.amount + absorbed
 		end
 
-		local overkill = dmg.overkill or 0
 		if overkill > 0 then
 			spell.o_amt = (spell.o_amt or 0) + overkill
 		end
@@ -293,82 +291,56 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		local source = spell.sources and spell.sources[dmg.srcName]
 		if not source then
 			spell.sources = spell.sources or {}
-			spell.sources[dmg.srcName] = {amount = dmg.amount}
+			spell.sources[dmg.srcName] = {amount = amount}
 			source = spell.sources[dmg.srcName]
 		else
-			source.amount = source.amount + dmg.amount
+			source.amount = source.amount + amount
 		end
 
 		if source.total then
-			source.total = source.total + dmg.amount + absorbed
+			source.total = source.total + amount + absorbed
 		elseif absorbed > 0 then
 			source.total = source.amount + absorbed
 		end
 
 		if overkill > 0 then
-			source.o_amt = (source.o_amt or 0) + dmg.overkill
+			source.o_amt = (source.o_amt or 0) + overkill
 		end
 
 		-- the rest of the code is only for allowed instance diffs.
 		if not allowed_diffs[get_instance_diff()] then return end
 
-		log_custom_group(set, dmg.actorname, dmg.actorid, dmg.srcName, dmg.spellid, dmg.amount, overkill, absorbed)
+		local guid = dmg.actorid
+		log_custom_group(set, dmg.actorname, guid, dmg.srcName, spellID, amount, overkill, absorbed)
 
-		local custom_units = get_custom_units(dmg.actorid)
+		local custom_units = get_custom_units(guid)
 		if not custom_units then return end
 
 		for i=1,#custom_units do
-			local unit = get_custom_unit(custom_units[i], dmg.actorid, dmg.actorname, dmg.amount, overkill)
-			if not unit then
-				-- continue
-			elseif unit.full then
-				local amount = unit.full - unit.curval
-				if unit.useful then
+			local unit = get_custom_unit(custom_units[i], guid, dmg.actorname, amount)
+			if unit then
+				local prev_value = unit.curval
+				local current = prev_value - amount
+				unit.curval = current
+				if current < unit.maxval then
+					if unit.useful then
+						ignored_in_custom_groups[guid] = true
+					end
+					local _amount
+					if current <= unit.minval then
+						_amount = prev_value - unit.minval
+						custom_units[i][guid] = false
+					elseif prev_value > unit.maxval then
+						_amount = unit.maxval - current
+					else
+						_amount = amount
+					end
+					log_custom_unit(set, unit.name, dmg.srcName, spellID, _amount, absorbed)
+				elseif unit.useful then
 					e.usefuldamaged = (e.usefuldamaged or 0) + amount
 					spell.useful = (spell.useful or 0) + amount
 					source.useful = (source.useful or 0) + amount
 				end
-				if unit.maxval == unit.full then
-					log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, amount, absorbed)
-				end
-				unit.full = nil
-			elseif unit.curval >= unit.maxval then
-				local amount = dmg.amount - overkill
-				unit.curval = unit.curval - amount
-
-				if unit.curval <= unit.maxval then
-					log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, unit.maxval - unit.curval, absorbed)
-					amount = amount - (unit.maxval - unit.curval)
-					if grouped_units[unit.oname] and unit.useful then
-						log_custom_group(set, unit.oname, unit.guid, dmg.srcName, dmg.spellid, amount, overkill, absorbed)
-						current_custom_groups[unit.guid] = true
-					end
-					if grouped_units[unit.name] then
-						log_custom_group(set, unit.name, unit.guid, dmg.srcName, dmg.spellid, unit.maxval - unit.curval, overkill, absorbed)
-					end
-				end
-				if unit.useful then
-					e.usefuldamaged = (e.usefuldamaged or 0) + amount
-					spell.useful = (spell.useful or 0) + amount
-					source.useful = (source.useful or 0) + amount
-				end
-			elseif unit.curval >= unit.minval then
-				local amount = dmg.amount - overkill
-				unit.curval = unit.curval - amount
-
-				if grouped_units[unit.name] then
-					log_custom_group(set, unit.name, unit.guid, dmg.srcName, dmg.spellid, amount, overkill, absorbed)
-				end
-
-				if unit.curval <= unit.minval then
-					amount = amount - (unit.minval - unit.curval)
-					local guid = unit.guid
-					unit[guid] = del(unit[guid])
-					unit[guid] = -1
-				end
-				log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, amount, absorbed)
-			elseif unit.power then
-				log_custom_unit(set, unit.name, dmg.srcName, dmg.spellid, dmg.amount - (unit.useful and overkill or 0), absorbed)
 			end
 		end
 	end
@@ -688,10 +660,10 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	function mode:CombatLeave()
 		instanceDiff = nil
 		wipe(dmg)
-		clear(current_custom_groups)
+		clear(ignored_in_custom_groups)
 		clear(ignored_custom_units)
+		clear(current_custom_units_by_id)
 		clear(current_custom_units)
-		clear(current_custom_units_by_guid)
 	end
 
 	---------------------------------------------------------------------------

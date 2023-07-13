@@ -59,7 +59,9 @@ local ignored_spells = {
 	-- friendfire = {},
 
 	-- [[ healing / enemy healing done modules ]] --
-	-- heal = {},
+	heal = {
+		[20267] = true, -- Judgement of Light
+	},
 
 	-- [[ interrupts module ]] --
 	-- interrupt = {},
@@ -82,7 +84,6 @@ local ignored_spells = {
 	-- [[ no active time spells ]] --
 	time = {
 		-- Retribution Aura
-		[7294] = true, -- Rank 1
 		[7294] = true, -- Rank 1
 		[10298] = true, -- Rank 2
 		[10299] = true, -- Rank 3
@@ -468,6 +469,10 @@ do
 		-- Halion: Halion and Inferno
 		[39863] = L["Halion and Inferno"], -- Halion
 		[40681] = L["Halion and Inferno"], -- Living Inferno
+
+		-- Anub'arak: Adds
+		[34605] = L["Adds"], -- Swarm Scarab
+		[34607] = L["Adds"], -- Nerubian Burrower
 	}
 
 	------------------------------------------------------
@@ -479,45 +484,143 @@ do
 	-- Useful in case you want to collect stuff done to units
 	-- at certain encounter phases for example.
 	--
-	-- table structure
+	-- table structure (all fields are optional, will be generated and cached by the addon)
+	-- 	start: 		when to start collecting (0.01 = 1%, default: 100%)
+	-- 	stop: 		when to stop collecting (0.01 = 1%, default: 0%)
+	-- 	power: 		will track specified power instead of health
+    ------  0 - Mana
+    ------  1 - Rage
+    ------  2 - Focus
+    ------  3 - Energy
+    ------  4 - Happiness
+    ------  5 - Runes
+    ------  6 - Runic Power
 	-- 	name: 		name of the fake unit (optional)
-	-- 	text: 		text to use *format()* with (optional)
-	-- 	start: 		when to start collecting (1 = 100%)
-	-- 	stop: 		when to stop collecting (0.5 = 50%)
-	-- 	diff: 		table of allowed difficulties (omit for all)
-	-- 	power: 		which type of power to trach (omit for health)
+	-- 	text: 		string to use for *format()* (optional)
 	-- 	values: 	table of difficulties to max health (optional)
-	--
-	-- **optional** fields will be generated and cached by the addon.
-	--
+	-- 	diff: 		table of whitelisted difficulties (optional, default: all)
+	------  {["10h"] = true, ["25h"] = true}
 
 	local custom_units = {
+		[10404] = {
+			text = "Pustulating Horror after cast",
+			start = 0.25,
+		},
+
 		-- ICC: Lady Deathwhisper
 		[36855] = {
-			text = L["%s - Phase 2"],
-			start = 0,
-			power = 0
+			{
+				text = L["%s - Phase 1"],
+				-- start = 1,
+				-- stop = 0,
+				power = 0,
+			},
+			{
+				text = L["%s - Phase 2"],
+				start = 0,
+				power = 0,
+			},
+			{
+				text = "5%% before p2",
+				start = 0.05,
+				-- stop = 0,
+				power = 0,
+			},
 		},
 
 		-- ICC: Professor Putricide
 		[36678] = {
-			text = L["%s - Phase 3"],
-			start = 0.35
+			{
+				text = L["%s - Phase 1"],
+				stop = 0.8,
+			},
+			{
+				text = L["%s - Phase 2"],
+				start = 0.8,
+				stop = 0.35
+			},
+			{
+				text = L["%s - Phase 3"],
+				start = 0.35,
+			},
+			{
+				text = "5%% before p2",
+				start = 0.85,
+				stop = 0.8,
+			},
+			{
+				text = "2%% before p2",
+				start = 0.82,
+				stop = 0.8,
+			},
+			{
+				text = "1%% before p2",
+				start = 0.81,
+				stop = 0.8,
+			},
+			{
+				text = "5%% before p3",
+				start = 0.4,
+				stop = 0.35,
+			},
+			{
+				text = "2%% before p3",
+				start = 0.37,
+				stop = 0.35,
+			},
+			{
+				text = "1%% before p3",
+				start = 0.36,
+				stop = 0.35,
+			},
 		},
 
 		-- ICC: Sindragosa
 		[36853] = {
-			text = L["%s - Phase 2"],
-			start = 0.35
+			{
+				text = L["%s - Phase 2"],
+				start = 0.35,
+			},
+			{
+				text = "2%% before p2",
+				start = 0.37,
+				stop = 0.35,
+			},
+			{
+				text = "1%% before p2",
+				start = 0.36,
+				stop = 0.35,
+			},
+		},
+		-- ICC: Ice Tomb
+		[36980] = {
+			{
+				text = "Tombs below 10%%",
+				start = 0.1,
+			},
+			{
+				text = "Tombs below 5%%",
+				start = 0.05,
+			},
 		},
 
 		-- ICC: The Lich King
 		[36597] = {
-			text = L["%s - Phase 3"],
-			start = 0.4,
-			stop = 0.1
+			{
+				text = L["%s - Phase 1"],
+				stop = 0.7,
+			},
+			{
+				text = L["%s - Phase 2"],
+				start = 0.7,
+				stop = 0.4,
+			},
+			{
+				text = L["%s - Phase 3"],
+				start = 0.4,
+			},
 		},
-
+		-- dont use more than 1 valk custom group
 		-- ICC: Valkyrs overkilling
 		[36609] = {
 			name = L["Valkyrs overkilling"],
@@ -526,11 +629,51 @@ do
 			diff = {["10h"] = true, ["25h"] = true}
 		},
 
+        -- Baltharus the Warborn
+		[39751] = {
+			text = "Baltharus the Warborn (main boss)",
+		},
+		-- Halion Fire
+		[39863] = {
+			{
+				text = "2%% before p2",
+				start = 0.77,
+				stop = 0.75,
+			},
+		},
+		-- Halion Shadow
+		[40142] = {
+			{
+				text = "2%% before p3",
+				start = 0.52,
+				stop = 0.5,
+			},
+		},
+
+		-- Heart of the Deconstructor
+		[33329] = {
+			{
+				start = 0.2,
+			},
+		},
+		-- Left Arm
+		[32933] = {
+			{
+				start = 0.1,
+			},
+		},
+		-- Right Arm
+		[32934] = {
+			{
+				start = 0.1,
+			},
+		},
+
 		-- ToC: Anub'arak
 		[34564] = {
 			text = L["%s - Phase 2"],
-			start = 0.3
-		}
+			start = 0.3,
+		},
 	}
 
 	------------------------------------------------------
@@ -728,9 +871,9 @@ ns.ignored_events = {
 -- events used to start combat in aggressive combat detection
 -- mode as well as boss encounter detection.
 ns.trigger_events = {
+	SWING_DAMAGE = true,
 	RANGE_DAMAGE = true,
-	SPELL_BUILDING_DAMAGE = true,
 	SPELL_DAMAGE = true,
-	SPELL_PERIODIC_DAMAGE = true,
-	SWING_DAMAGE = true
+    DAMAGE_SHIELD = true,
+	SPELL_BUILDING_DAMAGE = true,
 }
