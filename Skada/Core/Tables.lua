@@ -62,6 +62,7 @@ local ignored_spells = {
 	-- heal = {
 	-- 	[20267] = true, -- Judgement of Light
 	-- },
+
 	-- [[ interrupts module ]] --
 	-- interrupt = {},
 
@@ -504,11 +505,6 @@ do
 	-- **optional** fields will be generated and cached by the addon.
 	--
 	local custom_units = {
-		[10404] = {
-			text = "Pustulating Horror after cast",
-			start = 0.25,
-		},
-
 		-- ICC: Lady Deathwhisper
 		[36855] = {
 			{
@@ -524,67 +520,14 @@ do
 
 		-- ICC: Professor Putricide
 		[36678] = {
-			{
-				text = L["%s - Phase 1"],
-				stop = 0.8,
-			},
-			{
-				text = L["%s - Phase 2"],
-				start = 0.8,
-				stop = 0.35
-			},
-			{
-				text = L["%s - Phase 3"],
-				start = 0.35,
-			},
-			{
-				text = "5%% before p2",
-				start = 0.85,
-				stop = 0.8,
-			},
-			{
-				text = "2%% before p2",
-				start = 0.82,
-				stop = 0.8,
-			},
-			{
-				text = "1%% before p2",
-				start = 0.81,
-				stop = 0.8,
-			},
-			{
-				text = "5%% before p3",
-				start = 0.4,
-				stop = 0.35,
-			},
-			{
-				text = "2%% before p3",
-				start = 0.37,
-				stop = 0.35,
-			},
-			{
-				text = "1%% before p3",
-				start = 0.36,
-				stop = 0.35,
-			},
+			text = L["%s - Phase 3"],
+			start = 0.35
 		},
 
 		-- ICC: Sindragosa
 		[36853] = {
-			{
-				text = L["%s - Phase 2"],
-				start = 0.35,
-			},
-			{
-				text = "2%% before p2",
-				start = 0.37,
-				stop = 0.35,
-			},
-			{
-				text = "1%% before p2",
-				start = 0.36,
-				stop = 0.35,
-			},
+			text = L["%s - Phase 2"],
+			start = 0.35
 		},
 		-- ICC: Ice Tomb
 		[36980] = {
@@ -600,67 +543,17 @@ do
 
 		-- ICC: The Lich King
 		[36597] = {
-			{
-				text = L["%s - Phase 1"],
-				stop = 0.7,
-			},
-			{
-				text = L["%s - Phase 2"],
-				start = 0.7,
-				stop = 0.4,
-			},
-			{
-				text = L["%s - Phase 3"],
-				start = 0.4,
-			},
+			text = L["%s - Phase 3"],
+			start = 0.4,
+			stop = 0.1
 		},
-		-- dont use more than 1 valk custom group
+
 		-- ICC: Valkyrs overkilling
 		[36609] = {
 			name = L["Valkyrs overkilling"],
 			start = 0.5,
 			useful = true,
 			diff = {["10h"] = true, ["25h"] = true}
-		},
-
-        -- Baltharus the Warborn
-		[39751] = {
-			text = "Baltharus the Warborn (main boss)",
-		},
-		-- Halion Fire
-		[39863] = {
-			{
-				text = "2%% before p2",
-				start = 0.77,
-				stop = 0.75,
-			},
-		},
-		-- Halion Shadow
-		[40142] = {
-			{
-				text = "2%% before p3",
-				start = 0.52,
-				stop = 0.5,
-			},
-		},
-
-		-- Heart of the Deconstructor
-		[33329] = {
-			{
-				start = 0.2,
-			},
-		},
-		-- Left Arm
-		[32933] = {
-			{
-				start = 0.1,
-			},
-		},
-		-- Right Arm
-		[32934] = {
-			{
-				start = 0.1,
-			},
 		},
 
 		-- ToC: Anub'arak
@@ -871,8 +764,9 @@ ns.ignored_events = {
 -- mode as well as boss encounter detection.
 ns.trigger_events = {
 	SWING_DAMAGE = true,
-	RANGE_DAMAGE = true,
 	SPELL_DAMAGE = true,
+	RANGE_DAMAGE = true,
+	SPELL_PERIODIC_DAMAGE = true,
     DAMAGE_SHIELD = true,
-	SPELL_BUILDING_DAMAGE = true,
+	SPELL_BUILDING_DAMAGE = true
 }

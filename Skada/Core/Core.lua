@@ -233,7 +233,7 @@ local function process_set(set, curtime, mobname)
 			callbacks:Fire("Skada_SetComplete", set, curtime)
 
 			tinsert(Skada.sets, 1, set)
-			Skada:Debug("Segment Saved:", set.name)
+			Skada:Debug(format("Segment Saved: \124cffffbb00%s\124r", set.name))
 		else
 			set = delete_set(set)
 		end
@@ -2354,7 +2354,7 @@ local collectgarbage = collectgarbage
 function Skada:CleanGarbage()
 	if InCombatLockdown() then return end
 	collectgarbage("collect")
-	self:Debug("CleanGarbage")
+	self:Debug("Garbage \124cffffbb00Cleaned\124r!")
 end
 
 -- called on boss defeat
@@ -2374,7 +2374,7 @@ local function BossDefeated()
 		end
 	end
 
-	Skada:Debug("COMBAT_BOSS_DEFEATED: Skada")
+	Skada:Debug("\124cffffbb00COMBAT_BOSS_DEFEATED\124r: Skada")
 	Skada:SendMessage("COMBAT_BOSS_DEFEATED", set)
 	Skada:SmartStop(set)
 end
@@ -2418,14 +2418,14 @@ function Skada:PLAYER_REGEN_ENABLED()
 	-- 	1. the segment was previously stopped.
 	-- 	2. the player and the group aren't in combat
 	if self.current.stopped or (not InCombatLockdown() and not IsGroupInCombat()) then
-		self:Debug("EndSegment: PLAYER_REGEN_ENABLED")
+		self:Debug("\124cffffbb00EndSegment\124r: PLAYER_REGEN_ENABLED")
 		combat_end()
 	end
 end
 
 function Skada:PLAYER_REGEN_DISABLED()
 	if not self.disabled and not self.current then
-		self:Debug("StartCombat: PLAYER_REGEN_DISABLED")
+		self:Debug("\124cffffbb00StartCombat\124r: PLAYER_REGEN_DISABLED")
 		combat_start()
 	end
 end
@@ -2677,7 +2677,7 @@ do
 
 	local function combat_tick()
 		if not Skada.disabled and Skada.current and not InCombatLockdown() and not IsGroupInCombat() and Skada.insType ~= "pvp" and Skada.insType ~= "arena" then
-			Skada:Debug("EndSegment: combat tick")
+			Skada:Debug("\124cffffbb00EndSegment\124r: Combat Tick")
 			combat_end()
 		end
 	end
@@ -2692,12 +2692,12 @@ do
 		end
 
 		if update_timer then
-			Skada:Debug("EndSegment: StartCombat")
+			Skada:Debug("\124cffffbb00EndSegment\124r: StartCombat")
 			combat_end()
 		end
 
 		if Skada.current == nil then
-			Skada:Debug("StartCombat: Segment Created!")
+			Skada:Debug("\124cffffbb00StartCombat\124r: Segment Created!")
 			Skada.current = create_set(L["Current"], tentative_set)
 		end
 		tentative_set = nil
@@ -2947,12 +2947,12 @@ do
 			if not fail then
 				if tentative ~= nil then
 					tentative = tentative + 1
-					self:Debug(format("Tentative: %s (%d)", t.event, tentative))
+					self:Debug(format("\124cffffbb00Tentative\124r: %s (%d)", t.event, tentative))
 					if tentative >= 5 then
 						self:CancelTimer(tentative_timer, true)
 						tentative_timer = nil
 						tentative = nil
-						self:Debug("StartCombat: tentative combat")
+						self:Debug("\124cffffbb00StartCombat\124r: tentative combat")
 						combat_start()
 					end
 				end

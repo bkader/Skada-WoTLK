@@ -1207,7 +1207,7 @@ function Skada:BigWigs(_, _, event, message)
 				end
 			end
 
-			self:Debug("COMBAT_BOSS_DEFEATED: BigWigs")
+			self:Debug("\124cffffbb00COMBAT_BOSS_DEFEATED\124r: BigWigs")
 			self:SendMessage("COMBAT_BOSS_DEFEATED", self.current)
 
 			self:StopSegment(L["Smart Stop"])
@@ -1235,7 +1235,7 @@ function Skada:DBM(_, mod, wipe)
 				end
 			end
 
-			self:Debug("COMBAT_BOSS_DEFEATED: DBM")
+			self:Debug("\124cffffbb00COMBAT_BOSS_DEFEATED\124r: DBM")
 			self:SendMessage("COMBAT_BOSS_DEFEATED", set)
 
 			self:StopSegment(L["Smart Stop"])
@@ -1390,7 +1390,7 @@ do
 			if not actor.class then
 				actor.enemy = true
 				actor.class = "UNKNOWN"
-				self:Debug(format("Unknown unit spotted: %s (%s)", actorname, actorid))
+				self:Debug(format("Unknown unit detected: \124cffffbb00%s\124r (%s)", actorname, actorid))
 			end
 
 			for _, mode in pairs(modes) do
@@ -2128,7 +2128,7 @@ do
 				if t.targetline then
 					Skada:Print(t.targetline)
 				end
-				Skada:Debug("First Hit: Printed!")
+				Skada:Debug("\124cffffbb00First Hit\124r: Printed!")
 			end
 		end
 
@@ -2144,7 +2144,7 @@ do
 		function Skada:ClearFirstHit()
 			if self.firsthit then
 				self.firsthit = self.firsthit:free()
-				self:Debug("First Hit: Cleared!")
+				self:Debug("\124cffffbb00First Hit\124r: Cleared!")
 			end
 			if firsthit_timer then
 				self:CancelTimer(firsthit_timer, true)
