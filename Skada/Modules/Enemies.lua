@@ -26,7 +26,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	local UnitHealthMax, UnitPowerMax = UnitHealthMax, UnitPowerMax
 	local del = Private.delTable
 
-	local instanceDiff = nil
+	local instanceDiff, max_health, max_power
 	local custom_units = {}
 	local custom_groups = {}
 	local ignored_units = {}
@@ -65,41 +65,50 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	local function get_custom_unit_maxval(guid, tracking_power)
-		local cid = GetCreatureId(guid)
-		local unit = user_units[cid]
+		local creatureId = GetCreatureId(guid)
+		local unit = user_units[creatureId]
 		if not unit then return end -- no user-defined custom unit?
 
 		local diff = get_instance_diff()
-		local maxval = nil
 
-		-- already cached power?
-		if tracking_power and unit.maxPower and unit.maxPower[diff] then
-			return unit.maxPower[diff]
+		if tracking_power then
+			-- already cached power?
+			if max_power and max_power[creatureId] and max_power[creatureId][diff] then
+				return max_power[creatureId][diff]
+			end
+
+			-- try to grab UnitID
+			local uid = GetUnitIdFromGUID(guid)
+			if not uid then return end
+
+			local maxval = UnitPowerMax(uid, unit.power)
+			if not maxval then return end
+
+			max_power = max_power or {}
+			max_power[creatureId] = max_power[creatureId] or {}
+			max_power[creatureId][diff] = maxval
+			Skada:Debug(format('[%s] \124cffffbb00Max Power\124r: %s (diff: %s)', creatureId, maxval, diff))
+
+			return maxval
 		end
 
 		-- already cached health?
-		if unit.maxHealth and unit.maxHealth[diff] then
-			return unit.maxHealth[diff]
+		if max_health and max_health[creatureId] and max_health[creatureId][diff] then
+			return max_health[creatureId][diff]
 		end
 
 		-- try to grab UnitID
 		local uid = GetUnitIdFromGUID(guid)
 		if not uid then return end
 
-		-- get the maxval (power or health)
-		maxval = tracking_power and UnitPowerMax(uid, unit.power) or UnitHealthMax(uid)
+		local maxval = UnitHealthMax(uid)
 		if not maxval then return end
 
-		if tracking_power then
-			Skada:Debug(format('[%s] \124cffffbb00Max Power\124r: %s (diff: %s)', cid, maxval, diff))
-			unit.maxPower = unit.maxPower or {}
-			unit.maxPower[diff] = maxval
-			return maxval
-		end
+		max_health = max_health or {}
+		max_health[creatureId] = max_health[creatureId] or {}
+		max_health[creatureId][diff] = maxval
+		Skada:Debug(format('[%s] \124cffffbb00Max Health\124r: %s (diff: %s)', creatureId, maxval, diff))
 
-		unit.maxHealth = unit.maxHealth or {}
-		unit.maxHealth[diff] = maxval
-		Skada:Debug(format('[%s] \124cffffbb00Max Health\124r: %s (diff: %s)', cid, maxval, diff))
 		return maxval
 	end
 
@@ -269,19 +278,30 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	local function log_custom_group(set, name, id, playername, spellid, amount, overkill, absorbed)
-		local group_name = name and grouped_units[name]
-		if not group_name then
-			group_name = grouped_units[GetCreatureId(id)]
-			if not group_name then return end
-			grouped_units[name] = group_name
-		end
-		if group_name == L["Halion and Inferno"] and get_instance_diff() ~= "25h" then return end -- rs25hm only
-		if custom_groups[id] then return end -- a custom unit with useful damage.
+		-- we use ignored units table to ignore grouped units
+		-- if not needed in order to reduce useless processing.
+		if not name or ignored_units[name] then return end
 
-		if group_name == L["Princes overkilling"] then
-			amount = overkill
+		-- a custom unit with useful damage (i.e: Valkyr overkilling)
+		if id and custom_groups[id] then return end
+
+		-- see if it was cached already..
+		local group_name = grouped_units[name]
+		if not group_name then -- a little bit of processing if not cached.
+			group_name = grouped_units[GetCreatureId(id)]
+			if not group_name then -- not found?
+				ignored_units[name] = true -- ignore it so we only process once.
+				return
+			end
+			grouped_units[name] = group_name -- cache it.
 		end
-		log_custom_unit(set, group_name, playername, spellid, amount, absorbed)
+
+		-- Halion and Inferno are only considered for 25 heroic mode.
+		if group_name == L["Halion and Inferno"] and get_instance_diff() ~= "25h" then return end
+
+		-- log the damage as custom fake unit.
+		-- PS: we use "overkill" instead of "amount" for "Princes overkilling"
+		log_custom_unit(set, group_name, playername, spellid, group_name == L["Princes overkilling"] and overkill or amount, absorbed)
 	end
 
 	local dmg = {}
