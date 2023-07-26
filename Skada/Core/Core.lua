@@ -1067,7 +1067,7 @@ function Skada:ToggleWindow()
 		for i = 1, #windows do
 			local win = windows[i]
 			if win and win:IsShown() then
-				win.db.hidden = true
+				win.db.hidden = (P.showcombat ~= true)
 				win:Hide()
 			elseif win then
 				win.db.hidden = false
