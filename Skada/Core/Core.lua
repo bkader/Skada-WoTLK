@@ -10,7 +10,7 @@ local DBI = LibStub("LibDBIcon-1.0", true)
 local _G = _G
 local pairs, type, tonumber, tostring, min, max = pairs, type, tonumber, tostring, math.min, math.max
 local strmatch, format, gsub, strlower, strfind = strmatch, string.format, string.gsub, string.lower, string.find
-local Private = ns.Private
+local Private, GetCreatureId = ns.Private, Skada.GetCreatureId
 local tsort, tremove, wipe, setmetatable = table.sort, Private.tremove, wipe, setmetatable
 local TempTable, new, del, copy = Private.TempTable, Private.newTable, Private.delTable, Private.tCopy
 local InCombatLockdown, IsGroupInCombat, IsGroupDead = InCombatLockdown, Skada.IsGroupInCombat, Skada.IsGroupDead
@@ -2455,6 +2455,7 @@ end
 function combat_end()
 	if not Skada.current then return end
 	Private.ClearTempUnits()
+	wipe(GetCreatureId) -- wipe cached creature IDs
 
 	-- trigger events.
 	local curtime = time()
@@ -2766,7 +2767,6 @@ do
 	local bit_band = bit.band
 	local GetInstanceInfo = GetInstanceInfo
 	local GetBattlefieldArenaFaction = GetBattlefieldArenaFaction
-	local GetCreatureId = Skada.GetCreatureId
 	local BITMASK_CONTROL_PLAYER = COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100
 
 	local function check_boss_fight(set, t, src_is_interesting, dst_is_interesting)

@@ -307,9 +307,19 @@ do
 		return class, unit
 	end
 
-	local function GetCreatureId(guid)
-		return guid and tonumber(guid:sub(9, 12), 16) or 0
-	end
+	local GetCreatureId = setmetatable({}, {
+		__index = function(self, guid)
+			if guid then
+				local id = tonumber(guid:sub(9, 12), 16)
+				self[guid] = id -- cache it
+				return id
+			end
+			return 0
+		end,
+		__call = function(self, guid)
+			return self[guid]
+		end
+	})
 
 	local unknownUnits = {[_G.UKNOWNBEING] = true, [_G.UNKNOWNOBJECT] = true}
 
