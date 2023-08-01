@@ -1890,7 +1890,13 @@ do
 
 	-- trigger events used for first hit check
 	-- Edit Skada\Core\Tables.lua <trigger_events>
-	local TRIGGERS = Skada.trigger_events
+	local TRIGGER_EVENTS = Skada.trigger_events
+
+	-- specific events used for specific reasons.
+	local SWING_EVENTS = {SWING_DAMAGE = true, SWING_MISSED = true}
+	local ENVIRONMENT_EVENTS = {ENVIRONMENTAL_DAMAGE = true, ENVIRONMENTAL_MISSED = true}
+	local DOT_EVENTS = {SPELL_PERIODIC_DAMAGE = true, SPELL_PERIODIC_MISSED = true}
+	local HOT_EVENTS = {SPELL_PERIODIC_HEAL = true, SPELL_PERIODIC_ENERGIZE = true}
 
 	-- combat log handler
 	function Skada:ParseCombatLog(_, timestamp, event, ...)
@@ -1904,19 +1910,19 @@ do
 			return -- queue for later!
 		end
 
-		if event == "SWING_DAMAGE" or event == "SWING_MISSED" then
+		if SWING_EVENTS[event] then
 			args.spellid = 6603
 			args.spellname = L["Melee"]
 			args.spellschool = 0x01
-		elseif (event == "ENVIRONMENTAL_DAMAGE" or event == "ENVIRONMENTAL_MISSED") and args.envtype then
+		elseif ENVIRONMENT_EVENTS[event] and args.envtype then
 			local envtype = strlower(args.envtype)
 			args.spellid = environment_ids[envtype]
 			args.spellname = environment_names[envtype]
 			args.spellschool = environment_schools[envtype]
 			args.srcName = L["Environment"]
-		elseif event == "SPELL_PERIODIC_DAMAGE" or event == "SPELL_PERIODIC_MISSED" or args.auratype == "DEBUFF" then
+		elseif DOT_EVENTS[event] or args.auratype == "DEBUFF" then
 			args.is_dot = true
-		elseif event == "SPELL_PERIODIC_HEAL" or event == "SPELL_PERIODIC_ENERGIZE" then
+		elseif HOT_EVENTS[event] then
 			args.is_hot = true
 		end
 
@@ -1952,7 +1958,7 @@ do
 		end
 
 		-- check first hit!
-		if self.profile.firsthit and TRIGGERS[args.event] and not self.firsthit and (args:SourceInGroup() or args:DestInGroup()) then
+		if self.profile.firsthit and TRIGGER_EVENTS[args.event] and not self.firsthit and (args:SourceInGroup() or args:DestInGroup()) then
 			self:CheckFirstHit(args)
 		end
 
