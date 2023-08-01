@@ -236,6 +236,21 @@ function Private.TablePool()
 		return t
 	end
 
+	-- deep copies a table.
+	pool.copy = function(orig)
+		local orig_type, copy = type(orig), nil
+		if orig_type == "table" then
+			copy = {}
+			for k, v in next, orig, nil do
+				copy[pool.copy(k)] = pool.copy(v)
+			end
+			setmetatable(copy, pool.copy(getmetatable(orig)))
+		else
+			copy = orig
+		end
+		return copy
+	end
+
 	return pool
 end
 
@@ -247,6 +262,7 @@ do
 	Private.newTable = tablePool.new
 	Private.delTable = tablePool.del
 	Private.clearTable = tablePool.clear
+	Private.copyTable = tablePool.copy
 end
 
 -- alternative table reuse
