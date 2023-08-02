@@ -12,6 +12,7 @@ lib.embeds = lib.embeds or {}
 lib.EmptyFunc = Multibar_EmptyFunc
 
 local _G, pairs, type, max = _G, pairs, type, math.max
+local setmetatable, rawset = setmetatable, rawset
 local format, tonumber = format or string.format, tonumber
 local _
 
@@ -308,13 +309,17 @@ do
 	end
 
 	local GetCreatureId = setmetatable({}, {
+		__mode = "kv", -- make it weak
 		__index = function(self, guid)
 			if guid then
-				local id = tonumber(guid:sub(9, 12), 16)
-				self[guid] = id -- cache it
+				local id = tonumber(guid:sub(9, 12), 16) or 0
+				rawset(self, guid, id) -- cache it
 				return id
 			end
 			return 0
+		end,
+		__newindex = function(self, guid, id)
+			rawset(self, guid, id)
 		end,
 		__call = function(self, guid)
 			return self[guid]
@@ -367,7 +372,6 @@ end
 -- Specs and Roles
 
 do
-	local setmetatable, rawset = setmetatable, rawset
 	local UnitClass, GetSpellInfo = UnitClass, GetSpellInfo
 	local UnitGroupRolesAssigned = UnitGroupRolesAssigned
 	local MAX_TALENT_TABS = _G.MAX_TALENT_TABS or 3
