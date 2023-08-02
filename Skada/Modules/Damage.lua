@@ -30,9 +30,11 @@ Skada:RegisterModule("Damage", function(L, P)
 
 	local wipe, min = wipe, math.min
 	local PercentToRGB = Private.PercentToRGB
+	local GetCreatureId = Skada.GetCreatureId
 	local tooltip_school = Skada.tooltip_school
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
 	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
+	local ignored_creatures = Skada.ignored_creatures -- Edit Skada\Core\Tables.lua
 	local missTypes = Skada.missTypes
 	local mode_cols = nil
 
@@ -182,7 +184,11 @@ Skada:RegisterModule("Damage", function(L, P)
 	end
 
 	local function spell_damage(t)
-		if t.srcGUID ~= t.dstGUID and t.spellid and not ignored_spells[t.spellid] then
+		if
+			t.srcGUID ~= t.dstGUID and
+			not ignored_creatures[GetCreatureId(t.dstGUID)] and
+			t.spellid and not ignored_spells[t.spellid]
+		then
 			dmg.actorid = t.srcGUID
 			dmg.actorname = t.srcName
 			dmg.actorflags = t.srcFlags

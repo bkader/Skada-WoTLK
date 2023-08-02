@@ -16,15 +16,17 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	local mode_spell = mode:NewModule("Spell List")
 	local mode_spell_source = mode_spell:NewModule("Source List")
 	local mode_useful = mode:NewModule("Useful Damage")
-	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
-	local grouped_units = Skada.grouped_units -- Edit Skada\Core\Tables.lua
-	local user_units = Skada.custom_units -- Edit Skada\Core\Tables.lua
 	local mode_cols = nil
 
 	local GetUnitIdFromGUID, GetCreatureId = Skada.GetUnitIdFromGUID, Skada.GetCreatureId
 	local UnitExists, UnitGUID = UnitExists, UnitGUID
 	local UnitHealthMax, UnitPowerMax = UnitHealthMax, UnitPowerMax
 	local del, copy = Private.delTable, Private.copyTable
+
+	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
+	local grouped_units = Skada.grouped_units -- Edit Skada\Core\Tables.lua
+	local user_units = Skada.custom_units -- Edit Skada\Core\Tables.lua
+	local ignored_creatures = Skada.ignored_creatures -- Edit Skada\Core\Tables.lua
 
 	local instanceDiff, max_health, max_power
 	local custom_units = {}
@@ -408,7 +410,12 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	local function spell_damage(t)
-		if t.srcName and t.dstName and t.spellid and not ignored_spells[t.spellid] and (not t.misstype or t.misstype == "ABSORB") then
+		if
+			t.srcName and t.dstName and
+			not ignored_creatures[GetCreatureId(t.dstGUID)] and
+			t.spellid and not ignored_spells[t.spellid] and
+			(not t.misstype or t.misstype == "ABSORB")
+		then
 			dmg.actorid = t.dstGUID
 			dmg.actorname = t.dstName
 			dmg.actorflags = t.dstFlags
@@ -779,9 +786,12 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	local mode_target_spell = mode_target:NewModule("Target List")
 	local mode_spell = mode:NewModule("Spell List")
 	local mode_spell_target = mode_spell:NewModule("Target List")
+	local mode_cols = nil
+
+	local GetCreatureId = Skada.GetCreatureId
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
 	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
-	local mode_cols = nil
+	local ignored_creatures = Skada.ignored_creatures -- Edit Skada\Core\Tables.lua
 
 	local function format_valuetext(d, columns, total, dps, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -884,7 +894,12 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 	end
 
 	local function spell_damage(t)
-		if t.srcName and t.dstName and t.spellid and not ignored_spells[t.spellid] and (not t.misstype or t.misstype == "ABSORB") then
+		if
+			t.srcName and t.dstName and
+			not ignored_creatures[GetCreatureId(t.srcGUID)] and
+			t.spellid and not ignored_spells[t.spellid] and
+			(not t.misstype or t.misstype == "ABSORB")
+		then
 			dmg.actorid = t.srcGUID
 			dmg.actorname = t.srcName
 			dmg.actorflags = t.srcFlags
@@ -1185,9 +1200,10 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 	local mode = Skada:NewModule("Enemy Healing Done")
 	local mode_target = mode:NewModule("Target List")
 	local mode_spell = mode:NewModule("Spell List")
+	local mode_cols = nil
+
 	local ignored_spells = Skada.ignored_spells.heal -- Edit Skada\Core\Tables.lua
 	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
-	local mode_cols = nil
 
 	local function format_valuetext(d, columns, total, dps, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(

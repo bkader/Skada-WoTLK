@@ -28,10 +28,13 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	local mode_spell_breakdown = mode_spell:NewModule("More Details")
 	local mode_source = mode:NewModule("Source List")
 	local mode_source_spell = mode_source:NewModule("Spell List")
+
+	local min, wipe = math.min, wipe
+	local GetCreatureId = Skada.GetCreatureId
 	local tooltip_school = Skada.tooltip_school
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
+	local ignored_creatures = Skada.ignored_creatures -- Edit Skada\Core\Tables.lua
 	local missTypes = Skada.missTypes
-	local min, wipe = math.min, wipe
 	local mode_cols = nil
 
 	local dmg = {}
@@ -146,7 +149,11 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	end
 
 	local function spell_damage(t)
-		if t.srcGUID ~= t.dstGUID and t.spellid and not ignored_spells[t.spellid] then
+		if
+			t.srcGUID ~= t.dstGUID and
+			not ignored_creatures[GetCreatureId(t.srcGUID)] and
+			t.spellid and not ignored_spells[t.spellid]
+		then
 			dmg.actorid = t.dstGUID
 			dmg.actorname = t.dstName
 			dmg.actorflags = t.dstFlags
