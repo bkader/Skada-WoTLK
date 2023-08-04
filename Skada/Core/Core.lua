@@ -2890,11 +2890,11 @@ do
 		end
 
 		-- pet summons.
-		if t.event == "SPELL_SUMMON" and t:DestIsPet(true) then
+		if t.event == "SPELL_SUMMON" and t:SourceInGroup() and t:DestIsPet() then
 			summon_pet(t.dstGUID, t.srcGUID)
 		-- pet died?
 		elseif death_events[t.event] and guidToOwner[t.dstGUID] then
-			dismiss_pet(t.dstGUID)
+			dismiss_pet(t.dstGUID, 1)
 		end
 
 		-- current segment not created?
