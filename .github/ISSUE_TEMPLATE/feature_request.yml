@@ -1,0 +1,39 @@
+name: "✨ Feature Request"
+description: "Suggest an idea for this project"
+title: "[Request]: "
+labels: ["type: feature request"]
+assignees:
+  - bkader
+body:
+  - type: textarea
+    attributes:
+      label: Is your feature request related to a problem? Please describe.
+      description: A clear and concise description of what the problem is.
+      placeholder: The addon is not [...]
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Desired Solution
+      description: Describe the solution you'd like
+      placeholder: The addon should [...]
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Describe alternatives you've considered
+      description: A clear and concise description of any alternative solutions or features you've considered or seen elsewhere
+      placeholder: I saw the addon X doing Y [...]
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Anything else?
+      description: |
+        Links? References? Streams? Anything that will give us more context about the issue you are encountering!
+        Tip: You can attach images or video files by clicking this area to highlight it and then dragging files in.
+    validations:
+      required: false

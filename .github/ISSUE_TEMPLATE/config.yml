@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discord
+    url: https://discord.gg/a8z5CyS3eW
+    about: "Github issues are ONLY for bug reports and feature requests. Check #skada-faq and #skada-support channels on Discord before creating a new issue."
+  - name: Cataclysm (4.x.x)
+    url: https://github.com/bkader/Skada-Cata/issues/new/choose
+    about: Private Servers
+  - name: Mists of Pandaria (5.4.8)
+    url: https://github.com/bkader/Skada-MoP/issues/new/choose
+    about: Private Servers
+  - name: Dragonflight and Classic Wrath
+    url: https://github.com/bkader/Skada-Damage-Meter/issues/new/choose
+    about: Retail

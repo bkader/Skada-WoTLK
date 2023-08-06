@@ -1,0 +1,87 @@
+name: "🪲 Bug Report"
+description: Create a report to help us improve this project
+title: "[Bug]: "
+labels: ["type: bug"]
+assignees:
+  - bkader
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please search for existing issues before creating a new one.
+
+  - type: checkboxes
+    attributes:
+      label: Are you using the latest version of the addon?
+      options:
+        - label: "Yes"
+        - label: "No"
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Addon Version
+      description: "`/skada version` to check your current version (including the date and time)."
+      placeholder: "Version: 1.8.84 - Date: 2023-02-21 @ 22:03 UTC"
+    validations:
+      required: true
+
+  - type: checkboxes
+    attributes:
+      label: Did you try having only this addon enabled?
+      options:
+        - label: "Yes"
+        - label: "No"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Current Behavior
+      description: A concise description of what you're experiencing.
+    validations:
+        required: true
+
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Lua Error
+      description: "Paste your LUA error if you have any (enable error reporting: `/console scriptErrors 1`)"
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Reproduction Steps
+      description: Please list out the steps to reproduce your bug.
+      placeholder: |
+        1. Go to...
+        2. With this config...
+        3. Click on '...'
+        4. See error...
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Last Good Version
+      description: |
+        Was it working in a previous version? If yes, which update did it stop working? If you don't know, when was the last date you were aware it was working
+      placeholder: "MM/DD/YYYY"
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem.
+      placeholder: Click here to attach your screenshots via the editor button in the top right.
+    validations:
+      required: false
