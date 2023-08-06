@@ -205,7 +205,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 			click1 = mode_spell,
 			click2 = mode_target,
 			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
-			icon = [[Interface\Icons\inv_gizmo_supersappercharge]]
+			icon = [[Interface\ICONS\inv_gizmo_supersappercharge]]
 		}
 
 		mode_cols = self.metadata.columns

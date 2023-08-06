@@ -3,7 +3,7 @@ local Private = Skada.Private
 Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 	-- common stuff
-	local pairs, type, tsort = pairs, type, table.sort
+	local pairs, type, tsort, format = pairs, type, table.sort, string.format
 	local lib = {} -- LegacyLibBars-1.0
 	local _
 
@@ -60,6 +60,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 			tile = true,
 			insets = {left = 2, right = 2, top = 2, bottom = 2}
 		}
+		local CONFIG_ICON = format([[%s\Textures\toolbar1\config]], Skada.mediapath)
 
 		function lib:GetBar(name)
 			return bars[self] and bars[self][name]
@@ -204,8 +205,8 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 				list.optbutton:ClearAllPoints()
 				list.optbutton:SetHeight(16)
 				list.optbutton:SetWidth(16)
-				list.optbutton:SetNormalTexture([[Interface\AddOns\Skada\Media\Textures\toolbar1\config]])
-				list.optbutton:SetHighlightTexture([[Interface\AddOns\Skada\Media\Textures\toolbar1\config]], "ADD")
+				list.optbutton:SetNormalTexture(CONFIG_ICON)
+				list.optbutton:SetHighlightTexture(CONFIG_ICON, "ADD")
 				list.optbutton:SetAlpha(0.3)
 				list.optbutton:SetPoint("TOPRIGHT", list.button, "TOPRIGHT", -5, 0 - (max(list.button:GetHeight() - list.optbutton:GetHeight(), 2) / 2))
 				list.optbutton:Show()
@@ -1160,7 +1161,6 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		local IsAltKeyDown = IsAltKeyDown
 		local IsControlKeyDown = IsControlKeyDown
 
-		local format = string.format
 		local SavePosition, RestorePosition = Private.SavePosition, Private.RestorePosition
 		local classcolors = Skada.classcolors
 		local white = {r = 1, g = 1, b = 1, a = 1}

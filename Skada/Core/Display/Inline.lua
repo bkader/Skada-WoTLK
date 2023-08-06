@@ -34,7 +34,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		Skada.fontFlags = FONT_FLAGS
 	end
 
-	local buttonTexture = [[Interface\AddOns\Skada\Media\Textures\toolbar%s\config.blp]]
+	local buttonTexture = format([[%s\Textures\toolbar%%s\config.blp]], Skada.mediapath)
 
 	local function BarLeave(bar)
 		if ttactive then

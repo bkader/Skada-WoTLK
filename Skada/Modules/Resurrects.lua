@@ -102,7 +102,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 			filterclass = true,
 			click1 = mode_target,
 			columns = {Count = true, Percent = false, sPercent = false},
-			icon = [[Interface\Icons\spell_holy_resurrection]]
+			icon = [[Interface\ICONS\spell_holy_resurrection]]
 		}
 
 		mode_cols = self.metadata.columns

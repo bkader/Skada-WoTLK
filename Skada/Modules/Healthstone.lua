@@ -78,7 +78,7 @@ Skada:RegisterModule("Healthstones", function(L)
 			ordersort = true,
 			filterclass = true,
 			columns = {Count = true, Percent = false},
-			icon = [[Interface\Icons\inv_stone_04]]
+			icon = [[Interface\ICONS\inv_stone_04]]
 		}
 
 		mode_cols = self.metadata.columns

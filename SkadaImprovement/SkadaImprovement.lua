@@ -268,7 +268,7 @@ Skada:RegisterModule("Improvement", function(L)
 		self.metadata = {
 			click1 = mod_modes,
 			notitleset = true, -- ignore title set
-			icon = "Interface\\Icons\\ability_warrior_intensifyrage"
+			icon = [[Interface\ICONS\ability_warrior_intensifyrage]]
 		}
 
 		Skada.RegisterMessage(self, "COMBAT_BOSS_DEFEATED", "BossDefeated")

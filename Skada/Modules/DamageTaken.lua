@@ -636,7 +636,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 			click1 = mode_spell,
 			click2 = mode_source,
 			columns = {Damage = true, DTPS = false, Percent = true, sDTPS = false, sPercent = true},
-			icon = [[Interface\Icons\ability_mage_frostfirebolt]]
+			icon = [[Interface\ICONS\ability_mage_frostfirebolt]]
 		}
 	end
 end)
@@ -703,7 +703,7 @@ Skada:RegisterModule("DTPS", function(L, P)
 			filterclass = true,
 			tooltip = dtps_tooltip,
 			columns = {DTPS = true, Percent = true},
-			icon = [[Interface\Icons\inv_weapon_shortblade_06]]
+			icon = [[Interface\ICONS\inv_weapon_shortblade_06]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -916,7 +916,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 			click1 = mode_target,
 			click2 = mode_source,
 			columns = {Damage = true, DTPS = false, Percent = true, sDTPS = false, sPercent = true},
-			icon = [[Interface\Icons\spell_arcane_starfire]]
+			icon = [[Interface\ICONS\spell_arcane_starfire]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -1038,7 +1038,7 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 			filterclass = true,
 			click1 = mode_breakdown,
 			columns = {Percent = true, Count = true, Total = true},
-			icon = [[Interface\Icons\ability_warlock_avoidance]]
+			icon = [[Interface\ICONS\ability_warlock_avoidance]]
 		}
 
 		mode_cols = self.metadata.columns

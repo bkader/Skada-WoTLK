@@ -204,7 +204,7 @@ Skada:RegisterModule("Potions", function(L, P, G, C)
 			filterclass = true,
 			click1 = mode_spell,
 			columns = {Count = true, Percent = false, sPercent = false},
-			icon = [[Interface\Icons\inv_potion_31]]
+			icon = [[Interface\ICONS\inv_potion_31]]
 		}
 
 		mode_cols = self.metadata.columns

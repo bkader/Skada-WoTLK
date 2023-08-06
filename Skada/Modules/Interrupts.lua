@@ -206,7 +206,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 			click2 = mode_target,
 			click3 = mode_spell,
 			columns = {Count = true, Percent = true, sPercent = true},
-			icon = [[Interface\Icons\ability_kick]]
+			icon = [[Interface\ICONS\ability_kick]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -242,7 +242,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 					type = "description",
 					name = self.localeName,
 					fontSize = "large",
-					image = [[Interface\Icons\ability_kick]],
+					image = [[Interface\ICONS\ability_kick]],
 					imageWidth = 18,
 					imageHeight = 18,
 					imageCoords = {0.05, 0.95, 0.05, 0.95},

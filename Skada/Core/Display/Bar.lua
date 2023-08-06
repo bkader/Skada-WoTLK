@@ -73,7 +73,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		end
 	end
 
-	local buttonsTexPath = [[Interface\AddOns\Skada\Media\Textures\toolbar%s\%s.blp]]
+	local buttonsTexPath = format([[%s\Textures\toolbar%%s\%%s.blp]], Skada.mediapath)
 	do
 		local function AddWindowButton(win, style, index, title, description, func)
 			if win and win.AddButton and index then
@@ -934,7 +934,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				icon:SetFrameLevel(win.bargroup:GetFrameLevel() + 6)
 
 				local t = icon:CreateTexture(nil, "OVERLAY")
-				t:SetTexture([[Interface\AddOns\Skada\Media\Textures\icon-scroll]])
+				t:SetTexture(format([[%s\Textures\icon-scroll]], Skada.mediapath))
 				t:SetAllPoints(icon)
 
 				win.scroll_icon = icon

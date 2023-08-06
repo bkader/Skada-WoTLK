@@ -132,7 +132,7 @@ Skada:RegisterModule("My Spells", function(L, P)
 		self.metadata = {
 			showspots = true,
 			tooltip = spell_tooltip,
-			icon = [[Interface\Icons\spell_nature_lightning]]
+			icon = [[Interface\ICONS\spell_nature_lightning]]
 		}
 
 		userGUID = userGUID or Skada.userGUID

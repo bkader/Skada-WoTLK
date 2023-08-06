@@ -197,7 +197,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 			click2 = mode_extraspell,
 			click3 = mode_spell,
 			columns = {Count = true, Percent = false, sPercent = false},
-			icon = [[Interface\Icons\spell_holy_dispelmagic]]
+			icon = [[Interface\ICONS\spell_holy_dispelmagic]]
 		}
 
 		mode_cols = self.metadata.columns

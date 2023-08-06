@@ -707,7 +707,7 @@ Skada:RegisterModule("Damage", function(L, P)
 			click1 = mode_spell,
 			click2 = mode_target,
 			columns = {Damage = true, DPS = true, Percent = true, sDPS = false, sPercent = true},
-			icon = [[Interface\Icons\spell_fire_firebolt]]
+			icon = [[Interface\ICONS\spell_fire_firebolt]]
 		}
 
 		-- The Oculus
@@ -809,7 +809,7 @@ Skada:RegisterModule("DPS", function(L, P)
 			showspots = true,
 			tooltip = dps_tooltip,
 			columns = {DPS = true, Percent = true},
-			icon = [[Interface\Icons\achievement_bg_topdps]]
+			icon = [[Interface\ICONS\achievement_bg_topdps]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -967,7 +967,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C)
 			showspots = true,
 			click1 = mode_source,
 			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
-			icon = [[Interface\Icons\spell_nature_lightning]]
+			icon = [[Interface\ICONS\spell_nature_lightning]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -1145,7 +1145,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 			click1 = mode_spell,
 			click2 = mode_target,
 			columns = {Damage = true, DPS = true, Percent = true, sDPS = false, sPercent = true},
-			icon = [[Interface\Icons\spell_shaman_stormearthfire]]
+			icon = [[Interface\ICONS\spell_shaman_stormearthfire]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -1343,7 +1343,7 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 			click1 = mode_spell,
 			click2 = mode_target,
 			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
-			icon = [[Interface\Icons\spell_fire_incinerate]]
+			icon = [[Interface\ICONS\spell_fire_incinerate]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -1459,7 +1459,7 @@ Skada:RegisterModule("Damage Done By School", function(L, P, _, C)
 			click1 = mode_source,
 			showspots = true,
 			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
-			icon = [[Interface\Icons\spell_fire_firebolt]]
+			icon = [[Interface\ICONS\spell_fire_firebolt]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -1641,7 +1641,7 @@ Skada:RegisterModule("Absorbed Damage", function(L, _, _, C)
 			click1 = mode_spell,
 			click2 = mode_target,
 			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
-			icon = [[Interface\Icons\spell_fire_playingwithfire]]
+			icon = [[Interface\ICONS\spell_fire_playingwithfire]]
 		}
 
 		mode_cols = self.metadata.columns

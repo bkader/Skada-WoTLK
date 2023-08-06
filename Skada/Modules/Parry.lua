@@ -132,7 +132,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 			filterclass = true,
 			click1 = mode_target,
 			columns = {Count = true, Percent = false, sPercent = false},
-			icon = [[Interface\Icons\ability_parry]]
+			icon = [[Interface\ICONS\ability_parry]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -166,7 +166,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M)
 					type = "description",
 					name = self.localeName,
 					fontSize = "large",
-					image = [[Interface\Icons\ability_parry]],
+					image = [[Interface\ICONS\ability_parry]],
 					imageWidth = 18,
 					imageHeight = 18,
 					imageCoords = {0.05, 0.95, 0.05, 0.95},

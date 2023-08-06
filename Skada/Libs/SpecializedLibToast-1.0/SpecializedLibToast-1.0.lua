@@ -1,13 +1,14 @@
 -- LibToast-1.0 modified by Kader
 -- Specialized ( = enhanced) for Skada
 
-local MAJOR, MINOR = "SpecializedLibToast-1.0", 2
+local MAJOR, MINOR = "SpecializedLibToast-1.0", 3
 
 local LibStub = LibStub
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No upgrade needed
+local folder = ...
 
 -----------------------------------------------------------------------
 -- Upvalued Lua API.
@@ -364,9 +365,9 @@ local function _acquireToast()
 		dismiss_button:SetPoint("TOPRIGHT", toast, "TOPRIGHT", -4, -4)
 		dismiss_button:SetFrameStrata("DIALOG")
 		dismiss_button:SetFrameLevel(toast:GetFrameLevel() + 2)
-		dismiss_button:SetNormalTexture([[Interface\AddOns\Skada\Libs\SpecializedLibToast-1.0\closebutton-up]])
-		dismiss_button:SetPushedTexture([[Interface\AddOns\Skada\Libs\SpecializedLibToast-1.0\closebutton-down]])
-		dismiss_button:SetHighlightTexture([[Interface\AddOns\Skada\Libs\SpecializedLibToast-1.0\closebutton-highlight]])
+		dismiss_button:SetNormalTexture(format([[Interface\AddOns\%s\Libs\%s\closebutton-up]], folder, MAJOR))
+		dismiss_button:SetPushedTexture(format([[Interface\AddOns\%s\Libs\%s\closebutton-down]], folder, MAJOR))
+		dismiss_button:SetHighlightTexture(format([[Interface\AddOns\%s\Libs\%s\closebutton-highlight]], folder, MAJOR))
 		dismiss_button:Hide()
 		dismiss_button:SetScript("OnClick", _dismissToast)
 

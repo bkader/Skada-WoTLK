@@ -108,7 +108,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 			tooltip = activity_tooltip,
 			click1 = mode_target,
 			columns = {["Active Time"] = true, Percent = true, sPercent = true},
-			icon = [[Interface\Icons\spell_holy_borrowedtime]]
+			icon = [[Interface\ICONS\spell_holy_borrowedtime]]
 		}
 
 		mode_cols = self.metadata.columns

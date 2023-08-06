@@ -663,7 +663,7 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 			filterclass = true,
 			click1 = mode_spell,
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
-			icon = [[Interface\Icons\spell_holy_divinespirit]]
+			icon = [[Interface\ICONS\spell_holy_divinespirit]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -827,7 +827,7 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 			click1 = mode_spell,
 			click2 = mode_target,
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
-			icon = [[Interface\Icons\spell_shadow_shadowwordpain]]
+			icon = [[Interface\ICONS\spell_shadow_shadowwordpain]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -904,7 +904,7 @@ Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 			filterclass = true,
 			click1 = mode_spell,
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
-			icon = [[Interface\Icons\ability_paladin_beaconoflight]]
+			icon = [[Interface\ICONS\ability_paladin_beaconoflight]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -1015,7 +1015,7 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 			click1 = mode_spell,
 			click2 = mode_target,
 			columns = {Uptime = true, Count = false, Percent = true, sPercent = true},
-			icon = [[Interface\Icons\ability_warlock_improvedsoulleech]]
+			icon = [[Interface\ICONS\ability_warlock_improvedsoulleech]]
 		}
 
 		mode_cols = self.metadata.columns

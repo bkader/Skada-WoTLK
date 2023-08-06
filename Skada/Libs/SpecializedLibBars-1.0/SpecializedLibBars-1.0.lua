@@ -2,9 +2,12 @@
 -- Specialized ( = enhanced) for Skada
 -- Note to self: don't forget to notify original author of changes
 -- in the unlikely event they end up being usable outside of Skada.
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90019
+-- Renaming the library (MAJOR) might break few things.
+
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90020
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
+local folder = ...
 
 -------------------------------------------------------------------------------
 -- library callbacks
@@ -188,8 +191,8 @@ local posix = lib.listPosition
 local scrollspeed = 1
 local dummyTable = {}
 
-local ICON_LOCK = [[Interface\AddOns\Skada\Libs\SpecializedLibBars-1.0\lock.tga]]
-local ICON_UNLOCK = [[Interface\AddOns\Skada\Libs\SpecializedLibBars-1.0\unlock.tga]]
+local ICON_LOCK = ([[Interface\AddOns\%s\Libs\%s\lock.tga]]):format(folder, MAJOR)
+local ICON_UNLOCK = ([[Interface\AddOns\%s\Libs\%s\unlock.tga]]):format(folder, MAJOR)
 local ICON_RESIZE = [[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Up]]
 local ICON_STRETCH = [[Interface\MINIMAP\ROTATING-MINIMAPGUIDEARROW.blp]]
 
@@ -1778,7 +1781,7 @@ do
 		callbacks:Fire("BarLeave", self, motion)
 	end
 
-	local DEFAULT_ICON = [[Interface\Icons\INV_Misc_QuestionMark]]
+	local DEFAULT_ICON = [[Interface\ICONS\INV_Misc_QuestionMark]]
 	function lib.Create(self, text, value, maxVal, icon, orientation, length, thickness)
 		self:SetScript("OnMouseDown", barOnMouseDown)
 		self:SetScript("OnEnter", barOnEnter)

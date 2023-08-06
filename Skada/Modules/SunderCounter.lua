@@ -222,7 +222,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 			showspots = true,
 			click1 = mode_target,
 			columns = {Count = true, Percent = false, sPercent = false},
-			icon = [[Interface\Icons\ability_warrior_sunder]]
+			icon = [[Interface\ICONS\ability_warrior_sunder]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -287,7 +287,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 					type = "description",
 					name = self.localeName,
 					fontSize = "large",
-					image = [[Interface\Icons\ability_warrior_sunder]],
+					image = [[Interface\ICONS\ability_warrior_sunder]],
 					imageWidth = 18,
 					imageHeight = 18,
 					imageCoords = {0.05, 0.95, 0.05, 0.95},

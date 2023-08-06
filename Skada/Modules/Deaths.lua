@@ -1,4 +1,4 @@
-local _, Skada = ...
+local folder, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local mode = Skada:NewModule("Deaths")
@@ -29,8 +29,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 	local YELLOW_COLOR = YELLOW_FONT_COLOR
 	local PURPLE_COLOR = {r = 0.69, g = 0.38, b = 1}
 	local BLUE_COLOR = {r = 0.176, g = 0.318, b = 1}
-	local icon_mode = [[Interface\Icons\Ability_Rogue_FeignDeath]]
-	local icon_death = [[Interface\Icons\Spell_Shadow_Soulleech_1]]
+	local icon_mode = [[Interface\ICONS\Ability_Rogue_FeignDeath]]
+	local icon_death = [[Interface\ICONS\Spell_Shadow_Soulleech_1]]
 
 	-- returns a color table by its key
 	local function get_color(key)
@@ -907,6 +907,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 		end
 	end
 
+	local announce_fmt1 = "%s > %s (%s) %s"
+	local announce_fmt2 = format("%s: %%s > %%s (%%s) %%s", folder)
+
 	function mode:Announce(logs, actorname)
 		-- announce only if:
 		-- 	1. we have a valid deathlog.
@@ -930,7 +933,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 
 		-- prepare the output.
 		local output = format(
-			(channel == "SELF") and "%s > %s (%s) %s" or "Skada: %s > %s (%s) %s",
+			(channel == "SELF") and announce_fmt1 or announce_fmt2,
 			log.src or L["Unknown"], -- source name
 			actorname or L["Unknown"], -- actor name
 			log.id and spellnames[abs(log.id)] or L["Unknown"], -- spell name

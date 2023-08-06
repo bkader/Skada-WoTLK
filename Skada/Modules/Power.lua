@@ -2,7 +2,7 @@ local _, Skada = ...
 local Private = Skada.Private
 Skada:RegisterModule("Resources", function(L, P)
 	local mode = Skada:NewModule("Resources")
-	mode.icon = [[Interface\Icons\spell_holy_rapture]]
+	mode.icon = [[Interface\ICONS\spell_holy_rapture]]
 
 	local setmetatable, pairs = setmetatable, pairs
 	local format, uformat = string.format, Private.uformat
@@ -206,10 +206,10 @@ Skada:RegisterModule("Resources", function(L, P)
 
 		Skada:RegisterForCL(spell_energize, {src_is_interesting = true}, "SPELL_ENERGIZE", "SPELL_PERIODIC_ENERGIZE")
 
-		mode_mana.metadata.icon = [[Interface\Icons\spell_frost_summonwaterelemental]]
-		mode_rage.metadata.icon = [[Interface\Icons\spell_nature_shamanrage]]
-		mode_energy.metadata.icon = [[Interface\Icons\spell_holy_circleofrenewal]]
-		mode_runic.metadata.icon = [[Interface\Icons\inv_sword_62]]
+		mode_mana.metadata.icon = [[Interface\ICONS\spell_frost_summonwaterelemental]]
+		mode_rage.metadata.icon = [[Interface\ICONS\spell_nature_shamanrage]]
+		mode_energy.metadata.icon = [[Interface\ICONS\spell_holy_circleofrenewal]]
+		mode_runic.metadata.icon = [[Interface\ICONS\inv_sword_62]]
 
 		Skada:AddMode(mode_mana, "Resources")
 		Skada:AddMode(mode_rage, "Resources")

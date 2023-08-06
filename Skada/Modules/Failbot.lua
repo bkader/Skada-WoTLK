@@ -148,7 +148,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 			filterclass = true,
 			click1 = mode_spell,
 			columns = {Count = true, Percent = false, sPercent = false},
-			icon = [[Interface\Icons\ability_creature_cursed_01]]
+			icon = [[Interface\ICONS\ability_creature_cursed_01]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -180,7 +180,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 							type = "description",
 							name = mode.localeName,
 							fontSize = "large",
-							image = [[Interface\Icons\ability_creature_cursed_01]],
+							image = [[Interface\ICONS\ability_creature_cursed_01]],
 							imageWidth = 18,
 							imageHeight = 18,
 							imageCoords = {0.05, 0.95, 0.05, 0.95},

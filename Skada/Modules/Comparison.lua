@@ -793,7 +793,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			click3 = set_actor,
 			click3_label = L["Comparison"],
 			columns = {Damage = true, DPS = true, Comparison = true, Percent = true},
-			icon = [[Interface\Icons\Ability_Warrior_OffensiveStance]]
+			icon = [[Interface\ICONS\Ability_Warrior_OffensiveStance]]
 		}
 
 		mode_cols = self.metadata.columns

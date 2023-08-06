@@ -11,7 +11,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 	local mode_cols = nil
 
-	local aggro_icon = [[Interface\Icons\ability_physical_taunt]]
+	local aggro_icon = [[Interface\ICONS\ability_physical_taunt]]
 
 	do
 		local CheckInteractDistance, ItemRefTooltip = CheckInteractDistance, ItemRefTooltip

@@ -686,7 +686,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			click3 = mode_useful,
 			post_tooltip = mode_useful_tooltip,
 			columns = {Damage = true, DTPS = false, Percent = true, sDTPS = false, sPercent = true},
-			icon = [[Interface\Icons\spell_fire_felflamebolt]]
+			icon = [[Interface\ICONS\spell_fire_felflamebolt]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -1089,7 +1089,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 			click1 = mode_target,
 			click2 = mode_spell,
 			columns = {Damage = true, DPS = false, Percent = true, sDPS = false, sPercent = true},
-			icon = [[Interface\Icons\spell_shadow_shadowbolt]]
+			icon = [[Interface\ICONS\spell_shadow_shadowbolt]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -1399,7 +1399,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 			click1 = mode_spell,
 			click2 = mode_target,
 			columns = {Healing = true, HPS = true, Percent = true, sHPS = false, sPercent = true},
-			icon = [[Interface\Icons\spell_holy_blessedlife]]
+			icon = [[Interface\ICONS\spell_holy_blessedlife]]
 		}
 
 		mode_cols = self.metadata.columns

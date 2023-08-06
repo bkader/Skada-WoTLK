@@ -363,7 +363,7 @@ Skada:RegisterModule("Healing", function(L, P)
 			click1 = mode_spell,
 			click2 = mode_target,
 			columns = {Healing = true, HPS = true, Percent = true, sHPS = false, sPercent = true},
-			icon = [[Interface\Icons\spell_nature_healingtouch]]
+			icon = [[Interface\ICONS\spell_nature_healingtouch]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -581,7 +581,7 @@ Skada:RegisterModule("Overhealing", function(L)
 			click1 = mode_spell,
 			click2 = mode_target,
 			columns = {Overhealing = true, HPS = true, Percent = true, sHPS = false, sPercent = true},
-			icon = [[Interface\Icons\spell_holy_holybolt]]
+			icon = [[Interface\ICONS\spell_holy_holybolt]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -807,7 +807,7 @@ Skada:RegisterModule("Total Healing", function(L)
 			click1 = mode_spell,
 			click2 = mode_target,
 			columns = {Healing = true, HPS = true, Percent = true, sHPS = false, sPercent = true},
-			icon = [[Interface\Icons\spell_holy_flashheal]]
+			icon = [[Interface\ICONS\spell_holy_flashheal]]
 		}
 
 		mode_cols = self.metadata.columns
@@ -1013,7 +1013,7 @@ Skada:RegisterModule("Healing Taken", function(L, P)
 			click1 = mode_source,
 			click2 = mode_spell,
 			columns = {Healing = true, HPS = true, Percent = true, sHPS = false, sPercent = true},
-			icon = [[Interface\Icons\spell_nature_resistnature]]
+			icon = [[Interface\ICONS\spell_nature_resistnature]]
 		}
 
 		mode_cols = self.metadata.columns

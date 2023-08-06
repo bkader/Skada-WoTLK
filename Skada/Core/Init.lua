@@ -19,6 +19,9 @@ local EmptyFunc = Multibar_EmptyFunc
 local Private, L = ns.Private, ns.Locale
 local _
 
+-- location of media files (textures, fonts...)
+ns.mediapath = format([[Interface\AddOns\%s\Media]], folder)
+
 -- options table
 ns.options = {
 	type = "group",
@@ -313,7 +316,7 @@ function Private.RegisterClasses()
 	Private.RegisterClasses = nil
 
 	-- class, role and spec icons (sprite)
-	ns.classicons = [[Interface\AddOns\Skada\Media\Textures\icons]]
+	ns.classicons = format([[%s\Textures\icons]], ns.mediapath)
 	ns.roleicons = ns.classicons
 	ns.specicons = ns.classicons
 
@@ -679,35 +682,35 @@ function Private.RegisterMedias()
 	end
 
 	-- fonts
-	LSM:Register("font", "ABF", [[Interface\Addons\Skada\Media\Fonts\ABF.ttf]])
-	LSM:Register("font", "Accidental Presidency", [[Interface\Addons\Skada\Media\Fonts\Accidental Presidency.ttf]])
-	LSM:Register("font", "Adventure", [[Interface\Addons\Skada\Media\Fonts\Adventure.ttf]])
-	LSM:Register("font", "Diablo", [[Interface\Addons\Skada\Media\Fonts\Diablo.ttf]])
-	LSM:Register("font", "FORCED SQUARE", [[Interface\Addons\Skada\Media\Fonts\FORCED SQUARE.ttf]])
-	LSM:Register("font", "Hooge", [[Interface\Addons\Skada\Media\Fonts\Hooge.ttf]])
+	LSM:Register("font", "ABF", format([[%s\Fonts\ABF.ttf]], ns.mediapath))
+	LSM:Register("font", "Accidental Presidency", format([[%s\Fonts\Accidental Presidency.ttf]], ns.mediapath))
+	LSM:Register("font", "Adventure", format([[%s\Fonts\Adventure.ttf]], ns.mediapath))
+	LSM:Register("font", "Diablo", format([[%s\Fonts\Diablo.ttf]], ns.mediapath))
+	LSM:Register("font", "FORCED SQUARE", format([[%s\Fonts\FORCED SQUARE.ttf]], ns.mediapath))
+	LSM:Register("font", "Hooge", format([[%s\Fonts\Hooge.ttf]], ns.mediapath))
 
 	-- statusbars
-	LSM:Register("statusbar", "Aluminium", [[Interface\Addons\Skada\Media\Statusbar\Aluminium]])
-	LSM:Register("statusbar", "Armory", [[Interface\Addons\Skada\Media\Statusbar\Armory]])
-	LSM:Register("statusbar", "BantoBar", [[Interface\Addons\Skada\Media\Statusbar\BantoBar]])
-	LSM:Register("statusbar", "Flat", [[Interface\Addons\Skada\Media\Statusbar\Flat]])
-	LSM:Register("statusbar", "Gloss", [[Interface\Addons\Skada\Media\Statusbar\Gloss]])
-	LSM:Register("statusbar", "Graphite", [[Interface\Addons\Skada\Media\Statusbar\Graphite]])
-	LSM:Register("statusbar", "Grid", [[Interface\Addons\Skada\Media\Statusbar\Grid]])
-	LSM:Register("statusbar", "Healbot", [[Interface\Addons\Skada\Media\Statusbar\Healbot]])
-	LSM:Register("statusbar", "LiteStep", [[Interface\Addons\Skada\Media\Statusbar\LiteStep]])
-	LSM:Register("statusbar", "Minimalist", [[Interface\Addons\Skada\Media\Statusbar\Minimalist]])
-	LSM:Register("statusbar", "Otravi", [[Interface\Addons\Skada\Media\Statusbar\Otravi]])
-	LSM:Register("statusbar", "Outline", [[Interface\Addons\Skada\Media\Statusbar\Outline]])
-	LSM:Register("statusbar", "Round", [[Interface\Addons\Skada\Media\Statusbar\Round]])
-	LSM:Register("statusbar", "Serenity", [[Interface\AddOns\Skada\Media\Statusbar\Serenity]])
-	LSM:Register("statusbar", "Smooth", [[Interface\Addons\Skada\Media\Statusbar\Smooth]])
+	LSM:Register("statusbar", "Aluminium", format([[%s\Statusbar\Aluminium]], ns.mediapath))
+	LSM:Register("statusbar", "Armory", format([[%s\Statusbar\Armory]], ns.mediapath))
+	LSM:Register("statusbar", "BantoBar", format([[%s\Statusbar\BantoBar]], ns.mediapath))
+	LSM:Register("statusbar", "Flat", format([[%s\Statusbar\Flat]], ns.mediapath))
+	LSM:Register("statusbar", "Gloss", format([[%s\Statusbar\Gloss]], ns.mediapath))
+	LSM:Register("statusbar", "Graphite", format([[%s\Statusbar\Graphite]], ns.mediapath))
+	LSM:Register("statusbar", "Grid", format([[%s\Statusbar\Grid]], ns.mediapath))
+	LSM:Register("statusbar", "Healbot", format([[%s\Statusbar\Healbot]], ns.mediapath))
+	LSM:Register("statusbar", "LiteStep", format([[%s\Statusbar\LiteStep]], ns.mediapath))
+	LSM:Register("statusbar", "Minimalist", format([[%s\Statusbar\Minimalist]], ns.mediapath))
+	LSM:Register("statusbar", "Otravi", format([[%s\Statusbar\Otravi]], ns.mediapath))
+	LSM:Register("statusbar", "Outline", format([[%s\Statusbar\Outline]], ns.mediapath))
+	LSM:Register("statusbar", "Round", format([[%s\Statusbar\Round]], ns.mediapath))
+	LSM:Register("statusbar", "Serenity", format([[%s\Statusbar\Serenity]], ns.mediapath))
+	LSM:Register("statusbar", "Smooth", format([[%s\Statusbar\Smooth]], ns.mediapath))
 	LSM:Register("statusbar", "Solid", [[Interface\Buttons\WHITE8X8]])
-	LSM:Register("statusbar", "TukTex", [[Interface\Addons\Skada\Media\Statusbar\TukTex]])
+	LSM:Register("statusbar", "TukTex", format([[%s\Statusbar\TukTex]], ns.mediapath))
 
 	-- borders
-	LSM:Register("border", "Glow", [[Interface\Addons\Skada\Media\Border\Glow]])
-	LSM:Register("border", "Roth", [[Interface\Addons\Skada\Media\Border\Roth]])
+	LSM:Register("border", "Glow", format([[%s\Border\Glow]], ns.mediapath))
+	LSM:Register("border", "Roth", format([[%s\Border\Roth]], ns.mediapath))
 
 	-- sounds
 	LSM:Register("sound", "Cartoon FX", [[Sound\Doodad\Goblin_Lottery_Open03.wav]])

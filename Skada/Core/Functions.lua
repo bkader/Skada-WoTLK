@@ -829,7 +829,7 @@ do
 		elem:SetPoint("TOPLEFT", frame.text, "BOTTOMLEFT", 20, -15)
 		elem:SetPoint("TOPRIGHT", frame.text, "BOTTOMRIGHT", -20, -15)
 		elem:SetHeight(5)
-		elem:SetStatusBarTexture([[Interface\AddOns\Skada\Media\Statusbar\Flat.tga]])
+		elem:SetStatusBarTexture(format([[%s\Statusbar\Flat.tga]], Skada.mediapath))
 		elem:SetStatusBarColor(0, 1, 0)
 		frame.bar = elem
 
