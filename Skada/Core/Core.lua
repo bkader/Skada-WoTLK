@@ -1665,9 +1665,6 @@ function Skada:PLAYER_ENTERING_WORLD()
 	userGUID = self.userGUID or UnitGUID("player")
 	self.userGUID = userGUID
 
-	self._Time = GetTime()
-	self._time = time()
-
 	Skada:CheckZone()
 	if was_in_party == nil then
 		Skada:ScheduleTimer("UpdateRoster", 1)
@@ -2305,6 +2302,10 @@ function Skada:OnInitialize()
 	-- update references
 	classcolors = self.classcolors
 
+	-- assign times before loading modules.
+	self._Time = GetTime()
+	self._time = time()
+
 	-- early loading of modules
 	self:LoadModules()
 end
@@ -2527,6 +2528,9 @@ function combat_end()
 		Skada:CancelTimer(toggle_timer, true)
 		toggle_timer = nil
 	end
+
+	Skada._Time = GetTime()
+	Skada._time = time()
 end
 
 function Skada:StopSegment(msg, phase)
@@ -2677,6 +2681,7 @@ do
 	end
 
 	local function combat_tick()
+		Skada._time = time()
 		if not Skada.disabled and Skada.current and not InCombatLockdown() and not IsGroupInCombat() and Skada.insType ~= "pvp" and Skada.insType ~= "arena" then
 			Skada:Debug("\124cffffbb00EndSegment\124r: Combat Tick")
 			combat_end()
@@ -2684,6 +2689,8 @@ do
 	end
 
 	function combat_start()
+		Skada._time = time()
+
 		death_counter = 0
 		starting_members = GetNumGroupMembers()
 
@@ -2909,8 +2916,6 @@ do
 		if self.current.stopped or not combatlog_events[t.event] then return end
 
 		self._Time = GetTime()
-		self._time = time()
-
 		for func, flags in next, combatlog_events[t.event] do
 			local fail = false
 

@@ -66,11 +66,12 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		end
 
 		-- sunder refreshed
-		if t.event == "SPELL_AURA_REFRESH" and active_sunders[t.dstGUID] and active_sunders[t.dstGUID] > GetTime() then
-			active_sunders[t.dstGUID] = GetTime() + M.sunderdelay -- useless refresh
+		local curtime = Skada._Time or GetTime()
+		if t.event == "SPELL_AURA_REFRESH" and active_sunders[t.dstGUID] and active_sunders[t.dstGUID] > curtime then
+			active_sunders[t.dstGUID] = curtime + M.sunderdelay -- useless refresh
 			return
 		else
-			active_sunders[t.dstGUID] = GetTime() + M.sunderdelay
+			active_sunders[t.dstGUID] = curtime + M.sunderdelay
 		end
 
 		Skada:DispatchSets(log_sunder, last_srcName, last_srcGUID, last_srcFlags, t.dstName)
@@ -83,7 +84,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 			tar = new()
 			tar.name = t.dstName
 			tar.count = 1
-			tar.time = GetTime()
+			tar.time = curtime
 			sunder_targets = sunder_targets or {}
 			sunder_targets[t.dstGUID] = tar
 		elseif not tar.full then
@@ -94,7 +95,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 					tar.count,
 					sunder_link or spell_sunder,
 					t.dstName,
-					format("%.1f", GetTime() - tar.time)
+					format("%.1f", curtime - tar.time)
 				))
 				tar.full = true
 			end
