@@ -1,5 +1,5 @@
 local _, Skada = ...
-Skada:RegisterModule("Nickname", function(L, P, G)
+Skada:RegisterModule("Nickname", function(L, P, G, _, _, O)
 	local mode = Skada:NewModule("Nickname")
 	local CONST_COMM_MOD = "Nickname"
 
@@ -413,7 +413,7 @@ Skada:RegisterModule("Nickname", function(L, P, G)
 			P.nickname = nil
 		end
 
-		Skada.options.args.tweaks.args.advanced.args.nickname = {
+		O.tweaks.args.advanced.args.nickname = {
 			type = "group",
 			name = self.localeName,
 			desc = format(L["Options for %s."], self.localeName),

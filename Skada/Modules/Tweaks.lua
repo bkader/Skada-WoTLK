@@ -1,6 +1,6 @@
 local _, Skada = ...
 local Private = Skada.Private
-Skada:RegisterModule("Tweaks", function(L, P)
+Skada:RegisterModule("Tweaks", function(L, P, _, _, _, O)
 	local mode = Skada:NewModule("Tweaks", "AceHook-3.0")
 
 	local format = string.format
@@ -287,8 +287,8 @@ Skada:RegisterModule("Tweaks", function(L, P)
 		-- Fury of Frostmourne
 		fofrostmourne = fofrostmourne or GetSpellInfo(72350)
 
-		local gen_opt = Skada.options.args.tweaks.args.general -- Tweaks > General
-		local adv_opt = Skada.options.args.tweaks.args.advanced -- Tweaks > Advanced
+		local gen_opt = O.tweaks.args.general -- Tweaks > General
+		local adv_opt = O.tweaks.args.advanced -- Tweaks > Advanced
 
 		-- options.
 		gen_opt.args.moduleicons = {

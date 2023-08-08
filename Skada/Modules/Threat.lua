@@ -1,6 +1,6 @@
 local _, Skada = ...
 local Private = Skada.Private
-Skada:RegisterModule("Threat", function(L, P, _, _, M)
+Skada:RegisterModule("Threat", function(L, P, _, _, M, O)
 	local mode = Skada:NewModule("Threat")
 
 	local format, max, select = string.format, math.max, select
@@ -536,7 +536,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M)
 			end
 
 			self.db = M.threat
-			Skada.options.args.modules.args.threat = opts
+			O.modules.args.threat = opts
 		end
 	end
 

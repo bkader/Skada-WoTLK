@@ -1,6 +1,6 @@
 local folder, Skada = ...
 local Private = Skada.Private
-Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
+Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 	local mod = Skada:NewModule("Bar Display", "SpecializedLibBars-1.0")
 	local callbacks = mod.callbacks
 
@@ -21,15 +21,18 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 	local _
 
 	-- references
+	local validclass = Skada.validclass
 	local classcolors = Skada.classcolors
 	local classicons = Skada.classicons
 	local classcoords = Skada.classcoords
 	local roleicons = Skada.roleicons
 	local rolecoords = Skada.rolecoords
+	local specicons = Skada.specicons
 	local speccoords = Skada.speccoords
 	local spellschools = Skada.spellschools
 	local windows = Skada.windows
 
+	local WINDOW_DEFAULTS = Skada.windowdefaults
 	local COLOR_WHITE = HIGHLIGHT_FONT_COLOR
 	local FONT_FLAGS = Skada.fontFlags
 	if not FONT_FLAGS then
@@ -143,13 +146,13 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 			local bargroup = mod:GetBarGroup(p.name)
 
 			-- fix old oriantation
-			if p.barorientation == 3 then
-				p.barorientation = 2
+			if p.barorientation < 1 or p.barorientation > 2 then
+				p.barorientation = p.barorientation == 3 and 2 or 1
 			end
 
 			-- fix old toolbar texture
-			if p.title.toolbar == 3 then
-				p.title.toolbar = 2
+			if p.title.toolbar < 1 or p.title.toolbar > 2 then
+				p.title.toolbar = p.title.toolbar == 3 and 2 or 1
 			end
 
 			if not bargroup then
@@ -670,7 +673,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				bar:SetIcon(icon)
 				bar:ShowIcon()
 			elseif db.specicons and data.spec and speccoords[data.spec] then
-				bar:SetIcon(Skada.specicons, speccoords(data.spec))
+				bar:SetIcon(specicons, speccoords(data.spec))
 				bar:ShowIcon()
 			elseif db.roleicons and data.role then
 				bar:SetIcon(roleicons, rolecoords(data.role))
@@ -685,7 +688,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 		end
 
 		local function bar_setcolor(bar, db, data, color)
-			local default = db.barcolor or Skada.windowdefaults.barcolor
+			local default = db.barcolor or WINDOW_DEFAULTS.barcolor
 			if not color and data.color then
 				color = data.color
 			elseif not color and db.spellschoolcolors and data.spellschool and spellschools[data.spellschool] then
@@ -812,7 +815,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 						bar_seticon(bar, db, data)
 						bar_setcolor(bar, db, data)
 
-						if Skada.validclass[data.class] and (db.classcolortext or db.classcolorleft or db.classcolorright) then
+						if validclass[data.class] and (db.classcolortext or db.classcolorleft or db.classcolorright) then
 							local c = classcolors(data.class)
 							if db.classcolortext or db.classcolorleft then
 								bar.label:SetTextColor(c.r, c.g, c.b, c.a or 1)
@@ -1264,7 +1267,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 							order = 80,
 							hasAlpha = true,
 							get = function()
-								local c = db.barcolor or Skada.windowdefaults.barcolor
+								local c = db.barcolor or WINDOW_DEFAULTS.barcolor
 								return c.r, c.g, c.b, c.a or 1
 							end,
 							set = function(_, r, g, b, a)
@@ -1280,7 +1283,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 							order = 90,
 							hasAlpha = true,
 							get = function()
-								local c = db.barbgcolor or Skada.windowdefaults.barbgcolor
+								local c = db.barbgcolor or WINDOW_DEFAULTS.barbgcolor
 								return c.r, c.g, c.b, c.a or 1
 							end,
 							set = function(_, r, g, b, a)
@@ -1301,7 +1304,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 							order = 110,
 							hasAlpha = true,
 							get = function()
-								local c = db.selfcolor or Skada.windowdefaults.barcolor
+								local c = db.selfcolor or WINDOW_DEFAULTS.barcolor
 								return c.r, c.g, c.b, c.a or 1
 							end,
 							set = function(_, r, g, b, a)
@@ -1644,7 +1647,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 									order = 20,
 									hasAlpha = true,
 									get = function()
-										local c = db.title.color or Skada.windowdefaults.title.color
+										local c = db.title.color or WINDOW_DEFAULTS.title.color
 										return c.r, c.g, c.b, c.a or 1
 									end,
 									set = function(_, r, g, b, a)
@@ -1676,7 +1679,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 									hasAlpha = true,
 									order = 20,
 									get = function()
-										local c = db.title.bordercolor or Skada.windowdefaults.title.bordercolor
+										local c = db.title.bordercolor or WINDOW_DEFAULTS.title.bordercolor
 										return c.r, c.g, c.b, c.a or 1
 									end,
 									set = function(_, r, g, b, a)
@@ -1749,7 +1752,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 							order = 40,
 							hasAlpha = true,
 							get = function()
-								local c = db.title.textcolor or Skada.windowdefaults.title.textcolor
+								local c = db.title.textcolor or WINDOW_DEFAULTS.title.textcolor
 								return c.r, c.g, c.b, c.a or 1
 							end,
 							set = function(_, r, g, b, a)
@@ -2541,19 +2544,21 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G)
 				P.scroll = self.db
 			end
 
-			Skada.options.args.themeoptions = GetThemeOptions()
-			Skada.options.args.themeoptions.order = 960
+			O.themeoptions = GetThemeOptions()
+			O.themeoptions.order = 960
 
-			Skada.options.args.tweaks.args.advanced.args.scroll = GetScrollOptions()
-			Skada.options.args.tweaks.args.advanced.args.scroll.order = 980
+			O.tweaks.args.advanced.args.scroll = GetScrollOptions()
+			O.tweaks.args.advanced.args.scroll.order = 980
 
 			self:SetScrollSpeed(self.db.speed)
 
+			validclass = validclass or Skada.validclass
 			classcolors = classcolors or Skada.classcolors
 			classicons = classicons or Skada.classicons
 			classcoords = classcoords or Skada.classcoords
 			roleicons = roleicons or Skada.roleicons
 			rolecoords = rolecoords or Skada.rolecoords
+			specicons = specicons or Skada.specicons
 			speccoords = speccoords or Skada.speccoords
 			spellschools = spellschools or Skada.spellschools
 			windows = windows or Skada.windows

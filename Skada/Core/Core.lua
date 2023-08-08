@@ -298,7 +298,6 @@ local function summon_pet(petGUID, ownerGUID)
 	local guidOrClass = guidToClass[ownerGUID]
 	ownerGUID = guidToClass[guidOrClass] and guidOrClass or ownerGUID
 	guidToOwner[petGUID] = ownerGUID
-	guidToClass[petGUID] = ownerGUID
 end
 
 local dismiss_pet
@@ -1844,7 +1843,7 @@ do
 			local unit = groupUnits[owner] and format("%spet", owner)
 			local guid = unit and UnitGUID(unit)
 			if guid then
-				guidToClass[guid] = UnitGUID(owner)
+				guidToOwner[guid] = UnitGUID(owner)
 			end
 		end
 	end
@@ -1857,7 +1856,7 @@ do
 			local prefix, id, suffix = strmatch(unit, "([^%d]+)([%d]*)(.*)")
 			local vUnitId = format("%spet%s%s", prefix, id, suffix)
 			if UnitExists(vUnitId) then
-				guidToClass[UnitGUID(vUnitId)] = guid
+				guidToOwner[UnitGUID(vUnitId)] = guid
 				vehicles[guid] = UnitGUID(vUnitId)
 			end
 		elseif vehicles[guid] then

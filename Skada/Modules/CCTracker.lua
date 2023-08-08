@@ -533,7 +533,7 @@ end)
 -- ========= --
 -- CC Breaks --
 -- ========= --
-Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
+Skada:RegisterModule("CC Breaks", function(L, P, _, C, M, O)
 	local mode = Skada:NewModule("CC Breaks")
 	local mode_spell = mode:NewModule("Spell List")
 	local mode_target = mode:NewModule("Target List")
@@ -734,7 +734,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M)
 	end
 
 	function mode:OnInitialize()
-		Skada.options.args.modules.args.ccoptions = {
+		O.modules.args.ccoptions = {
 			type = "group",
 			name = self.localeName,
 			desc = format(L["Options for %s."], self.localeName),

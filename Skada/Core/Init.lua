@@ -1431,18 +1431,32 @@ do
 
 	-- spell icon and name to speed up things
 	local SpellInfo = Private.SpellInfo
-	ns.spellnames = setmetatable({}, {__index = function(t, spellid)
-		local name, _, icon = SpellInfo(spellid)
-		ns.spellicons[spellid] = icon
-		t[spellid] = name
-		return name
-	end})
-	ns.spellicons = setmetatable({}, {__index = function(t, spellid)
-		local name, _, icon = SpellInfo(spellid)
-		ns.spellnames[spellid] = name
-		t[spellid] = icon
-		return icon
-	end})
+	ns.spellnames = setmetatable({}, {
+		__index = function(t, spellid)
+			local name, _, icon = SpellInfo(spellid)
+			if name then
+				rawset(t, spellid, name)
+				rawset(ns.spellicons, spellid, icon)
+			end
+			return name
+		end,
+		__newindex = function(t, spellid, name)
+			rawset(t, spellid, name)
+		end
+	})
+	ns.spellicons = setmetatable({}, {
+		__index = function(t, spellid)
+			local name, _, icon = SpellInfo(spellid)
+			if name then
+				rawset(t, spellid, icon)
+				rawset(ns.spellnames, spellid, name)
+			end
+			return icon
+		end,
+		__newindex = function(t, spellid, icon)
+			rawset(t, spellid, icon)
+		end
+	})
 end
 
 -------------------------------------------------------------------------------
@@ -1467,16 +1481,25 @@ do
 		return (band(flags or 0, BITMASK_NPC) ~= 0)
 	end
 
+	-- used to protect tables
+	local table_mt = {__metatable = true}
+
 	-- players: [guid] = class / pets: [guid] = owner guid
-	local guidToClass = Private.guidToClass or {}
+	local guidToClass = setmetatable(Private.guidToClass or {}, table_mt)
 	Private.guidToClass = guidToClass
 
 	-- players only: [guid] = name
-	local guidToName = Private.guidToName or {}
+	local guidToName = setmetatable(Private.guidToName or {}, table_mt)
 	Private.guidToName = guidToName
 
 	-- pets only: [pet guid] = owner guid
-	local guidToOwner = Private.guidToOwner or {}
+	local guidToOwner = setmetatable(Private.guidToOwner or {}, {
+		__metatable = true,
+		__newindex = function(t, guid, owner)
+			rawset(guidToClass, guid, owner)
+			rawset(t, guid, owner)
+		end
+	})
 	Private.guidToOwner = guidToOwner
 
 	do
@@ -1573,7 +1596,7 @@ do
 	function Private.AddCombatant(unit, ownerUnit)
 		local guid = UnitGUID(unit)
 		if guid and ownerUnit then
-			guidToClass[guid] = UnitGUID(ownerUnit)
+			guidToOwner[guid] = UnitGUID(ownerUnit)
 		elseif guid then
 			local _, class = UnitClass(unit)
 			guidToClass[guid] = class

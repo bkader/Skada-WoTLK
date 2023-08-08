@@ -1,6 +1,6 @@
 local folder, Skada = ...
 local Private = Skada.Private
-Skada:RegisterModule("Deaths", function(L, P, _, _, M)
+Skada:RegisterModule("Deaths", function(L, P, _, _, M, O)
 	local mode = Skada:NewModule("Deaths")
 	local mode_actor = mode:NewModule("Player's deaths")
 	local mode_deathlog = mode:NewModule("Death log")
@@ -1081,17 +1081,17 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M)
 			M.deathlogthreshold = M.deathlogthreshold or 1000
 			M.deathchannel = M.deathchannel or "AUTO"
 
-			Skada.options.args.modules.args.deathlog = get_options()
+			O.modules.args.deathlog = get_options()
 
 			-- add colors to tweaks
-			local color_opt = Skada.options.args.tweaks.args.advanced.args.colors
+			local color_opt = O.tweaks.args.advanced.args.colors
 			if not color_opt then return end
 			color_opt.args.deathlog = {
 				type = "group",
 				name = L["Death log"],
 				order = 50,
-				hidden = Skada.options.args.tweaks.args.advanced.args.colors.args.custom.disabled,
-				disabled = Skada.options.args.tweaks.args.advanced.args.colors.args.custom.disabled,
+				hidden = O.tweaks.args.advanced.args.colors.args.custom.disabled,
+				disabled = O.tweaks.args.advanced.args.colors.args.custom.disabled,
 				get = function(i)
 					local color = get_color(i[#i])
 					return color.r, color.g, color.b

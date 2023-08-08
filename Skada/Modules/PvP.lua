@@ -1,5 +1,5 @@
 local _, Skada = ...
-Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
+Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P, _, _, _, O)
 	local mode = Skada:NewModule("Player vs. Player")
 
 	local format, wipe, GetTime = string.format, wipe, GetTime
@@ -250,12 +250,12 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P)
 		end
 
 		-- add custom colors to tweaks
-		Skada.options.args.tweaks.args.advanced.args.colors.args.arean = {
+		O.tweaks.args.advanced.args.colors.args.arean = {
 			type = "group",
 			name = L["Arena Teams"],
 			order = 40,
-			hidden = Skada.options.args.tweaks.args.advanced.args.colors.args.custom.disabled,
-			disabled = Skada.options.args.tweaks.args.advanced.args.colors.args.custom.disabled,
+			hidden = O.tweaks.args.advanced.args.colors.args.custom.disabled,
+			disabled = O.tweaks.args.advanced.args.colors.args.custom.disabled,
 			args = {
 				ARENA_GOLD = {
 					type = "color",

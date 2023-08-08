@@ -1,6 +1,6 @@
 local _, Skada = ...
 local Private = Skada.Private
-Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
+Skada:RegisterModule("Interrupts", function(L, P, _, C, M, O)
 	local mode = Skada:NewModule("Interrupts")
 	local mode_extraspell = mode:NewModule("Spell List")
 	local mode_target = mode:NewModule("Target List")
@@ -233,7 +233,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M)
 	function mode:OnInitialize()
 		M.interruptchannel = M.interruptchannel or  "SAY"
 
-		Skada.options.args.modules.args.interrupts = {
+		O.modules.args.interrupts = {
 			type = "group",
 			name = self.localeName,
 			desc = format(L["Options for %s."], self.localeName),

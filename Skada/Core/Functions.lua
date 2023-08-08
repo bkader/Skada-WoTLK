@@ -7,10 +7,12 @@ local setmetatable, wipe = setmetatable, wipe
 local next, time, GetTime = next, time, GetTime
 local _
 
+local UnitGUID, UnitClass, UnitFullName = UnitGUID, UnitClass, Private.UnitFullName
 local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 local tablePool, TempTable = Skada.tablePool, Private.TempTable
 local new, del = Private.newTable, Private.delTable
 local L, callbacks = Skada.Locale, Skada.callbacks
+local guidToName, guidToClass, guidToOwner = Private.guidToName, Private.guidToClass, Private.guidToOwner
 
 -------------------------------------------------------------------------------
 -- debug function
@@ -167,7 +169,7 @@ do
 			local mod = tremove(self.LoadableModules, 1)
 			while mod do
 				if mod.name and mod.func and not self:IsDisabled(mod.name) and not (mod.deps and self:IsDisabled(unpack(mod.deps))) then
-					mod.func(L, self.profile, self.global, self.cacheTable, self.profile.modules)
+					mod.func(L, self.profile, self.global, self.cacheTable, self.profile.modules, self.options.args)
 				end
 				mod = tremove(self.LoadableModules, 1)
 			end
@@ -1261,12 +1263,9 @@ end
 
 do
 	local UnitLevel = UnitLevel
-	local UnitClass = UnitClass
 	local GetUnitRole = Skada.GetUnitRole
 	local GetUnitSpec = Skada.GetUnitSpec
 	local GetUnitIdFromGUID = Skada.GetUnitIdFromGUID
-	local guidToClass = Private.guidToClass
-	local guidToName = Private.guidToName
 	local actorPrototype = Skada.actorPrototype
 	local playerPrototype = Skada.playerPrototype
 	local enemyPrototype = Skada.enemyPrototype
@@ -1457,8 +1456,6 @@ end
 -- pet functions
 
 do
-	local guidToClass = Private.guidToClass
-	local guidToName = Private.guidToName
 	do
 		local GetPetOwnerFromTooltip
 		do
@@ -1535,7 +1532,6 @@ do
 			end
 		end
 
-		local UnitGUID, UnitFullName = UnitGUID, Private.UnitFullName
 		local function FixPetsHandler(guid, flag)
 			local guidOrClass = guid and guidToClass[guid]
 			if guidOrClass and guidToName[guidOrClass] then
@@ -1544,7 +1540,7 @@ do
 
 			-- flag is provided and it is mine.
 			if guid and flag and Skada:IsMine(flag) then
-				guidToClass[guid] = Skada.userGUID
+				guidToOwner[guid] = Skada.userGUID
 				return Skada.userGUID, Skada.userName
 			end
 
@@ -1554,14 +1550,14 @@ do
 				local ownerUnit = GetPetOwnerUnit(guid)
 				if ownerUnit then
 					local ownerGUID = UnitGUID(ownerUnit)
-					guidToClass[guid] = UnitGUID(ownerUnit)
+					guidToOwner[guid] = ownerGUID
 					return ownerGUID, UnitFullName(ownerUnit)
 				end
 
 				-- guess the pet from tooltip.
 				local ownerGUID, ownerName = GetPetOwnerFromTooltip(guid)
 				if ownerGUID and ownerName then
-					guidToClass[guid] = ownerGUID
+					guidToOwner[guid] = ownerGUID
 					return ownerGUID, ownerName
 				end
 			end
@@ -1794,9 +1790,6 @@ do
 		do -- source or destination in the group
 			local BITMASK_GROUP = Private.BITMASK_GROUP
 			local BITMASK_PETS = Private.BITMASK_PETS
-			local guidToName = Private.guidToName
-			local guidToClass = Private.guidToClass
-			local guidToOwner = Private.guidToOwner
 
 			function ARGS_MT.SourceInGroup(args, nopets)
 				if bit_band(args.srcFlags, BITMASK_GROUP) == 0 then
@@ -1973,9 +1966,8 @@ end
 -- group buffs scanner
 
 do
-	local UnitGUID, UnitIsDeadOrGhost, UnitBuff = UnitGUID, UnitIsDeadOrGhost, UnitBuff
-	local UnitIterator, UnitFullName = Skada.UnitIterator, Private.UnitFullName
-	local guidToClass, guidToName = Private.guidToClass, Private.guidToName
+	local UnitIsDeadOrGhost, UnitBuff = UnitIsDeadOrGhost, UnitBuff
+	local UnitIterator = Skada.UnitIterator
 	local actorflags = Private.DEFAULT_FLAGS
 	local clear = Private.clearTable
 
@@ -2047,8 +2039,7 @@ end
 -- first hit check
 
 do
-	local UnitExists, UnitClass = UnitExists, UnitClass
-	local UnitName, UnitFullName = UnitName, Private.UnitFullName
+	local UnitExists, UnitName = UnitExists, UnitName
 	local SpellLink = Private.SpellLink or GetSpellLink
 	local IsPet, uformat = Private.IsPet, Private.uformat
 	local ignored_spells = Skada.ignored_spells.firsthit

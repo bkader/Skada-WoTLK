@@ -3,7 +3,7 @@ if not LibFail then return end
 
 local folder, Skada = ...
 local Private = Skada.Private
-Skada:RegisterModule("Fails", function(L, P, _, _, M)
+Skada:RegisterModule("Fails", function(L, P, _, _, M, O)
 	local mode = Skada:NewModule("Fails")
 	local mode_spell = mode:NewModule("Spell List")
 	local mode_spell_target = mode_spell:NewModule("Target List")
@@ -228,7 +228,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M)
 
 			M.ignoredfails = nil
 			M.failschannel = M.failschannel or "AUTO"
-			Skada.options.args.modules.args.failbot = get_options()
+			O.modules.args.failbot = get_options()
 		end
 	end
 

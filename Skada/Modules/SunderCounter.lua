@@ -1,6 +1,6 @@
 local _, Skada = ...
 local Private = Skada.Private
-Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
+Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M, O)
 	local mode = Skada:NewModule("Sunder Counter")
 	local mode_target = mode:NewModule("Target List")
 	local mode_target_source = mode_target:NewModule("Source List")
@@ -279,7 +279,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M)
 		M.sunderchannel = M.sunderchannel or "SAY"
 		M.sunderdelay = M.sunderdelay or 20
 
-		Skada.options.args.modules.args.sundercounter = {
+		O.modules.args.sundercounter = {
 			type = "group",
 			name = self.localeName,
 			desc = format(L["Options for %s."], self.localeName),

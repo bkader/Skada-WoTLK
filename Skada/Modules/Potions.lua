@@ -1,6 +1,6 @@
 local _, Skada = ...
 local Private = Skada.Private
-Skada:RegisterModule("Potions", function(L, P, G, C)
+Skada:RegisterModule("Potions", function(L, P, G, C, _, O)
 	local mode = Skada:NewModule("Potions")
 	local mode_spell = mode:NewModule("Spell List")
 	local mode_actor = mode_spell:NewModule("Target List")
@@ -358,7 +358,7 @@ Skada:RegisterModule("Potions", function(L, P, G, C)
 			P.prepotion = true
 		end
 
-		Skada.options.args.tweaks.args.general.args.prepotion = {
+		O.tweaks.args.general.args.prepotion = {
 			type = "toggle",
 			name = L["Pre-potion"],
 			desc = L["Prints pre-potion after the end of the combat."],
