@@ -7,6 +7,7 @@ local setmetatable, wipe = setmetatable, wipe
 local next, time, GetTime = next, time, GetTime
 local _
 
+local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 local tablePool, TempTable = Skada.tablePool, Private.TempTable
 local new, del = Private.newTable, Private.delTable
 local L, callbacks = Skada.Locale, Skada.callbacks
@@ -340,7 +341,6 @@ end
 do
 	local tsort = table.sort
 	local SendChatMessage, BNSendWhisper = SendChatMessage, BNSendWhisper
-	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 	local Window, windows = Skada.Window, Skada.windows
 	local EscapeStr = Private.EscapeStr
 
@@ -788,7 +788,6 @@ end
 
 do
 	local UnitIsConnected = UnitIsConnected
-	local IsInGroup, IsInRaid = Skada.IsInGroup, Skada.IsInRaid
 	local collectgarbage = collectgarbage
 
 	local function create_progress_window()
