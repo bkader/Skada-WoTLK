@@ -696,11 +696,11 @@ ns.creature_to_boss = {
 	[36969] = 37540, -- Skybreaker Rifleman > The Skybreaker
 	[36978] = 37540, -- Skybreaker Mortar Soldier > The Skybreaker
 	[37116] = 37540, -- Skybreaker Sorcerer > The Skybreaker
-	[36791] = 36789, -- Blazing Skeleton
-	[37868] = 36789, -- Risen Archmage
-	[37886] = 36789, -- Gluttonous Abomination
-	[37934] = 36789, -- Blistering Zombie
-	[37985] = 36789, -- Dream Cloud
+	[36791] = 36789, -- Blazing Skeleton > Valithria Dreamwalker
+	[37868] = 36789, -- Risen Archmage > Valithria Dreamwalker
+	[37886] = 36789, -- Gluttonous Abomination > Valithria Dreamwalker
+	[37934] = 36789, -- Blistering Zombie > Valithria Dreamwalker
+	[37985] = 36789, -- Dream Cloud > Valithria Dreamwalker
 
 	-- [[ Naxxramas ]] --
 	[15930] = 15928, -- Feugen > Thaddius
@@ -776,7 +776,6 @@ ns.trigger_events = {
 	SWING_DAMAGE = true,
 	SPELL_DAMAGE = true,
 	RANGE_DAMAGE = true,
-	SPELL_PERIODIC_DAMAGE = true,
     DAMAGE_SHIELD = true,
 	SPELL_BUILDING_DAMAGE = true
 }
