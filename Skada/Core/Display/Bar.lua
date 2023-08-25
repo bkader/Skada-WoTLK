@@ -8,7 +8,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 	local pairs, tsort, format = pairs, table.sort, string.format
 	local max, min, abs = math.max, math.min, math.abs
 	local GameTooltip, GameTooltip_Hide = GameTooltip, GameTooltip_Hide
-	local GetSpellLink = Private.SpellLink or GetSpellLink
+	local SpellLink = Private.SpellLink or GetSpellLink
 	local GetScreenWidth, GetScreenHeight = GetScreenWidth, GetScreenHeight
 	local IsShiftKeyDown = IsShiftKeyDown
 	local IsAltKeyDown = IsAltKeyDown
@@ -145,15 +145,9 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 			local p = window.db
 			local bargroup = mod:GetBarGroup(p.name)
 
-			-- fix old oriantation
-			if p.barorientation < 1 or p.barorientation > 2 then
-				p.barorientation = p.barorientation == 3 and 2 or 1
-			end
-
-			-- fix old toolbar texture
-			if p.title.toolbar < 1 or p.title.toolbar > 2 then
-				p.title.toolbar = p.title.toolbar == 3 and 2 or 1
-			end
+			-- fix old oriantation & buttons texture
+			p.barorientation = max(1, min(2, p.barorientation or 1))
+			p.title.toolbar = max(1, min(2, p.title.toolbar or 2))
 
 			if not bargroup then
 				bargroup = mod:NewBarGroup(
@@ -783,7 +777,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 
 								bar.link = nil
 								if data.spellid then
-									bar.link = GetSpellLink(abs(data.spellid))
+									bar.link = SpellLink(abs(data.spellid))
 								elseif data.hyperlink then
 									bar.link = data.hyperlink
 								end

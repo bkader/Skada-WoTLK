@@ -12,7 +12,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M, O)
 	-- cache frequently used globals
 	local pairs, format, uformat = pairs, string.format, Private.uformat
 	local new, clear = Private.newTable, Private.clearTable
-	local GetSpellLink = Private.SpellLink or GetSpellLink
+	local SpellLink = Private.SpellLink or GetSpellLink
 	local mode_cols = nil
 
 	local function format_valuetext(d, columns, total, metadata, subview)
@@ -82,7 +82,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M, O)
 
 		local spelllink = t.extraspellname or data.dstName
 		if P.reportlinks then
-			spelllink = GetSpellLink(t.extraspellid or t.extraspellname) or spelllink
+			spelllink = SpellLink(t.extraspellid or t.extraspellname) or spelllink
 		end
 		Skada:SendChat(format(L["%s interrupted!"], spelllink), M.interruptchannel or "SAY", "preset")
 	end

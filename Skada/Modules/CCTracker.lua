@@ -2,7 +2,7 @@ local _, Skada = ...
 local Private = Skada.Private
 
 local pairs, format, uformat = pairs, string.format, Private.uformat
-local GetSpellLink = Private.SpellLink or GetSpellLink
+local SpellLink = Private.SpellLink or GetSpellLink
 local new, clear = Private.newTable, Private.clearTable
 local cc_table = {} -- holds stuff from cleu
 
@@ -608,7 +608,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M, O)
 
 			-- Go ahead and announce it.
 			if t.extraspellid or t.extraspellname then
-				Skada:SendChat(format(L["%s on %s removed by %s's %s"], t.spellname, t.dstName, srcName, GetSpellLink(t.extraspellid or t.extraspellname)), "RAID", "preset")
+				Skada:SendChat(format(L["%s on %s removed by %s's %s"], t.spellname, t.dstName, srcName, SpellLink(t.extraspellid or t.extraspellname)), "RAID", "preset")
 			else
 				Skada:SendChat(format(L["%s on %s removed by %s"], t.spellname, t.dstName, srcName), "RAID", "preset")
 			end
