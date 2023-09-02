@@ -1466,11 +1466,11 @@ do
 				local ownerPatterns = {}
 				do
 					local i = 1
-					local title = _G["UNITNAME_SUMMON_TITLE" .. i]
+					local title = _G[format("UNITNAME_SUMMON_TITLE%s", i)]
 					while (title and title ~= "%s" and find(title, "%s")) do
 						ownerPatterns[#ownerPatterns + 1] = title
 						i = i + 1
-						title = _G["UNITNAME_SUMMON_TITLE" .. i]
+						title = _G[format("UNITNAME_SUMMON_TITLE%s", i)]
 					end
 				end
 
@@ -1701,7 +1701,7 @@ do
 			if strsub(event, 1, len) == prefix then
 				local suffix_args = SUFFIXES[strsub(event, len + 2)]
 				if suffix_args then
-					args = args .. prefix_args .. suffix_args
+					args = format("%s%s%s", args, prefix_args, suffix_args)
 					break
 				end
 			end

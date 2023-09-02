@@ -228,7 +228,7 @@ Skada:RegisterModule("Damage", function(L, P)
 		tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(damage), 1, 1, 1)
 
 		local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
-		tooltip:AddDoubleLine(Skada:FormatNumber(damage) .. "/" .. suffix, Skada:FormatNumber(dps), 1, 1, 1)
+		tooltip:AddDoubleLine(format("%s/%s", Skada:FormatNumber(damage), suffix), Skada:FormatNumber(dps), 1, 1, 1)
 
 		local petdamage = P.absdamage and actor.pettotaldamage or actor.petdamage
 		if not petdamage then return end
@@ -844,7 +844,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C)
 		local spell = actor and actor.damagespells and actor.damagespells[win.spellid]
 		if not spell then return end
 
-		tooltip:AddLine(label .. " - " .. win.spellname)
+		tooltip:AddLine(format("%s - %s", label, win.spellname))
 
 		if not spell.count or spell.count == 0 then return end
 

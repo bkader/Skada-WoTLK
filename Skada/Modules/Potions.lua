@@ -125,7 +125,7 @@ Skada:RegisterModule("Potions", function(L, P, G, C, _, O)
 
 	local function request_potion(potionid)
 		if potionid and potionid ~= nil and potionid ~= "" and potionid ~= 0 and strsub(potionid, 1, 1) ~= "s" then
-			GameTooltip:SetHyperlink("item:" .. potionid .. ":0:0:0:0:0:0:0")
+			GameTooltip:SetHyperlink(format("item:%s:0:0:0:0:0:0:0"))
 			GameTooltip:Hide()
 		end
 	end

@@ -7,6 +7,7 @@ local min, floor = math.min, math.floor
 local new, del = Private.newTable, Private.delTable
 local tooltip_school = Skada.tooltip_school
 local hits_perc = "%s (\124cffffffff%s\124r)"
+local slash_fmt = "%s/%s"
 
 -- ============== --
 -- Absorbs module --
@@ -748,7 +749,7 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 		tooltip:AddDoubleLine(L["Absorbs"], Skada:FormatNumber(damage), 1, 1, 1)
 
 		local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
-		tooltip:AddDoubleLine(Skada:FormatNumber(damage) .. "/" .. suffix, Skada:FormatNumber(aps), 1, 1, 1)
+		tooltip:AddDoubleLine(format(slash_fmt, Skada:FormatNumber(damage), suffix), Skada:FormatNumber(aps), 1, 1, 1)
 	end
 
 	local function mode_spell_tooltip(win, id, label, tooltip)
@@ -1152,7 +1153,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		tooltip:AddDoubleLine(L["Absorbs and Healing"], Skada:FormatNumber(amount), 1, 1, 1)
 
 		local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
-		tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. suffix, Skada:FormatNumber(hps), 1, 1, 1)
+		tooltip:AddDoubleLine(format(slash_fmt, Skada:FormatNumber(amount), suffix), Skada:FormatNumber(hps), 1, 1, 1)
 	end
 
 	local function mode_spell_tooltip(win, id, label, tooltip)
@@ -1392,7 +1393,7 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 
 	local function feed_raid_hps()
 		local set = Skada:GetSet("current")
-		return Skada:FormatNumber(set and set:GetAHPS() or 0) .. " " .. L["RHPS"]
+		return format("%s %s", Skada:FormatNumber(set and set:GetAHPS() or 0), L["RHPS"])
 	end
 
 	function mode:OnEnable()
@@ -1465,7 +1466,7 @@ Skada:RegisterModule("HPS", function(L, P)
 		tooltip:AddDoubleLine(L["Absorbs and Healing"], Skada:FormatNumber(amount), 1, 1, 1)
 
 		local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
-		tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. suffix, Skada:FormatNumber(hps), 1, 1, 1)
+		tooltip:AddDoubleLine(format(slash_fmt, Skada:FormatNumber(amount), suffix), Skada:FormatNumber(hps), 1, 1, 1)
 	end
 
 	function mode:Update(win, set)

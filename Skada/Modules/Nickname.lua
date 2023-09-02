@@ -18,7 +18,7 @@ Skada:RegisterModule("Nickname", function(L, P, G, _, _, O)
 		end
 
 		local function title_case(first, rest)
-			return strupper(first) .. strlower(rest)
+			return format("%s%s", strupper(first), strlower(rest))
 		end
 
 		local have_repeated = false
@@ -461,8 +461,8 @@ Skada:RegisterModule("Nickname", function(L, P, G, _, _, O)
 					values = {
 						[1] = L["Name"],
 						[2] = L["Nickname"],
-						[3] = L["Name"] .. " (" .. L["Nickname"] .. ")",
-						[4] = L["Nickname"] .. " (" .. L["Name"] .. ")"
+						[3] = format("%s (%s)", L["Name"], L["Nickname"]),
+						[4] = format("%s (%s)", L["Nickname"], L["Name"])
 					}
 				},
 				ignorenicknames = {

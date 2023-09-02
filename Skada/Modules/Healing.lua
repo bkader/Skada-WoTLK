@@ -172,7 +172,7 @@ Skada:RegisterModule("Healing", function(L, P)
 		tooltip:AddDoubleLine(L["Healing"], Skada:FormatNumber(amount), 1, 1, 1)
 
 		local suffix = Skada:FormatTime(P.timemesure == 1 and activetime or totaltime)
-		tooltip:AddDoubleLine(Skada:FormatNumber(amount) .. "/" .. suffix, Skada:FormatNumber(hps), 1, 1, 1)
+		tooltip:AddDoubleLine(format("%s/%s", Skada:FormatNumber(amount), suffix), Skada:FormatNumber(hps), 1, 1, 1)
 	end
 
 	local function mode_spell_tooltip(win, id, label, tooltip)

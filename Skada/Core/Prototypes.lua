@@ -44,8 +44,11 @@ do
 			return total
 		end
 
-		if arena and set["e" .. key] then
-			total = (total or 0) + set["e" .. key]
+		if arena then
+			key = format("e%s", key)
+			if set[key] then
+				total = (total or 0) + set[key]
+			end
 		end
 
 		return total

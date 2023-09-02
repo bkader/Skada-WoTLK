@@ -33,8 +33,8 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M, O)
 
 	-- returns a color table by its key
 	local function get_color(key)
-		if P.usecustomcolors and P.customcolors and P.customcolors["deathlog_" .. key] then
-			return P.customcolors["deathlog_" .. key]
+		if P.usecustomcolors and P.customcolors and P.customcolors[format("deathlog_%s", key)] then
+			return P.customcolors[format("deathlog_%s", key)]
 		elseif key == "orange" then
 			return ORANGE_COLOR
 		elseif key == "yellow" then
@@ -501,13 +501,13 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M, O)
 							change = format("%s %s", log.rem and "-" or "+", L["debuff"])
 							color = get_color("purple")
 						elseif change > 0 then
-							change = "+" .. Skada:FormatNumber(change)
+							change = format("+%s", Skada:FormatNumber(change))
 							color = get_color("green")
 						elseif change == 0 and (log.res or log.blo or log.abs) then
-							change = "+" .. Skada:FormatNumber(log.res or log.blo or log.abs)
+							change = format("+%s", Skada:FormatNumber(log.res or log.blo or log.abs))
 							color = get_color("orange")
 						elseif log.ovh then
-							change = "+" .. Skada:FormatNumber(log.ovh)
+							change = format("+%s", Skada:FormatNumber(log.ovh))
 							color = get_color("yellow")
 						elseif log.cri then
 							change = format("%s (%s)", Skada:FormatNumber(change), L["Crit"])
@@ -526,19 +526,19 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M, O)
 							local extra = new()
 
 							if log.ovh and log.ovh > 0 then
-								extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.ovh)
+								extra[#extra + 1] = format("O:%s", Skada:FormatNumber(log.ovh))
 							end
 							if log.ovk and log.ovk > 0 then
-								extra[#extra + 1] = "O:" .. Skada:FormatNumber(log.ovk)
+								extra[#extra + 1] = format("O:%s", Skada:FormatNumber(log.ovk))
 							end
 							if log.res and log.res > 0 then
-								extra[#extra + 1] = "R:" .. Skada:FormatNumber(log.res)
+								extra[#extra + 1] = format("R:%s", Skada:FormatNumber(log.res))
 							end
 							if log.blo and log.blo > 0 then
-								extra[#extra + 1] = "B:" .. Skada:FormatNumber(log.blo)
+								extra[#extra + 1] = format("B:%s", Skada:FormatNumber(log.blo))
 							end
 							if log.abs and log.abs > 0 then
-								extra[#extra + 1] = "A:" .. Skada:FormatNumber(log.abs)
+								extra[#extra + 1] = format("A:%s", Skada:FormatNumber(log.abs))
 							end
 
 							if next(extra) then
@@ -1097,7 +1097,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M, O)
 				end,
 				set = function(i, r, g, b)
 					P.customcolors = P.customcolors or {}
-					local key = "deathlog_" .. i[#i]
+					local key = format("deathlog_%s", i[#i])
 					P.customcolors[key] = P.customcolors[key] or {}
 					P.customcolors[key].r = r
 					P.customcolors[key].g = g

@@ -4,7 +4,7 @@
 -- in the unlikely event they end up being usable outside of Skada.
 -- Renaming the library (MAJOR) might break few things.
 
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90020
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90021
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 local folder = ...
@@ -311,7 +311,7 @@ do
 		end
 
 		if barLists[self] and barLists[self][name] then
-			error("A bar list named " .. name .. " already exists.")
+			error(format("A bar list named %s already exists.", name))
 		end
 
 		barLists[self] = barLists[self] or {}
@@ -797,7 +797,7 @@ do
 		end
 
 		-- Create button frame.
-		local btn = CreateFrame("Button", "$parent" .. title:gsub("%s+", "_"), self.button)
+		local btn = CreateFrame("Button", format("$parent%s", title:gsub("%s+", "_")), self.button)
 		btn:SetFrameLevel(self.button:GetFrameLevel() + 1)
 		btn:SetWidth(14)
 		btn:SetHeight(14)
@@ -1124,7 +1124,7 @@ do
 			elseif IsAltKeyDown() then
 				p:StartSizing(p.growup and "TOP" or "BOTTOM")
 			else
-				p:StartSizing((p.growup and "TOP" or "BOTTOM") .. self.direction)
+				p:StartSizing(format("%s%s", (p.growup and "TOP" or "BOTTOM"), self.direction))
 			end
 		end
 	end
@@ -1702,8 +1702,8 @@ do
 
 			if shown <= maxbars and v then
 				v:ClearAllPoints()
-				v:SetPoint(from .. "LEFT", lastBar, to .. "LEFT", x1, y1)
-				v:SetPoint(from .. "RIGHT", lastBar, to .. "RIGHT", x2, y2)
+				v:SetPoint(format("%sLEFT", from), lastBar, format("%sLEFT", to), x1, y1)
+				v:SetPoint(format("%sRIGHT", from), lastBar, format("%sRIGHT", to), x2, y2)
 				v:Show()
 
 				shown = shown + 1
