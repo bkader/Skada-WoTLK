@@ -11,6 +11,7 @@ Skada is a modular damage meter with various viewing modes, segmented fights and
 _**FOR PRIVATE SERVERS**_:
 * _[Cataclysm](https://github.com/bkader/Skada-Cata)_
 * _[Mists of Pandaria](https://github.com/bkader/Skada-MoP)_
+* _[Legion](https://github.com/bkader/Skada-Legion)_
 
 _**FOR OFFICIAL SERVERS**_:
 * _[Retail/Classic Wrath](https://github.com/bkader/Skada-Damage-Meter)_

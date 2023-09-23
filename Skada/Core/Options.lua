@@ -7,7 +7,7 @@ local ACR = LibStub("AceConfigRegistry-3.0")
 
 local min, max = math.min, math.max
 local next, format = next, format or string.format
-local del = Private.delTable
+local wipe, del = wipe, Private.delTable
 local _
 
 -- references: windows, modes
