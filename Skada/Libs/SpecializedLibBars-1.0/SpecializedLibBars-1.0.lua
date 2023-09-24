@@ -4,7 +4,7 @@
 -- in the unlikely event they end up being usable outside of Skada.
 -- Renaming the library (MAJOR) might break few things.
 
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90021
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90022
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 local folder = ...
@@ -766,10 +766,9 @@ end
 function barListPrototype:SetClickthrough(clickthrough)
 	if self.clickthrough ~= clickthrough then
 		self.clickthrough = clickthrough or nil
-		if bars[self] then
-			for _, bar in pairs(bars[self]) do
-				bar:EnableMouse(not self.clickthrough)
-			end
+		if not bars[self] then return end
+		for _, bar in pairs(bars[self]) do
+			bar:EnableMouse(not self.clickthrough)
 		end
 	end
 end
@@ -1075,10 +1074,9 @@ function barListPrototype:SetBarBackgroundColor(r, g, b, a)
 		self.bgcolor[3] = b
 		self.bgcolor[4] = a or 1
 
-		if bars[self] then
-			for _, bar in pairs(bars[self]) do
-				bar.bg:SetVertexColor(self.bgcolor[1], self.bgcolor[2], self.bgcolor[3], self.bgcolor[4])
-			end
+		if not bars[self] then return end
+		for _, bar in pairs(bars[self]) do
+			bar.bg:SetVertexColor(self.bgcolor[1], self.bgcolor[2], self.bgcolor[3], self.bgcolor[4])
 		end
 	end
 end
@@ -1414,14 +1412,13 @@ end
 
 -- changes bars texture
 function barListPrototype:SetTexture(tex)
-	if self.texture ~= tex then
-		self.texture = tex
-		if bars[self] then
-			for _, bar in pairs(bars[self]) do
-				bar.fg:SetTexture(self.texture)
-				bar.bg:SetTexture(self.texture)
-			end
-		end
+	if self.texture == tex then return end
+	self.texture = tex
+
+	if not bars[self] then return end
+	for _, bar in pairs(bars[self]) do
+		bar.fg:SetTexture(self.texture)
+		bar.bg:SetTexture(self.texture)
 	end
 end
 
@@ -1467,20 +1464,18 @@ end
 -- show bar icons
 function barListPrototype:ShowBarIcons()
 	self.showIcon = true
-	if bars[self] then
-		for _, bar in pairs(bars[self]) do
-			bar:ShowIcon()
-		end
+	if not bars[self] then return end
+	for _, bar in pairs(bars[self]) do
+		bar:ShowIcon()
 	end
 end
 
 -- hide bar icons
 function barListPrototype:HideBarIcons()
 	self.showIcon = nil
-	if bars[self] then
-		for _, bar in pairs(bars[self]) do
-			bar:HideIcon()
-		end
+	if not bars[self] then return end
+	for _, bar in pairs(bars[self]) do
+		bar:HideIcon()
 	end
 end
 
@@ -1492,40 +1487,36 @@ end
 -- shows bar labels
 function barListPrototype:ShowLabel()
 	self.showLabel = true
-	if bars[self] then
-		for _, bar in pairs(bars[self]) do
-			bar:ShowLabel()
-		end
+	if not bars[self] then return end
+	for _, bar in pairs(bars[self]) do
+		bar:ShowLabel()
 	end
 end
 
 -- hides bar labesl
 function barListPrototype:HideLabel()
 	self.showLabel = nil
-	if bars[self] then
-		for _, bar in pairs(bars[self]) do
-			bar:HideLabel()
-		end
+	if not bars[self] then return end
+	for _, bar in pairs(bars[self]) do
+		bar:HideLabel()
 	end
 end
 
 -- shows bars timer labels
 function barListPrototype:ShowTimerLabel()
 	self.showTimerLabel = true
-	if bars[self] then
-		for _, bar in pairs(bars[self]) do
-			bar:ShowTimerLabel()
-		end
+	if not bars[self] then return end
+	for _, bar in pairs(bars[self]) do
+		bar:ShowTimerLabel()
 	end
 end
 
 -- hides bars timer labels
 function barListPrototype:HideTimerLabel()
 	self.showTimerLabel = nil
-	if bars[self] then
-		for _, bar in pairs(bars[self]) do
-			bar:HideTimerLabel()
-		end
+	if not bars[self] then return end
+	for _, bar in pairs(bars[self]) do
+		bar:HideTimerLabel()
 	end
 end
 
@@ -1538,11 +1529,10 @@ function barListPrototype:SetTextColor(r, g, b, a)
 		self.textcolor[3] = b or 1
 		self.textcolor[4] = a or 1
 
-		if bars[self] then
-			for _, bar in pairs(bars[self]) do
-				bar.label:SetTextColor(self.textcolor[1], self.textcolor[2], self.textcolor[3], self.textcolor[4])
-				bar.timerLabel:SetTextColor(self.textcolor[1], self.textcolor[2], self.textcolor[3], self.textcolor[4])
-			end
+		if not bars[self] then return end
+		for _, bar in pairs(bars[self]) do
+			bar.label:SetTextColor(self.textcolor[1], self.textcolor[2], self.textcolor[3], self.textcolor[4])
+			bar.timerLabel:SetTextColor(self.textcolor[1], self.textcolor[2], self.textcolor[3], self.textcolor[4])
 		end
 	end
 end
@@ -1558,15 +1548,14 @@ function barListPrototype:SetColor(r, g, b, a)
 		self.colors[3] = b
 		self.colors[4] = a
 
-		if bars[self] then
-			for _, bar in pairs(bars[self]) do
-				if bar.lockColor and alpha then
-					bar:SetColor(nil, nil, nil, a, bar.lockColor)
-				elseif bar.lockColor then
-					bar:UpdateColor()
-				else
-					bar:SetColor(r, g, b, a, bar.lockColor)
-				end
+		if not bars[self] then return end
+		for _, bar in pairs(bars[self]) do
+			if bar.lockColor and alpha then
+				bar:SetColor(nil, nil, nil, a, bar.lockColor)
+			elseif bar.lockColor then
+				bar:UpdateColor()
+			else
+				bar:SetColor(r, g, b, a, bar.lockColor)
 			end
 		end
 	end
@@ -1577,13 +1566,12 @@ function barListPrototype:SetUseSpark(usespark)
 	if self.usespark ~= usespark then
 		self.usespark = usespark or nil
 
-		if bars[self] then
-			for _, bar in pairs(bars[self]) do
-				if self.usespark and not bar.spark:IsShown() then
-					bar.spark:Show()
-				elseif not self.usespark and bar.spark:IsShown() then
-					bar.spark:Hide()
-				end
+		if not bars[self] then return end
+		for _, bar in pairs(bars[self]) do
+			if self.usespark and not bar.spark:IsShown() then
+				bar.spark:Show()
+			elseif not self.usespark and bar.spark:IsShown() then
+				bar.spark:Hide()
 			end
 		end
 	end
@@ -1612,15 +1600,13 @@ do
 		local ct = 0
 		local has_fixed = nil
 
-		if not bars[self] then
-			return
-		else
-			for _, bar in pairs(bars[self]) do
-				ct = ct + 1
-				values[ct] = bar
-				bar:Hide()
-				has_fixed = has_fixed or bar.fixed
-			end
+		if not bars[self] then return end
+
+		for _, bar in pairs(bars[self]) do
+			ct = ct + 1
+			values[ct] = bar
+			bar:Hide()
+			has_fixed = has_fixed or bar.fixed
 		end
 
 		for i = ct + 1, #values do

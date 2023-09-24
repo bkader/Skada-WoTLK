@@ -291,36 +291,31 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 		function barListPrototype:SetTexture(tex)
 			self.texture = tex
-			if bars[self] then
-				for k, v in pairs(bars[self]) do
-					v:SetTexture(tex)
-				end
+			if not bars[self] then return end
+			for k, v in pairs(bars[self]) do
+				v:SetTexture(tex)
 			end
 		end
 
 		function barListPrototype:SetFont(f, s, m)
 			self.font, self.fontSize, self.fontFlags = f, s, m
-			if bars[self] then
-				for k, v in pairs(bars[self]) do
-					v:SetFont(f, s, m)
-				end
+			if not bars[self] then return end
+			for k, v in pairs(bars[self]) do
+				v:SetFont(f, s, m)
 			end
 		end
 
 		function barListPrototype:SetFill(fill)
 			self.fill = fill
-			if bars[self] then
-				for k, v in pairs(bars[self]) do
-					v:SetFill(fill)
-				end
+			if not bars[self] then return end
+			for k, v in pairs(bars[self]) do
+				v:SetFill(fill)
 			end
 		end
 
 		function barListPrototype:ShowIcon()
 			self.showIcon = true
-			if not bars[self] then
-				return
-			end
+			if not bars[self] then return end
 			for name, bar in pairs(bars[self]) do
 				bar:ShowIcon()
 			end
@@ -328,9 +323,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 		function barListPrototype:HideIcon()
 			self.showIcon = false
-			if not bars[self] then
-				return
-			end
+			if not bars[self] then return end
 			for name, bar in pairs(bars[self]) do
 				bar:HideIcon()
 			end
@@ -396,10 +389,9 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		barListPrototype.UnsetAllColors = barListPrototype.UnsetColor
 
 		function barListPrototype:UpdateColors()
-			if bars[self] then
-				for k, v in pairs(bars[self]) do
-					v:UpdateColor()
-				end
+			if not bars[self] then return end
+			for k, v in pairs(bars[self]) do
+				v:UpdateColor()
 			end
 		end
 
@@ -428,6 +420,17 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 				self.button:SetPoint("TOPRIGHT", self, "TOPRIGHT")
 			end
 			self:SortBars()
+		end
+
+		function barListPrototype:SetClickthrough(clickthrough)
+			if self.clickthrough ~= clickthrough then
+				self.clickthrough = clickthrough or nil
+				if bars[self] then
+					for _, bar in pairs(bars[self]) do
+						bar:EnableMouse(not self.clickthrough)
+					end
+				end
+			end
 		end
 
 		function barListPrototype:UpdateOrientationLayout()
@@ -494,13 +497,12 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 		function barListPrototype:SetUseSpark(use)
 			self.usespark = use
-			if bars[self] then
-				for _, bar in pairs(bars[self]) do
-					if self.usespark and not bar.spark:IsShown() then
-						bar.spark:Show()
-					elseif not self.usespark and bar.spark:IsShown() then
-						bar.spark:Hide()
-					end
+			if not bars[self] then return end
+			for _, bar in pairs(bars[self]) do
+				if self.usespark and not bar.spark:IsShown() then
+					bar.spark:Show()
+				elseif not self.usespark and bar.spark:IsShown() then
+					bar.spark:Hide()
 				end
 			end
 		end
@@ -542,9 +544,8 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 			function barListPrototype:SortBars()
 				local lastBar = self.button:IsVisible() and self.button or self
 				local ct = 0
-				if not bars[self] then
-					return
-				end
+				if not bars[self] then return end
+
 				for k, v in pairs(bars[self]) do
 					ct = ct + 1
 					values[ct] = v
@@ -1149,6 +1150,33 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 				self.texture:SetTexCoord(1 - (value / maxvalue), 1, 0, 1)
 			end
 		end
+
+		local function SetShown(self, show)
+			if show and not self:IsShown() then
+				self:Show()
+			elseif not show and self:IsShown() then
+				self:Hide()
+			end
+		end
+		barListPrototype.SetShown = SetShown
+		barPrototype.SetShown = SetShown
+
+		-- things to prevent errors.
+		barListPrototype.SetReverseGrowth = barListPrototype.ReverseGrowth
+		barListPrototype.SetBarHeight = Skada.EmptyFunc
+		barListPrototype.SetDisableHighlight = Skada.EmptyFunc
+		barListPrototype.SetBarBackgroundColor = Skada.EmptyFunc
+		barListPrototype.SetAnchorMouseover = Skada.EmptyFunc
+		barListPrototype.SetButtonsOpacity = Skada.EmptyFunc
+		barListPrototype.SetButtonsSpacing = Skada.EmptyFunc
+		barListPrototype.SetDisableResize = Skada.EmptyFunc
+		barListPrototype.SetDisableStretch = Skada.EmptyFunc
+		barListPrototype.SetReverseStretch = Skada.EmptyFunc
+		barListPrototype.SetDisplacement = Skada.EmptyFunc
+		barListPrototype.ShowButton = Skada.EmptyFunc
+		barListPrototype.SetTextColor = Skada.EmptyFunc
+		barListPrototype.SetSticky = Skada.EmptyFunc
+		barListPrototype.SetSmoothing = Skada.EmptyFunc
 	end
 
 	----------------------------------------------------------------
@@ -1169,7 +1197,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		function mod:OnInitialize()
 			classcolors = classcolors or Skada.classcolors
 			self.description = L["mod_bar_desc"]
-			Skada:AddDisplaySystem("legacy", self)
+			Skada:AddDisplaySystem("legacy", self, true)
 		end
 
 		function mod:OnEnable()
@@ -1372,7 +1400,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 			end
 
 			local nr = 1
-			for i = 1, #dataset do
+			for i = 0, #dataset do
 				local data = dataset[i]
 				if data and data.id then
 					local barid = data.id
@@ -1380,22 +1408,15 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 					local bar = win.bargroup:GetBar(barid)
 
-					if bar then
-						bar:SetMaxValue(metadata.maxvalue or 1)
-						bar:SetValue(data.value)
-					else
+					if not bar then
 						-- Initialization of bars.
 						bar = mod:CreateBar(win, barid, barlabel, data.value, metadata.maxvalue or 1, data.icon, false)
 						if data.icon and not data.ignore then
 							bar:ShowIcon()
 						end
-						bar:EnableMouse()
 						bar.id = data.id
 						bar.text = data.label
 
-						bar:SetScript("OnEnter", BarEnter)
-						bar:SetScript("OnLeave", BarLeave)
-						bar:SetScript("OnMouseDown", BarClick)
 
 						bar_seticon(bar, win.db, data)
 						bar_setcolor(bar, win.db, data)
@@ -1403,13 +1424,28 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 						local color = data.class and win.db.classcolortext and classcolors[data.class] or white
 						bar.label:SetTextColor(color.r, color.g, color.b, color.a or 1)
 						bar.timerLabel:SetTextColor(color.r, color.g, color.b, color.a or 1)
+
+						if not data.ignore then
+							bar:SetScript("OnEnter", BarEnter)
+							bar:SetScript("OnLeave", BarLeave)
+							bar:SetScript("OnMouseDown", BarClick)
+							bar:EnableMouse(not win.db.clickthrough)
+						else
+							bar:SetScript("OnEnter", nil)
+							bar:SetScript("OnLeave", nil)
+							bar:SetScript("OnMouseDown", nil)
+							bar:EnableMouse(false)
+						end
 					end
+
+					bar:SetValue(data.value)
+					bar:SetMaxValue(metadata.maxvalue or 1)
 
 					if metadata.ordersort then
 						bar.order = i
 					end
 
-					if metadata.showspots and P.showranks then
+					if metadata.showspots and P.showranks and not data.ignore then
 						if win.db.barorientation == 2 then
 							bar:SetLabel(format("%s .%2u", data.text or data.label or L["Unknown"], nr))
 						else
@@ -1855,6 +1891,12 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 						type = "toggle",
 						name = L["Show Spark Effect"],
 						order = 32
+					},
+					clickthrough = {
+						type = "toggle",
+						name = L["Click Through"],
+						desc = L["Disables mouse clicks on bars."],
+						order = 33
 					}
 				}
 			}

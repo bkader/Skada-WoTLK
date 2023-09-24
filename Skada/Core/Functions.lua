@@ -135,10 +135,11 @@ do
 		end
 
 		local displays = Skada.displays
+		local display_with_totals = Skada.display_with_totals
 		local numorder = 80
 
 		-- adds a display system
-		function Skada:AddDisplaySystem(key, mod)
+		function Skada:AddDisplaySystem(key, mod, has_totals)
 			displays[key] = mod
 			if mod.description then
 				self.options.args.windows.args[format("%sdesc", key)] = {
@@ -149,6 +150,7 @@ do
 				}
 				numorder = numorder + 10
 			end
+			display_with_totals[key] = (has_totals == true)
 		end
 	end
 

@@ -48,6 +48,10 @@ local userClass = Skada.userClass
 local displays = ns.displays or {}
 ns.displays = displays
 
+-- displays that show totals
+local display_with_totals = ns.display_with_totals or {}
+ns.display_with_totals = display_with_totals
+
 -- update & tick timers
 local update_timer, tick_timer, toggle_timer, version_timer
 local check_version, convert_version
@@ -546,18 +550,22 @@ function Window:SetDisplay(name, isnew)
 end
 
 -- checks if the window can show total bar/text
-local function can_show_total(win, set)
-	if not P.showtotals and not win.db.showtotals then
+local function can_show_total(db, mode, set)
+	-- totals aren't show if:
+	--	[1] disabled globally or for the window
+	--	[2] the display doesn't support totals
+	--	[3] then mode doesn't show totals (missing GetSetSummary function)
+	--	[4] not a group segment or a total segment.
+	if
+		(not P.showtotals and not db.showtotals) -- [1]
+		or (not display_with_totals[db.display]) --  [2]
+		or (not mode or not mode.GetSetSummary) --  [3]
+		or (not set.type or set.type == "none" and set.name ~= L["Total"]) -- [4]
+	then
 		return false
-	elseif not win.selectedmode.GetSetSummary then
-		return false
-	elseif win.db.display ~= "bar" and win.db.display ~= "inline" then
-		return false
-	elseif not set.type or set.type == "none" and set.name ~= L["Total"] then
-		return false
-	else
-		return true
 	end
+
+	return true
 end
 
 -- tell window to update the display of its dataset, using its display provider.
@@ -574,7 +582,7 @@ function Window:UpdateDisplay()
 				Skada:Printf("Mode \124cffffbb00%s\124r does not have an Update function!", self.selectedmode.localeName or self.selectedmode.moduleName)
 			end
 
-			if can_show_total(self, set) then
+			if can_show_total(self.db, self.selectedmode, set) then
 				local value, valuetext = self.selectedmode:GetSetSummary(set, self)
 				if value or valuetext then
 					if not value then
@@ -969,8 +977,8 @@ function Skada:CreateWindow(name, db, display)
 		window.db.mode = "Damage"
 	end
 
-	window:SetDisplay(window.db.display, isnew)
-	if window.db.display and displays[window.db.display] then
+	window:SetDisplay(db.display, isnew)
+	if db.display and displays[db.display] then
 		window.display:Create(window, isnew)
 		windows[#windows + 1] = window
 		window:DisplaySets()
@@ -981,7 +989,7 @@ function Skada:CreateWindow(name, db, display)
 			restore_view(window, window.db.set, window.db.mode)
 		end
 	else
-		self:Printf("Window \"\124cffffbb00%s\124r\" was not loaded because its display module, \"\124cff00ff00%s\124r\" was not found.", name, window.db.display or L["Unknown"])
+		self:Printf("Window \"\124cffffbb00%s\124r\" was not loaded because its display module, \"\124cff00ff00%s\124r\" was not found.", name, db.display or L["Unknown"])
 	end
 
 	ACR:NotifyChange(folder)

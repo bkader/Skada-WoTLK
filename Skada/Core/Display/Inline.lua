@@ -679,6 +679,6 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		classcolors = classcolors or Skada.classcolors
 		self.name = L["Inline Bar Display"]
 		self.description = L["mod_inline_desc"]
-		Skada:AddDisplaySystem("inline", self)
+		Skada:AddDisplaySystem("inline", self, true)
 	end
 end)

@@ -423,8 +423,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 		end
 	end
 
-	function mod:CreateBar(win, name, label, value, maxvalue, icon, o)
-		local bar, isnew = win.bargroup:NewBar(name, label, value, maxvalue, icon, o)
+	function mod:CreateBar(win, name, label, value, maxvalue, icon)
+		local bar, isnew = win.bargroup:NewBar(name, label, value, maxvalue, icon)
 		bar.win = win
 		return bar, isnew
 	end
@@ -745,7 +745,9 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 				if data and data.id then
 					local bar = bargroup:GetBar(data.id)
 
+					-- bar generated before class info? remove it...
 					if bar and bar.missingclass and data.class and not data.ignore then
+						bar:Hide()
 						bargroup:RemoveBar(bar)
 						bar.missingclass = nil
 						bar = nil
@@ -766,7 +768,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 						end
 					else
 						-- Initialization of bars.
-						bar = mod:CreateBar(win, data.id, data.label, data.value, metadata.maxvalue or 1, data.icon, false)
+						bar = mod:CreateBar(win, data.id, data.label, data.value, metadata.maxvalue or 1, data.icon)
 						bar.id = data.id
 						bar.text = data.label
 						bar.fixed = nil
@@ -2526,7 +2528,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 
 		function mod:OnInitialize()
 			self.description = L["mod_bar_desc"]
-			Skada:AddDisplaySystem("bar", self)
+			Skada:AddDisplaySystem("bar", self, true)
 
 			self.db = P.scroll
 			if not self.db then
