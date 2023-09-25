@@ -4,7 +4,6 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 	local mod = Skada:NewModule("Bar Display", "SpecializedLibBars-1.0")
 	local callbacks = mod.callbacks
 
-	local ACR = LibStub("AceConfigRegistry-3.0")
 	local pairs, tsort, format = pairs, table.sort, string.format
 	local max, min, abs = math.max, math.min, math.abs
 	local GameTooltip, GameTooltip_Hide = GameTooltip, GameTooltip_Hide
@@ -324,7 +323,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 			end
 
 			Skada:CloseMenus()
-			ACR:NotifyChange(folder)
+			Skada:NotifyChange()
 		end
 	end
 
@@ -384,7 +383,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 
 		SavePosition(group, p)
 		Skada:ApplySettings(p.name)
-		ACR:NotifyChange(folder)
+		Skada:NotifyChange()
 	end
 
 	function mod:WindowLocked(_, group, locked)
@@ -2241,7 +2240,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 				theme.__name = nil
 				G.themes = G.themes or {}
 				G.themes[name] = theme
-				ACR:NotifyChange(folder)
+				Skada:NotifyChange()
 			end
 
 			opt_themes = {

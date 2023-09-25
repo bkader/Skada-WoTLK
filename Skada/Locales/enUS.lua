@@ -1,4 +1,4 @@
-local L = LibStub("AceLocale-3.0"):NewLocale(..., "enUS", true, true)
+local L = LibStub("AceLocale-3.0"):NewLocale(..., "enUS", true)
 if not L then return end
 
 L["A damage meter."] = true
@@ -116,6 +116,8 @@ L["Enter the name for the new window."] = true
 L["Delete Window"] = true
 L["Choose the window to be deleted."] = true
 L["Are you sure you want to delete this window?"] = true
+L["Delete All Windows"] = true
+L["Are you sure you want to delete all windows?"] = true
 L["Rename Window"] = true
 L["Enter the name for the window."] = true
 L["Test Mode"] = true

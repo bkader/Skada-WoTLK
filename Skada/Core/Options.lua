@@ -8,6 +8,7 @@ local ACR = LibStub("AceConfigRegistry-3.0")
 local min, max = math.min, math.max
 local next, format = next, format or string.format
 local wipe, del = wipe, Private.delTable
+local ConfirmDialog = Private.ConfirmDialog
 local _
 
 -- references: windows, modes
@@ -230,6 +231,24 @@ options.set = function(info, value)
 end
 
 -- windows options
+local tremove = Private.tremove
+local function delete_all_windows()
+	local win = tremove(windows)
+	while win do
+		win:Destroy()
+		win = tremove(windows)
+	end
+
+	local wins = Skada.profile.windows
+	win = tremove(wins)
+	while win do
+		Skada.options.args.windows.args[win.name] = del(Skada.options.args.windows.args[win.name], true)
+		win = tremove(wins)
+	end
+	Skada:NotifyChange()
+	Skada:CleanGarbage()
+end
+
 options.args.windows = {
 	type = "group",
 	name = L["Windows"],
@@ -288,6 +307,16 @@ options.args.windows = {
 					end
 				}
 			}
+		},
+		delete = {
+			type = "execute",
+			name = L["Delete All Windows"],
+			width = "full",
+			order = 1,
+			disabled = function() return (not windows or #windows <= 0) end,
+			func = function()
+				ConfirmDialog(L["Are you sure you want to delete all windows?"], delete_all_windows)
+			end
 		}
 	}
 }
@@ -1546,7 +1575,7 @@ do
 			Private.ReloadSettings = Old_ReloadSettings
 			copy(Skada.profile, profile)
 			Private.ReloadSettings()
-			LibStub("AceConfigRegistry-3.0"):NotifyChange(folder)
+			Skada:NotifyChange()
 		end
 
 		Skada.data:SetProfile(profileName)
@@ -1588,7 +1617,7 @@ do
 				Share:Enable(false) -- disable receiving
 				Share.target = nil -- reset target
 			end
-			Private.ConfirmDialog(uformat(L["opt_profile_received"], sender), acceptfunc)
+			ConfirmDialog(uformat(L["opt_profile_received"], sender), acceptfunc)
 		end
 
 		function Share:Send(profileStr, target)

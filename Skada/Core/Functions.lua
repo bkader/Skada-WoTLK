@@ -145,7 +145,7 @@ do
 				self.options.args.windows.args[format("%sdesc", key)] = {
 					type = "description",
 					name = format("\n\124cffffd700%s\124r:\n%s", mod.localeName, mod.description),
-					fontSize = "medium",
+					fontSize = "small",
 					order = numorder
 				}
 				numorder = numorder + 10

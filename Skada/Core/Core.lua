@@ -992,7 +992,7 @@ function Skada:CreateWindow(name, db, display)
 		self:Printf("Window \"\124cffffbb00%s\124r\" was not loaded because its display module, \"\124cff00ff00%s\124r\" was not found.", name, db.display or L["Unknown"])
 	end
 
-	ACR:NotifyChange(folder)
+	self:NotifyChange()
 	self:ApplySettings()
 	return window
 end
@@ -1026,7 +1026,7 @@ do
 	function Skada:DeleteWindow(name, internal)
 		if internal then
 			delete_window(name)
-			ACR:NotifyChange(folder)
+			Skada:NotifyChange()
 			Skada:CloseMenus()
 			return
 		end
@@ -1041,7 +1041,7 @@ do
 				hideOnEscape = 1,
 				OnAccept = function(self, data)
 					Skada:CloseMenus()
-					ACR:NotifyChange(folder)
+					Skada:NotifyChange()
 					return delete_window(data)
 				end
 			}
@@ -2155,6 +2155,10 @@ function Private.RefreshButton()
 	else
 		DBI:Show(folder)
 	end
+end
+
+function Skada:NotifyChange()
+	ACR:NotifyChange(folder)
 end
 
 function Skada:ApplySettings(name, hidemenu)
