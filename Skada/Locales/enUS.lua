@@ -623,6 +623,10 @@ L["Absorbed Damage"] = true
 L["Enable this if you want the damage absorbed to be included in the damage done."] = true
 L["Damage Done By School"] = true
 L["%s Damage"] = true
+-- killing blows module
+L["Killing Blows"] = _G.KILLING_BLOWS or "Killing Blows"
+L["%s's killing blows"] = true
+L["Killing blows on %s"] = true
 -- damage taken module
 L["Damage Taken"] = true
 L["Damage taken by %s"] = true

@@ -569,6 +569,9 @@ L["Absorbed Damage"] = "흡수된 손상"
 L["Enable this if you want the damage absorbed to be included in the damage done."] = "가한 피해에 흡수된 피해가 포함되도록 하려면 이 옵션을 활성화합니다."
 L["Damage Done By School"] = "학교가 가한 피해"
 L["%s Damage"] = "%s 피해"
+-- killing blows module
+L["%s's killing blows"] = "%s - 결정타"
+L["Killing blows on %s"] = "%s - 결정타"
 -- damage taken module
 L["Damage Taken"] = "받은 피해"
 -- L["Damage taken by %s"] = ""

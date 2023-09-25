@@ -989,7 +989,7 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 			win.metadata.maxvalue = 0
 		end
 
-		clear(C, true) -- used later
+		clear(C) -- used later
 
 		local nr = 0
 

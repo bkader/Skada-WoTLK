@@ -570,6 +570,9 @@ L["Absorbed Damage"] = "Поглощенный урон"
 L["Enable this if you want the damage absorbed to be included in the damage done."] = "Включите это, если хотите, чтобы наносимый урон включал поглощенный урон."
 L["Damage Done By School"] = "Ущерб, нанесенный школами"
 L["%s Damage"] = "Урон от %s"
+-- killing blows module
+L["%s's killing blows"] = "%s - Смерт. удары"
+L["Killing blows on %s"] = "Смерт. удары по %s"
 -- damage taken module
 L["Damage Taken"] = "Получено урона"
 L["Damage taken by %s"] = "%s - Полученный урон"

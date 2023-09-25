@@ -14,6 +14,7 @@
 	<Script file="Activity.lua" />
 	<Script file="Comparison.lua" />
 	<Script file="Deaths.lua" />
+	<Script file="KillingBlows.lua" />
 	<Script file="Dispels.lua" />
 	<Script file="Failbot.lua" />
 	<Script file="Healthstone.lua" />

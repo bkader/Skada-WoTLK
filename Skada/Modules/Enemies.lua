@@ -729,7 +729,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	function mode:CombatLeave()
 		instanceDiff = nil
 		wipe(dmg)
-		clear(custom_units, true)
+		clear(custom_units)
 		clear(custom_groups)
 		clear(ignored_units)
 	end

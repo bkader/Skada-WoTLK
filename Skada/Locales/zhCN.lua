@@ -567,6 +567,9 @@ L["Absorbed Damage"] = "吸收伤害"
 L["Enable this if you want the damage absorbed to be included in the damage done."] = "启用此选项，如果你想算入吸收伤害。"
 L["Damage Done By School"] = "学校造成的伤害"
 L["%s Damage"] = "%s伤害"
+-- killing blows module
+L["%s's killing blows"] = "%s的致命一击"
+L["Killing blows on %s"] = "对%s的致命一击"
 -- damage taken module
 L["Damage Taken"] = "承受伤害"
 L["Damage taken by %s"] = "%s的承受伤害"

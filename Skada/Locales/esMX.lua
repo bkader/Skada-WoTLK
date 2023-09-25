@@ -571,6 +571,9 @@ L["Absorbed Damage"] = "Da\195\177o absorbido"
 L["Enable this if you want the damage absorbed to be included in the damage done."] = "Active esta opci\195\179n si desea que el da\195\177o hecho de incluir el da\195\177o absorbido."
 L["Damage Done By School"] = "Da\195\177o hecho por la escuela"
 L["%s Damage"] = "Da\195\177o por %s"
+-- killing blows module
+L["%s's killing blows"] = "Golpes de gracia de %s"
+L["Killing blows on %s"] = "Golpes de gracia sobre %s"
 -- damage taken module
 L["Damage Taken"] = "Da\195\177o recibido"
 L["Damage taken by %s"] = "Da\195\177o recibido por %s"
