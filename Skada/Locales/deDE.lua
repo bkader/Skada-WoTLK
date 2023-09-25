@@ -377,6 +377,7 @@ L["This change requires a UI reload. Are you sure?"] = "Diese \195\132nderung er
 L["Theme"] = "Oberfl\195\164che"
 L["Themes"] = "Oberfl\195\164chen"
 L["Manage Themes"] = "Oberfl\195\164chen verwalten"
+L["All Windows"] = "Alle Fenster"
 L["Apply Theme"] = "Übernimmt die Oberfl\195\164che"
 L["Theme applied!"] = "Oberfl\195\164che \195\188bernommen!"
 L["Name of your new theme."] = "Name deiner neuen Oberfl\195\164che"

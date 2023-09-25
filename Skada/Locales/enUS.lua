@@ -401,6 +401,7 @@ L["This change requires a UI reload. Are you sure?"] = true
 L["Theme"] = true
 L["Themes"] = true
 L["Manage Themes"] = true
+L["All Windows"] = true
 L["Apply Theme"] = true
 L["Apply"] = _G.APPLY
 L["Theme applied!"] = true

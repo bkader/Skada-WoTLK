@@ -382,6 +382,7 @@ L["This change requires a UI reload. Are you sure?"] = "Ce changement n\195\169c
 L["Theme"] = "Th\195\168me"
 L["Themes"] = "Th\195\168mes"
 L["Manage Themes"] = "G\195\169rer les th\195\168mes"
+L["All Windows"] = "Toutes les fen\195\170tres"
 L["Apply Theme"] = "Appliquer le th\195\168me"
 L["Theme applied!"] = "Th\195\168me appliqu\195\169!"
 L["Name of your new theme."] = "Le nom de votre nouveau th\195\168me."

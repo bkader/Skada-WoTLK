@@ -2283,6 +2283,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 								disabled = function() return (applytheme == nil) end,
 								values = function()
 									wipe(list)
+									list["**"] = L["All Windows"]
 									for i = 1, #windows do
 										local win = windows[i]
 										if win and win.db and win.db.display == "bar" then
@@ -2313,11 +2314,16 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 										if theme then
 											for i = 1, #windows do
 												local win = windows[i]
-												if win and win.db and win.db.name == applywindow then
+												if win and win.db and (applywindow == "**" or win.db.name == applywindow) then
 													copy(win.db, theme, skipped)
 													Skada:ApplySettings()
-													Skada:Print(L["Theme applied!"])
+													applytheme = nil
+													-- single window? no need to go further..
+													if win.db.name == applywindow then break end
 												end
+											end
+											if not applytheme then
+												Skada:Print(L["Theme applied!"])
 											end
 										end
 									end

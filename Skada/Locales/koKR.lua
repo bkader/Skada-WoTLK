@@ -378,6 +378,7 @@ L["This change requires a UI reload. Are you sure?"] = "변경하려면 UI 재�
 L["Theme"] = "테마"
 L["Themes"] = "테마"
 L["Manage Themes"] = "테마 관리"
+L["All Windows"] = "모든 창문"
 L["Apply Theme"] = "테마 적용"
 L["Theme applied!"] = "테마 적용!"
 L["Name of your new theme."] = "당신의 새로운 테마의 이름입니다."

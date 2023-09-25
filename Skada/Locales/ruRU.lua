@@ -379,6 +379,7 @@ L["This change requires a UI reload. Are you sure?"] = "Это изменени�
 L["Theme"] = "Тема"
 L["Themes"] = "Темы"
 L["Manage Themes"] = "Управление темами"
+L["All Windows"] = "Все окна"
 L["Apply Theme"] = "Применить тему"
 L["Theme applied!"] = "Тема применена!"
 L["Name of your new theme."] = "Название вашей новой темы."

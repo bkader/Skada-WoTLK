@@ -376,6 +376,7 @@ L["This change requires a UI reload. Are you sure?"] = "這些改變需要重載
 L["Theme"] = "主題"
 L["Themes"] = "主題"
 L["Manage Themes"] = "管理風格"
+L["All Windows"] = "所有窗口"
 L["Apply Theme"] = "套用主題"
 L["Theme applied!"] = "主題已應用！"
 L["Name of your new theme."] = "你新主題的名稱。"
