@@ -570,8 +570,9 @@ L["Enable this if you want the damage absorbed to be included in the damage done
 L["Damage Done By School"] = "학교가 가한 피해"
 L["%s Damage"] = "%s 피해"
 -- killing blows module
-L["%s's killing blows"] = "%s - 결정타"
-L["Killing blows on %s"] = "%s - 결정타"
+L["Only PvP Kills"] = "PvP 킬만 계산됩니다."
+L["When enabled, only kills against enemy players count."] = "활성화되면 적 플레이어에 대한 킬만 계산됩니다."
+L["Announce killing blows after combat ends. Only works for boss fights."] = "전투가 끝난 후 결정타를 선언합니다. 보스에게만 작동합니다."
 -- damage taken module
 L["Damage Taken"] = "받은 피해"
 -- L["Damage taken by %s"] = ""

@@ -245,7 +245,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M, O)
 					image = [[Interface\ICONS\ability_kick]],
 					imageWidth = 18,
 					imageHeight = 18,
-					imageCoords = {0.05, 0.95, 0.05, 0.95},
+					imageCoords = Skada.cropTable,
 					width = "full",
 					order = 0
 				},

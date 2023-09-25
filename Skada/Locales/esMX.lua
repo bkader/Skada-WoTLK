@@ -572,8 +572,9 @@ L["Enable this if you want the damage absorbed to be included in the damage done
 L["Damage Done By School"] = "Da\195\177o hecho por la escuela"
 L["%s Damage"] = "Da\195\177o por %s"
 -- killing blows module
-L["%s's killing blows"] = "Golpes de gracia de %s"
-L["Killing blows on %s"] = "Golpes de gracia sobre %s"
+L["Only PvP Kills"] = "Solo muertes en JcJ"
+L["When enabled, only kills against enemy players count."] = "Cuando est\195\161 activado, s\195\179lo cuentan las muertes contra jugadores enemigos."
+L["Announce killing blows after combat ends. Only works for boss fights."] = "Anuncia golpes de gracia una vez finalizado el combate. Solo funciona contra jefes."
 -- damage taken module
 L["Damage Taken"] = "Da\195\177o recibido"
 L["Damage taken by %s"] = "Da\195\177o recibido por %s"

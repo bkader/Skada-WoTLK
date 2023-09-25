@@ -571,8 +571,9 @@ L["Enable this if you want the damage absorbed to be included in the damage done
 L["Damage Done By School"] = "Ущерб, нанесенный школами"
 L["%s Damage"] = "Урон от %s"
 -- killing blows module
-L["%s's killing blows"] = "%s - Смерт. удары"
-L["Killing blows on %s"] = "Смерт. удары по %s"
+L["Only PvP Kills"] = "Только убийства в PvP"
+L["When enabled, only kills against enemy players count."] = "Если этот параметр включен, засчитываются только убийства вражеских игроков."
+L["Announce killing blows after combat ends. Only works for boss fights."] = "Объявляйте смертельные удары после окончания боя. Работает только против боссов."
 -- damage taken module
 L["Damage Taken"] = "Получено урона"
 L["Damage taken by %s"] = "%s - Полученный урон"

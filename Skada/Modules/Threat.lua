@@ -381,7 +381,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M, O)
 					image = aggro_icon,
 					imageWidth = 18,
 					imageHeight = 18,
-					imageCoords = {0.05, 0.95, 0.05, 0.95},
+					imageCoords = Skada.cropTable,
 					width = "full",
 					order = 0
 				},

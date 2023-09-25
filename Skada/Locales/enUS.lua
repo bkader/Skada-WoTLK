@@ -625,8 +625,9 @@ L["Damage Done By School"] = true
 L["%s Damage"] = true
 -- killing blows module
 L["Killing Blows"] = _G.KILLING_BLOWS or "Killing Blows"
-L["%s's killing blows"] = true
-L["Killing blows on %s"] = true
+L["Only PvP Kills"] = true
+L["When enabled, only kills against enemy players count."] = true
+L["Announce killing blows after combat ends. Only works for boss fights."] = true
 -- damage taken module
 L["Damage Taken"] = true
 L["Damage taken by %s"] = true

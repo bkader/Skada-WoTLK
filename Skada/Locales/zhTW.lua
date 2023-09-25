@@ -568,8 +568,9 @@ L["Enable this if you want the damage absorbed to be included in the damage done
 L["Damage Done By School"] = "学校造成的伤害"
 L["%s Damage"] = "%s傷害"
 -- killing blows module
-L["%s's killing blows"] = "%s的致命一擊"
-L["Killing blows on %s"] = "對%s的致命一擊"
+L["Only PvP Kills"] = "僅限 PvP 殺"
+L["When enabled, only kills against enemy players count."] = "啟用後，僅對敵方玩家進行殺死才算數。"
+L["Announce killing blows after combat ends. Only works for boss fights."] = "戰鬥結束後宣布致命一擊。 僅對Boss有效。"
 -- damage taken module
 L["Damage Taken"] = "承受傷害"
 L["Damage taken by %s"] = "%s的承受傷害"

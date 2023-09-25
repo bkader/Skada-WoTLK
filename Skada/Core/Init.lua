@@ -44,6 +44,9 @@ ns.dummyTable = {} -- a dummy table used as fallback
 ns.cacheTable = {} -- primary cache table
 ns.cacheTable2 = {} -- secondary cache table
 
+-- table used to crop mode options images.
+ns.cropTable = {0.06, 0.94, 0.06, 0.94}
+
 -------------------------------------------------------------------------------
 -- flags/bitmasks
 

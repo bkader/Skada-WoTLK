@@ -1,16 +1,19 @@
 local _, Skada = ...
 local Private = Skada.Private
-Skada:RegisterModule("Killing Blows", function(L, P, _, C)
+Skada:RegisterModule("Killing Blows", function(L, P, _, C, M, O)
 	local mode = Skada:NewModule("Killing Blows")
 	local mode_target = mode:NewModule("Target List")
 	local mode_source = mode_target:NewModule("Source List")
 	local get_actor_killing_blows = nil
 	local get_target_killing_blows = nil
-
-	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
-	local uformat = Private.uformat
-	local last_damager = {}
 	local mode_cols = nil
+
+	local KILLING_BLOWS = _G.KILLING_BLOWS or mode.localeName
+	local next, tconcat = next, table.concat
+	local SpellLink, uformat = Private.SpellLink or GetSpellLink, Private.uformat
+	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
+	local announce_fmt = format("%s: %%s > %%s <%%s> %%s", KILLING_BLOWS)
+	local last_damager = {}
 
 	local function format_valuetext(d, columns, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -23,49 +26,96 @@ Skada:RegisterModule("Killing Blows", function(L, P, _, C)
 		end
 	end
 
-	local function log_kill(set, data, dstName)
-		local actor = Skada:GetActor(set, data.name, data.id, data.flag)
+	local function log_kill(set, data)
+		local actor = Skada:GetActor(set, data.actorname, data.actorid, data.actorflags)
 		if not actor then return end
 
 		set.kill = (set.kill or 0) + 1
 		actor.kill = (actor.kill or 0) + 1
 
-		if not dstName or (set == Skada.total and not P.totalidc) then return end
+		local dstName = (set ~= Skada.total or P.totalidc) and data.dstName
+		if not dstName then return end
 
 		actor.kills = actor.kills or {}
 		actor.kills[dstName] = (actor.kills[dstName] or 0) + 1
 	end
 
 	local function spell_damage(t)
-		if not t.dstGUID then return end
+		if not t.dstGUID or (M.killpvponly and not t:DestIsPlayer()) then return end
 
-		local actor = last_damager[t.dstGUID]
-		if not actor then
-			last_damager[t.dstGUID] = new()
-			actor = last_damager[t.dstGUID]
+		local data = last_damager[t.dstGUID] or new()
+		last_damager[t.dstGUID] = data
+
+		data.actorid = t.srcGUID
+		data.actorname = t.srcName
+		data.actorflags = t.srcFlags
+		data.dstName = t.dstName
+
+		-- announcing? collect data...
+		if M.killannounce then
+			data.spellname = t.spellname
+			data.amount = t.amount
+			data.overkill = t.overkill
+			data.absorbed = t.absorbed
+			data.blocked = t.blocked
+			data.resisted = t.resisted
 		end
 
-		actor.dstName = t.dstName
-		actor.id, actor.name, actor.flag = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
+		Skada:FixPets(data)
 	end
 
 	local function unit_died(t)
-		if not t.dstGUID then return end
+		local data = t.dstGUID and last_damager[t.dstGUID]
+		if not data then return end
 
-		local actor = last_damager[t.dstGUID]
-		if not actor then return end
+		Skada:DispatchSets(log_kill, data)
 
-		Skada:DispatchSets(log_kill, actor, t.dstName)
+		if M.killannounce and Skada:IsBoss(t.dstGUID, true) then
+			local output = format(
+				announce_fmt,
+				data.actorname,
+				data.dstName,
+				data.spellname or L["Unknown"],
+				data.amount and Skada:FormatNumber(0 - data.amount, 1) or "??"
+			)
+
+			if data.overkill or data.resisted or data.blocked or data.absorbed then
+				local extra = new()
+
+				if data.overkill then
+					extra[#extra + 1] = format("O:%s", Skada:FormatNumber(data.overkill, 1))
+				end
+				if data.resisted then
+					extra[#extra + 1] = format("R:%s", Skada:FormatNumber(data.resisted, 1))
+				end
+				if data.blocked then
+					extra[#extra + 1] = format("B:%s", Skada:FormatNumber(data.blocked, 1))
+				end
+				if data.absorbed then
+					extra[#extra + 1] = format("A:%s", Skada:FormatNumber(data.absorbed, 1))
+				end
+
+				if next(extra) then
+					output = format("%s [%s]", output, tconcat(extra, " - "))
+				end
+
+				extra = del(extra)
+			end
+
+			Skada:SendChat(output, M.killchannel or "SAY", "preset")
+		end
+
+		-- not needed anymore?
 		last_damager[t.dstGUID] = del(last_damager[t.dstGUID])
 	end
 
 	function mode_source:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["Killing blows on %s"], label)
+		win.title = format("%s - %s", label, KILLING_BLOWS)
 	end
 
 	function mode_source:Update(win, set)
-		win.title = uformat(L["Killing blows on %s"], win.targetname)
+		win.title = uformat("%s - %s", win.targetname, KILLING_BLOWS)
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
@@ -91,11 +141,11 @@ Skada:RegisterModule("Killing Blows", function(L, P, _, C)
 
 	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's killing blows"], label)
+		win.title = format("%s - %s", label, KILLING_BLOWS)
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's killing blows"], win.actorname)
+		win.title = uformat("%s - %s", win.actorname, KILLING_BLOWS)
 		if not set or not win.actorname then return end
 
 		local total, targets = get_actor_killing_blows(set, win.actorname, win.actorid)
@@ -171,7 +221,7 @@ Skada:RegisterModule("Killing Blows", function(L, P, _, C)
 			ordersort = true,
 			filterclass = true,
 			click1 = mode_target,
-			columns = {Count = true, Damage = true, Percent = true, sPercent = true},
+			columns = {Count = true, Percent = true, sPercent = false},
 			icon = [[Interface\ICONS\ability_creature_cursed_02]]
 		}
 
@@ -204,6 +254,58 @@ Skada:RegisterModule("Killing Blows", function(L, P, _, C)
 
 	function mode:OnDisable()
 		Skada:RemoveMode(self)
+	end
+
+	function mode:OnInitialize()
+		M.killchannel = M.killchannel or "SAY"
+
+		O.modules.args.killbow = {
+			type = "group",
+			name = self.localeName,
+			desc = format(L["Options for %s."], self.localeName),
+			args = {
+				header = {
+					type = "description",
+					name = self.localeName,
+					fontSize = "large",
+					image = [[Interface\ICONS\ability_creature_cursed_02]],
+					imageWidth = 18,
+					imageHeight = 18,
+					imageCoords = Skada.cropTable,
+					width = "full",
+					order = 0
+				},
+				empty_1 = {
+					type = "description",
+					name = " ",
+					width = "full",
+					order = 1
+				},
+				killpvponly = {
+					type = "toggle",
+					name = L["Only PvP Kills"],
+					desc = L["When enabled, only kills against enemy players count."],
+					descStyle = "inline",
+					width = "full",
+					order = 2
+				},
+				killannounce = {
+					type = "toggle",
+					name = format(L["Announce %s"], KILLING_BLOWS),
+					desc = L["Announce killing blows after combat ends. Only works for boss fights."],
+					descStyle = "inline",
+					width = "full",
+					order = 3
+				},
+				killchannel = {
+					type = "select",
+					name = L["Channel"],
+					values = {AUTO = L["Instance"], SAY = L["Say"], YELL = L["Yell"], SELF = L["Self"]},
+					order = 4,
+					width = "full"
+				},
+			}
+		}
 	end
 
 	---------------------------------------------------------------------------

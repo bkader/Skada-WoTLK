@@ -183,7 +183,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M, O)
 							image = [[Interface\ICONS\ability_creature_cursed_01]],
 							imageWidth = 18,
 							imageHeight = 18,
-							imageCoords = {0.05, 0.95, 0.05, 0.95},
+							imageCoords = Skada.cropTable,
 							width = "full",
 							order = 0
 						},

@@ -574,8 +574,9 @@ L["Enable this if you want the damage absorbed to be included in the damage done
 L["Damage Done By School"] = "D\195\169g\195\162ts inflig\195\169s par \195\169cole"
 L["%s Damage"] = "D\195\169g\195\162ts \1242 %s"
 -- killing blows module
-L["%s's killing blows"] = "Coups fatals \1242 %s"
-L["Killing blows on %s"] = "Coups fatals sur %s"
+L["Only PvP Kills"] = "Seulement en PvP"
+L["When enabled, only kills against enemy players count."] = "Si activ\195\169, seuls les coups fatals contre des joueurs ennemies comptent."
+L["Announce killing blows after combat ends. Only works for boss fights."] = "Annoncer les coups fatals une fois le combat termin\195\169. Fonctionne seulement contre les boss."
 -- damage taken module
 L["Damage Taken"] = "D\195\169g\195\162ts subis"
 L["Damage taken by %s"] = "D\195\169g\195\162ts subis par %s"

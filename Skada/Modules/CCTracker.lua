@@ -746,7 +746,7 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M, O)
 					image = [[Interface\ICONS\spell_holy_sealofvalor]],
 					imageWidth = 18,
 					imageHeight = 18,
-					imageCoords = {0.05, 0.95, 0.05, 0.95},
+					imageCoords = Skada.cropTable,
 					width = "full",
 					order = 0
 				},
