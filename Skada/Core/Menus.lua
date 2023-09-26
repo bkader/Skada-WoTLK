@@ -196,7 +196,7 @@ function Skada:OpenMenu(window)
 
 			-- start new segment
 			wipe(info)
-			info.text = L["Start New Segment"]
+			info.text = L["New Segment"]
 			info.func = function()
 				Skada:NewSegment()
 			end
@@ -206,7 +206,7 @@ function Skada:OpenMenu(window)
 
 			-- start new phase
 			wipe(info)
-			info.text = L["Start New Phase"]
+			info.text = L["New Phase"]
 			info.func = function()
 				Skada:NewPhase()
 			end

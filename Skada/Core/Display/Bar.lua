@@ -121,6 +121,14 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 			end
 		end
 
+		local function splitOnClick()
+			return Skada:NewSegment()
+		end
+
+		local function phaseOnClick()
+			return Skada:NewPhase()
+		end
+
 		local function stopOnClick(self, button)
 			if not Skada.current then
 				return
@@ -163,6 +171,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 				AddWindowButton(bargroup, p.title.toolbar, "reset", L["Reset"], L["btn_reset_desc"], resetOnClick)
 				AddWindowButton(bargroup, p.title.toolbar, "segment", L["Segment"], L["btn_segment_desc"], segmentOnClick)
 				AddWindowButton(bargroup, p.title.toolbar, "mode", L["Mode"], L["Jump to a specific mode."], modeOnClick)
+				AddWindowButton(bargroup, p.title.toolbar, "split", L["New Segment"], L["Starts a new segment."], splitOnClick)
+				AddWindowButton(bargroup, p.title.toolbar, "phase", L["New Phase"], L["Starts a new phase."], phaseOnClick)
 				AddWindowButton(bargroup, p.title.toolbar, "report", L["Report"], L["btn_report_desc"], reportOnClick)
 				AddWindowButton(bargroup, p.title.toolbar, "stop", L["Stop"], L["btn_stop_desc"], stopOnClick)
 			end
@@ -1095,6 +1105,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 				g:ShowButton(L["Reset"], p.buttons.reset)
 				g:ShowButton(L["Segment"], p.buttons.segment)
 				g:ShowButton(L["Mode"], p.buttons.mode)
+				g:ShowButton(L["New Phase"], p.buttons.phase)
+				g:ShowButton(L["New Segment"], p.buttons.split)
 				g:ShowButton(L["Report"], p.buttons.report)
 				g:ShowButton(L["Stop"], p.buttons.stop)
 			else
@@ -1815,6 +1827,18 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 									name = L["Stop"],
 									desc = L["btn_stop_desc"],
 									order = 60
+								},
+								split = {
+									type = "toggle",
+									name = L["New Segment"],
+									desc = L["Starts a new segment."],
+									order = 70
+								},
+								phase = {
+									type = "toggle",
+									name = L["New Phase"],
+									desc = L["Starts a new phase."],
+									order = 80
 								}
 							}
 						},
