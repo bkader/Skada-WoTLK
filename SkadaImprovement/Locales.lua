@@ -57,6 +57,7 @@ if L then
 	-- L["Improvement comparison"] = ""
 	-- L["Do you want to reset your improvement data?"] = ""
 	-- L["%s's overall data"] = ""
+	return
 end
 
 L = LibStub("AceLocale-3.0"):NewLocale("Skada", "ruRU")
@@ -66,6 +67,7 @@ if L then
 	L["Improvement comparison"] = "Сравнение улучшений"
 	L["Do you want to reset your improvement data?"] = "Вы хотите сбросить данные об улучшении?"
 	L["%s's overall data"] = "%s - Данные об улучшении"
+	return
 end
 
 L = LibStub("AceLocale-3.0"):NewLocale("Skada", "zhCN")
@@ -75,6 +77,7 @@ if L then
 	L["Improvement comparison"] = "提升比较"
 	L["Do you want to reset your improvement data?"] = "确定要重置你的提升数据？"
 	L["%s's overall data"] = "%s的总体数据"
+	return
 end
 
 L = LibStub("AceLocale-3.0"):NewLocale("Skada", "zhTW")
@@ -84,4 +87,5 @@ if L then
 	-- L["Improvement comparison"] = ""
 	-- L["Do you want to reset your improvement data?"] = ""
 	-- L["%s's overall data"] = ""
+	return
 end

@@ -209,6 +209,8 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			e.totaldamaged = e.totaldamaged + absorbed
 		end
 
+		if not spellid then return end
+
 		-- spell
 		local spell = e.damagedspells and e.damagedspells[spellid]
 		if not spell then
@@ -271,9 +273,9 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 	local dmg = {}
 	local function log_damage(set)
-		if not set or (set == Skada.total and not P.totalidc) then return end
-
 		local amount = dmg.amount
+		if not amount then return end
+
 		local absorbed = dmg.absorbed or 0
 		if (amount + absorbed) == 0 then return end
 
@@ -296,8 +298,17 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			set.etotaldamaged = set.edamaged + absorbed
 		end
 
-		-- damage spell.
+		local srcName = dmg.srcName
 		local spellid = dmg.spellid
+		local overkill = dmg.overkill or 0
+
+		-- saving this to total set may become a memory hog deluxe.
+		if set == Skada.total and not P.totalidc then
+			log_custom_group(set, actorname, actorid, srcName, spellid, amount, overkill, absorbed)
+			return
+		end
+
+		-- damage spell.
 		local spell = e.damagedspells and e.damagedspells[spellid]
 		if not spell then
 			e.damagedspells = e.damagedspells or {}
@@ -313,13 +324,11 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			spell.total = spell.amount + absorbed
 		end
 
-		local overkill = dmg.overkill or 0
 		if overkill > 0 then
 			spell.o_amt = (spell.o_amt or 0) + overkill
 		end
 
 		-- damage source.
-		local srcName = dmg.srcName
 		if not srcName then return end
 
 		-- the source
@@ -347,6 +356,10 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 		-- custom groups
 		log_custom_group(set, actorname, actorid, srcName, spellid, amount, overkill, absorbed)
+
+		-- until a better and simple way is found to handle custom units
+		-- this is temporarily disabled, only recorded to the current set.
+		if set ~= Skada.current then return end
 
 		-- custom units.
 		local units = get_custom_units(actorid, actorname, amount, overkill)
@@ -817,7 +830,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 
 	local dmg = {}
 	local function log_damage(set)
-		if not set or (set == Skada.total and not P.totalidc) then return end
+		if not dmg.amount then return end
 
 		local absorbed = dmg.absorbed or 0
 		if (dmg.amount + absorbed) == 0 then return end
@@ -849,6 +862,9 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 			set.eoverkill = (set.eoverkill or 0) + dmg.overkill
 			e.overkill = (e.overkill or 0) + dmg.overkill
 		end
+
+		-- saving this to total set may become a memory hog deluxe.
+		if set == Skada.total and not P.totalidc then return end
 
 		-- damage spell.
 		local spell = e.damagespells and e.damagespells[dmg.spellid]
@@ -1229,7 +1245,6 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 
 	local heal = {}
 	local function log_heal(set)
-		if not set or (set == Skada.total and not P.totalidc) then return end
 		if not heal.amount then return end
 
 		local actor = Skada:GetActor(set, heal.actorname, heal.actorid, heal.actorflags)
@@ -1248,6 +1263,9 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 			actor.overheal = (actor.overheal or 0) + overheal
 			set.eoverheal = (set.eoverheal or 0) + overheal
 		end
+
+		-- saving this to total set may become a memory hog deluxe.
+		if set == Skada.total and not P.totalidc then return end
 
 		local spell = actor.healspells and actor.healspells[heal.spellid]
 		if not spell then
