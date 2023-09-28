@@ -351,11 +351,11 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			source.o_amt = (source.o_amt or 0) + overkill
 		end
 
-		-- the rest of the code is only for allowed instance diffs.
-		if not allowed_diffs[get_instance_diff()] then return end
-
 		-- custom groups
 		log_custom_group(set, actorname, actorid, srcName, spellid, amount, overkill, absorbed)
+
+		-- the rest of the code is only for allowed instance diffs.
+		if not allowed_diffs[get_instance_diff()] then return end
 
 		-- until a better and simple way is found to handle custom units
 		-- this is temporarily disabled, only recorded to the current set.
