@@ -5,7 +5,9 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P, _, _, _
 	local format, wipe, GetTime = string.format, wipe, GetTime
 	local UnitGUID, UnitClass, UnitBuff, UnitIsPlayer = UnitGUID, UnitClass, UnitBuff, UnitIsPlayer
 	local spellnames, UnitCastingInfo = Skada.spellnames, UnitCastingInfo
+	local group_units, group_pets = Skada.Units.group, Skada.Units.grouppet
 
+	local validclass = Skada.validclass
 	local specsCache, specsRoles = nil, nil
 	local spellsTable, aurasTable = nil, nil
 
@@ -162,17 +164,32 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P, _, _, _
 		end
 	end
 
-	function mode:UNIT_AURA(_, unit)
-		if Skada.insType ~= "pvp" and Skada.insType ~= "arena" then
-			Skada.UnregisterEvent(self, "UNIT_AURA")
-		elseif unit and UnitIsPlayer(unit) and not specsCache[UnitGUID(unit)] then
-			local _, class = UnitClass(unit)
-			if Skada.validclass[class] then
+	local function unit_guid_and_class(unit)
+		-- validate unit.
+		local guid = unit and not group_units[unit] and not group_pets[unit] and UnitIsPlayer(unit) and UnitGUID(unit)
+		if not guid or specsCache[guid] then return end -- invalid or already cached
+
+		-- validate class
+		local _, class = UnitClass(unit)
+		if not validclass[class] then return end
+
+		return guid, class
+	end
+
+	function mode:UNIT_AURA(units)
+		if not self.enabled then
+			Skada.UnregisterBucket(self, "UNIT_AURA")
+			return
+		end
+
+		for unit in pairs(units) do
+			local guid, class = unit_guid_and_class(unit)
+			if guid and class then
 				local i = 1
 				local name = UnitBuff(unit, i)
 				while name do
 					if aurasTable[class] and aurasTable[class][name] then
-						specsCache[UnitGUID(unit)] = aurasTable[class][name]
+						specsCache[guid] = aurasTable[class][name]
 						break -- found
 					end
 					i = i + 1
@@ -182,53 +199,68 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P, _, _, _
 		end
 	end
 
-	function mode:UNIT_SPELLCAST_START(_, unit)
-		if Skada.insType ~= "pvp" and Skada.insType ~= "arena" then
-			Skada.UnregisterEvent(self, "UNIT_SPELLCAST_START")
-		elseif unit and UnitIsPlayer(unit) and not specsCache[UnitGUID(unit)] then
-			local _, class = UnitClass(unit)
-			local spell = UnitCastingInfo(unit)
-			if Skada.validclass[class] and spellsTable[class] and spellsTable[class][spell] then
-				specsCache[UnitGUID(unit)] = spellsTable[class][spell]
+	function mode:UNIT_SPELLCAST_START(units)
+		if not self.enabled then
+			Skada.UnregisterBucket(self, "UNIT_SPELLCAST_START")
+			return
+		end
+
+		for unit in pairs(units) do
+			local guid, class = unit_guid_and_class(unit)
+			if guid and class then
+				local spell = UnitCastingInfo(unit)
+				if spell and spellsTable[class] and spellsTable[class][spell] then
+					specsCache[guid] = spellsTable[class][spell]
+				end
 			end
 		end
 	end
 
+	function mode:UNIT_SPELLCAST_SUCCEEDED(_, unit, spell)
+		if not self.enabled then
+			Skada.UnregisterEvent(self, "UNIT_SPELLCAST_SUCCEEDED")
+			return
+		end
+
+		local guid, class = unit_guid_and_class(unit)
+		if not guid or not spell then return end
+
+		if spellsTable[class] and spellsTable[class][spell] then
+			specsCache[guid] = spellsTable[class][spell]
+		end
+	end
+
 	function mode:CheckZone(_, current, previous)
+		self.enabled = current == "arena" or current == "pvp"
+
 		if current == previous then return end
 
 		specsCache = wipe(specsCache or {})
 
-		if current == "arena" or current == "pvp" then
+		if self.enabled then
 			build_spell_list()
-			Skada.RegisterEvent(self, "UNIT_AURA")
-			Skada.RegisterEvent(self, "UNIT_SPELLCAST_START")
+			Skada.RegisterBucketEvent(self, "UNIT_AURA", 0.2)
+			Skada.RegisterBucketEvent(self, "UNIT_SPELLCAST_START", 0.2)
+			Skada.RegisterEvent(self, "UNIT_SPELLCAST_SUCCEEDED")
 			Skada.RegisterCallback(self, "Skada_GetEnemy", "GetEnemy")
 		else
-			Skada.UnregisterEvent(self, "UNIT_AURA")
-			Skada.UnregisterEvent(self, "UNIT_SPELLCAST_START")
+			Skada.UnregisterAllBuckets(self)
+			Skada.UnregisterEvent(self, "UNIT_SPELLCAST_SUCCEEDED")
 			Skada.UnregisterCallback(self, "Skada_GetEnemy", "GetEnemy")
 		end
 	end
 
 	function mode:GetEnemy(_, actor, set)
-		if actor and not actor.fake and Skada.validclass[actor.class] then
-			if actor.spec == nil then
-				actor.spec = specsCache[actor.id]
-			end
+		if not actor or actor.fake or not validclass[actor.class] then return end
 
-			if actor.spec and (actor.role == nil or actor.role == "NONE") then
-				actor.role = specsRoles[actor.spec] or "DAMAGER"
-			end
+		actor.spec = actor.spec or specsCache[actor.id]
 
-			if actor.time == nil then
-				actor.time = 0
-			end
-
-			if actor.last == nil then
-				actor.last = Skada._Time or GetTime()
-			end
+		if actor.spec and (actor.role == nil or actor.role == "NONE") then
+			actor.role = specsRoles[actor.spec] or "DAMAGER"
 		end
+
+		actor.time = actor.time or 0
+		actor.last = actor.last or Skada._Time or GetTime()
 	end
 
 	function mode:OnEnable()
@@ -239,7 +271,10 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P, _, _, _
 
 	function mode:OnDisable()
 		Skada.forPVP = nil
+		Skada.UnregisterAllBuckets(self)
+		Skada.UnregisterAllEvents(self)
 		Skada.UnregisterAllMessages(self)
+		Skada.UnregisterAllCallbacks(self)
 	end
 
 	---------------------------------------------------------------------------

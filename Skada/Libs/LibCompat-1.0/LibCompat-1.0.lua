@@ -26,6 +26,7 @@ do
 	-- solo, group, pets and targets
 	local solo = {"player", "pet"}
 	local group = {player = true}
+	local grouppet = {playerpet = true}
 	local target = {"target", "targettarget", "focus", "focustarget", "mouseover", "mouseovertarget"}
 
 	-- boss
@@ -43,7 +44,10 @@ do
 		party[i] = unit
 		group[unit] = true
 
-		partypet[i] = format("partypet%d", i)
+		unit = format("partypet%d", i)
+		partypet[i] = unit
+		grouppet[unit] = true
+
 		target[#target + 1] = format("party%dtarget", i)
 	end
 
@@ -55,7 +59,10 @@ do
 		raid[i] = unit
 		group[unit] = true
 
-		raidpet[i] = format("raidpet%d", i)
+		unit = format("raidpet%d", i)
+		raidpet[i] = unit
+		grouppet[unit] = true
+
 		target[#target + 1] = format("raid%dtarget", i)
 	end
 
@@ -72,6 +79,7 @@ do
 		-- solo and targets
 		solo = solo,
 		group = group,
+		grouppet = grouppet,
 		target = target,
 		-- party units and pets
 		party = party,

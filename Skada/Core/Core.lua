@@ -2803,12 +2803,14 @@ do
 				if bit_band(t.dstFlags or 0, BITMASK_CONTROL_PLAYER) ~= 0 then
 					set.type = "pvp"
 					set.gotboss = false
+					Skada:SendMessage("ZONE_TYPE_CHANGED", "pvp", Skada.insType)
 				end
 			elseif dst_is_interesting and not t:SourceIsFriendly() then
 				set.mobname = t.srcName
 				if bit_band(t.srcFlags or 0, BITMASK_CONTROL_PLAYER) ~= 0 then
 					set.type = "pvp"
 					set.gotboss = false
+					Skada:SendMessage("ZONE_TYPE_CHANGED", "pvp", Skada.insType)
 				end
 			end
 		end
