@@ -725,8 +725,9 @@ ns.creature_to_boss = {
 }
 
 -- use LibBossIDs-1.0 as backup plan
-local LBI = LibStub("LibBossIDs-1.0", true)
-if LBI then setmetatable(ns.creature_to_boss, {__index = LBI.BossIDs}) end
+local LBI = LibStub("LibBossIDs-1.0")
+setmetatable(ns.creature_to_boss, {__index = LBI.BossIDs})
+ns.BossIDs = LBI.BossIDs -- needed for some CLEU stuff.
 
 -------------------------------------------------------------------------------
 

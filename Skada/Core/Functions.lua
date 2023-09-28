@@ -298,8 +298,8 @@ do
 
 	function Private.SetValueFormat(bracket, separator)
 		format_2 = brackets[bracket or 1]
-		format_3 = "%s " .. format(format_2, separators[separator or 1])
-		format_2 = "%s " .. format_2
+		format_3 = format("%%s %s", format(format_2, separators[separator or 1]))
+		format_2 = format("%%s %s", format_2)
 	end
 
 	function Skada:FormatValueText(v1, b1, v2, b2, v3, b3)
@@ -354,13 +354,8 @@ do
 			return
 		end
 		if strlower(chan) == "auto" then
-			if not IsInGroup() then
-				return
-			elseif Skada.insType == "pvp" or Skada.insType == "arena" then
-				chan = "battleground"
-			else
-				chan = IsInRaid() and "raid" or "party"
-			end
+			if not IsInGroup() then return end
+			chan = (Skada.insType == "pvp" or Skada.insType == "arena") and "battleground" or IsInRaid() and "raid" or "party"
 		end
 
 		if not noescape then
@@ -956,39 +951,39 @@ do
 	end
 
 	function Skada.AddComm(self, const, func)
-		if self and const then
-			Skada.comms = Skada.comms or {}
-			Skada.comms[const] = Skada.comms[const] or {}
-			Skada.comms[const][self] = Skada.comms[const][self] or {}
-			Skada.comms[const][self][func or const] = true
-		end
+		if not self or not const then return end
+
+		Skada.comms = Skada.comms or {}
+		Skada.comms[const] = Skada.comms[const] or {}
+		Skada.comms[const][self] = Skada.comms[const][self] or {}
+		Skada.comms[const][self][func or const] = true
 	end
 
 	function Skada.RemoveComm(self, func)
-		if self and Skada.comms then
-			for const, selfs in pairs(Skada.comms) do
-				if selfs[self] then
-					selfs[self][func] = nil
+		if not self or not Skada.comms then return end
 
-					-- remove the table if empty
-					if next(selfs[self]) == nil then
-						selfs[self] = nil
-					end
+		for const, selfs in pairs(Skada.comms) do
+			if selfs[self] then
+				selfs[self][func] = nil
 
-					break
+				-- remove the table if empty
+				if next(selfs[self]) == nil then
+					selfs[self] = nil
 				end
+
+				break
 			end
 		end
 	end
 
 	function Skada.RemoveAllComms(self)
-		if self and Skada.comms then
-			for const, selfs in pairs(Skada.comms) do
-				for _self in pairs(selfs) do
-					if self == _self then
-						selfs[self] = nil
-						break
-					end
+		if not self or not Skada.comms then return end
+
+		for const, selfs in pairs(Skada.comms) do
+			for _self in pairs(selfs) do
+				if self == _self then
+					selfs[self] = nil
+					break
 				end
 			end
 		end
@@ -1040,11 +1035,7 @@ end
 -- returns the selected set time.
 function Skada:GetSetTime(set)
 	local settime = set and set.time
-	if not settime then
-		return 0
-	end
-
-	return (settime >= 1) and settime or max(1, time() - set.starttime)
+	return not settime and 0 or (settime >= 1) and settime or max(1, time() - set.starttime)
 end
 
 -- returns the actor's active/effective time
@@ -1514,12 +1505,12 @@ do
 
 				-- we only need to scan the 2nd line.
 				local text = _G["SkadaPetTooltipTextLeft2"] and _G["SkadaPetTooltipTextLeft2"]:GetText()
-				if text and text ~= "" then
-					for actorname, actor in pairs(actors) do
-						local name = not actor.enemy and gsub(actorname, "%-.*", "")
-						if name and ((LOCALE_ruRU and FindNameDeclension(text, name)) or ValidatePetOwner(text, name)) then
-							return actor.id, actorname
-						end
+				if not text or text == "" then return end
+
+				for actorname, actor in pairs(actors) do
+					local name = not actor.enemy and gsub(actorname, "%-.*", "")
+					if name and ((LOCALE_ruRU and FindNameDeclension(text, name)) or ValidatePetOwner(text, name)) then
+						return actor.id, actorname
 					end
 				end
 			end
@@ -1547,21 +1538,21 @@ do
 			end
 
 			-- no owner yet?
-			if guid then
-				-- guess the pet from roster.
-				local ownerUnit = GetPetOwnerUnit(guid)
-				if ownerUnit then
-					local ownerGUID = UnitGUID(ownerUnit)
-					guidToOwner[guid] = ownerGUID
-					return ownerGUID, UnitFullName(ownerUnit)
-				end
+			if not guid then return end
 
-				-- guess the pet from tooltip.
-				local ownerGUID, ownerName = GetPetOwnerFromTooltip(guid)
-				if ownerGUID and ownerName then
-					guidToOwner[guid] = ownerGUID
-					return ownerGUID, ownerName
-				end
+			-- guess the pet from roster.
+			local ownerUnit = GetPetOwnerUnit(guid)
+			if ownerUnit then
+				local ownerGUID = UnitGUID(ownerUnit)
+				guidToOwner[guid] = ownerGUID
+				return ownerGUID, UnitFullName(ownerUnit)
+			end
+
+			-- guess the pet from tooltip.
+			local ownerGUID, ownerName = GetPetOwnerFromTooltip(guid)
+			if ownerGUID and ownerName then
+				guidToOwner[guid] = ownerGUID
+				return ownerGUID, ownerName
 			end
 		end
 
@@ -1615,10 +1606,7 @@ do
 
 		function Skada:FixPetsName(guid, name, flags)
 			local _, ownerName = self:FixMyPets(guid, name, flags)
-			if name and ownerName and ownerName ~= name then
-				return format("%s <%s>", name, ownerName)
-			end
-			return name
+			return (name and ownerName and ownerName ~= name) and format("%s <%s>", name, ownerName) or name
 		end
 	end
 
@@ -1797,30 +1785,31 @@ do
 				if bit_band(args.srcFlags, BITMASK_GROUP) == 0 then
 					return false
 				end
-				if nopets then
-					return (bit_band(args.srcFlags, BITMASK_PETS) == 0)
-				end
-				return true
+				return nopets and (bit_band(args.srcFlags, BITMASK_PETS) == 0) or true
 			end
 
 			function ARGS_MT.DestInGroup(args, nopets)
 				if bit_band(args.dstFlags, BITMASK_GROUP) == 0 then
 					return false
 				end
-				if nopets then
-					return (bit_band(args.dstFlags, BITMASK_PETS) == 0)
+				return nopets and (bit_band(args.dstFlags, BITMASK_PETS) == 0) or true
+			end
+
+			function ARGS_MT.IsGroupEvent(args, nopets)
+				if args.srcFlags and bit_band(args.srcFlags, BITMASK_GROUP) ~= 0 then
+					return nopets and (bit_band(args.srcFlags, BITMASK_PETS) == 0) or true
 				end
-				return true
+				if args.dstFlags and bit_band(args.dstFlags, BITMASK_GROUP) ~= 0 then
+					return nopets and (bit_band(args.dstFlags, BITMASK_PETS) == 0) or true
+				end
+				return false
 			end
 
 			function ARGS_MT.SourceIsPet(args, ingroup)
 				if (bit_band(args.srcFlags, BITMASK_PETS) == 0) then
 					return false
 				end
-				if ingroup then
-					return (guidToOwner[args.srcGUID] ~= nil)
-				end
-				return true
+				return ingroup and (guidToOwner[args.srcGUID] ~= nil) or true
 			end
 
 			-- owner=true? acts like "ingroup" (SourceIsPet)
@@ -1857,6 +1846,24 @@ do
 			end
 			function ARGS_MT.DestIsPlayer(args)
 				return (bit_band(args.dstFlags, BITMASK_PLAYER) == BITMASK_PLAYER)
+			end
+		end
+
+		do -- source or destination are bosses
+			local BossIDs = Skada.BossIDs
+			local GetCreatureId = Skada.GetCreatureId
+
+			function ARGS_MT.SourceIsBoss(args)
+				return args.srcGUID and BossIDs[GetCreatureId(args.srcGUID)] or false
+			end
+			function ARGS_MT.DestIsBoss(args)
+				return args.dstGUID and BossIDs[GetCreatureId(args.dstGUID)] or false
+			end
+			function ARGS_MT.IsBossEvent(args)
+				if args.srcGUID and BossIDs[GetCreatureId(args.srcGUID)] then
+					return true
+				end
+				return args.dstGUID and BossIDs[GetCreatureId(args.dstGUID)] or false
 			end
 		end
 
@@ -1955,7 +1962,7 @@ do
 		end
 
 		-- check first hit!
-		if self.profile.firsthit and TRIGGER_EVENTS[args.event] and not self.firsthit and (args:SourceInGroup() or args:DestInGroup()) then
+		if self.profile.firsthit and not self.firsthit and TRIGGER_EVENTS[args.event] and args:IsGroupEvent() then
 			self:CheckFirstHit(args)
 		end
 
