@@ -1782,70 +1782,102 @@ do
 			local BITMASK_PETS = Private.BITMASK_PETS
 
 			function ARGS_MT.SourceInGroup(args, nopets)
-				if bit_band(args.srcFlags, BITMASK_GROUP) == 0 then
-					return false
+				if nopets then
+					if args._srcInGroupNopets ~= nil then
+						return args._srcInGroupNopets
+					end
+					args._srcInGroupNopets = (bit_band(args.srcFlags, BITMASK_GROUP) ~= 0) and (bit_band(args.srcFlags, BITMASK_PETS) == 0)
+					return args._srcInGroupNopets
 				end
-				return nopets and (bit_band(args.srcFlags, BITMASK_PETS) == 0) or true
+
+				if args._srcInGroup ~= nil then
+					return args._srcInGroup
+				end
+				args._srcInGroup = (bit_band(args.srcFlags, BITMASK_GROUP) ~= 0)
+				return args._srcInGroup
 			end
 
 			function ARGS_MT.DestInGroup(args, nopets)
-				if bit_band(args.dstFlags, BITMASK_GROUP) == 0 then
-					return false
+				if nopets then
+					if args._dstInGroupNopets ~= nil then
+						return args._dstInGroupNopets
+					end
+					args._dstInGroupNopets = (bit_band(args.dstFlags, BITMASK_GROUP) ~= 0) and (bit_band(args.dstFlags, BITMASK_PETS) == 0)
+					return args._dstInGroupNopets
 				end
-				return nopets and (bit_band(args.dstFlags, BITMASK_PETS) == 0) or true
+
+				if args._dstInGroup ~= nil then
+					return args._dstInGroup
+				end
+				args._dstInGroup = (bit_band(args.dstFlags, BITMASK_GROUP) ~= 0)
+				return args._dstInGroup
 			end
 
 			function ARGS_MT.IsGroupEvent(args, nopets)
-				if args.srcFlags and bit_band(args.srcFlags, BITMASK_GROUP) ~= 0 then
-					return nopets and (bit_band(args.srcFlags, BITMASK_PETS) == 0) or true
-				end
-				if args.dstFlags and bit_band(args.dstFlags, BITMASK_GROUP) ~= 0 then
-					return nopets and (bit_band(args.dstFlags, BITMASK_PETS) == 0) or true
-				end
-				return false
+				return args:SourceInGroup(nopets) or args:DestInGroup(nopets)
 			end
 
 			function ARGS_MT.SourceIsPet(args, ingroup)
-				if (bit_band(args.srcFlags, BITMASK_PETS) == 0) then
-					return false
+				if ingroup then
+					if args._srcIsGroupPet ~= nil then
+						return args._srcIsGroupPet
+					end
+					args._srcIsGroupPet = (guidToOwner[args.srcGUID] ~= nil)
+					return args._srcIsGroupPet
 				end
-				return ingroup and (guidToOwner[args.srcGUID] ~= nil) or true
+
+				if args._srcIsPet ~= nil then
+					return args._srcIsPet
+				end
+
+				args._srcIsPet = (bit_band(args.srcFlags, BITMASK_PETS) ~= 0)
+				return args._srcIsPet
 			end
 
 			-- owner=true? acts like "ingroup" (SourceIsPet)
 			function ARGS_MT.DestIsPet(args, owner)
-				if (bit_band(args.dstFlags, BITMASK_PETS) == 0) then
-					return false
-				end
 				if owner == true then
-					return (guidToOwner[args.dstGUID] ~= nil)
+					if args._dstIsGroupPet ~= nil then
+						return args._dstIsGroupPet
+					end
+					args._dstIsGroupPet = (bit_band(args.dstFlags, BITMASK_PETS) ~= 0) and (guidToOwner[args.dstGUID] ~= nil)
+					return args._dstIsGroupPet
 				end
 
-				-- owner provided? check for affiliation.
 				if owner then
-					if bit_band(args.srcFlags, BITMASK_GROUP) ~= 0 then
-						return true -- owner is a group member?
+					if args._dstIsOwnedPet ~= nil then
+						return args._dstIsOwnedPet
 					end
-					if bit_band(args.srcFlags, BITMASK_PETS) ~= 0 then
-						return true -- summoned by another pet?
-					end
-					if guidToClass[args.dstGUID] then
-						return true -- already known pet
-					end
-					return false
+
+					args._dstIsOwnedPet = (bit_band(args.srcFlags, BITMASK_GROUP) ~= 0) -- owner is a group member?
+					args._dstIsOwnedPet = args._dstIsOwnedPet or (bit_band(args.srcFlags, BITMASK_PETS) ~= 0) -- summoned by another pet?
+					args._dstIsOwnedPet = args._dstIsOwnedPet or (guidToClass[args.dstGUID] ~= nil) -- already known pet
+					return args._dstIsOwnedPet
 				end
 
-				return true
+				if args._dstIsPet ~= nil then
+					return args._dstIsPet
+				end
+				args._dstIsPet = (bit_band(args.dstFlags, BITMASK_PETS) == 0)
+				return args._dstIsPet
 			end
 		end
 
 		do -- source or destination are players
 			local BITMASK_PLAYER = Private.BITMASK_PLAYER
 			function ARGS_MT.SourceIsPlayer(args)
-				return (bit_band(args.srcFlags, BITMASK_PLAYER) == BITMASK_PLAYER)
+				if args._srcIsPlayer ~= nil then
+					return args._srcIsPlayer
+				end
+				args._srcIsPlayer = (bit_band(args.srcFlags, BITMASK_PLAYER) == BITMASK_PLAYER)
+				return args._srcIsPlayer
 			end
 			function ARGS_MT.DestIsPlayer(args)
-				return (bit_band(args.dstFlags, BITMASK_PLAYER) == BITMASK_PLAYER)
+				if args._dstIsPlayer ~= nil then
+					return args._dstIsPlayer
+				end
+				args._dstIsPlayer = (bit_band(args.dstFlags, BITMASK_PLAYER) == BITMASK_PLAYER)
+				return args._dstIsPlayer
 			end
 		end
 
@@ -1854,34 +1886,71 @@ do
 			local GetCreatureId = Skada.GetCreatureId
 
 			function ARGS_MT.SourceIsBoss(args)
-				return args.srcGUID and BossIDs[GetCreatureId(args.srcGUID)] or false
+				if args._srcIsBoss ~= nil then
+					return args._srcIsBoss
+				end
+				args._srcIsBoss = args.srcGUID and BossIDs[GetCreatureId(args.srcGUID)] or false
+				return args._srcIsBoss
 			end
 			function ARGS_MT.DestIsBoss(args)
-				return args.dstGUID and BossIDs[GetCreatureId(args.dstGUID)] or false
+				if args._dstIsBoss ~= nil then
+					return args._dstIsBoss
+				end
+				args._dstIsBoss = args.dstGUID and BossIDs[GetCreatureId(args.dstGUID)] or false
+				return args._dstIsBoss
 			end
 			function ARGS_MT.IsBossEvent(args)
-				if args.srcGUID and BossIDs[GetCreatureId(args.srcGUID)] then
-					return true
-				end
-				return args.dstGUID and BossIDs[GetCreatureId(args.dstGUID)] or false
+				return args:SourceIsBoss() or args:DestIsBoss()
 			end
 		end
 
 		do -- source and destination reactions
 			local BITMASK_FRIENDLY = Private.BITMASK_FRIENDLY
 			function ARGS_MT.SourceIsFriendly(args)
-				return (bit_band(args.srcFlags, BITMASK_FRIENDLY) ~= 0)
+				if args._srcIsFriendly ~= nil then
+					return args._srcIsFriendly
+				end
+				args._srcIsFriendly = (bit_band(args.srcFlags, BITMASK_FRIENDLY) ~= 0)
+				return args._srcIsFriendly
 			end
 			function ARGS_MT.DestIsFriendly(args)
-				return (bit_band(args.dstFlags, BITMASK_FRIENDLY) ~= 0)
+				if args._dstIsFriendly ~= nil then
+					return args._dstIsFriendly
+				end
+				args._dstIsFriendly = (bit_band(args.dstFlags, BITMASK_FRIENDLY) ~= 0)
+				return args._dstIsFriendly
 			end
 
 			local BITMASK_NEUTRAL = Private.BITMASK_NEUTRAL
 			function ARGS_MT.SourceIsNeutral(args)
-				return (bit_band(args.srcFlags, BITMASK_NEUTRAL) ~= 0)
+				if args._srcIsNeutral ~= nil then
+					return args._srcIsNeutral
+				end
+				args._srcIsNeutral = (bit_band(args.srcFlags, BITMASK_NEUTRAL) ~= 0)
+				return args._srcIsNeutral
 			end
 			function ARGS_MT.DestIsNeutral(args)
-				return (bit_band(args.dstFlags, BITMASK_NEUTRAL) ~= 0)
+				if args._dstIsNeutral ~= nil then
+					return args._dstIsNeutral
+				end
+				args._dstIsNeutral = (bit_band(args.dstFlags, BITMASK_NEUTRAL) ~= 0)
+				return args._dstIsNeutral
+			end
+
+			local BITMASK_HOSTILE = Private.BITMASK_HOSTILE
+			function ARGS_MT.SourceIsHostile(args)
+				if args._srcIsHostile ~= nil then
+					return args._srcIsHostile
+				end
+				args._srcIsHostile = (bit_band(args.srcFlags, BITMASK_HOSTILE) ~= 0)
+				return args._srcIsHostile
+			end
+			function ARGS_MT.DestIsHostile(args)
+				if args._dstIsHostile ~= nil then
+					return args._dstIsHostile
+				end
+				args._dstIsHostile = (bit_band(args.dstFlags, BITMASK_HOSTILE) ~= 0)
+				return args._dstIsHostile
 			end
 		end
 
@@ -1905,6 +1974,9 @@ do
 		if self.disabled or self.testMode then return end
 
 		local args = Handlers[event](ARGS, timestamp, event, ...)
+
+		-- the event happens within the group?
+		args.inside_event = args:IsGroupEvent()
 
 		if event == "SPELL_EXTRA_ATTACKS" then
 			create_extra_attack(args)
@@ -1944,9 +2016,6 @@ do
 			args.amount = 0
 		end
 
-		-- the event happens within the group?
-		args.inside_event = args:SourceInGroup() or args:DestInGroup()
-
 		if args.spellid and args.spellschool and not args.spellstring then
 			args.spellstring = format((args.is_dot or args.is_hot) and "-%s.%s" or "%s.%s", args.spellid, args.spellschool)
 			if args.inside_event then
@@ -1962,7 +2031,7 @@ do
 		end
 
 		-- check first hit!
-		if self.profile.firsthit and not self.firsthit and TRIGGER_EVENTS[args.event] and args:IsGroupEvent() then
+		if self.profile.firsthit and not self.firsthit and TRIGGER_EVENTS[args.event] and args.inside_event then
 			self:CheckFirstHit(args)
 		end
 
