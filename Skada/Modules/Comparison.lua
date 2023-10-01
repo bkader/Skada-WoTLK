@@ -161,7 +161,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 			local activetime = actor:GetTime(set, true)
 			local oactivetime = set:GetActorTime(otherName, otherGUID, true)
 
-			tooltip:AddDoubleLine(L["Activity"], format_value_percent(100 * activetime / totaltime, 100 * oactivetime / totaltime, actor.id == otherGUID), 1, 1, 1)
+			tooltip:AddDoubleLine(L["Activity"], format_value_percent(100 * activetime / totaltime, 100 * oactivetime / totaltime, actor.id == otherGUID), nil, nil, nil, 1, 1, 1)
 			tooltip:AddDoubleLine(L["Active Time"], format(actor.id ~= otherGUID and "%s (%s)" or "%s", Skada:FormatTime(activetime), Skada:FormatTime(oactivetime)), 1, 1, 1)
 		end
 	end
@@ -787,7 +787,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		mode_spell.metadata = {click1 = mode_spell_details, click2 = mode_spell_breakdown}
 		self.metadata = {
 			showspots = true,
-			post_tooltip = activity_tooltip,
+			tooltip = activity_tooltip,
 			click1 = mode_spell,
 			click2 = mode_target,
 			click3 = set_actor,

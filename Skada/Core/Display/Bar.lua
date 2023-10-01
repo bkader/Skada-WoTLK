@@ -2115,7 +2115,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 						texture = "Blizzard",
 						bordercolor = {r = 1, g = 0.75, b = 0, a = 1},
 						bordertexture = "Blizzard Dialog",
-						borderthickness = 1,
+						borderthickness = 0,
 						borderinsets = 0,
 						color = {r = 0.2, g = 0.2, b = 0.2, a = 0},
 						fontflags = ""
@@ -2125,7 +2125,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 						texture = "Blizzard Parchment",
 						bordercolor = {r = 1, g = 1, b = 1, a = 1},
 						bordertexture = "Blizzard Dialog",
-						borderthickness = 1,
+						borderthickness = 0,
 						borderinsets = 0,
 						color = {r = 1, g = 1, b = 1, a = 1},
 						tilesize = 0

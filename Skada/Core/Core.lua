@@ -514,7 +514,7 @@ end
 
 -- destroy a window
 function Window:Destroy()
-	if self.display then
+	if self.display and self.display.Destroy then
 		self.display:Destroy(self)
 	end
 
@@ -533,7 +533,7 @@ end
 -- change window display
 function Window:SetDisplay(name, isnew)
 	if name ~= self.db.display or self.display == nil then
-		if self.display then
+		if self.display and self.display.Destroy then
 			self.display:Destroy(self)
 		end
 
@@ -695,14 +695,14 @@ end
 -- toggles window visibility
 function Window:Toggle()
 	if
-		P.hidden or
-		self.db.hidden or
-		((P.hidesolo or self.db.hideauto == 4) and not IsInGroup()) or
-		((P.hidepvp or self.db.hideauto == 7) and IsInPvP()) or
-		((P.showcombat or self.db.hideauto == 3) and not IsGroupInCombat()) or
-		((P.hidecombat or self.db.hideauto == 2) and IsGroupInCombat()) or
-		(self.db.hideauto == 5 and (Skada.insType == "raid" or Skada.insType == "party")) or
-		(self.db.hideauto == 6 and Skada.insType ~= "raid" and Skada.insType ~= "party")
+		P.hidden or -- all windows are hidden
+		self.db.hidden or -- this window is hidden
+		((P.hidesolo or self.db.hideauto == 4) and not IsInGroup()) or -- hide when solo & not in a group
+		((P.hidepvp or self.db.hideauto == 7) and IsInPvP()) or -- hide in pvp & not in pvp
+		((P.showcombat or self.db.hideauto == 3) and not IsGroupInCombat()) or -- show in combat & not in combat
+		((P.hidecombat or self.db.hideauto == 2) and IsGroupInCombat()) or -- hide in combat & in combat
+		(self.db.hideauto == 5 and (Skada.insType == "raid" or Skada.insType == "party")) or -- hide in instance & in instance
+		(self.db.hideauto == 6 and Skada.insType ~= "raid" and Skada.insType ~= "party") -- hide out of instance and not in instance
 	then
 		self:Hide()
 	else
@@ -712,7 +712,7 @@ end
 
 function Window:Wipe(changed)
 	self:reset()
-	if self.display then
+	if self.display and self.display.Wipe then
 		self.display:Wipe(self)
 	end
 
@@ -864,7 +864,10 @@ do
 		self.metadata.click = click_on_mode
 		self.metadata.maxvalue = 1
 		self.changed = true
-		self.display:SetTitle(self, self.metadata.title)
+
+		if self.display.SetTitle then
+			self.display:SetTitle(self, self.metadata.title)
+		end
 
 		if self.child then
 			if self.db.childmode == 1 or self.db.childmode == 3 then
@@ -901,7 +904,9 @@ do
 		self.selectedset = nil
 
 		self.metadata.title = L["Skada: Fights"]
-		self.display:SetTitle(self, self.metadata.title)
+		if self.display.SetTitle then
+			self.display:SetTitle(self, self.metadata.title)
+		end
 
 		self.metadata.click = click_on_set
 		self.metadata.maxvalue = 1
@@ -1160,37 +1165,36 @@ end
 do
 	-- scane modes to add column options
 	local function scan_for_columns(mode)
-		if type(mode) == "table" and not mode.scanned then
-			mode.scanned = true
+		if type(mode) ~= "table" or mode.scanned then return end
+		mode.scanned = true
 
-			if mode.metadata then
-				-- add columns if available
-				if mode.metadata.columns then
-					Skada:AddColumnOptions(mode)
-				end
+		if not mode.metadata then return end
 
-				-- scan for linked modes
-				if mode.metadata.click1 then
-					scan_for_columns(mode.metadata.click1)
-				end
-				if mode.metadata.click2 then
-					scan_for_columns(mode.metadata.click2)
-				end
-				if mode.metadata.click3 then
-					scan_for_columns(mode.metadata.click3)
-				end
-			end
+		-- add columns if available
+		if mode.metadata.columns then
+			Skada:AddColumnOptions(mode)
+		end
+
+		-- scan for click modes
+		if mode.metadata.click1 then -- any click
+			scan_for_columns(mode.metadata.click1)
+		end
+		if mode.metadata.click2 then -- shift-click
+			scan_for_columns(mode.metadata.click2)
+		end
+		if mode.metadata.click3 then -- ctrl-click
+			scan_for_columns(mode.metadata.click3)
 		end
 	end
 
 	local function reload_mode(self)
-		if self.metadata then
-			for i = 1, #windows do
-				local win = windows[i]
-				if win and win.selectedmode == self and win.metadata then
-					for key, value in pairs(self.metadata) do
-						win.metadata[key] = value
-					end
+		if not self.metadata then return end
+
+		for i = 1, #windows do
+			local win = windows[i]
+			if win and win.selectedmode == self and win.metadata then
+				for key, value in pairs(self.metadata) do
+					win.metadata[key] = value
 				end
 			end
 		end
@@ -1424,8 +1428,10 @@ do
 		end
 	end
 
+	local total_noclick = Private.total_noclick
+
 	local function add_submode_lines(mode, win, id, label, tooltip)
-		if mode and not Private.total_noclick(win.selectedset, mode) then
+		if mode and not total_noclick(win.selectedset, mode) then
 			add_subview_lines(tooltip, win, mode, id, label)
 		end
 	end
@@ -1434,7 +1440,7 @@ do
 	local function add_click_lines(mode, label, win, t, fmt)
 		if type(mode) == "function" then
 			t:AddLine(uformat(fmt, label))
-		elseif not Private.total_noclick(win.selectedset, mode) then
+		elseif not total_noclick(win.selectedset, mode) then
 			t:AddLine(format(fmt, label or mode.localeName))
 		end
 	end
@@ -1450,49 +1456,52 @@ do
 			t:ClearLines()
 			add_subview_lines(t, win, find_mode(id), id, label)
 			t:Show()
-		elseif md.click1 or md.click2 or md.click3 or md.filterclass or md.tooltip then
-			t:ClearLines()
-			local hasClick = md.click1 or md.click2 or md.click3 or md.filterclass or nil
-
-			if md.tooltip then
-				local numLines = t:NumLines()
-				md.tooltip(win, id, label, t)
-
-				if t:NumLines() ~= numLines and hasClick then
-					t:AddLine(" ")
-				end
-			end
-
-			if P.informativetooltips then
-				add_submode_lines(md.click1, win, id, label, t)
-				add_submode_lines(md.click2, win, id, label, t)
-				add_submode_lines(md.click3, win, id, label, t)
-			end
-
-			if md.post_tooltip then
-				local numLines = t:NumLines()
-				md.post_tooltip(win, id, label, t)
-
-				if numLines > 0 and t:NumLines() ~= numLines and hasClick then
-					t:AddLine(" ")
-				end
-			end
-
-			if md.click1 then
-				add_click_lines(md.click1, md.click1_label, win, t, L["Click for \124cff00ff00%s\124r"])
-			end
-			if md.click2 then
-				add_click_lines(md.click2, md.click2_label, win, t, L["Shift-Click for \124cff00ff00%s\124r"])
-			end
-			if md.click3 then
-				add_click_lines(md.click3, md.click3_label, win, t, L["Control-Click for \124cff00ff00%s\124r"])
-			end
-			if md.filterclass then
-				t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], L["Toggle Class Filter"]))
-			end
-
-			t:Show()
+			return
 		end
+
+		local hasClick = md.click1 or md.click2 or md.click3 or md.filterclass
+		if not hasClick and not md.tooltip then return end
+
+		t:ClearLines()
+
+		if md.tooltip then
+			local numLines = t:NumLines()
+			md.tooltip(win, id, label, t)
+
+			if t:NumLines() ~= numLines and hasClick then
+				t:AddLine(" ")
+			end
+		end
+
+		if P.informativetooltips then
+			add_submode_lines(md.click1, win, id, label, t)
+			add_submode_lines(md.click2, win, id, label, t)
+			add_submode_lines(md.click3, win, id, label, t)
+		end
+
+		if md.post_tooltip then
+			local numLines = t:NumLines()
+			md.post_tooltip(win, id, label, t)
+
+			if numLines > 0 and t:NumLines() ~= numLines and hasClick then
+				t:AddLine(" ")
+			end
+		end
+
+		if md.click1 then
+			add_click_lines(md.click1, md.click1_label, win, t, L["Click for \124cff00ff00%s\124r"])
+		end
+		if md.click2 then
+			add_click_lines(md.click2, md.click2_label, win, t, L["Shift-Click for \124cff00ff00%s\124r"])
+		end
+		if md.click3 then
+			add_click_lines(md.click3, md.click3_label, win, t, L["Control-Click for \124cff00ff00%s\124r"])
+		end
+		if md.filterclass then
+			t:AddLine(format(L["Alt-Click for \124cff00ff00%s\124r"], L["Toggle Class Filter"]))
+		end
+
+		t:Show()
 	end
 end
 
@@ -2076,7 +2085,9 @@ do
 		end
 
 		self.metadata.title = name
-		self.display:SetTitle(self, name)
+		if self.display.SetTitle then
+			self.display:SetTitle(self, name)
+		end
 	end
 end
 
