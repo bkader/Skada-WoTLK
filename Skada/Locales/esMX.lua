@@ -759,6 +759,9 @@ L["%s vs %s: %s"] = "%s vs %s: %s"
 L["%s vs %s: Spells"] = "%s vs %s: Hechizos"
 L["%s vs %s: Targets"] = "%s vs %s: Objetivos"
 L["%s vs %s: Damage on %s"] = "%s vs %s: Da\195\177o en %s"
+-- spellcast module
+L["Casts"] = "Lanzar"
+L["%s's spells"] = "Hechizos de %s"
 -- about
 L["Author"] = "Autor"
 L["Credits"] = "Cr\195\169ditos"

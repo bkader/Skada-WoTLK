@@ -758,6 +758,9 @@ L["%s vs %s: %s"] = "%s vs %s: %s"
 L["%s vs %s: Spells"] = "%s vs %s: Заклинания"
 L["%s vs %s: Targets"] = "%s vs %s: Цели"
 L["%s vs %s: Damage on %s"] = "%s vs %s: Урон по %s"
+-- spellcast module
+L["Casts"] = "Произнесено"
+L["%s's spells"] = "%s - Заклинания"
 -- about
 L["Author"] = "Автор"
 L["Credits"] = "Благодарности"

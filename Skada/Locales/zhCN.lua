@@ -754,6 +754,9 @@ L["%s vs %s: %s"] = "%s 与 %s: %s"
 L["%s vs %s: Spells"] = "%s 与 %s: 法术"
 L["%s vs %s: Targets"] = "%s 与 %s: 目标"
 L["%s vs %s: Damage on %s"] = "%s 与 %s: %s上的伤害"
+-- spellcast module
+L["Casts"] = "施放"
+L["%s's spells"] = "%s的咒语"
 -- about
 L["Author"] = "作者"
 L["Credits"] = "鸣谢"

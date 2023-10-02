@@ -131,6 +131,7 @@ Skada.defaults = {
 			["Absorbed Damage"] = true,
 			["Avoidance & Mitigation"] = true,
 			["CC Breaks"] = true,
+			["Casts"] = true,
 			["DTPS"] = true,
 			["Damage Done By School"] = true,
 			["Damage Done By Spell"] = true,

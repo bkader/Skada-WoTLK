@@ -24,6 +24,7 @@
 	<Script file="Potions.lua" />
 	<Script file="Resurrects.lua" />
 	<Script file="Threat.lua" />
+	<Script file="Spellcast.lua" />
 	<Script file="Nickname.lua" />
 	<Script file="PvP.lua" />
 </Ui>

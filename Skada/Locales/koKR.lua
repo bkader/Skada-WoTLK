@@ -754,9 +754,12 @@ L["Test Notifications"] = "테스트 알림"
 -- comparison module
 L["Comparison"] = "비교"
 L["%s vs %s: %s"] = "%s 대 %s: %s"
-L["%s vs %s: Spells"] = "%s 대 %s: Spells"
+L["%s vs %s: Spells"] = "%s 대 %s: 스펠스"
 L["%s vs %s: Targets"] = "%s 대 %s: 대상"
 L["%s vs %s: Damage on %s"] = "%s 대 %s: %s의 손상"
+-- spellcast module
+L["Casts"] = "시전"
+L["%s's spells"] = "%s 스펠스"
 -- about
 L["Author"] = "저작자"
 L["Credits"] = "크레딧"

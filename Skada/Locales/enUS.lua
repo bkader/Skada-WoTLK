@@ -826,6 +826,9 @@ L["%s vs %s: %s"] = true
 L["%s vs %s: Spells"] = true
 L["%s vs %s: Targets"] = true
 L["%s vs %s: Damage on %s"] = true
+-- spellcast module
+L["Casts"] = true
+L["%s's spells"] = true
 -- about
 L["Author"] = true
 L["Credits"] = true
