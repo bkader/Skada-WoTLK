@@ -30,6 +30,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	local mode_source_spell = mode_source:NewModule("Spell List")
 
 	local min, wipe = math.min, wipe
+	local PercentToRGB = Private.PercentToRGB
 	local GetCreatureId = Skada.GetCreatureId
 	local tooltip_school = Skada.tooltip_school
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
@@ -183,7 +184,8 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		local activetime = actor:GetTime(set, true)
 		local dtps, damage = actor:GetDTPS(set)
 
-		tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, totaltime), nil, nil, nil, 1, 1, 1)
+		local activepercent = activetime / totaltime * 100
+		tooltip:AddDoubleLine(format(L["%s's activity"], label), Skada:FormatPercent(activepercent), nil, nil, nil, PercentToRGB(activepercent))
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(damage), 1, 1, 1)
@@ -570,7 +572,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 
 	function mode:OnEnable()
 		mode_spell_details.metadata = {tooltip = mode_spell_details_tooltip}
-		mode_spell.metadata = {click1 = mode_spell_details, click2 = mode_spell_breakdown, post_tooltip = mode_spell_tooltip}
+		mode_spell.metadata = {click1 = mode_spell_details, click2 = mode_spell_breakdown, tooltip = mode_spell_tooltip}
 		mode_source.metadata = {click1 = mode_source_spell}
 		mode_cols = self.metadata.columns
 
@@ -632,7 +634,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		self.metadata = {
 			showspots = true,
 			filterclass = true,
-			post_tooltip = damage_tooltip,
+			tooltip = damage_tooltip,
 			click1 = mode_spell,
 			click2 = mode_source,
 			columns = {Damage = true, DTPS = false, Percent = true, sDTPS = false, sPercent = true},
@@ -743,7 +745,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 
 		tooltip:AddLine(uformat("%s - %s", label, win.spellname))
 
-		tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
+		tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 		local diff = spell.count -- used later
 
 		if spell.n_num then

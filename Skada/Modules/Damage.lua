@@ -222,7 +222,8 @@ Skada:RegisterModule("Damage", function(L, P)
 		local activetime = actor:GetTime(set, true)
 		local dps, damage = actor:GetDPS(set)
 
-		tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, totaltime), nil, nil, nil, 1, 1, 1)
+		local activepercent = activetime / totaltime * 100
+		tooltip:AddDoubleLine(format(L["%s's activity"], label), Skada:FormatPercent(activepercent), nil, nil, nil, PercentToRGB(activepercent))
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(damage), 1, 1, 1)
@@ -401,14 +402,19 @@ Skada:RegisterModule("Damage", function(L, P)
 	function mode_spell_details:Tooltip(win, set, id, label, tooltip)
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local spell = actor and actor.damagespells and actor.damagespells[id]
-		if spell then
-			if spell.count then
-				tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
-				return spell, spell.count
-			end
+		if not spell then return end
 
-			return spell
+		local cast = actor.GetSpellCast and actor:GetSpellCast(id)
+		if cast then
+			tooltip:AddDoubleLine(L["Casts"], cast, nil, nil, nil, 1, 1, 1)
 		end
+
+		local count = spell.count
+		if count then
+			tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
+		end
+
+		return spell, count, cast
 	end
 
 	function mode_spell_details:Update(win, set, spell, count)
@@ -639,8 +645,18 @@ Skada:RegisterModule("Damage", function(L, P)
 
 	function mode:OnEnable()
 		mode_spell_details.metadata = {tooltip = mode_spell_details_tooltip}
-		mode_spell.metadata = {click1 = mode_spell_details, click2 = mode_spell_breakdown, post_tooltip = mode_spell_tooltip}
+		mode_spell.metadata = {click1 = mode_spell_details, click2 = mode_spell_breakdown, tooltip = mode_spell_tooltip}
 		mode_target.metadata = {click1 = mode_target_spell}
+		self.metadata = {
+			showspots = true,
+			filterclass = true,
+			tooltip = damage_tooltip,
+			click1 = mode_spell,
+			click2 = mode_target,
+			columns = {Damage = true, DPS = true, Percent = true, sDPS = false, sPercent = true},
+			icon = [[Interface\ICONS\spell_fire_firebolt]]
+		}
+
 		mode_cols = self.metadata.columns
 
 		-- no total click.
@@ -700,16 +716,6 @@ Skada:RegisterModule("Damage", function(L, P)
 	end
 
 	function mode:OnInitialize()
-		self.metadata = {
-			showspots = true,
-			filterclass = true,
-			post_tooltip = damage_tooltip,
-			click1 = mode_spell,
-			click2 = mode_target,
-			columns = {Damage = true, DPS = true, Percent = true, sDPS = false, sPercent = true},
-			icon = [[Interface\ICONS\spell_fire_firebolt]]
-		}
-
 		-- The Oculus
 		whitelist[49840] = true -- Shock Lance (Amber Drake)
 		whitelist[50232] = true -- Searing Wrath (Ruby Drake)
@@ -846,9 +852,14 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C)
 
 		tooltip:AddLine(format("%s - %s", label, win.spellname))
 
+		local cast = actor.GetSpellCast and actor:GetSpellCast(win.spellid)
+		if cast then
+			tooltip:AddDoubleLine(L["Casts"], cast, nil, nil, nil, 1, 1, 1)
+		end
+
 		if not spell.count or spell.count == 0 then return end
 
-		tooltip:AddDoubleLine(L["Count"], spell.count, 1, 1, 1)
+		tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 		local diff = spell.count -- used later
 
 		if spell.n_num then

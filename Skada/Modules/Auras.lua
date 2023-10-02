@@ -484,6 +484,11 @@ do
 		tooltip:AddLine(uformat("%s - %s", win.actorname, label))
 		tooltip_school(tooltip, id)
 
+		local cast = actor.GetSpellCast and actor:GetSpellCast(id)
+		if cast then
+			tooltip:AddDoubleLine(L["Casts"], cast, nil, nil, nil, 1, 1, 1)
+		end
+
 		if spell.n or spell.r then
 			if spell.n then
 				tooltip:AddDoubleLine(L["Count"], spell.n, 1, 1, 1)
