@@ -107,11 +107,11 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = L["actor damage"](label)
+		win.title = format(L["%s's spells"], label)
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = L["actor damage"](win.actorname or L["Unknown"])
+		win.title = uformat(L["%s's spells"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.friendfire
@@ -137,11 +137,11 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 	function mode_spell_target:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = uformat(L["%s's <%s> damage"], win.actorname, label)
+		win.title = uformat(L["%s's <%s> targets"], win.actorname, label)
 	end
 
 	function mode_spell_target:Update(win, set)
-		win.title = uformat(L["%s's <%s> damage"], win.actorname, win.spellname)
+		win.title = uformat(L["%s's <%s> targets"], win.actorname, win.spellname)
 		if not win.spellid then return end
 
 		local targets, total, actor = get_spell_friendfire_targets(set, win.actorname, win.actorid, win.spellid)

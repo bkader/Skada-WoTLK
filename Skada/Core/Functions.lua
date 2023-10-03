@@ -509,6 +509,9 @@ do
 		end
 
 		local title = (window and window.title) or mode.title or mode.localeName
+		if window.parentmode and title ~= window.parentmode.localeName then
+			title = format("%s - %s", window.parentmode.localeName, title)
+		end
 		local label = (modename == L["Improvement"]) and self.userName or Skada:GetSetLabel(set)
 		maxlines = maxlines or 10
 

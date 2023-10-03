@@ -188,9 +188,9 @@ Skada:RegisterModule("Comparison", function(L, P)
 		win.spellid, win.spellname = id, label
 
 		if win.actorname == otherName then
-			win.title = uformat("%s: %s", win.actorname, format(L["%s's damage breakdown"], label))
+			win.title = uformat("%s: %s", win.actorname, format(L["%s's details"], label))
 		else
-			win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, uformat(L["%s's damage breakdown"], win.spellname))
+			win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, uformat(L["%s's details"], win.spellname))
 		end
 	end
 
@@ -224,7 +224,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 		-- same actor?
 		if spell and actor and actor.id == otherGUID then
-			win.title = format("%s: %s", win.actorname, format(L["%s's damage breakdown"], win.spellname))
+			win.title = format("%s: %s", win.actorname, format(L["%s's details"], win.spellname))
 
 			if win.metadata then
 				win.metadata.maxvalue = 0
@@ -252,6 +252,8 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 			return
 		end
+
+		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, uformat(L["%s's details"], win.spellname))
 
 		if not oactor or not ospell then
 			oactor = set and set:GetActor(otherName, otherGUID)
@@ -287,7 +289,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 	function mode_spell_breakdown:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, L["actor damage"](label))
+		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, label)
 	end
 
 	function mode_spell_breakdown:Tooltip(win, set, id, label, tooltip)
@@ -332,7 +334,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 	end
 
 	function mode_spell_breakdown:Update(win, set, actor, spell, oactor, ospell)
-		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, L["actor damage"](win.spellname or L["Unknown"]))
+		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, win.spellname)
 		if not set or not win.spellid then return end
 
 		if not actor or not spell then
@@ -341,7 +343,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 
 		if spell and actor and actor.id == otherGUID then
-			win.title = uformat(L["%s's <%s> damage"], win.actorname, win.spellname)
+			win.title = uformat("%s: %s", win.actorname, win.spellname)
 
 			local nr = add_detail_bar(win, 0, L["Damage"], spell.amount, nil, true, true)
 
@@ -416,18 +418,18 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 	function mode_target_spell:Enter(win, id, label)
 		win.targetname = label
-		win.title = uformat(L["%s vs %s: Damage on %s"], win.actorname, otherName, label)
+		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, format(L["Spells on %s"], label))
 	end
 
 	function mode_target_spell:Update(win, set)
-		win.title = uformat(L["%s vs %s: Damage on %s"], win.actorname, otherName, win.targetname)
+		win.title = uformat(L["%s vs %s: %s"], win.actorname, otherName, uformat(L["Spells on %s"], win.targetname))
 		if not set or not win.targetname then return end
 
 		local targets, _, actor = set:GetActorDamageTargets(win.actorname, win.actorid)
 		if not targets then return end
 
 		if actor.id == otherGUID then
-			win.title = L["actor damage"](win.actorname, win.targetname)
+			win.title = uformat(L["%s's spells on %s"], win.actorname, win.targetname)
 
 			local total = targets[win.targetname] and targets[win.targetname].amount
 			if P.absdamage and targets[win.targetname].total then
@@ -556,7 +558,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
 		if label == otherName then
-			win.title = L["actor damage"](label)
+			win.title = format(L["%s's spells"], label)
 		else
 			win.title = uformat(L["%s vs %s: Spells"], label, otherName)
 		end
@@ -578,7 +580,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 		-- same actor?
 		if actor.id == otherGUID then
-			win.title = L["actor damage"](otherName)
+			win.title = uformat(L["%s's spells"], otherName)
 
 			for spellid, spell in pairs(spells) do
 				nr = nr + 1

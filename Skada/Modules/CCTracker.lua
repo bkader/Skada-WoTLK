@@ -74,11 +74,11 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s's control spells"], label)
+		win.title = uformat(L["%s's spells"], label)
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's control spells"], win.actorname)
+		win.title = uformat(L["%s's spells"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.ccdone
@@ -102,11 +102,11 @@ Skada:RegisterModule("CC Done", function(L, P, _, C)
 
 	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s's control targets"], label)
+		win.title = uformat(L["%s's targets"], label)
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's control targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], win.actorname)
 
 		local targets, total, actor = get_actor_cc_targets(set, win.actorname, win.actorid)
 		if not targets or not actor or total == 0 then
@@ -336,11 +336,11 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 
 	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s's control spells"], label)
+		win.title = uformat(L["%s's spells"], label)
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's control spells"], win.actorname)
+		win.title = uformat(L["%s's spells"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.cctaken
@@ -364,11 +364,11 @@ Skada:RegisterModule("CC Taken", function(L, P, _, C)
 
 	function mode_source:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s's control sources"], label)
+		win.title = uformat(L["%s's sources"], label)
 	end
 
 	function mode_source:Update(win, set)
-		win.title = uformat(L["%s's control sources"], win.actorname)
+		win.title = uformat(L["%s's sources"], win.actorname)
 
 		local sources, total, actor = get_actor_cc_sources(set, win.actorname, win.actorid)
 		if not sources or not actor or total == 0 then
@@ -617,11 +617,11 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M, O)
 
 	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s's control spells"], label)
+		win.title = uformat(L["%s's spells"], label)
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's control spells"], win.actorname)
+		win.title = uformat(L["%s's spells"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.ccbreak
@@ -645,11 +645,11 @@ Skada:RegisterModule("CC Breaks", function(L, P, _, C, M, O)
 
 	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s's control targets"], label)
+		win.title = uformat(L["%s's targets"], label)
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's control targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], win.actorname)
 
 		local targets, total, actor = get_actor_cc_break_targets(set, win.actorname, win.actorid)
 		if not targets or not actor or total == 0 then

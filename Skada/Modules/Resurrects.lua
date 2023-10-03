@@ -43,11 +43,11 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 
 	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's resurrect targets"], label)
+		win.title = format(L["%s's targets"], label)
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's resurrect targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local targets, total, actor = get_actor_ress_targets(set, win.actorname, win.actorid)

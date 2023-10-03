@@ -4,7 +4,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M, O)
 	local mode = Skada:NewModule("Interrupts")
 	local mode_extraspell = mode:NewModule("Spell List")
 	local mode_target = mode:NewModule("Target List")
-	local mode_spell = mode:NewModule("Interrupt spells")
+	local mode_spell = mode:NewModule("Interrupt Spells")
 	local ignored_spells = Skada.ignored_spells.interrupt -- Edit Skada\Core\Tables.lua
 	local get_actor_interrupted_spells = nil
 	local get_actor_interrupt_targets = nil
@@ -115,11 +115,11 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M, O)
 
 	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's interrupted targets"], label)
+		win.title = format(L["%s's targets"], label)
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's interrupted targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local targets, total, actor = get_actor_interrupt_targets(set, win.actorname, win.actorid)
@@ -141,11 +141,11 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M, O)
 
 	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's interrupt spells"], label)
+		win.title = format(L["%s's spells"], label)
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's interrupt spells"], win.actorname)
+		win.title = uformat(L["%s's spells"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)

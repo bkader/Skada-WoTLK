@@ -549,9 +549,6 @@ L["High Threat"] = _G.COMBAT_THREAT_INCREASE_1
 L["Healing"] = true
 L["Healing Done"] = true
 L["Healing Taken"] = true
-L["%s's healing"] = true
-L["%s's healed targets"] = true
-L["actor heal spells"] = function(n1, n2) return ((not n2 or n1 == n2) and "%s's healing spells" or "%s's healing on %s"):format(n1, n2) end
 L["HPS"] = true
 L["sHPS"] = "HPS (subviews)"
 L["Healing: Personal HPS"] = true
@@ -560,28 +557,19 @@ L["Healing: Raid HPS"] = true
 L["Total Healing"] = true
 L["Overheal"] = true
 L["Overhealing"] = true
-L["%s's overheal targets"] = true
-L["actor overheal spells"] = function(n1, n2) return ((not n2 or n1 == n2) and "%s's overheal spells" or "%s's overhealing on %s"):format(n1, n2) end
 L["Absorbs"] = true
 L["Target List"] = true
 L["Spell List"] = true
-L["%s's absorbed targets"] = true
-L["actor absorb spells"] = function(n1, n2) return ((not n2 or n1 == n2) and "%s's absorb spells" or "%s's absorbs on %s"):format(n1, n2) end
 L["APS"] = true
 L["sAPS"] = "APS (subviews)"
 L["Absorbs and Healing"] = true
-L["%s's absorbed and healed targets"] = true
-L["actor absorb and heal spells"] = function(n1, n2) return ((not n2 or n1 == n2) and "%s's absorb and healing spells" or "%s's absorbs and healing on %s"):format(n1, n2) end
-L["%s's heal sources"] = true
 L["Healing Done By Spell"] = true
 L["Source List"] = true
 -- Auras Module --
 L["Uptime"] = true
 L["Buffs and Debuffs"] = true
 L["Buffs"] = true
-L["%s's buffs"] = true
 L["Debuffs"] = true
-L["actor debuffs"] = function(n1, n2) return ((not n2 or n1 == n2) and "%s's debuffs" or "%s's debuffs on %s"):format(n1, n2) end
 L["%s's <%s> targets"] = true
 L["%s's <%s> sources"] = true
 L["Sunder Counter"] = true
@@ -593,9 +581,6 @@ L["Crowd Control"] = true
 L["CC Done"] = true
 L["CC Taken"] = true
 L["CC Breaks"] = true
-L["%s's control spells"] = true
-L["%s's control targets"] = true
-L["%s's control sources"] = true
 L["Ignore Main Tanks"] = true
 L["%s on %s removed by %s"] = true
 L["%s on %s removed by %s's %s"] = true
@@ -613,8 +598,6 @@ L["Damage"] = true
 L["Spell Details"] = true
 L["Damage Done"] = true
 L["Pet Damage"] = _G.SHOW_PET_MELEE_DAMAGE or "Pet Damage"
-L["actor damage"] = function(n1, n2) return ((not n2 or n1 == n2) and "%s's damage" or "%s's damage on %s"):format(n1, n2) end
-L["%s's <%s> damage"] = true
 L["Useful Damage"] = true
 L["Useful damage on %s"] = true
 L["Damage Done By Spell"] = true
@@ -627,7 +610,6 @@ L["Damage: Raid DPS"] = true
 L["Absorbed Damage"] = true
 L["Enable this if you want the damage absorbed to be included in the damage done."] = true
 L["Damage Done By School"] = true
-L["%s Damage"] = true
 -- killing blows module
 L["Killing Blows"] = _G.KILLING_BLOWS or "Killing Blows"
 L["Only PvP Kills"] = true
@@ -635,7 +617,6 @@ L["When enabled, only kills against enemy players count."] = true
 L["Announce killing blows after combat ends. Only works for boss fights."] = true
 -- damage taken module
 L["Damage Taken"] = true
-L["Damage taken by %s"] = true
 L["Damage Taken By Spell"] = true
 L["%s's targets"] = true
 L["DTPS"] = true
@@ -643,11 +624,8 @@ L["sDTPS"] = "DTPS (subviews)"
 -- enemy damage done module
 L["Enemies"] = true
 L["Enemy Damage Done"] = true
-L["Damage done per player"] = true
-L["Damage from %s"] = true
 -- enemy damage taken module
 L["Enemy Damage Taken"] = true
-L["%s's damage sources"] = true
 L["%s below %s%%"] = true
 L["%s - %s%% to %s%%"] = true
 L["Phase %s"] = true
@@ -664,7 +642,7 @@ L["Enemy Healing Done"] = true
 -- avoidance and mitigation module
 L["Avoidance & Mitigation"] = true
 L["More Details"] = true
-L["%s's damage breakdown"] = true
+L["%s's details"] = true
 -- friendly fire module
 L["Friendly Fire"] = true
 -- useful damage targets
@@ -705,10 +683,8 @@ L["Activity per Target"] = true
 L["%s's activity"] = true
 -- dispels module lines --
 L["Dispels"] = _G.DISPELS
-L["Dispel spells"] = true
-L["%s's dispel spells"] = true
+L["Dispel Spells"] = true
 L["%s's dispelled spells"] = true
-L["%s's dispelled targets"] = true
 -- failbot module lines --
 L["Fails"] = true
 L["%s's fails"] = true
@@ -716,10 +692,8 @@ L["Report Fails"] = true
 L["Reports the group fails at the end of combat if there are any."] = true
 -- interrupts module lines --
 L["Interrupts"] = _G.INTERRUPTS
-L["Interrupt spells"] = true
-L["%s's interrupt spells"] = true
+L["Interrupt Spells"] = true
 L["%s's interrupted spells"] = true
-L["%s's interrupted targets"] = true
 L["%s interrupted!"] = true
 -- Power gained module --
 L["Resources"] = true
@@ -734,8 +708,6 @@ L["Power gained: Runic Power"] = true
 L["%s's gained %s"] = true
 -- Parry module lines --
 L["Parry-Haste"] = true
-L["%s's parry targets"] = true
-L["%s's parry targets"] = true
 L["%s parried %s (%s)"] = true
 -- Potions module lines --
 L["Potions"] = true
@@ -747,7 +719,6 @@ L["Prints pre-potion after the end of the combat."] = true
 L["Healthstones"] = true
 -- resurrect module lines --
 L["Resurrects"] = true
-L["%s's resurrect targets"] = true
 -- nickname module lines --
 L["Nickname"] = true
 L["Name"] = _G.NAME
@@ -766,8 +737,6 @@ L["Clear Cache"] = true
 L["Are you sure you want clear cached nicknames?"] = true
 -- overkill module lines --
 L["Overkill"] = true
-L["%s's overkill spells"] = true
-L["%s's overkill targets"] = true
 -- tweaks module lines --
 L["Improvement"] = true
 L["Tweaks"] = true
@@ -825,10 +794,11 @@ L["Comparison"] = true
 L["%s vs %s: %s"] = true
 L["%s vs %s: Spells"] = true
 L["%s vs %s: Targets"] = true
-L["%s vs %s: Damage on %s"] = true
 -- spellcast module
 L["Casts"] = true
 L["%s's spells"] = true
+L["%s's spells on %s"] = true
+L["Spells on %s"] = true
 -- about
 L["Author"] = true
 L["Credits"] = true

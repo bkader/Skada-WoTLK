@@ -68,11 +68,11 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M, O)
 
 	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's parry targets"], label)
+		win.title = format(L["%s's targets"], label)
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's parry targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], win.actorname)
 		if not set or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)

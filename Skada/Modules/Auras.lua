@@ -616,11 +616,11 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 
 	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s's buffs"], label)
+		win.title = uformat(L["%s's spells"], label)
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's buffs"], win.actorname)
+		win.title = uformat(L["%s's spells"], win.actorname)
 		spell_update_func(self, "BUFF", win, set, mode_cols)
 	end
 
@@ -731,11 +731,11 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 
 	function mode_target_spell:Enter(win, id, label)
 		win.targetname = label or L["Unknown"]
-		win.title = L["actor debuffs"](win.actorname or L["Unknown"], label)
+		win.title = uformat(L["%s's spells on %s"], win.actorname, label)
 	end
 
 	function mode_target_spell:Update(win, set)
-		win.title = L["actor debuffs"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
+		win.title = uformat(L["%s's spells on %s"], win.actorname, win.targetname)
 		targetspell_update_func(self, "DEBUFF", win, set, mode_cols, C)
 	end
 
@@ -790,11 +790,11 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 
 	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = L["actor debuffs"](label)
+		win.title = format(L["%s's spells"], label)
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = L["actor debuffs"](win.actorname or L["Unknown"])
+		win.title = uformat(L["%s's spells"], win.actorname)
 		spell_update_func(self, "DEBUFF", win, set, mode_cols)
 	end
 
@@ -890,11 +890,11 @@ Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 
 	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s's buffs"], label)
+		win.title = uformat(L["%s's spells"], label)
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's buffs"], win.actorname)
+		win.title = uformat(L["%s's spells"], win.actorname)
 		spell_update_func(self, "BUFF", win, set, mode_cols)
 	end
 
@@ -968,11 +968,11 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 
 	function mode_target_spell:Enter(win, id, label)
 		win.targetname = label or L["Unknown"]
-		win.title = L["actor debuffs"](win.actorname or L["Unknown"], label)
+		win.title = uformat(L["%s's spells on %s"], win.actorname, label)
 	end
 
 	function mode_target_spell:Update(win, set)
-		win.title = L["actor debuffs"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
+		win.title = uformat(L["%s's spells on %s"], win.actorname, win.targetname)
 		targetspell_update_func(self, "DEBUFF", win, set, mode_cols, C)
 	end
 
@@ -998,11 +998,11 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 
 	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = L["actor debuffs"](label)
+		win.title = format(L["%s's spells"], label)
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = L["actor debuffs"](win.actorname or L["Unknown"])
+		win.title = format(L["%s's spells"], win.actorname)
 		spell_update_func(self, "DEBUFF", win, set, mode_cols)
 	end
 

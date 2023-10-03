@@ -450,7 +450,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		local damage, overkill, useful = set:GetActorDamageFromSource(win.targetname, win.targetid, label)
 		if damage == 0 then return end
 
-		tooltip:AddLine(format(L["%s's damage breakdown"], label))
+		tooltip:AddLine(format(L["%s's details"], label))
 		tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(damage), 1, 1, 1)
 		if useful > 0 then
 			tooltip:AddDoubleLine(L["Useful Damage"], format("%s (%s)", Skada:FormatNumber(useful), Skada:FormatPercent(useful, damage)), 1, 1, 1)
@@ -469,7 +469,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		local amount, total, useful = e:GetDamageTakenBreakdown(set)
 		if not useful or useful == 0 then return end
 
-		tooltip:AddLine(format(L["%s's damage breakdown"], label))
+		tooltip:AddLine(format(L["%s's details"], label))
 		tooltip:AddDoubleLine(L["Damage Done"], Skada:FormatNumber(total), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Useful Damage"], format("%s (%s)", Skada:FormatNumber(useful), Skada:FormatPercent(useful, total)), 1, 1, 1)
 		local overkill = max(0, total - useful)
@@ -515,11 +515,11 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 	function mode_source:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's damage sources"], label)
+		win.title = format(L["%s's sources"], label)
 	end
 
 	function mode_source:Update(win, set)
-		win.title = uformat(L["%s's damage sources"], win.targetname)
+		win.title = uformat(L["%s's sources"], win.targetname)
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
@@ -547,11 +547,11 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 	function mode_source_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = L["actor damage"](label or L["Unknown"], win.targetname or L["Unknown"])
+		win.title = uformat(L["%s's spells on %s"], label, win.targetname)
 	end
 
 	function mode_source_spell:Update(win, set)
-		win.title = L["actor damage"](win.actorname or L["Unknown"], win.targetname or L["Unknown"])
+		win.title = uformat(L["%s's spells on %s"], win.actorname, win.targetname)
 		if not win.actorname or not win.targetname then return end
 
 		local actor = set and set:GetActor(win.targetname, win.targetid)
@@ -584,11 +584,11 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 
 	function mode_spell:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["Damage taken by %s"], label)
+		win.title = format(L["Spells on %s"], label)
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["Damage taken by %s"], win.targetname)
+		win.title = uformat(L["Spells on %s"], win.targetname)
 
 		local actor = set and set:GetActor(win.targetname, win.targetid)
 		local total = actor and actor:GetDamageTaken()
@@ -781,6 +781,8 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			end
 			if src.total then
 				total = total + src.total
+			elseif src.amount then
+				total = total + src.amount
 			end
 			if src.useful then
 				useful = useful + src.useful
@@ -933,11 +935,11 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 
 	function mode_target_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = L["actor damage"](win.targetname or L["Unknown"], label)
+		win.title = uformat(L["%s's spells on %s"], win.targetname, label)
 	end
 
 	function mode_target_spell:Update(win, set)
-		win.title = L["actor damage"](win.targetname or L["Unknown"], win.actorname or L["Unknown"])
+		win.title = uformat(L["%s's spells on %s"], win.targetname, win.actorname)
 		if not (win.targetname and win.actorname) then return end
 
 		local actor = set and set:GetActor(win.targetname, win.targetid)
@@ -1033,11 +1035,11 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 
 	function mode_spell:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = L["actor damage"](label)
+		win.title = format(L["%s's spells"], label)
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = L["actor damage"](win.targetname or L["Unknown"])
+		win.title = uformat(L["%s's spells"], win.targetname)
 
 		local actor = set and set:GetActor(win.targetname, win.targetid)
 		local total = actor and actor:GetDamage()
@@ -1116,7 +1118,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 
 		Skada:RegisterForCL(
 			spell_damage,
-			{dst_is_interesting = true, src_is_not_interesting = true},
+			{src_is_not_interesting = true, dst_is_interesting = true},
 			-- damage events
 			"DAMAGE_SHIELD",
 			"DAMAGE_SPLIT",
@@ -1315,11 +1317,11 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 
 	function mode_target:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's healed targets"], label)
+		win.title = format(L["%s's targets"], label)
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's healed targets"], win.targetname)
+		win.title = uformat(L["%s's targets"], win.targetname)
 
 		local targets, total, actor = set:GetActorHealTargets(win.targetname, win.targetid)
 		if not targets or not actor or total == 0 then
@@ -1342,11 +1344,11 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 
 	function mode_spell:Enter(win, id, label)
 		win.targetid, win.targetname = id, label
-		win.title = L["actor heal spells"](label)
+		win.title = format(L["%s's spells"], label)
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = L["actor heal spells"](win.targetname or L["Unknown"])
+		win.title = uformat(L["%s's spells"], win.targetname)
 
 		local actor = set and set:GetActor(win.targetname, win.targetid)
 		local total = actor and actor.heal

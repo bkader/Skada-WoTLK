@@ -4,7 +4,7 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 	local mode = Skada:NewModule("Dispels")
 	local mode_extraspell = mode:NewModule("Spell List")
 	local mode_target = mode:NewModule("Target List")
-	local mode_spell = mode:NewModule("Dispel spells")
+	local mode_spell = mode:NewModule("Dispel Spells")
 	local ignored_spells = Skada.ignored_spells.dispel -- Edit Skada\Core\Tables.lua
 	local get_actor_dispelled_spells = nil
 	local get_actor_dispelled_targets = nil
@@ -101,11 +101,11 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 
 	function mode_target:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's dispelled targets"], label)
+		win.title = format(L["%s's targets"], label)
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's dispelled targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], win.actorname)
 
 		local targets, total, actor = get_actor_dispelled_targets(set, win.actorname, win.actorid)
 		if not targets or not actor or total == 0 then
@@ -126,11 +126,11 @@ Skada:RegisterModule("Dispels", function(L, P, _, C)
 
 	function mode_spell:Enter(win, id, label)
 		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's dispel spells"], label)
+		win.title = format(L["%s's spells"], label)
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's dispel spells"], win.actorname)
+		win.title = uformat(L["%s's spells"], win.actorname)
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.dispel
