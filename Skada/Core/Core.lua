@@ -8,7 +8,7 @@ local DBI = LibStub("LibDBIcon-1.0", true)
 
 -- cache frequently used globals
 local _G = _G
-local pairs, type, tonumber, tostring, min, max = pairs, type, tonumber, tostring, math.min, math.max
+local next, pairs, type, tonumber, tostring, min, max = next, pairs, type, tonumber, tostring, math.min, math.max
 local strmatch, format, gsub, strlower, strfind = strmatch, string.format, string.gsub, string.lower, string.find
 local Private, GetCreatureId = ns.Private, Skada.GetCreatureId
 local tsort, tremove, wipe, setmetatable = table.sort, Private.tremove, wipe, setmetatable
@@ -2891,22 +2891,22 @@ do
 		tentative = nil
 	end
 
-	local next = next
-	local src_is_interesting = nil
-	local dst_is_interesting = nil
+	local GetTempUnit = Private.GetTempUnit
+	local src_is_interesting = false
+	local dst_is_interesting = false
 
 	function Skada:OnCombatEvent(t)
 		-- ignored combat event?
 		if (not t.event or ignored_events[t.event]) and not (spellcast_events[t.event] and self.current) then return end
 
-		src_is_interesting = nil
-		dst_is_interesting = nil
+		src_is_interesting = false
+		dst_is_interesting = false
 
 		if not self.current and trigger_events[t.event] and t.srcName and t.dstName and t.srcGUID ~= t.dstGUID then
-			src_is_interesting = t:SourceInGroup() or t:SourceIsPet(true) or guidToName[t.srcGUID]
+			src_is_interesting = t:SourceInGroup() or t:SourceIsPet(true)
 
 			if t.event ~= "SPELL_PERIODIC_DAMAGE" then
-				dst_is_interesting = t:DestInGroup() or t:DestIsPet(true) or guidToName[t.dstGUID]
+				dst_is_interesting = t:DestInGroup() or t:DestIsPet(true)
 			end
 
 			if src_is_interesting or dst_is_interesting then
@@ -2944,7 +2944,7 @@ do
 			local fail = false
 
 			if flags.src_is_interesting_nopets then
-				if t:SourceInGroup(true) or guidToName[t.srcGUID] then
+				if t:SourceInGroup(true) then
 					src_is_interesting = true
 				else
 					fail = true
@@ -2952,7 +2952,7 @@ do
 			end
 
 			if not fail and flags.dst_is_interesting_nopets then
-				if t:DestInGroup(true) or guidToName[t.dstGUID] then
+				if t:DestInGroup(true) then
 					dst_is_interesting = true
 				else
 					fail = true
@@ -2960,14 +2960,14 @@ do
 			end
 
 			if not fail and (flags.src_is_interesting or flags.src_is_not_interesting) then
-				src_is_interesting = t:SourceInGroup() or t:SourceIsPet(true) or guidToName[t.srcGUID] or Private.GetTempUnit(t.srcGUID)
+				src_is_interesting = t:SourceInGroup() or t:SourceIsPet(true) or GetTempUnit(t.srcGUID)
 				if (flags.src_is_interesting and not src_is_interesting) or (flags.src_is_not_interesting and src_is_interesting) then
 					fail = true
 				end
 			end
 
 			if not fail and (flags.dst_is_interesting or flags.dst_is_not_interesting) then
-				dst_is_interesting = t:DestInGroup() or t:DestIsPet(true) or guidToName[t.dstGUID]
+				dst_is_interesting = t:DestInGroup() or t:DestIsPet(true)
 				if (flags.dst_is_interesting and not dst_is_interesting) or (flags.dst_is_not_interesting and dst_is_interesting) then
 					fail = true
 				end

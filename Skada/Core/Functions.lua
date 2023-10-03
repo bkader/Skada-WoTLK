@@ -1785,35 +1785,59 @@ do
 			local BITMASK_PETS = Private.BITMASK_PETS
 
 			function ARGS_MT.SourceInGroup(args, nopets)
-				if nopets then
-					if args._srcInGroupNopets ~= nil then
-						return args._srcInGroupNopets
+				if args._srcInGroup == nil then
+					if guidToName[args.srcGUID] ~= nil then
+						args._srcInGroup = true
+						args._srcInGroupNopets = true
+						args._srcIsPet = false
+						args._srcIsGroupPet = false
+					else
+						args._srcInGroup = (bit_band(args.srcFlags, BITMASK_GROUP) ~= 0)
 					end
-					args._srcInGroupNopets = (bit_band(args.srcFlags, BITMASK_GROUP) ~= 0) and (bit_band(args.srcFlags, BITMASK_PETS) == 0)
-					return args._srcInGroupNopets
 				end
 
-				if args._srcInGroup ~= nil then
-					return args._srcInGroup
+				if args._srcInGroupNopets == nil then
+					if bit_band(args.srcFlags, BITMASK_PETS) == 0 then
+						args._srcInGroupNopets = args._srcInGroup
+						args._srcIsPet = false
+						args._srcIsGroupPet = false
+					else
+						args._srcInGroupNopets = false
+						args._srcIsPet = true
+						args._srcIsGroupPet = (guidToOwner[args.srcGUID] ~= nil)
+					end
 				end
-				args._srcInGroup = (bit_band(args.srcFlags, BITMASK_GROUP) ~= 0)
-				return args._srcInGroup
+
+				return nopets and args._srcInGroupNopets or args._srcInGroup
 			end
 
 			function ARGS_MT.DestInGroup(args, nopets)
-				if nopets then
-					if args._dstInGroupNopets ~= nil then
-						return args._dstInGroupNopets
+				if args._dstInGroup == nil then
+					if guidToName[args.dstGUID] ~= nil then
+						args._dstInGroup = true
+						args._dstInGroupNopets = true
+						args._dstIsPet = false
+						args._dstIsGroupPet = false
+						args._dstIsOwnedPet = false
+					else
+						args._dstInGroup = (bit_band(args.dstFlags, BITMASK_GROUP) ~= 0)
 					end
-					args._dstInGroupNopets = (bit_band(args.dstFlags, BITMASK_GROUP) ~= 0) and (bit_band(args.dstFlags, BITMASK_PETS) == 0)
-					return args._dstInGroupNopets
 				end
 
-				if args._dstInGroup ~= nil then
-					return args._dstInGroup
+				if args._dstInGroupNopets == nil then
+					if bit_band(args.dstFlags, BITMASK_PETS) == 0 then
+						args._dstInGroupNopets = args._dstInGroup
+						args._dstIsPet = false
+						args._dstIsGroupPet = false
+						args._dstIsOwnedPet = false
+					else
+						args._dstInGroupNopets = false
+						args._dstIsPet = true
+						args._dstIsGroupPet = (guidToOwner[args.dstGUID] ~= nil)
+					end
 				end
-				args._dstInGroup = (bit_band(args.dstFlags, BITMASK_GROUP) ~= 0)
-				return args._dstInGroup
+
+				return nopets and args._dstInGroupNopets or args._dstInGroup
 			end
 
 			function ARGS_MT.IsGroupEvent(args, nopets)
@@ -1821,65 +1845,55 @@ do
 			end
 
 			function ARGS_MT.SourceIsPet(args, ingroup)
-				if ingroup then
-					if args._srcIsGroupPet ~= nil then
-						return args._srcIsGroupPet
-					end
-					args._srcIsGroupPet = (guidToOwner[args.srcGUID] ~= nil)
-					return args._srcIsGroupPet
+				if args._srcIsPet == nil then
+					args._srcIsPet = (bit_band(args.srcFlags, BITMASK_PETS) ~= 0)
 				end
 
-				if args._srcIsPet ~= nil then
-					return args._srcIsPet
+				if args._srcIsGroupPet == nil then
+					args._srcIsGroupPet = args._srcIsPet and (guidToOwner[args.srcGUID] ~= nil)
 				end
 
-				args._srcIsPet = (bit_band(args.srcFlags, BITMASK_PETS) ~= 0)
-				return args._srcIsPet
+				return ingroup and args._srcIsGroupPet or args._srcIsPet
 			end
 
 			-- owner=true? acts like "ingroup" (SourceIsPet)
 			function ARGS_MT.DestIsPet(args, owner)
-				if owner == true then
-					if args._dstIsGroupPet ~= nil then
-						return args._dstIsGroupPet
+				if args._dstIsPet == nil then
+					args._dstIsPet = (bit_band(args.dstFlags, BITMASK_PETS) ~= 0)
+				end
+
+				if not args._dstIsPet then
+					return false
+				elseif owner == true then
+					if args._dstIsGroupPet == nil then
+						args._dstIsGroupPet = (guidToOwner[args.dstGUID] ~= nil)
 					end
-					args._dstIsGroupPet = (bit_band(args.dstFlags, BITMASK_PETS) ~= 0) and (guidToOwner[args.dstGUID] ~= nil)
 					return args._dstIsGroupPet
-				end
-
-				if owner then
-					if args._dstIsOwnedPet ~= nil then
-						return args._dstIsOwnedPet
+				elseif owner then
+					if args._dstIsOwnedPet == nil then
+						args._dstIsOwnedPet = (bit_band(args.srcFlags, BITMASK_GROUP) ~= 0) -- owner is a group member?
+						args._dstIsOwnedPet = args._dstIsOwnedPet or (bit_band(args.srcFlags, BITMASK_PETS) ~= 0) -- summoned by another pet?
+						args._dstIsOwnedPet = args._dstIsOwnedPet or (guidToClass[args.dstGUID] ~= nil) -- already known pet
 					end
-
-					args._dstIsOwnedPet = (bit_band(args.srcFlags, BITMASK_GROUP) ~= 0) -- owner is a group member?
-					args._dstIsOwnedPet = args._dstIsOwnedPet or (bit_band(args.srcFlags, BITMASK_PETS) ~= 0) -- summoned by another pet?
-					args._dstIsOwnedPet = args._dstIsOwnedPet or (guidToClass[args.dstGUID] ~= nil) -- already known pet
 					return args._dstIsOwnedPet
-				end
-
-				if args._dstIsPet ~= nil then
+				else
 					return args._dstIsPet
 				end
-				args._dstIsPet = (bit_band(args.dstFlags, BITMASK_PETS) == 0)
-				return args._dstIsPet
 			end
 		end
 
 		do -- source or destination are players
 			local BITMASK_PLAYER = Private.BITMASK_PLAYER
 			function ARGS_MT.SourceIsPlayer(args)
-				if args._srcIsPlayer ~= nil then
-					return args._srcIsPlayer
+				if args._srcIsPlayer == nil then
+					args._srcIsPlayer = (guidToName[args.srcGUID] ~= nil) or (bit_band(args.srcFlags, BITMASK_PLAYER) == BITMASK_PLAYER)
 				end
-				args._srcIsPlayer = (bit_band(args.srcFlags, BITMASK_PLAYER) == BITMASK_PLAYER)
 				return args._srcIsPlayer
 			end
 			function ARGS_MT.DestIsPlayer(args)
-				if args._dstIsPlayer ~= nil then
-					return args._dstIsPlayer
+				if args._dstIsPlayer == nil then
+					args._dstIsPlayer = (guidToName[args.dstGUID] ~= nil) or (bit_band(args.dstFlags, BITMASK_PLAYER) == BITMASK_PLAYER)
 				end
-				args._dstIsPlayer = (bit_band(args.dstFlags, BITMASK_PLAYER) == BITMASK_PLAYER)
 				return args._dstIsPlayer
 			end
 		end
@@ -1889,17 +1903,15 @@ do
 			local GetCreatureId = Skada.GetCreatureId
 
 			function ARGS_MT.SourceIsBoss(args)
-				if args._srcIsBoss ~= nil then
-					return args._srcIsBoss
+				if args._srcIsBoss == nil then
+					args._srcIsBoss = BossIDs[GetCreatureId(args.srcGUID)] or false
 				end
-				args._srcIsBoss = args.srcGUID and BossIDs[GetCreatureId(args.srcGUID)] or false
 				return args._srcIsBoss
 			end
 			function ARGS_MT.DestIsBoss(args)
-				if args._dstIsBoss ~= nil then
-					return args._dstIsBoss
+				if args._dstIsBoss == nil then
+					args._dstIsBoss = BossIDs[GetCreatureId(args.dstGUID)] or false
 				end
-				args._dstIsBoss = args.dstGUID and BossIDs[GetCreatureId(args.dstGUID)] or false
 				return args._dstIsBoss
 			end
 			function ARGS_MT.IsBossEvent(args)
@@ -1910,49 +1922,67 @@ do
 		do -- source and destination reactions
 			local BITMASK_FRIENDLY = Private.BITMASK_FRIENDLY
 			function ARGS_MT.SourceIsFriendly(args)
-				if args._srcIsFriendly ~= nil then
-					return args._srcIsFriendly
+				if args._srcIsFriendly == nil then
+					args._srcIsFriendly = (bit_band(args.srcFlags, BITMASK_FRIENDLY) ~= 0)
+					if args._srcIsFriendly then
+						args._srcIsNeutral = false
+						args._srcIsHostile = false
+					end
 				end
-				args._srcIsFriendly = (bit_band(args.srcFlags, BITMASK_FRIENDLY) ~= 0)
 				return args._srcIsFriendly
 			end
 			function ARGS_MT.DestIsFriendly(args)
-				if args._dstIsFriendly ~= nil then
-					return args._dstIsFriendly
+				if args._dstIsFriendly == nil then
+					args._dstIsFriendly = (bit_band(args.dstFlags, BITMASK_FRIENDLY) ~= 0)
+					if args._dstIsFriendly then
+						args._dstIsNeutral = false
+						args._dstIsHostile = false
+					end
 				end
-				args._dstIsFriendly = (bit_band(args.dstFlags, BITMASK_FRIENDLY) ~= 0)
 				return args._dstIsFriendly
 			end
 
 			local BITMASK_NEUTRAL = Private.BITMASK_NEUTRAL
 			function ARGS_MT.SourceIsNeutral(args)
-				if args._srcIsNeutral ~= nil then
-					return args._srcIsNeutral
+				if args._srcIsNeutral == nil then
+					args._srcIsNeutral = (bit_band(args.srcFlags, BITMASK_NEUTRAL) ~= 0)
+					if args._srcIsNeutral then
+						args._srcIsFriendly = false
+						args._srcIsHostile = false
+					end
 				end
-				args._srcIsNeutral = (bit_band(args.srcFlags, BITMASK_NEUTRAL) ~= 0)
 				return args._srcIsNeutral
 			end
 			function ARGS_MT.DestIsNeutral(args)
-				if args._dstIsNeutral ~= nil then
-					return args._dstIsNeutral
+				if args._dstIsNeutral == nil then
+					args._dstIsNeutral = (bit_band(args.dstFlags, BITMASK_NEUTRAL) ~= 0)
+					if args._dstIsNeutral then
+						args._dstIsFriendly = false
+						args._dstIsHostile = false
+					end
 				end
-				args._dstIsNeutral = (bit_band(args.dstFlags, BITMASK_NEUTRAL) ~= 0)
 				return args._dstIsNeutral
 			end
 
 			local BITMASK_HOSTILE = Private.BITMASK_HOSTILE
 			function ARGS_MT.SourceIsHostile(args)
-				if args._srcIsHostile ~= nil then
-					return args._srcIsHostile
+				if args._srcIsHostile == nil then
+					args._srcIsHostile = (bit_band(args.srcFlags, BITMASK_HOSTILE) ~= 0)
+					if args._srcIsHostile then
+						args._srcIsFriendly = false
+						args._srcIsNeutral = false
+					end
 				end
-				args._srcIsHostile = (bit_band(args.srcFlags, BITMASK_HOSTILE) ~= 0)
 				return args._srcIsHostile
 			end
 			function ARGS_MT.DestIsHostile(args)
-				if args._dstIsHostile ~= nil then
-					return args._dstIsHostile
+				if args._dstIsHostile == nil then
+					args._dstIsHostile = (bit_band(args.dstFlags, BITMASK_HOSTILE) ~= 0)
+					if args._dstIsHostile then
+						args._dstIsFriendly = false
+						args._dstIsNeutral = false
+					end
 				end
-				args._dstIsHostile = (bit_band(args.dstFlags, BITMASK_HOSTILE) ~= 0)
 				return args._dstIsHostile
 			end
 		end
