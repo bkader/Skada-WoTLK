@@ -628,6 +628,7 @@ function Window:UpdateDisplay()
 
 		self.metadata.ordersort = true
 		self.metadata.is_modelist = set and true or nil
+		self.metadata.is_setlist = nil
 	else
 		local nr = 1
 		local d = self:nr(nr)
@@ -658,6 +659,7 @@ function Window:UpdateDisplay()
 		end
 
 		self.metadata.ordersort = true
+		self.metadata.is_setlist = true
 	end
 
 	if not self.metadata.maxvalue then
@@ -1452,7 +1454,8 @@ do
 		local t = md and GameTooltip
 		if not t then return end
 
-		if md.is_modelist and P.informativetooltips then
+		if P.informativetooltips and (md.is_setlist or md.is_modelist) then
+			if md.is_setlist then return end
 			t:ClearLines()
 			add_subview_lines(t, win, find_mode(id), id, label)
 			t:Show()
@@ -2417,17 +2420,23 @@ function Skada:GetFeeds()
 	return feeds
 end
 
-function Skada:GetSet(s)
-	local set = nil
-	if s == "current" then
-		set = self.current or self.last or self.sets[1]
-	elseif s == "total" then
-		set = self.total
-	else
-		set = self.sets[s]
+function Skada:GetSet(id, unbound)
+	if id == "current" then
+		local set = self.current or self.last or self.sets[1]
+		return unbound and set or setPrototype:Bind(set)
+	elseif id == "total" then
+		return unbound and self.total or setPrototype:Bind(self.total)
+	elseif type(id) == "number" then
+		local set = self.sets[id]
+		return unbound and set or setPrototype:Bind(set)
 	end
 
-	return setPrototype:Bind(set)
+	for i = 1, #self.sets do
+		local set = self.sets[i]
+		if set and (tostring(set.starttime) == id or set.name == id) then
+			return unbound and set or setPrototype:Bind(set)
+		end
+	end
 end
 
 -------------------------------------------------------------------------------

@@ -204,7 +204,7 @@ Skada:RegisterModule("Killing Blows", function(L, P, _, C, M, O)
 
 	function mode:GetSetSummary(set, win)
 		if not set then return end
-		local value = set:GetTotal(win and win.class, nil, "kill")
+		local value = set:GetTotal(win and win.class, nil, "kill") or 0
 		return value, Skada:FormatNumber(value)
 	end
 

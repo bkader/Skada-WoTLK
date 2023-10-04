@@ -566,6 +566,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	function mode:AddToTooltip(set, tooltip)
 		if not set then return end
 		local dtps, amount = set:GetDTPS()
+		if not amount then return end
 		tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(amount), 1, 1, 1)
 		tooltip:AddDoubleLine(L["DTPS"], Skada:FormatNumber(dtps), 1, 1, 1)
 	end
