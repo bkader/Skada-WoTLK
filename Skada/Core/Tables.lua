@@ -780,3 +780,13 @@ ns.trigger_events = {
     DAMAGE_SHIELD = true,
 	SPELL_BUILDING_DAMAGE = true
 }
+
+-- local segment types used for set tooltips.
+ns.segment_types = {
+	arena = L["Arena"],
+	group = L["Group"],
+	none = L["None"],
+	party = L["Dungeon"],
+	pvp = L["Battleground"],
+	raid = L["Raid"]
+}

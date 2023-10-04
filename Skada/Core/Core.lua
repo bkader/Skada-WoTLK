@@ -1447,6 +1447,36 @@ do
 		end
 	end
 
+	local date = date
+	local segment_types = Skada.segment_types
+
+	local function show_set_info(set, t)
+		if not set then return end
+
+		t:AddLine(set.name)
+
+		if set.diff then
+			t:AddDoubleLine(L["Type"], format("%s (%s)", segment_types[set.type] or set.type, set.diff), nil, nil, nil, 1, 1, 1)
+		else
+			t:AddDoubleLine(L["Type"], segment_types[set.type] or set.type, nil, nil, nil, 1, 1, 1)
+		end
+
+		if set.gotboss and set.success then
+			t:AddDoubleLine(L["BOSS"], set.mobname, nil, nil, nil, 0, 1, 0)
+		elseif set.gotboss then
+			t:AddDoubleLine(L["BOSS"], set.mobname, nil, nil, nil, 1, 0, 0)
+		elseif set.type == "pvp" or set.type == "arena" then
+			t:AddDoubleLine(L["Zone"], set.mobname, nil, nil, nil, 1, 1, 0)
+		else
+			t:AddDoubleLine(L["ENEMY"], set.mobname, nil, nil, nil, 1, 1, 1)
+		end
+
+		t:AddLine(" ")
+		t:AddDoubleLine(L["Start"], date("%x %X", set.starttime), nil, nil, nil, 1, 1, 1)
+		t:AddDoubleLine(L["End"], set.endtime and date("%x %X", set.endtime) or "??", nil, nil, nil, 1, 1, 1)
+		t:AddDoubleLine(L["Duration"], Skada:FormatTime(set.time, true), nil, nil, nil, 1, 1, 1)
+	end
+
 	function Skada:ShowTooltip(win, id, label, bar)
 		if self.testMode or not P.tooltips or (bar and bar.ignore) then return end
 
@@ -1455,10 +1485,15 @@ do
 		if not t then return end
 
 		if P.informativetooltips and (md.is_setlist or md.is_modelist) then
-			if md.is_setlist then return end
-			t:ClearLines()
-			add_subview_lines(t, win, find_mode(id), id, label)
-			t:Show()
+			if md.is_modelist then
+				t:ClearLines()
+				add_subview_lines(t, win, find_mode(id), id, label)
+				t:Show()
+			elseif id ~= "total" and id ~= "current" then
+				t:ClearLines()
+				show_set_info(self:GetSet(id, true), t)
+				t:Show()
+			end
 			return
 		end
 
@@ -1736,13 +1771,12 @@ end
 
 do
 	local IsInInstance = IsInInstance
-	local inInstance, instanceType, isininstance, isinpvp
 	local was_in_instance, was_in_pvp
 
 	function Skada:CheckZone()
-		inInstance, instanceType = IsInInstance()
-		isininstance = inInstance and (instanceType == "party" or instanceType == "raid")
-		isinpvp = IsInPvP()
+		local inInstance, instanceType = IsInInstance()
+		local isininstance = inInstance and (instanceType == "party" or instanceType == "raid") or false
+		local isinpvp = IsInPvP()
 
 		if isininstance and was_in_instance ~= nil and not was_in_instance and P.reset.instance ~= 1 and self:CanReset() then
 			if P.reset.instance == 3 then
@@ -1765,6 +1799,8 @@ do
 		elseif self.insType ~= instanceType then
 			self:SendMessage("ZONE_TYPE_CHANGED", instanceType, self.insType)
 		end
+
+		self.insDiff = isininstance and self:GetInstanceDiff() or nil
 		self.insType = instanceType
 
 		was_in_instance = (isininstance == true)
@@ -1990,6 +2026,7 @@ end
 -- format functions
 
 do
+	local date = date
 	local function set_label_format(name, starttime, endtime, fmt, dye)
 		fmt = max(1, min(8, fmt or P.setformat or 3))
 
@@ -2839,6 +2876,7 @@ do
 		if not set.type then
 			if Skada.insType == nil then Skada:CheckZone() end
 			set.type = (Skada.insType == "none" and IsInGroup()) and "group" or Skada.insType
+			set.diff = (set.type == "party" or set.type == "raid") and Skada.insDiff
 		end
 
 		-- don't go further for arena/pvp
@@ -2850,7 +2888,7 @@ do
 		if set.gotboss then
 			-- default boss defeated event? (no DBM/BigWigs)
 			if not Skada.bossmod and death_events[t.event] and set.gotboss == GetCreatureId(t.dstGUID) then
-				Skada:ScheduleTimer(BossDefeated, P.updatefrequency or 0.5)
+				Skada:ScheduleTimer(BossDefeated, 0.1)
 			end
 			return
 		end

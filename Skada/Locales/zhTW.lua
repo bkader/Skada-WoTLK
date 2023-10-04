@@ -87,6 +87,9 @@ L["REFLECT"] = "反射"
 L["RESIST"] = "抵制"
 L["Only for bosses."] = "只針對老闆。"
 L["Enable this only against bosses."] = "只對老闆啟用此。"
+-- segment info
+L["Start"] = "開始"
+L["End"] = "結束"
 -- windows section:
 L["Window"] = "視窗"
 L["Windows"] = "視窗"

@@ -90,6 +90,9 @@ L["REFLECT"] = "Reflejado"
 L["RESIST"] = "Resistido"
 L["Only for bosses."] = "Solo para jefes."
 L["Enable this only against bosses."] = "Habilita esto solo contra jefes."
+-- segment info
+L["Start"] = "Iniciar"
+L["End"] = "Terminar"
 -- windows section:
 L["Window"] = "Ventana"
 L["Windows"] = "Ventanas"

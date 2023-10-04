@@ -88,6 +88,9 @@ L["REFLECT"] = "Renvoy\195\169"
 L["RESIST"] = "R\195\169sist\195\169"
 L["Only for bosses."] = "Uniquement contre les boss"
 L["Enable this only against bosses."] = "Activer uniquement contre les boss."
+-- segment info
+L["Start"] = "D\195\169but"
+L["End"] = "Fin"
 -- windows section:
 L["Window"] = "Fen\195\170tre"
 L["Windows"] = "Fen\195\170tres"

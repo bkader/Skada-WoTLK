@@ -103,6 +103,16 @@ L["Unknown"] = _G.UNKNOWN
 L["Other"] = _G.OTHER
 L["Category"] = _G.CATEGORY
 L["Categories"] = _G.CATEGORIES
+-- segment info
+L["Type"] = _G.TYPE
+L["Arena"] = _G.ARENA
+L["Battleground"] = _G.BATTLEGROUND
+L["Group"] = _G.GROUP
+L["Dungeon"] = _G.LFG_TYPE_DUNGEON
+L["Raid"] = _G.LFG_TYPE_RAID
+L["Zone"] = _G.ZONE
+L["Start"] = true
+L["End"] = true
 -- windows section:
 L["Window"] = true
 L["Windows"] = true

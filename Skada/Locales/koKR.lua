@@ -87,6 +87,9 @@ L["REFLECT"] = "반사함"
 L["RESIST"] = "저항함"
 L["Only for bosses."] = "상사에게만."
 L["Enable this only against bosses."] = "보스에 대해서만 활성화하십시오."
+-- segment info
+L["Start"] = "시작"
+L["End"] = "종료"
 -- windows section:
 L["Window"] = "창"
 L["Windows"] = "창"
