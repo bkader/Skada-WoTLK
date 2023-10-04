@@ -1759,6 +1759,40 @@ do
 end
 
 -------------------------------------------------------------------------------
+-- temporary flags check bypass
+
+do
+	local new = Private.newTable
+	local del = Private.delTable
+	local clear = Private.clearTable
+	local temp_units = nil
+
+	-- adds a temporary unit with optional info
+	function Private.AddTempUnit(guid, info)
+		if not guid then return end
+		temp_units = temp_units or new()
+		temp_units[guid] = info or true
+	end
+
+	-- deletes a temporary unit if found
+	function Private.DelTempUnit(guid)
+		if guid and temp_units and temp_units[guid] then
+			temp_units[guid] = del(temp_units[guid])
+		end
+	end
+
+	-- returns the temporary unit stored "info" or false
+	function Private.GetTempUnit(guid)
+		return guid and temp_units and temp_units[guid]
+	end
+
+	-- clears all store temporary units
+	function Private.ClearTempUnits()
+		temp_units = clear(temp_units)
+	end
+end
+
+-------------------------------------------------------------------------------
 -- window table
 do
 	local Window = {}
@@ -1881,11 +1915,13 @@ do
 			if type(actor) == "string" then
 				d.id = actor
 				d.label = actorname or actor
+				d.text = ns:FormatName(d.label)
 				return d
 			end
 
 			d.id = actor.id or actorname
 			d.label = actorname or L["Unknown"]
+			d.text = ns:FormatName(d.label)
 
 			-- speed up things if it's a pet/enemy.
 			if strmatch(d.label, "%<(%a+)%>") then
@@ -1906,7 +1942,7 @@ do
 			d.spec = actor.spec
 
 			if actor.id and ns.validclass[d.class] then
-				d.text = ns:FormatName(actorname, actor.id)
+				d.text = ns:FormatName(d.label, actor.id)
 			end
 		end
 		return d

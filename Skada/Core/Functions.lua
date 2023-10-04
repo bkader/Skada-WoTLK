@@ -278,13 +278,8 @@ end
 
 local Translit = LibStub("LibTranslit-1.0", true)
 function Skada:FormatName(name)
-	if self.profile.realmless then
-		name = gsub(name, ("%-.*"), "")
-	end
-	if self.profile.translit and Translit then
-		return Translit:Transliterate(name, "!")
-	end
-	return name
+	name = self.profile.realmless and gsub(name, ("%-.*"), "") or name
+	return self.profile.translit and Translit and Translit:Transliterate(name, "!") or name
 end
 
 do
@@ -726,38 +721,6 @@ do
 end
 
 -------------------------------------------------------------------------------
--- temporary flags check bypass
-
-do
-	local clear = Private.clearTable
-	local temp_units = nil
-
-	-- adds a temporary unit with optional info
-	function Private.AddTempUnit(guid, info)
-		if not guid then return end
-		temp_units = temp_units or new()
-		temp_units[guid] = info or true
-	end
-
-	-- deletes a temporary unit if found
-	function Private.DelTempUnit(guid)
-		if guid and temp_units and temp_units[guid] then
-			temp_units[guid] = del(temp_units[guid])
-		end
-	end
-
-	-- returns the temporary unit stored "info" or false
-	function Private.GetTempUnit(guid)
-		return guid and temp_units and temp_units[guid]
-	end
-
-	-- clears all store temporary units
-	function Private.ClearTempUnits()
-		temp_units = clear(temp_units)
-	end
-end
-
--------------------------------------------------------------------------------
 -- frame borders
 
 function Skada:ApplyBorder(frame, texture, color, thickness, padtop, padbottom, padleft, padright)
@@ -891,6 +854,7 @@ do
 	end
 
 	-- "PURR" is a special key to whisper with progress window.
+	local serialize = Private.serialize
 	local function send_comm_message(self, channel, target, ...)
 		if target == self.userName then
 			return -- to yourself? really...
@@ -911,9 +875,9 @@ do
 		end
 
 		if channel == "PURR" then
-			self:SendCommMessage(folder, Private.serialize(true, ...), "WHISPER", target, "NORMAL", show_progress_window, self)
+			self:SendCommMessage(folder, serialize(true, ...), "WHISPER", target, "NORMAL", show_progress_window, self)
 		elseif channel then
-			self:SendCommMessage(folder, Private.serialize(true, ...), channel, target)
+			self:SendCommMessage(folder, serialize(true, ...), channel, target)
 		end
 	end
 
@@ -931,9 +895,10 @@ do
 		end
 	end
 
+	local deserialize = Private.deserialize
 	local function on_comm_received(self, prefix, message, channel, sender)
 		if prefix == folder and channel and sender and sender ~= self.userName then
-			dispatch_comm(sender, Private.deserialize(message, true))
+			dispatch_comm(sender, deserialize(message, true))
 		end
 	end
 
@@ -1087,6 +1052,8 @@ end
 
 -- skada reset dialog
 do
+	local ConfirmDialog = Private.ConfirmDialog
+
 	local t = {timeout = 30, whileDead = 0}
 	local f = function() Skada:Reset(IsShiftKeyDown()) end
 
@@ -1098,7 +1065,7 @@ do
 			return
 		end
 
-		Private.ConfirmDialog(L["Do you want to reset Skada?\nHold SHIFT to reset all data."], f, t)
+		ConfirmDialog(L["Do you want to reset Skada?\nHold SHIFT to reset all data."], f, t)
 	end
 end
 
@@ -1167,6 +1134,8 @@ end
 -- reinstall the addon
 do
 	local ReloadUI = ReloadUI
+	local ConfirmDialog = Private.ConfirmDialog
+
 	local t = {timeout = 15, whileDead = 0}
 	local f = function()
 		if Skada.data.profiles then
@@ -1181,7 +1150,7 @@ do
 	end
 
 	function Skada:Reinstall()
-		Private.ConfirmDialog(L["Are you sure you want to reinstall Skada?"], f, t)
+		ConfirmDialog(L["Are you sure you want to reinstall Skada?"], f, t)
 	end
 end
 

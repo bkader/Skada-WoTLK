@@ -554,11 +554,11 @@ Skada:RegisterModule("Nickname", function(L, P, G, _, _, O)
 			return nickname
 		end})
 
-		local Orig_FormatName = Skada.FormatName
-		function Skada:FormatName(name, guid)
-			-- showing only names or missing guid?
-			if P.namedisplay <= 1 or not guid then
-				return Orig_FormatName(self, name)
+		Skada.oFormatName = Skada.FormatName
+		Skada.FormatName = function(self, name, guid)
+			-- missing guid or showing only names?
+			if not guid or P.namedisplay <= 1 then
+				return self:oFormatName(name)
 			end
 
 			-- cache table handles the worse part!
@@ -568,7 +568,7 @@ Skada:RegisterModule("Nickname", function(L, P, G, _, _, O)
 			end
 
 			-- leave the rest to the original func!
-			return Orig_FormatName(self, name)
+			return self:oFormatName(name)
 		end
 	end
 
