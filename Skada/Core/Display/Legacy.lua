@@ -1204,6 +1204,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 			lib.RegisterCallback(self, "AnchorMoved")
 			lib.RegisterCallback(self, "AnchorClicked")
 			lib.RegisterCallback(self, "ConfigClicked")
+			lib.RegisterCallback(self, "BarReleased")
 		end
 
 		-- Called when a Skada window starts using this display provider.
@@ -1312,6 +1313,13 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 		function mod:SetTitle(win, title)
 			win.bargroup.button:SetText(win.metadata.title)
+		end
+
+		function mod:BarReleased(_, bar)
+			if not bar then return end
+			bar.order = nil
+			bar.text = nil
+			bar.win = nil
 		end
 
 		local ttactive = false

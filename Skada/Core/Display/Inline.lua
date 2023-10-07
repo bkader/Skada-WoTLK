@@ -236,6 +236,22 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		end
 	end
 
+	local function barOnMouseDown(self, button)
+		local bar = self.bar
+		local win = bar and bar.win
+		if not win then return end
+		BarClick(win, bar, button)
+	end
+
+	local function barOnEnter(self, motion)
+		local bar = self.bar
+		local win = bar and bar.win
+		if not win then return end
+		ttactive = true
+		Skada:SetTooltipPosition(GameTooltip, win.frame, "inline", win)
+		Skada:ShowTooltip(win, bar.valueid, bar.valuetext, bar)
+	end
+
 	function barlibrary:CreateBar(uuid, win)
 		local bar = {}
 		bar.uuid = uuid or self.nextuuid
@@ -245,18 +261,16 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 
 		bar.bg = CreateFrame("Frame", format("$parentBackground%d", bar.uuid), win.frame)
 		bar.bg:SetFrameLevel(win.frame:GetFrameLevel() + 6)
+		bar.bg.bar = bar
+
 		bar.label = win.frame:CreateFontString(format("$parentLabel%d", bar.uuid))
 		bar.label:SetFont(mod:GetFont(win.db))
 		bar.label:SetTextColor(mod:GetFontColor(win.db))
 		bar.label:SetJustifyH("LEFT")
 		bar.label:SetJustifyV("MIDDLE")
 		bar.bg:EnableMouse(true)
-		bar.bg:SetScript("OnMouseDown", function(frame, button) BarClick(win, bar, button) end)
-		bar.bg:SetScript("OnEnter", function(frame, button)
-			ttactive = true
-			Skada:SetTooltipPosition(GameTooltip, win.frame, "inline", win)
-			Skada:ShowTooltip(win, bar.valueid, bar.valuetext, bar)
-		end)
+		bar.bg:SetScript("OnMouseDown", barOnMouseDown)
+		bar.bg:SetScript("OnEnter", barOnEnter)
 		bar.bg:SetScript("OnLeave", BarLeave)
 
 		if uuid then
