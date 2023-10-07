@@ -354,35 +354,38 @@ function Private.RegisterClasses()
 	local P = ns.profile
 
 	-- some useful functions
-	classcolors.unpack = function(class)
-		local color = classcolors(class)
-		return color.r, color.g, color.b
-	end
-	classcolors.str = function(class)
-		local color = classcolors(class)
-		return color.colorStr
-	end
-	classcolors.format = function(class, text)
-		local color = classcolors(class)
-		return format("\124c%s%s\124r", color.colorStr, text)
-	end
-
-	-- returns class color or "arg" wrapped in class color
 	local classcolors_mt = {
-		__index = function(t, class)
-			local color = {r = 0.353, g = 0.067, b = 0.027, colorStr = "ff5a1107"} -- unknown
-			rawset(t, class, color)
-			return color
+		unpack = function(class) -- returns class RGB
+			local color = class and classcolors(class)
+			if not color then return end
+			return color.r, color.g, color.b
 		end,
-		__call = function(t, class)
-			local color = P.usecustomcolors and P.customcolors and P.customcolors[class] or t[class]
-			if not color.colorStr then
-				color.colorStr = RGBPercToHex(color.r, color.g, color.b, true)
-			end
-			return color
+		str = function(class) -- returns color string.
+			local color = class and classcolors(class)
+			return color and color.colorStr or "ffffffff"
+		end,
+		format = function(class, text) -- class colored text.
+			local color = class and classcolors(class)
+			return color and format("\124c%s%s\124r", color.colorStr or "ffffffff", text) or text
 		end
 	}
-	ns.classcolors = setmetatable(classcolors, classcolors_mt)
+
+	-- missing class? use uknown.
+	local unknown_classcolor = {r = 0.353, g = 0.067, b = 0.027, colorStr = "ff5a1107"}
+	setmetatable(classcolors_mt, {__index = function(t, class)
+		rawset(t, class, unknown_classcolor)
+		return unknown_classcolor
+	end})
+
+	setmetatable(classcolors, {
+		__index = classcolors_mt,
+		__call = function(t, class)
+			local color = P.usecustomcolors and P.customcolors and P.customcolors[class] or t[class]
+			color.colorStr = color.colorStr or RGBPercToHex(color.r, color.g, color.b, true)
+			return color
+		end
+	})
+	ns.classcolors = classcolors
 
 	-- common __call for coordinates
 	local coords__call = function(t, key)

@@ -281,18 +281,20 @@ Skada:RegisterModule("Improvement", function(L)
 	end
 
 	local function ask_for_reset()
-		StaticPopupDialogs["ResetImprovementDialog"] = {
-			text = L["Do you want to reset your improvement data?"],
-			button1 = L["Accept"],
-			button2 = L["Cancel"],
-			timeout = 30,
-			whileDead = 0,
-			hideOnEscape = 1,
-			OnAccept = function()
-				mod:Reset()
-			end
-		}
-		StaticPopup_Show("ResetImprovementDialog")
+		if not StaticPopupDialogs["SkadaResetImprovementDialog"] then
+			StaticPopupDialogs["SkadaResetImprovementDialog"] = {
+				text = L["Do you want to reset your improvement data?"],
+				button1 = L["Accept"],
+				button2 = L["Cancel"],
+				timeout = 30,
+				whileDead = 0,
+				hideOnEscape = 1,
+				OnAccept = function()
+					mod:Reset()
+				end
+			}
+		end
+		StaticPopup_Show("SkadaResetImprovementDialog")
 	end
 
 	function mod:Reset()
