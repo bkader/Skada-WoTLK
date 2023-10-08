@@ -172,11 +172,10 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 				barLists[self][name] = list
 				list.name = name
 
-				local myfont = lib.defaultFont
+				local myfont = lib.defaultFont or _G["SkadaRevTitleFont"]
 				if not myfont then
-					myfont = CreateFont("MyTitleFont")
+					myfont = CreateFont("SkadaRevTitleFont")
 					myfont:CopyFontObject(ChatFontSmall)
-					myfont:SetJustifyH("CENTER")
 					lib.defaultFont = myfont
 				end
 
@@ -1424,7 +1423,6 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 						end
 						bar.id = data.id
 						bar.text = data.label
-
 
 						bar_seticon(bar, win.db, data)
 						bar_setcolor(bar, win.db, data)

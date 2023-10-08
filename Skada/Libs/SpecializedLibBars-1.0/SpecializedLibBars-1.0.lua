@@ -329,9 +329,9 @@ do
 		list.name = name
 		barLists[self][name] = list
 
-		local myfont = lib.defaultFont
+		local myfont = lib.defaultFont or _G["SkadaRevTitleFont"]
 		if not myfont then
-			myfont = CreateFont("MyTitleFont")
+			myfont = CreateFont("SkadaRevTitleFont")
 			myfont:CopyFontObject(ChatFontSmall)
 			lib.defaultFont = myfont
 		end
@@ -790,7 +790,7 @@ do
 		end
 
 		-- Create button frame.
-		local btn = CreateFrame("Button", format("$parent%s", title:gsub("%s+", "_")), self.button)
+		local btn = CreateFrame("Button", format("$parent%s", (index:gsub("^%l", string.upper)):gsub("%s+", "")), self.button)
 		btn:SetFrameLevel(self.button:GetFrameLevel() + 1)
 		btn:SetWidth(14)
 		btn:SetHeight(14)

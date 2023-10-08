@@ -30,14 +30,6 @@ end
 -- modules and display functions
 
 do
-	-- when modules are created w make sure to save
-	-- their english "name" then localize "moduleName"
-	local function on_module_created(self, module)
-		module.localeName = L[module.moduleName]
-		module.OnModuleCreated = module.OnModuleCreated or on_module_created
-	end
-	Skada.OnModuleCreated = on_module_created
-
 	local tconcat = table.concat
 	local function module_table(...)
 		local args = TempTable(...)
@@ -121,6 +113,13 @@ do
 
 		-- return it so that RegisterDisplay changes order
 		return self.options.args.modules.args.blocked.args[module.name]
+	end
+
+	-- when modules are created w make sure to save
+	-- their english "name" then localize "moduleName"
+	function Skada:OnModuleCreated(module)
+		module.localeName = L[module.moduleName]
+		module.OnModuleCreated = module.OnModuleCreated or self.OnModuleCreated
 	end
 
 	do

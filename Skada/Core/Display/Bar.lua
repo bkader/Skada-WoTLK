@@ -1062,7 +1062,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 			end
 
 			-- Header
-			local fo = g.TitleFont or CreateFont(format("TitleFont%s", win.db.name))
+			local fo = g.TitleFont or CreateFont(format("%s%sTitleFont", folder, win.db.name))
 			g.TitleFont = fo
 			fo:SetFont(p.title.fontpath or Skada:MediaFetch("font", p.title.font), p.title.fontsize, p.title.fontflags)
 			if p.title.textcolor then
