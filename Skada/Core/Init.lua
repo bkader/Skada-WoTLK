@@ -884,11 +884,16 @@ end
 do
 	-- we a fake frame/fontstring to escape the string
 	local escape_fs = nil
-	function Private.EscapeStr(str)
+	function Private.EscapeStr(str, plain)
 		escape_fs = escape_fs or UIParent:CreateFontString(nil, "ARTWORK", "ChatFontNormal")
 		escape_fs:SetText(str)
 		str = escape_fs:GetText()
 		escape_fs:SetText("")
+		if plain then
+			str = gsub(str, "|c%x%x%x%x%x%x%x%x", "")
+			str = gsub(str, "|c%x%x %x%x%x%x%x", "")
+			return gsub(str, "|r", "")
+		end
 		return str
 	end
 

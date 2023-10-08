@@ -509,7 +509,7 @@ do
 		local label = (modename == L["Improvement"]) and self.userName or Skada:GetSetLabel(set)
 		maxlines = maxlines or 10
 
-		local firstline = format(L["Skada: %s for %s:"], title, label)
+		local firstline = format(L["Skada: %s for %s:"], EscapeStr(title, true), label)
 		local temp = BuildReportTable(mode, firstline, dataset, maxlines, channel == "text", barid)
 
 		if channel == "text" then
