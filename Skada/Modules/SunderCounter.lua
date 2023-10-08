@@ -10,6 +10,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M, O)
 	local pairs, format, GetTime, uformat = pairs, string.format, GetTime, Private.uformat
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 	local SpellLink = Private.SpellLink or GetSpellLink
+	local classfmt = Skada.classcolors.format
 	local spellnames = Skada.spellnames
 
 	local sunder_targets -- holds sunder targets details for announcement
@@ -128,13 +129,13 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M, O)
 		end
 	end
 
-	function mode_target_source:Enter(win, id, label)
-		win.targetid, win.targetname = id, label
-		win.title = format(L["%s's <%s> sources"], label, spell_sunder)
+	function mode_target_source:Enter(win, id, label, class)
+		win.targetid, win.targetname, win.targetclass = id, label, class
+		win.title = format(L["%s's sources"], classfmt(class, label))
 	end
 
 	function mode_target_source:Update(win, set)
-		win.title = uformat(L["%s's <%s> sources"], win.targetname, spell_sunder)
+		win.title = uformat(L["%s's sources"], classfmt(win.targetclass, win.targetname))
 		if not win.targetname then return end
 
 		local sources, total = get_actor_sunder_sources(set, win.targetname)
@@ -154,14 +155,14 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M, O)
 		end
 	end
 
-	function mode_target:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's <%s> targets"], label, spell_sunder)
+	function mode_target:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's targets"], classfmt(class, label))
 	end
 
 	function mode_target:Update(win, set)
 		double_check_sunder()
-		win.title = uformat(L["%s's <%s> targets"], win.actorname, spell_sunder)
+		win.title = uformat(L["%s's targets"], classfmt(win.actorclass, win.actorname))
 		if not set or not win.actorname then return end
 
 		local targets, total, actor = get_actor_sunder_targets(set, win.actorname, win.actorid)

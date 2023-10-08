@@ -4,6 +4,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M, O)
 	local mode = Skada:NewModule("Parry-Haste")
 	local mode_target = mode:NewModule("Target List")
 	local pairs, format, uformat = pairs, string.format, Private.uformat
+	local classfmt = Skada.classcolors.format
 	local mode_cols = nil
 
 	local parrybosses = {
@@ -66,13 +67,13 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M, O)
 		end
 	end
 
-	function mode_target:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's targets"], label)
+	function mode_target:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's targets"], classfmt(class, label))
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], classfmt(win.actorclass, win.actorname))
 		if not set or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)

@@ -6,6 +6,7 @@ Skada:RegisterModule("Resources", function(L, P)
 
 	local setmetatable, pairs = setmetatable, pairs
 	local format, uformat = string.format, Private.uformat
+	local classfmt = Skada.classcolors.format
 	local mode_cols = nil
 
 	local SPELL_POWER_MANA = SPELL_POWER_MANA or 0
@@ -160,14 +161,14 @@ Skada:RegisterModule("Resources", function(L, P)
 	end
 
 	-- actor mods common Enter function.
-	function mode_actor:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s's gained %s"], label, namesTable[self.powerid])
+	function mode_actor:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = uformat(L["%s's gained %s"], classfmt(class, label), namesTable[self.powerid])
 	end
 
 	-- actor mods main update function
 	function mode_actor:Update(win, set)
-		win.title = uformat(L["%s's gained %s"], win.actorname, L[self.powername])
+		win.title = uformat(L["%s's gained %s"], classfmt(win.actorclass, win.actorname), L[self.powername])
 		if not set or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)

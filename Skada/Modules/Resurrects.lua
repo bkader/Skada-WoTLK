@@ -6,8 +6,9 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 
 	local pairs, format, uformat = pairs, string.format, Private.uformat
 	local new, clear = Private.newTable, Private.clearTable
-	local get_actor_ress_targets = nil
+	local classfmt = Skada.classcolors.format
 	local ress_spells = Skada.ress_spells
+	local get_actor_ress_targets = nil
 	local mode_cols = nil
 
 	local function format_valuetext(d, columns, total, metadata, subview)
@@ -41,13 +42,13 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 		end
 	end
 
-	function mode_target:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's targets"], label)
+	function mode_target:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's targets"], classfmt(class, label))
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], classfmt(win.actorclass, win.actorname))
 		if not set or not win.actorname then return end
 
 		local targets, total, actor = get_actor_ress_targets(set, win.actorname, win.actorid)
@@ -68,7 +69,7 @@ Skada:RegisterModule("Resurrects", function(L, P, _, C)
 	end
 
 	function mode:Update(win, set)
-		win.title = L["Resurrects"]
+		win.title = win.class and format("%s (%s)", L["Resurrects"], L[win.class]) or L["Resurrects"]
 
 		local total = set and set:GetTotal(win.class, nil, "ress")
 		if not total or total == 0 then

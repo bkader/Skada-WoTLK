@@ -17,9 +17,8 @@ local function format_valuetext(d, columns, total, dtps, metadata, subview)
 	end
 end
 
--- =================== --
--- Damage Taken Module --
--- =================== --
+---------------------------------------------------------------------------
+-- Damage Taken Module
 
 Skada:RegisterModule("Damage Taken", function(L, P)
 	local mode = Skada:NewModule("Damage Taken")
@@ -32,6 +31,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	local min, wipe = math.min, wipe
 	local PercentToRGB = Private.PercentToRGB
 	local GetCreatureId = Skada.GetCreatureId
+	local classfmt = Skada.classcolors.format
 	local tooltip_school = Skada.tooltip_school
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
 	local ignored_creatures = Skada.ignored_creatures -- Edit Skada\Core\Tables.lua
@@ -185,7 +185,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		local dtps, damage = actor:GetDTPS(set)
 
 		local activepercent = activetime / totaltime * 100
-		tooltip:AddDoubleLine(format(L["%s's activity"], label), Skada:FormatPercent(activepercent), nil, nil, nil, PercentToRGB(activepercent))
+		tooltip:AddDoubleLine(format(L["%s's activity"], classfmt(actor.class, label)), Skada:FormatPercent(activepercent), nil, nil, nil, PercentToRGB(activepercent))
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(damage), 1, 1, 1)
@@ -202,7 +202,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		local spell = actor and actor.damagedspells and actor.damagedspells[id]
 		if not spell then return end
 
-		tooltip:AddLine(uformat("%s - %s", win.actorname, label))
+		tooltip:AddLine(uformat("%s - %s", classfmt(win.actorclass, win.actorname), label))
 		tooltip_school(tooltip, id)
 
 		if spell.n_min then
@@ -265,13 +265,13 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		end
 	end
 
-	function mode_spell:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's spells"], label)
+	function mode_spell:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's spells"], classfmt(class, label))
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's spells"], win.actorname)
+		win.title = uformat(L["%s's spells"], classfmt(win.actorclass, win.actorname))
 		if not set or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
@@ -296,13 +296,13 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		end
 	end
 
-	function mode_source:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's sources"], label)
+	function mode_source:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's sources"], classfmt(class, label))
 	end
 
 	function mode_source:Update(win, set)
-		win.title = uformat(L["%s's sources"], win.actorname)
+		win.title = uformat(L["%s's sources"], classfmt(win.actorclass, win.actorname))
 
 		local sources, total, actor = set:GetActorDamageSources(win.actorname, win.actorid)
 		if not sources or not actor or total == 0 then
@@ -341,7 +341,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 
 	function mode_spell_details:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = uformat("%s: %s", win.actorname, format(L["%s's details"], label))
+		win.title = uformat("%s: %s", classfmt(win.actorclass, win.actorname), format(L["%s's details"], label))
 	end
 
 	function mode_spell_details:Tooltip(win, set, id, label, tooltip)
@@ -354,7 +354,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	end
 
 	function mode_spell_details:Update(win, set, spell, count)
-		win.title = uformat("%s: %s", win.actorname, uformat(L["%s's details"], win.spellname))
+		win.title = uformat("%s: %s", classfmt(win.actorclass, win.actorname), uformat(L["%s's details"], win.spellname))
 		if not win.spellid then return end
 
 		if not spell then
@@ -396,7 +396,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 
 	function mode_spell_breakdown:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = uformat("%s: %s", win.actorname, label)
+		win.title = uformat("%s: %s", classfmt(win.actorclass, win.actorname), label)
 	end
 
 	function mode_spell_breakdown:Tooltip(win, set, id, label, tooltip)
@@ -429,7 +429,7 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	end
 
 	function mode_spell_breakdown:Update(win, set, spell, total, resisted, blocked, absorbed)
-		win.title = uformat("%s: %s", win.actorname, win.spellname)
+		win.title = uformat("%s: %s", classfmt(win.actorclass, win.actorname), win.spellname)
 		if not win.spellid then return end
 
 		if not spell then
@@ -489,13 +489,13 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		end
 	end
 
-	function mode_source_spell:Enter(win, id, label)
-		win.targetid, win.targetname = id, label
-		win.title = uformat(L["%s's spells on %s"], label, win.actorname)
+	function mode_source_spell:Enter(win, id, label, class)
+		win.targetid, win.targetname, win.targetclass = id, label, class
+		win.title = uformat(L["%s's spells on %s"], classfmt(class, label), classfmt(win.actorclass, win.actorname))
 	end
 
 	function mode_source_spell:Update(win, set)
-		win.title = uformat(L["%s's spells on %s"], win.targetname, win.actorname)
+		win.title = uformat(L["%s's spells on %s"], classfmt(win.targetclass, win.targetname), classfmt(win.actorclass, win.actorname))
 		if not set or not win.targetname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
@@ -644,12 +644,12 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 	end
 end)
 
--- ============================== --
--- Damage taken per second module --
--- ============================== --
+---------------------------------------------------------------------------
+-- DTPS Module
 
 Skada:RegisterModule("DTPS", function(L, P)
 	local mode = Skada:NewModule("DTPS")
+	local classfmt = Skada.classcolors.format
 	local mode_cols = nil
 
 	local function dtps_tooltip(win, id, label, tooltip)
@@ -661,7 +661,7 @@ Skada:RegisterModule("DTPS", function(L, P)
 		local activetime = actor:GetTime(set, true)
 		local dtps, damage = actor:GetDTPS(set, nil, false)
 
-		tooltip:AddLine(uformat("%s - %s", label, L["DTPS"]))
+		tooltip:AddLine(uformat("%s - %s", classfmt(actor.class, label), L["DTPS"]))
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Damage Taken"], Skada:FormatNumber(damage), 1, 1, 1)
@@ -725,15 +725,14 @@ Skada:RegisterModule("DTPS", function(L, P)
 	end
 end, "Damage Taken")
 
--- ============================ --
--- Damage Taken By Spell Module --
--- ============================ --
+---------------------------------------------------------------------------
+-- Damage Taken By Spell Module
 
 Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 	local mode = Skada:NewModule("Damage Taken By Spell")
 	local mode_target = mode:NewModule("Target List")
 	local mode_source = mode:NewModule("Source List")
-	local C = Skada.cacheTable2
+	local C, classfmt = Skada.cacheTable2, Skada.classcolors.format
 	local mode_cols = nil
 
 	local function actor_tooltip(win, id, label, tooltip)
@@ -744,7 +743,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 		local spell = actor.damagedspells and actor.damagedspells[win.spellid]
 		if not spell or not spell.count then return end
 
-		tooltip:AddLine(uformat("%s - %s", label, win.spellname))
+		tooltip:AddLine(uformat("%s - %s", classfmt(actor.class, label), win.spellname))
 
 		tooltip:AddDoubleLine(L["Hits"], spell.count, 1, 1, 1)
 		local diff = spell.count -- used later
@@ -771,7 +770,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 
 	function mode_source:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = format(L["%s's targets"], label)
+		win.title = format(L["%s's sources"], label)
 	end
 
 	function mode_source:Update(win, set)
@@ -828,6 +827,7 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 
 	function mode_target:Update(win, set)
 		win.title = uformat(L["%s's targets"], win.spellname)
+		win.title = win.class and format("%s (%s)", win.title, L[win.class]) or win.title
 		if not win.spellid then return end
 
 		local total = 0
@@ -932,13 +932,13 @@ Skada:RegisterModule("Damage Taken By Spell", function(L, P)
 	end
 end, "Damage Taken")
 
--- ============================= --
--- Avoidance & Mitigation Module --
--- ============================= --
+---------------------------------------------------------------------------
+-- Avoidance & Mitigation Module
 
 Skada:RegisterModule("Avoidance & Mitigation", function(L)
 	local mode = Skada:NewModule("Avoidance & Mitigation")
 	local mode_breakdown = mode:NewModule("More Details")
+	local classfmt = Skada.classcolors.format
 	local missTypes = Skada.missTypes
 	local C = Skada.cacheTable2
 	local mode_cols = nil
@@ -955,30 +955,30 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 		end
 	end
 
-	function mode_breakdown:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's details"], label)
+	function mode_breakdown:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's details"], classfmt(class, label))
 	end
 
 	function mode_breakdown:Update(win, set)
-		if C[win.actorid] then
-			local actor = C[win.actorid]
-			win.title = uformat(L["%s's details"], win.actorname)
+		win.title = uformat(L["%s's details"], classfmt(win.actorclass, win.actorname))
 
-			if win.metadata then
-				win.metadata.maxvalue = 0
-			end
+		local actor = win.actorid and C[win.actorid]
+		if not actor then
+			return
+		elseif win.metadata then
+			win.metadata.maxvalue = 0
+		end
 
-			local nr = 0
-			for event, count in pairs(actor.data) do
-				nr = nr + 1
+		local nr = 0
+		for event, count in pairs(actor.data) do
+			nr = nr + 1
 
-				local d = win:nr(nr)
-				d.id = event
-				d.label = L[event]
-				d.value = 100 * count / actor.total
-				fmt_valuetext(d, mode_cols, actor.total, count, win.metadata)
-			end
+			local d = win:nr(nr)
+			d.id = event
+			d.label = L[event]
+			d.value = 100 * count / actor.total
+			fmt_valuetext(d, mode_cols, actor.total, count, win.metadata)
 		end
 	end
 
@@ -1035,7 +1035,6 @@ Skada:RegisterModule("Avoidance & Mitigation", function(L)
 	end
 
 	function mode:OnEnable()
-		mode_breakdown.metadata = {}
 		self.metadata = {
 			showspots = true,
 			filterclass = true,

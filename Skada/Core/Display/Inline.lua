@@ -52,23 +52,23 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		end
 	end
 
-	local function onEnter(win, id, label, mode)
-		mode:Enter(win, id, label)
+	local function onEnter(win, id, label, class, mode)
+		mode:Enter(win, id, label, class)
 		if win.child and (win.db.childmode == 1 or win.db.childmode == 3) then
-			onEnter(win.child, id, label, mode)
+			onEnter(win.child, id, label, class, mode)
 		end
 	end
 
-	local function showmode(win, id, label, mode)
+	local function showmode(win, id, label, class, mode)
 		if Private.total_noclick(win.selectedset, mode) then return end
 
 		inserthistory(win)
 
 		if type(mode) == "function" then
-			mode(mode, win, id, label)
+			mode(mode, win, id, label, class)
 		else
 			if mode.Enter then
-				onEnter(win, id, label, mode)
+				onEnter(win, id, label, class, mode)
 			end
 			win:DisplayMode(mode)
 		end
@@ -80,7 +80,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 	local function BarClick(win, bar, button)
 		if Skada.testMode or bar.ignore then return end
 
-		local id, label = bar.valueid, bar.valuetext
+		local id, label, class = bar.valueid, bar.valuetext, bar.class
 
 		if button == "RightButton" and IsShiftKeyDown() then
 			Skada:OpenMenu(win)
@@ -89,13 +89,13 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		elseif button == "RightButton" then
 			win:RightClick(bar, button)
 		elseif button == "LeftButton" and win.metadata.click2 and IsShiftKeyDown() then
-			showmode(win, id, label, win.metadata.click2)
+			showmode(win, id, label, class, win.metadata.click2)
 		elseif button == "LeftButton" and win.metadata.filterclass and IsAltKeyDown() then
-			win:FilterClass(id, label)
+			win:FilterClass(class)
 		elseif button == "LeftButton" and win.metadata.click3 and IsControlKeyDown() then
-			showmode(win, id, label, win.metadata.click3)
+			showmode(win, id, label, class, win.metadata.click3)
 		elseif button == "LeftButton" and win.metadata.click1 then
-			showmode(win, id, label, win.metadata.click1)
+			showmode(win, id, label, class, win.metadata.click1)
 		end
 	end
 
@@ -230,10 +230,10 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 	mod.Wipe = Skada.EmptyFunc
 
 	function mod:SetTitle(win, title)
-		if win and win.frame then
-			win.frame.fstitle:SetText(title)
-			win.frame.barstartx = leftmargin + win.frame.fstitle:GetStringWidth() + 20
-		end
+		local frame = win and win.frame
+		if not win then return end
+		frame.fstitle:SetText(title or win.title or win.metadata.title)
+		frame.barstartx = leftmargin + frame.fstitle:GetStringWidth() + 20
 	end
 
 	local function barOnMouseDown(self, button)
@@ -249,7 +249,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		if not win then return end
 		ttactive = true
 		Skada:SetTooltipPosition(GameTooltip, win.frame, "inline", win)
-		Skada:ShowTooltip(win, bar.valueid, bar.valuetext, bar)
+		Skada:ShowTooltip(win, bar.valueid, bar.valuetext, bar, bar.class)
 	end
 
 	function barlibrary:CreateBar(uuid, win)
@@ -346,6 +346,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		bar.label:SetFont(mod:GetFont(db))
 		bar.label:SetText(label)
 		bar.label:SetTextColor(mod:GetFontColor(db))
+		bar.class = bardata.class
 		bar.value = bardata.value
 		if bardata.ignore then
 			bar.ignore = true

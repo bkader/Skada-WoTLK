@@ -236,17 +236,18 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 	end
 
 	function mod:SetTitle(win, title)
-		if win and win.bargroup then
-			win.bargroup.button:SetText(title)
+		local bargroup = win and win.bargroup
+		if not bargroup then return end
 
-			-- module icon
-			if not win.db.moduleicons then
-				win.bargroup:HideAnchorIcon()
-			elseif win.selectedmode and win.selectedmode.metadata and win.selectedmode.metadata.icon then
-				win.bargroup:ShowAnchorIcon(win.selectedmode.metadata.icon)
-			elseif win.parentmode and win.parentmode.metadata and win.parentmode.metadata.icon then
-				win.bargroup:ShowAnchorIcon(win.parentmode.metadata.icon)
-			end
+		bargroup.button:SetText(title or win.title or win.metadata.title)
+
+		-- module icon
+		if not win.db.moduleicons then
+			bargroup:HideAnchorIcon()
+		elseif win.selectedmode and win.selectedmode.metadata and win.selectedmode.metadata.icon then
+			bargroup:ShowAnchorIcon(win.selectedmode.metadata.icon)
+		elseif win.parentmode and win.parentmode.metadata and win.parentmode.metadata.icon then
+			bargroup:ShowAnchorIcon(win.parentmode.metadata.icon)
 		end
 	end
 
@@ -254,35 +255,35 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 		local ttactive = false
 
 		function mod:BarEnter(_, bar, motion)
-			if bar and bar.win then
-				local win, id, label = bar.win, bar.id, bar.text
-				ttactive = true
-				Skada:SetTooltipPosition(GameTooltip, win.bargroup, "bar", win)
-				Skada:ShowTooltip(win, id, label, bar)
-			end
+			local win = bar and bar.win
+			if not win then return end
+
+			local id, label, class = bar.id, bar.text, bar.class
+			Skada:SetTooltipPosition(GameTooltip, win.bargroup, "bar", win)
+			Skada:ShowTooltip(win, id, label, bar, class)
+			ttactive = true
 		end
 
 		function mod:BarLeave(_, bar, motion)
-			if ttactive then
-				GameTooltip:Hide()
-				ttactive = false
-			end
+			if not ttactive then return end
+			GameTooltip:Hide()
+			ttactive = false
 		end
 	end
 
 	function mod:BarReleased(_, bar)
-		if bar then
-			bar.changed = nil
-			bar.fixed = nil
-			bar.order = nil
-			bar.text = nil
-			bar.win = nil
+		if not bar then return end
 
-			bar.iconFrame:SetScript("OnEnter", nil)
-			bar.iconFrame:SetScript("OnLeave", nil)
-			bar.iconFrame:SetScript("OnMouseDown", nil)
-			bar.iconFrame:EnableMouse(false)
-		end
+		bar.changed = nil
+		bar.fixed = nil
+		bar.order = nil
+		bar.text = nil
+		bar.win = nil
+
+		bar.iconFrame:SetScript("OnEnter", nil)
+		bar.iconFrame:SetScript("OnLeave", nil)
+		bar.iconFrame:SetScript("OnMouseDown", nil)
+		bar.iconFrame:EnableMouse(false)
 	end
 
 	do
@@ -511,15 +512,15 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 			end
 		end
 
-		local function onEnter(win, id, label, mode)
-			mode:Enter(win, id, label)
+		local function onEnter(win, id, label, class, mode)
+			mode:Enter(win, id, label, class)
 			if win.child and (win.db.childmode == 1 or win.db.childmode == 3) then
-				onEnter(win.child, id, label, mode)
+				onEnter(win.child, id, label, class, mode)
 			end
 		end
 
 		local total_noclick = Private.total_noclick
-		local function showmode(win, id, label, mode)
+		local function showmode(win, id, label, class, mode)
 			if total_noclick(win.selectedset, mode) then
 				return
 			end
@@ -527,10 +528,10 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 			inserthistory(win)
 
 			if type(mode) == "function" then
-				mode(mode, win, id, label)
+				mode(mode, win, id, label, class)
 			else
 				if mode.Enter then
-					onEnter(win, id, label, mode)
+					onEnter(win, id, label, class, mode)
 				end
 				win:DisplayMode(mode)
 			end
@@ -557,10 +558,10 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 		end
 
 		function mod:BarClick(_, bar, button)
-			if Skada.testMode then return end
-
-			local win, id, label = bar.win, bar.id, bar.text
+			local win = not Skada.testMode and bar and bar.win
 			if not win then return end
+
+			local id, label, class = bar.id, bar.text, bar.class
 
 			if button == self.db.button then
 				self:ScrollStart(win)
@@ -571,17 +572,17 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 			elseif button == "RightButton" and IsControlKeyDown() then
 				Skada:SegmentMenu(win)
 			elseif win.metadata.click then
-				win.metadata.click(win, id, label, button)
+				win.metadata.click(win, id, label, button, class)
 			elseif button == "RightButton" and not IsModifierKeyDown() then
 				win:RightClick(bar, button)
 			elseif button == "LeftButton" and win.metadata.click2 and IsShiftKeyDown() then
-				showmode(win, id, label, win.metadata.click2)
+				showmode(win, id, label, class, win.metadata.click2)
 			elseif button == "LeftButton" and win.metadata.filterclass and IsAltKeyDown() then
-				win:FilterClass(id, label)
+				win:FilterClass(class)
 			elseif button == "LeftButton" and win.metadata.click3 and IsControlKeyDown() then
-				showmode(win, id, label, win.metadata.click3)
+				showmode(win, id, label, class, win.metadata.click3)
 			elseif button == "LeftButton" and win.metadata.click1 and not IsModifierKeyDown() then
-				showmode(win, id, label, win.metadata.click1)
+				showmode(win, id, label, class, win.metadata.click1)
 			end
 		end
 
@@ -763,6 +764,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 					end
 
 					if bar then
+						bar.class = data.class
 						bar:SetValue(data.value)
 						bar:SetMaxValue(metadata.maxvalue or 1)
 
@@ -780,6 +782,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 						bar = mod:CreateBar(win, data.id, data.label, data.value, metadata.maxvalue or 1, data.icon)
 						bar.id = data.id
 						bar.text = data.label
+						bar.class = data.class
 						bar.fixed = nil
 
 						if not data.ignore then

@@ -16,6 +16,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M, O)
 	local UnitIsFeignDeath, UnitHealthInfo = UnitIsFeignDeath, Skada.UnitHealthInfo
 	local IsInGroup, IsInPvP, spellnames = Skada.IsInGroup, Skada.IsInPvP, Skada.spellnames
 	local GetTime, time, date, wipe = GetTime, time, date, wipe
+	local classfmt = Skada.classcolors.format
 	local mode_cols, submode_cols = nil, nil
 
 	--------------------------------------------------------------------------
@@ -411,7 +412,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M, O)
 			win.datakey = id
 		end
 
-		win.title = uformat(L["%s's death log"], win.actorname)
+		win.title = uformat(L["%s's death log"], classfmt(win.actorclass, win.actorname))
 	end
 
 	do
@@ -420,7 +421,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M, O)
 		end
 
 		function mode_deathlog:Update(win, set)
-			win.title = uformat(L["%s's death log"], win.actorname)
+			win.title = uformat(L["%s's death log"], classfmt(win.actorclass, win.actorname))
 
 			local actor = win.datakey and Skada:FindActor(set, win.actorname, win.actorid)
 			local deathlog = actor and actor.deathlog and actor.deathlog[win.datakey]
@@ -560,13 +561,13 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M, O)
 		end
 	end
 
-	function mode_actor:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's deaths"], label)
+	function mode_actor:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's deaths"], classfmt(class, label))
 	end
 
 	function mode_actor:Update(win, set)
-		win.title = uformat(L["%s's deaths"], win.actorname)
+		win.title = uformat(L["%s's deaths"], classfmt(win.actorclass, win.actorname))
 		if not set or not win.actorid then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)

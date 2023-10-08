@@ -12,6 +12,7 @@ Skada:RegisterModule("Killing Blows", function(L, P, _, C, M, O)
 	local next, tconcat = next, table.concat
 	local SpellLink, uformat = Private.SpellLink or GetSpellLink, Private.uformat
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
+	local classfmt = Skada.classcolors.format
 	local announce_fmt = format("%s: %%s > %%s <%%s> %%s", KILLING_BLOWS)
 	local last_damager = {}
 
@@ -109,13 +110,13 @@ Skada:RegisterModule("Killing Blows", function(L, P, _, C, M, O)
 		last_damager[t.dstGUID] = del(last_damager[t.dstGUID])
 	end
 
-	function mode_source:Enter(win, id, label)
-		win.targetid, win.targetname = id, label
-		win.title = format("%s - %s", label, KILLING_BLOWS)
+	function mode_source:Enter(win, id, label, class)
+		win.targetid, win.targetname, win.targetclass = id, label, class
+		win.title = format("%s - %s", classfmt(class, label), KILLING_BLOWS)
 	end
 
 	function mode_source:Update(win, set)
-		win.title = uformat("%s - %s", win.targetname, KILLING_BLOWS)
+		win.title = uformat("%s - %s", classfmt(win.targetclass, win.targetname), KILLING_BLOWS)
 		if win.class then
 			win.title = format("%s (%s)", win.title, L[win.class])
 		end
@@ -139,13 +140,13 @@ Skada:RegisterModule("Killing Blows", function(L, P, _, C, M, O)
 		end
 	end
 
-	function mode_target:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format("%s - %s", label, KILLING_BLOWS)
+	function mode_target:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format("%s - %s", classfmt(class, label), KILLING_BLOWS)
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat("%s - %s", win.actorname, KILLING_BLOWS)
+		win.title = uformat("%s - %s", classfmt(win.actorclass, win.actorname), KILLING_BLOWS)
 		if not set or not win.actorname then return end
 
 		local total, targets = get_actor_killing_blows(set, win.actorname, win.actorid)

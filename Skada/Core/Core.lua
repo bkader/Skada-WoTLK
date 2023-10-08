@@ -792,13 +792,11 @@ function Window:DisplayMode(mode)
 	Skada:UpdateDisplay()
 end
 
-function Window:FilterClass(id, label)
+function Window:FilterClass(class)
 	if self.class then
 		self.class = nil
 	else
-		local set = self:GetSelectedSet()
-		local actor = set and set:GetActor(label, id)
-		self.class = actor and actor.class or nil
+		self.class = class
 	end
 
 	self:Wipe()
@@ -1369,7 +1367,7 @@ do
 	end
 
 	local white = HIGHLIGHT_FONT_COLOR
-	local function add_subview_lines(tooltip, win, mode, id, label)
+	local function add_subview_lines(tooltip, win, mode, id, label, class)
 		if not (type(mode) == "table" and mode.Update) then return end
 
 		local set = win and win:GetSelectedSet()
@@ -1381,7 +1379,7 @@ do
 		win.ttwin:reset()
 
 		if mode.Enter then
-			mode:Enter(win.ttwin, id, label)
+			mode:Enter(win.ttwin, id, label, class)
 		end
 
 		-- tooltip title
@@ -1389,7 +1387,7 @@ do
 
 		-- mode:Update(win, set, info1)
 		if mode.Tooltip then
-			mode:Update(win.ttwin, set, mode:Tooltip(win.ttwin, set, id, label, tooltip))
+			mode:Update(win.ttwin, set, mode:Tooltip(win.ttwin, set, id, label, tooltip, class))
 		else
 			mode:Update(win.ttwin, set)
 		end
@@ -1432,9 +1430,9 @@ do
 
 	local total_noclick = Private.total_noclick
 
-	local function add_submode_lines(mode, win, id, label, tooltip)
+	local function add_submode_lines(mode, win, id, label, tooltip, class)
 		if mode and not total_noclick(win.selectedset, mode) then
-			add_subview_lines(tooltip, win, mode, id, label)
+			add_subview_lines(tooltip, win, mode, id, label, class)
 		end
 	end
 
@@ -1477,7 +1475,7 @@ do
 		t:AddDoubleLine(L["Duration"], Skada:FormatTime(set.time, true), nil, nil, nil, 1, 1, 1)
 	end
 
-	function Skada:ShowTooltip(win, id, label, bar)
+	function Skada:ShowTooltip(win, id, label, bar, class)
 		if self.testMode or not P.tooltips or (bar and bar.ignore) then return end
 
 		local md = win and win.metadata
@@ -1512,9 +1510,9 @@ do
 		end
 
 		if P.informativetooltips then
-			add_submode_lines(md.click1, win, id, label, t)
-			add_submode_lines(md.click2, win, id, label, t)
-			add_submode_lines(md.click3, win, id, label, t)
+			add_submode_lines(md.click1, win, id, label, t, class)
+			add_submode_lines(md.click2, win, id, label, t, class)
+			add_submode_lines(md.click3, win, id, label, t, class)
 		end
 
 		if md.post_tooltip then
@@ -2138,9 +2136,9 @@ function restore_window_view(self, theset, themode)
 		self.title = nil
 
 		-- all all stuff that were registered by modules
-		self.actorid, self.actorname = nil, nil
+		self.actorid, self.actorname, self.actorclass = nil, nil, nil
+		self.targetid, self.targetname, self.targetclass = nil, nil, nil
 		self.spellid, self.spellname = nil, nil
-		self.targetid, self.targetname = nil, nil
 	end
 
 	-- force menu to close and let Skada handle the rest

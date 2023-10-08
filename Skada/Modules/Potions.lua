@@ -8,7 +8,7 @@ Skada:RegisterModule("Potions", function(L, P, G, C, _, O)
 	local mode_cols = nil
 
 	local pairs, format, strsub, uformat = pairs, string.format, string.sub, Private.uformat
-	local GetItemInfo, classcolors = GetItemInfo, Skada.classcolors
+	local GetItemInfo, classcolors, classfmt = GetItemInfo, Skada.classcolors, Skada.classcolors.format
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
 	local prepotionStr, potionStr = "\124c%s%s\124r %s", "\124T%s:14:14:0:0:64:64:4:60:4:60\124t"
 	local potion_ids, prepotion = {}, {}
@@ -118,9 +118,9 @@ Skada:RegisterModule("Potions", function(L, P, G, C, _, O)
 		end
 	end
 
-	function mode_spell:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's used potions"], label)
+	function mode_spell:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's used potions"], classfmt(class, label))
 	end
 
 	local function request_potion(potionid)
@@ -131,7 +131,7 @@ Skada:RegisterModule("Potions", function(L, P, G, C, _, O)
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's used potions"], win.actorname)
+		win.title = uformat(L["%s's used potions"], classfmt(win.actorclass, win.actorname))
 		if not set or not win.actorname then return end
 
 		local actor = Skada:FindActor(set, win.actorname, win.actorid, true)

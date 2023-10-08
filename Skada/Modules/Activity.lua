@@ -5,6 +5,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 	local mode_target = mode:NewModule("Activity per Target")
 	local date, pairs, format = date, pairs, string.format
 	local uformat, new, clear = Private.uformat, Private.newTable, Private.clearTable
+	local classfmt = Skada.classcolors.format
 	local get_activity_targets = nil
 	local mode_cols = nil
 
@@ -28,19 +29,19 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		if settime == 0 then return end
 
 		local activetime = actor:GetTime(set, true)
-		tooltip:AddLine(uformat("%s - %s", label, L["Activity"]))
+		tooltip:AddLine(uformat("%s - %s", classfmt(actor.class, label), L["Activity"]))
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(settime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Activity"], Skada:FormatPercent(activetime, settime), nil, nil, nil, 1, 1, 1)
 	end
 
-	function mode_target:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s's activity"], label)
+	function mode_target:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = uformat(L["%s's activity"], classfmt(class, label))
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's activity"], win.actorname)
+		win.title = uformat(L["%s's activity"], classfmt(win.actorclass, win.actorname))
 		if not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)

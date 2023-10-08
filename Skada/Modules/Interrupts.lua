@@ -13,6 +13,7 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M, O)
 	local pairs, format, uformat = pairs, string.format, Private.uformat
 	local new, clear = Private.newTable, Private.clearTable
 	local SpellLink = Private.SpellLink or GetSpellLink
+	local classfmt = Skada.classcolors.format
 	local mode_cols = nil
 
 	local function format_valuetext(d, columns, total, metadata, subview)
@@ -87,13 +88,13 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M, O)
 		Skada:SendChat(format(L["%s interrupted!"], spelllink), M.interruptchannel or "SAY", "preset")
 	end
 
-	function mode_extraspell:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's interrupted spells"], label)
+	function mode_extraspell:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's interrupted spells"], classfmt(class, label))
 	end
 
 	function mode_extraspell:Update(win, set)
-		win.title = uformat(L["%s's interrupted spells"], win.actorname)
+		win.title = uformat(L["%s's interrupted spells"], classfmt(win.actorclass, win.actorname))
 		if not set or not win.actorname then return end
 
 		local spells, total, actor = get_actor_interrupted_spells(set, win.actorname, win.actorid)
@@ -113,13 +114,13 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M, O)
 		end
 	end
 
-	function mode_target:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's targets"], label)
+	function mode_target:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's targets"], classfmt(class, label))
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], classfmt(win.actorclass, win.actorname))
 		if not set or not win.actorname then return end
 
 		local targets, total, actor = get_actor_interrupt_targets(set, win.actorname, win.actorid)
@@ -139,13 +140,13 @@ Skada:RegisterModule("Interrupts", function(L, P, _, C, M, O)
 		end
 	end
 
-	function mode_spell:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's spells"], label)
+	function mode_spell:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's spells"], classfmt(class, label))
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's spells"], win.actorname)
+		win.title = uformat(L["%s's spells"], classfmt(win.actorclass, win.actorname))
 		if not set or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)

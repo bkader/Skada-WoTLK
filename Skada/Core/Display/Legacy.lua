@@ -1263,26 +1263,27 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 			win.bargroup:SortBars()
 		end
 
-		local function showmode(win, id, label, mode)
+		local function showmode(win, id, label, class, mode)
 			-- Add current mode to window traversal history.
 			if win.selectedmode then
 				win.history[#win.history + 1] = win.selectedmode
 			end
 
 			if type(mode) == "function" then
-				mode(mode, win, id, label)
+				mode(mode, win, id, label, class)
 			else
 				if mode.Enter then
-					mode:Enter(win, id, label, mode)
+					mode:Enter(win, id, label, class, mode)
 				end
 				win:DisplayMode(mode)
 			end
 		end
 
 		local function BarClick(bar, button)
-			if Skada.testMode then return end
+			local win = not Skada.testMode and bar and bar.win
+			if not win then return end
 
-			local win, id, label = bar.win, bar.id, bar.text
+			local id, label, class = bar.id, bar.text, bar.class
 
 			local click1 = win.metadata.click1
 			local click2 = win.metadata.click2
@@ -1296,22 +1297,25 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 			elseif button == "RightButton" and IsControlKeyDown() then
 				Skada:SegmentMenu(win)
 			elseif win.metadata.click then
-				win.metadata.click(win, id, label, button)
+				win.metadata.click(win, id, label, button, class)
 			elseif button == "RightButton" and not IsModifierKeyDown() then
 				win:RightClick(bar, button)
 			elseif button == "LeftButton" and click2 and IsShiftKeyDown() then
-				showmode(win, id, label, click2)
+				showmode(win, id, label, class, click2)
 			elseif button == "LeftButton" and filterclass and IsAltKeyDown() then
-				win:FilterClass(id, label)
+				win:FilterClass(class)
 			elseif button == "LeftButton" and click3 and IsControlKeyDown() then
-				showmode(win, id, label, click3)
+				showmode(win, id, label, class, click3)
 			elseif button == "LeftButton" and click1 and not IsModifierKeyDown() then
-				showmode(win, id, label, click1)
+				showmode(win, id, label, class, click1)
 			end
 		end
 
 		function mod:SetTitle(win, title)
-			win.bargroup.button:SetText(win.metadata.title)
+			local bargroup = win and win.bargroup
+			if not bargroup then return end
+
+			bargroup.button:SetText(title or win.title or win.metadata.title)
 		end
 
 		function mod:BarReleased(_, bar)
@@ -1324,19 +1328,19 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		local ttactive = false
 
 		local function BarEnter(bar, motion)
-			if bar and bar.win then
-				local win, id, label = bar.win, bar.id, bar.text
-				ttactive = true
-				Skada:SetTooltipPosition(GameTooltip, win.bargroup, "legacy", win)
-				Skada:ShowTooltip(win, id, label, bar)
-			end
+			local win = bar and bar.win
+			if not win then return end
+
+			local id, label, class = bar.id, bar.text, bar.class
+			Skada:SetTooltipPosition(GameTooltip, win.bargroup, "legacy", win)
+			Skada:ShowTooltip(win, id, label, bar, class)
+			ttactive = true
 		end
 
 		local function BarLeave(win, id, label)
-			if ttactive then
-				GameTooltip:Hide()
-				ttactive = false
-			end
+			if not ttactive then return end
+			GameTooltip:Hide()
+			ttactive = false
 		end
 
 		local function value_sort(a, b)
@@ -1444,6 +1448,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 						end
 					end
 
+					bar.class = data.class
 					bar:SetValue(data.value)
 					bar:SetMaxValue(metadata.maxvalue or 1)
 

@@ -481,7 +481,7 @@ do
 		local spell = actor and actor.auras and actor.auras[id]
 		if not spell then return end
 
-		tooltip:AddLine(uformat("%s - %s", win.actorname, label))
+		tooltip:AddLine(uformat("%s - %s", Skada.classcolors.format(actor.class, win.actorname), label))
 		tooltip_school(tooltip, id)
 
 		local cast = actor.GetSpellCast and actor:GetSpellCast(id)
@@ -496,7 +496,6 @@ do
 			if spell.r then
 				tooltip:AddDoubleLine(L["Refresh"], spell.r, 1, 1, 1)
 			end
-			tooltip:AddLine(" ")
 		end
 
 		-- add segment and active times
@@ -516,7 +515,7 @@ do
 		local target = spell and spell.t and spell.t[label]
 		if not target then return end
 
-		tooltip:AddLine(uformat("%s - %s", win.actorname, win.spellname))
+		tooltip:AddLine(uformat("%s - %s", Skada.classcolors.format(actor.class, win.actorname), win.spellname))
 		tooltip_school(tooltip, win.spellid)
 
 		if target.n then
@@ -535,6 +534,7 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 	local mode = Skada:NewModule("Buffs")
 	local mode_spell = mode:NewModule("Spell List")
 	local mode_spell_target = mode_spell:NewModule("Target List")
+	local classfmt = Skada.classcolors.format
 	local mode_cols = nil
 
 	local function handle_buff(t)
@@ -614,13 +614,13 @@ Skada:RegisterModule("Buffs", function(_, P, G, C)
 		end
 	end
 
-	function mode_spell:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s's spells"], label)
+	function mode_spell:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = uformat(L["%s's spells"], classfmt(class, label))
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's spells"], win.actorname)
+		win.title = uformat(L["%s's spells"], classfmt(win.actorclass, win.actorname))
 		spell_update_func(self, "BUFF", win, set, mode_cols)
 	end
 
@@ -706,6 +706,7 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 	local mode_spell_source = mode_spell:NewModule("Source List")
 	local mode_target = mode:NewModule("Target List")
 	local mode_target_spell = mode_target:NewModule("Spell List")
+	local classfmt = Skada.classcolors.format
 	local mode_cols = nil
 
 	local function handle_debuff(t)
@@ -729,23 +730,23 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 		end
 	end
 
-	function mode_target_spell:Enter(win, id, label)
-		win.targetname = label or L["Unknown"]
-		win.title = uformat(L["%s's spells on %s"], win.actorname, label)
+	function mode_target_spell:Enter(win, id, label, class)
+		win.targetid, win.targetname, win.targetclass = id, label or L["Unknown"], class
+		win.title = uformat(L["%s's spells on %s"], classfmt(win.actorclass, win.actorname), classfmt(class, win.targetname))
 	end
 
 	function mode_target_spell:Update(win, set)
-		win.title = uformat(L["%s's spells on %s"], win.actorname, win.targetname)
+		win.title = uformat(L["%s's spells on %s"], classfmt(win.actorclass, win.actorname), classfmt(win.targetclass, win.targetname))
 		targetspell_update_func(self, "DEBUFF", win, set, mode_cols, C)
 	end
 
 	function mode_spell_target:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = uformat(L["%s's <%s> targets"], win.actorname, label)
+		win.title = uformat(L["%s's <%s> targets"], classfmt(win.actorclass, win.actorname), label)
 	end
 
 	function mode_spell_target:Update(win, set)
-		win.title = uformat(L["%s's <%s> targets"], win.actorname, win.spellname)
+		win.title = uformat(L["%s's <%s> targets"], classfmt(win.actorclass, win.actorname), win.spellname)
 		spelltarget_update_func(self, "DEBUFF", win, set, mode_cols, C)
 	end
 
@@ -778,23 +779,23 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 		end
 	end
 
-	function mode_target:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s's targets"], label)
+	function mode_target:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = uformat(L["%s's targets"], classfmt(class, label))
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], classfmt(win.actorclass, win.actorname))
 		target_update_func(self, "DEBUFF", win, set, mode_cols, C)
 	end
 
-	function mode_spell:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's spells"], label)
+	function mode_spell:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's spells"], classfmt(class, label))
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's spells"], win.actorname)
+		win.title = uformat(L["%s's spells"], classfmt(win.actorclass, win.actorname))
 		spell_update_func(self, "DEBUFF", win, set, mode_cols)
 	end
 
@@ -809,7 +810,7 @@ Skada:RegisterModule("Debuffs", function(_, _, _, C)
 		local spell = actor and actor.auras and actor.auras[win.spellid]
 		if not (spell and spell.n) then return end
 
-		tooltip:AddLine(uformat("%s - %s", label, win.spellname))
+		tooltip:AddLine(uformat("%s - %s", classfmt(actor.class, label), win.spellname))
 		tooltip_school(tooltip, win.spellid)
 
 		tooltip:AddDoubleLine(L["Count"], spell.n, 1, 1, 1)
@@ -864,6 +865,7 @@ end)
 Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 	local mode = Skada:NewModule("Enemy Buffs")
 	local mode_spell = mode:NewModule("Spell List")
+	local classfmt = Skada.classcolors.format
 	local mode_cols = nil
 
 	local function handle_buff(t)
@@ -888,13 +890,13 @@ Skada:RegisterModule("Enemy Buffs", function(_, P, _, C)
 		end
 	end
 
-	function mode_spell:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s's spells"], label)
+	function mode_spell:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = uformat(L["%s's spells"], classfmt(class, label))
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's spells"], win.actorname)
+		win.title = uformat(L["%s's spells"], classfmt(win.actorclass, win.actorname))
 		spell_update_func(self, "BUFF", win, set, mode_cols)
 	end
 
@@ -944,6 +946,7 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 	local mode_spell_target = mode_spell:NewModule("Target List")
 	local mode_target = mode:NewModule("Target List")
 	local mode_target_spell = mode_target:NewModule("Spell List")
+	local classfmt = Skada.classcolors.format
 	local mode_cols = nil
 
 	local function handle_debuff(t)
@@ -966,43 +969,43 @@ Skada:RegisterModule("Enemy Debuffs", function(_, _, _, C)
 		end
 	end
 
-	function mode_target_spell:Enter(win, id, label)
-		win.targetname = label or L["Unknown"]
-		win.title = uformat(L["%s's spells on %s"], win.actorname, label)
+	function mode_target_spell:Enter(win, id, label, class)
+		win.targetid, win.targetname, win.targetclass = id, label or L["Unknown"], class
+		win.title = uformat(L["%s's spells on %s"], classfmt(win.actorclass, win.actorname), classfmt(class, win.targetname))
 	end
 
 	function mode_target_spell:Update(win, set)
-		win.title = uformat(L["%s's spells on %s"], win.actorname, win.targetname)
+		win.title = uformat(L["%s's spells on %s"], classfmt(win.actorclass, win.actorname), classfmt(win.targetclass, win.targetname))
 		targetspell_update_func(self, "DEBUFF", win, set, mode_cols, C)
 	end
 
 	function mode_spell_target:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = uformat(L["%s's <%s> targets"], win.actorname, label)
+		win.title = uformat(L["%s's <%s> targets"], classfmt(win.actorclass, win.actorname), label)
 	end
 
 	function mode_spell_target:Update(win, set)
-		win.title = uformat(L["%s's <%s> targets"], win.actorname, win.spellname)
+		win.title = uformat(L["%s's <%s> targets"], classfmt(win.actorclass, win.actorname), win.spellname)
 		spelltarget_update_func(self, "DEBUFF", win, set, mode_cols, C)
 	end
 
-	function mode_target:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = uformat(L["%s's targets"], label)
+	function mode_target:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = uformat(L["%s's targets"], classfmt(class, label))
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], classfmt(win.actorclass, win.actorname))
 		target_update_func(self, "DEBUFF", win, set, mode_cols, C)
 	end
 
-	function mode_spell:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's spells"], label)
+	function mode_spell:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's spells"], classfmt(class, label))
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = format(L["%s's spells"], win.actorname)
+		win.title = format(L["%s's spells"], classfmt(win.actorclass, win.actorname))
 		spell_update_func(self, "DEBUFF", win, set, mode_cols)
 	end
 

@@ -11,6 +11,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 	local pairs, wipe, format, uformat = pairs, wipe, string.format, Private.uformat
 	local new, del, clear = Private.newTable, Private.delTable, Private.clearTable
+	local classfmt = Skada.classcolors.format
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
 	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
 
@@ -78,13 +79,13 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 	end
 
-	function mode_target:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's targets"], label)
+	function mode_target:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's targets"], classfmt(class, label))
 	end
 
 	function mode_target:Update(win, set)
-		win.title = uformat(L["%s's targets"], win.actorname)
+		win.title = uformat(L["%s's targets"], classfmt(win.actorclass, win.actorname))
 
 		local targets, total, actor = get_actor_friendfire_targets(set, win.actorname, win.actorid)
 		if not targets or not actor or total == 0 then
@@ -105,13 +106,13 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 	end
 
-	function mode_spell:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's spells"], label)
+	function mode_spell:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's spells"], classfmt(class, label))
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's spells"], win.actorname)
+		win.title = uformat(L["%s's spells"], classfmt(win.actorclass, win.actorname))
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.friendfire
@@ -137,11 +138,11 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 	function mode_spell_target:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = uformat(L["%s's <%s> targets"], win.actorname, label)
+		win.title = uformat(L["%s's <%s> targets"], classfmt(win.actorclass, win.actorname), label)
 	end
 
 	function mode_spell_target:Update(win, set)
-		win.title = uformat(L["%s's <%s> targets"], win.actorname, win.spellname)
+		win.title = uformat(L["%s's <%s> targets"], classfmt(win.actorclass, win.actorname), win.spellname)
 		if not win.spellid then return end
 
 		local targets, total, actor = get_spell_friendfire_targets(set, win.actorname, win.actorid, win.spellid)

@@ -12,6 +12,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M, O)
 
 	local pairs, tostring, format, UnitGUID = pairs, tostring, string.format, UnitGUID
 	local uformat, IsInGroup = Private.uformat, Skada.IsInGroup
+	local classfmt = Skada.classcolors.format
 	local tank_events, mode_cols
 
 	local function format_valuetext(d, columns, total, metadata, subview)
@@ -77,13 +78,13 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M, O)
 		end
 	end
 
-	function mode_spell:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's fails"], label)
+	function mode_spell:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's fails"], classfmt(class, label))
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's fails"], win.actorname)
+		win.title = uformat(L["%s's fails"], classfmt(win.actorclass, win.actorname))
 
 		local actor = set and set:GetActor(win.actorname, win.actorid)
 		local total = actor and actor.fail

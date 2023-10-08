@@ -7,6 +7,7 @@ Skada:RegisterModule("Casts", function(L, P)
 
 	local pairs, wipe = pairs, wipe
 	local format, uformat = string.format, Private.uformat
+	local classfmt = Skada.classcolors.format
 
 	local function format_valuetext(d, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
@@ -46,13 +47,13 @@ Skada:RegisterModule("Casts", function(L, P)
 		Skada:DispatchSets(log_spellcast)
 	end
 
-	function mode_spell:Enter(win, id, label)
-		win.actorid, win.actorname = id, label
-		win.title = format(L["%s's spells"], label)
+	function mode_spell:Enter(win, id, label, class)
+		win.actorid, win.actorname, win.actorclass = id, label, class
+		win.title = format(L["%s's spells"], classfmt(class, label))
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's spells"], win.actorname)
+		win.title = uformat(L["%s's spells"], classfmt(win.actorclass, win.actorname))
 		if not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
