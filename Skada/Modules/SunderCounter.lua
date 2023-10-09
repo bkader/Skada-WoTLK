@@ -45,15 +45,10 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M, O)
 	end
 
 	local function sunder_dropped(dstGUID)
-		if dstGUID and sunder_targets and sunder_targets[dstGUID] then
+		if sunder_targets and dstGUID and sunder_targets[dstGUID] then
 			local dstName = sunder_targets[dstGUID].name
 			sunder_targets[dstGUID] = del(sunder_targets[dstGUID])
-
-			if not M.sunderannounce then
-				return
-			elseif not M.sunderbossonly or (M.sunderbossonly and Skada:IsBoss(dstGUID, true)) then
-				mode:Announce(uformat(L["%s dropped from %s!"], sunder_link or spell_sunder, dstName))
-			end
+			mode:Announce(uformat(L["%s dropped from %s!"], sunder_link or spell_sunder, dstName))
 		end
 	end
 
@@ -78,7 +73,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M, O)
 		Skada:DispatchSets(log_sunder, last_srcName, last_srcGUID, last_srcFlags, t.dstName)
 
 		-- announce disabled or only for bosses
-		if not M.sunderannounce or (M.sunderbossonly and not Skada:IsBoss(t.dstGUID, true)) then return end
+		if not M.sunderannounce or (M.sunderbossonly and not t:DestIsBoss()) then return end
 
 		local tar = sunder_targets and sunder_targets[t.dstGUID]
 		if not tar then
@@ -112,7 +107,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M, O)
 	end
 
 	local function unit_died(t)
-		if M.sunderannounce and t.dstGUID and sunder_targets and sunder_targets[t.dstGUID] then
+		if sunder_targets and t.dstGUID and sunder_targets[t.dstGUID] then
 			sunder_targets[t.dstGUID] = del(sunder_targets[t.dstGUID])
 		end
 	end
