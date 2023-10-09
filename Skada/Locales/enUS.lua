@@ -707,15 +707,10 @@ L["%s's interrupted spells"] = true
 L["%s interrupted!"] = true
 -- Power gained module --
 L["Resources"] = true
-L["Mana"] = _G.MANA
-L["Rage"] = _G.RAGE
-L["Energy"] = _G.ENERGY
-L["Runic Power"] = _G.RUNIC_POWER
-L["Power gained: Mana"] = true
-L["Power gained: Rage"] = true
-L["Power gained: Energy"] = true
-L["Power gained: Runic Power"] = true
-L["%s's gained %s"] = true
+L["Mana Restored"] = true
+L["Rage Generated"] = true
+L["Energy Generated"] = true
+L["Runic Power Generated"] = true
 -- Parry module lines --
 L["Parry-Haste"] = true
 L["%s parried %s (%s)"] = true

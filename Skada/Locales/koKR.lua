@@ -642,11 +642,10 @@ L["Reports the group fails at the end of combat if there are any."] = "전투 �
 L["%s interrupted!"] = "%s 차단!"
 -- Power gained module --
 L["Resources"] = "자원"
-L["Power gained: Mana"] = "마나 획득"
-L["Power gained: Rage"] = "분노 획득"
-L["Power gained: Energy"] = "기력 획득"
-L["Power gained: Runic Power"] = "룬 마력 획득"
--- L["%s's gained %s"] = ""
+L["Mana Restored"] = "마나 회복"
+L["Rage Generated"] = "분노 생성"
+L["Energy Generated"] = "기력 생성"
+L["Runic Power Generated"] = "룬 마력 생성"
 -- Parry module lines --
 L["Parry-Haste"] = "패리-가속"
 L["%s parried %s (%s)"] = "%s 패리 %s (%s)"

@@ -16,14 +16,6 @@ Skada:RegisterModule("Resources", function(L, P)
 	local SPELL_POWER_HAPPINESS = SPELL_POWER_HAPPINESS or 4
 	local SPELL_POWER_RUNIC_POWER = SPELL_POWER_RUNIC_POWER or 6
 
-	-- used to localize modules names.
-	local namesTable = {
-		[SPELL_POWER_MANA] = "Mana",
-		[SPELL_POWER_RAGE] = "Rage",
-		[SPELL_POWER_ENERGY] = "Energy",
-		[SPELL_POWER_RUNIC_POWER] = "Runic Power"
-	}
-
 	-- used to store total amounts for sets and actors
 	local gainTable = {
 		[SPELL_POWER_MANA] = "mana",
@@ -100,12 +92,10 @@ Skada:RegisterModule("Resources", function(L, P)
 	local mode_actor_mt = {__index = mode_actor}
 
 	-- allows us to create a module for each power type.
-	function mode_base:Create(power)
+	function mode_base:Create(power, name)
 		if not power or not gainTable[power] then return end
 
-		local powername = namesTable[power]
-
-		local instance = Skada:NewModule(format("Power gained: %s", powername))
+		local instance = Skada:NewModule(name)
 		setmetatable(instance, mode_base_mt)
 
 		local pmode = instance:NewModule("Spell List")
@@ -113,7 +103,6 @@ Skada:RegisterModule("Resources", function(L, P)
 
 		pmode.powerid = power
 		pmode.power = gainTable[power]
-		pmode.powername = powername
 		pmode.spells = spellTable[power]
 		instance.power = gainTable[power]
 		instance.metadata = {showspots = true, filterclass = true, click1 = pmode}
@@ -163,12 +152,12 @@ Skada:RegisterModule("Resources", function(L, P)
 	-- actor mods common Enter function.
 	function mode_actor:Enter(win, id, label, class)
 		win.actorid, win.actorname, win.actorclass = id, label, class
-		win.title = uformat(L["%s's gained %s"], classfmt(class, label), namesTable[self.powerid])
+		win.title = uformat(L["%s's spells"], classfmt(class, label))
 	end
 
 	-- actor mods main update function
 	function mode_actor:Update(win, set)
-		win.title = uformat(L["%s's gained %s"], classfmt(win.actorclass, win.actorname), L[self.powername])
+		win.title = uformat(L["%s's spells"], classfmt(win.actorclass, win.actorname))
 		if not set or not win.actorname then return end
 
 		local actor = set:GetActor(win.actorname, win.actorid)
@@ -195,10 +184,10 @@ Skada:RegisterModule("Resources", function(L, P)
 
 	-- we create the modules now
 	-- power gained: mana
-	local mode_mana = mode_base:Create(SPELL_POWER_MANA)
-	local mode_rage = mode_base:Create(SPELL_POWER_RAGE)
-	local mode_energy = mode_base:Create(SPELL_POWER_ENERGY)
-	local mode_runic = mode_base:Create(SPELL_POWER_RUNIC_POWER)
+	local mode_mana = mode_base:Create(SPELL_POWER_MANA, "Mana Restored")
+	local mode_rage = mode_base:Create(SPELL_POWER_RAGE, "Rage Generated")
+	local mode_energy = mode_base:Create(SPELL_POWER_ENERGY, "Energy Generated")
+	local mode_runic = mode_base:Create(SPELL_POWER_RUNIC_POWER, "Runic Power Generated")
 
 	function mode:OnEnable()
 		self.metadata = {columns = {Amount = true, Percent = false, sPercent = true}}
