@@ -71,7 +71,7 @@ Skada:RegisterModule("Killing Blows", function(L, P, _, C, M, O)
 
 		Skada:DispatchSets(log_kill, data)
 
-		if M.killannounce and Skada:IsBoss(t.dstGUID, true) then
+		if M.killannounce and t:DestIsBoss() then
 			local output = format(
 				announce_fmt,
 				data.actorname,
