@@ -655,7 +655,7 @@ L["Parry-Haste"] = "Parade-h\195\162te"
 L["%s parried %s (%s)"] = "%s a par\195\169 %s (%s)"
 -- Potions module lines --
 L["Potions"] = "Potions"
-L["%s's used potions"] = "Potions utilis\195\169es par %s"
+L["%s's potions"] = "Potions \1242 %s"
 L["Pre-potion"] = "Pre-potion"
 L["pre-potion: %s"] = "pr\195\169-potion: %s"
 L["Prints pre-potion after the end of the combat."] = "Affiche, en fin du combat, la liste des joueurs ayant utilis\195\169 des potions avant le d\195\169but du combat."

@@ -721,7 +721,7 @@ L["Parry-Haste"] = true
 L["%s parried %s (%s)"] = true
 -- Potions module lines --
 L["Potions"] = true
-L["%s's used potions"] = true
+L["%s's potions"] = true
 L["Pre-potion"] = true
 L["pre-potion: %s"] = true
 L["Prints pre-potion after the end of the combat."] = true

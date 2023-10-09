@@ -649,7 +649,7 @@ L["Parry-Haste"] = "招架-急速"
 L["%s parried %s (%s)"] = "%s招架%s (%s)"
 -- Potions module lines --
 L["Potions"] = "藥水"
-L["%s's used potions"] = "%s使用的藥水"
+L["%s's potions"] = "%s的藥水"
 L["Pre-potion"] = "預使用藥水"
 L["pre-potion: %s"] = "預使用藥水:%s"
 L["Prints pre-potion after the end of the combat."] = "戰鬥結束後發布預使用藥水訊息。"

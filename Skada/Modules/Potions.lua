@@ -120,18 +120,18 @@ Skada:RegisterModule("Potions", function(L, P, G, C, _, O)
 
 	function mode_spell:Enter(win, id, label, class)
 		win.actorid, win.actorname, win.actorclass = id, label, class
-		win.title = format(L["%s's used potions"], classfmt(class, label))
+		win.title = format(L["%s's potions"], classfmt(class, label))
 	end
 
 	local function request_potion(potionid)
 		if potionid and potionid ~= nil and potionid ~= "" and potionid ~= 0 and strsub(potionid, 1, 1) ~= "s" then
-			GameTooltip:SetHyperlink(format("item:%s:0:0:0:0:0:0:0"))
+			GameTooltip:SetHyperlink(format("item:%s:0:0:0:0:0:0:0", potionid))
 			GameTooltip:Hide()
 		end
 	end
 
 	function mode_spell:Update(win, set)
-		win.title = uformat(L["%s's used potions"], classfmt(win.actorclass, win.actorname))
+		win.title = uformat(L["%s's potions"], classfmt(win.actorclass, win.actorname))
 		if not set or not win.actorname then return end
 
 		local actor = Skada:FindActor(set, win.actorname, win.actorid, true)
