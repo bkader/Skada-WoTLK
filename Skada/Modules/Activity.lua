@@ -9,10 +9,10 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 	local get_activity_targets = nil
 	local mode_cols = nil
 
-	local function format_valuetext(d, columns, maxtime, metadata, subview)
+	local function format_valuetext(d, maxtime, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
-			columns["Active Time"] and Skada:FormatTime(d.value),
-			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, maxtime)
+			mode_cols["Active Time"] and Skada:FormatTime(d.value),
+			mode_cols[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, maxtime)
 		)
 
 		if metadata and d.value > metadata.maxvalue then
@@ -60,7 +60,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 
 			local d = win:actor(nr, target, target.enemy, name)
 			d.value = target.time
-			format_valuetext(d, mode_cols, maxtime, win.metadata, true)
+			format_valuetext(d, maxtime, win.metadata, true)
 		end
 	end
 
@@ -85,7 +85,7 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 
 					local d = win:actor(nr, actor, actor.enemy, actorname)
 					d.value = activetime
-					format_valuetext(d, mode_cols, settime, win.metadata)
+					format_valuetext(d, settime, win.metadata)
 					win:color(d, set, actor.enemy)
 				end
 			end

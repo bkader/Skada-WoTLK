@@ -22,10 +22,10 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M, O)
 		[33271] = true, -- General Vezax
 	}
 
-	local function format_valuetext(d, columns, total, metadata, subview)
+	local function format_valuetext(d, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
-			columns.Count and d.value,
-			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+			mode_cols.Count and d.value,
+			mode_cols[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
 		)
 
 		if metadata and d.value > metadata.maxvalue then
@@ -93,7 +93,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M, O)
 			local d = win:actor(nr, targetname)
 			d.class = "BOSS" -- what else can it be?
 			d.value = count
-			format_valuetext(d, mode_cols, total, win.metadata, true)
+			format_valuetext(d, total, win.metadata, true)
 		end
 	end
 
@@ -116,7 +116,7 @@ Skada:RegisterModule("Parry-Haste", function(L, P, _, _, M, O)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.parry
-				format_valuetext(d, mode_cols, total, win.metadata)
+				format_valuetext(d, total, win.metadata)
 			end
 		end
 	end

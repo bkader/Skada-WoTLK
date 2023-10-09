@@ -46,18 +46,18 @@ Skada:RegisterModule("Comparison", function(L, P)
 	local function format_value_percent(val, oval, disabled)
 		val, oval = val or 0, oval or 0
 		return Skada:FormatValueCols(
-			mode.metadata.columns.Damage and Skada:FormatPercent(val),
-			(mode.metadata.columns.Comparison and not disabled) and Skada:FormatPercent(oval),
-			format_percent(oval, val, mode.metadata.columns.Percent and not disabled)
+			mode_cols.Damage and Skada:FormatPercent(val),
+			(mode_cols.Comparison and not disabled) and Skada:FormatPercent(oval),
+			format_percent(oval, val, mode_cols.Percent and not disabled)
 		)
 	end
 
 	local function format_value_number(val, oval, fmt, disabled)
 		val, oval = val or 0, oval or 0 -- sanity check
 		return Skada:FormatValueCols(
-			mode.metadata.columns.Damage and (fmt and Skada:FormatNumber(val) or val),
-			(mode.metadata.columns.Comparison and not disabled) and (fmt and Skada:FormatNumber(oval) or oval),
-			format_percent(oval, val, mode.metadata.columns.Percent and not disabled)
+			mode_cols.Damage and (fmt and Skada:FormatNumber(val) or val),
+			(mode_cols.Comparison and not disabled) and (fmt and Skada:FormatNumber(oval) or oval),
+			format_percent(oval, val, mode_cols.Percent and not disabled)
 		)
 	end
 

@@ -13,10 +13,10 @@ Skada:RegisterModule("Potions", function(L, P, G, C, _, O)
 	local prepotionStr, potionStr = "\124c%s%s\124r %s", "\124T%s:14:14:0:0:64:64:4:60:4:60\124t"
 	local potion_ids, prepotion = {}, {}
 
-	local function format_valuetext(d, columns, total, metadata, subview)
+	local function format_valuetext(d, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
-			columns.Count and d.value,
-			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+			mode_cols.Count and d.value,
+			mode_cols[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
 		)
 
 		if metadata and d.value > metadata.maxvalue then
@@ -114,7 +114,7 @@ Skada:RegisterModule("Potions", function(L, P, G, C, _, O)
 
 			local d = win:actor(nr, actor, actor.enemy, actorname)
 			d.value = actor.count
-			format_valuetext(d, mode_cols, total, win.metadata, true)
+			format_valuetext(d, total, win.metadata, true)
 		end
 	end
 
@@ -161,7 +161,7 @@ Skada:RegisterModule("Potions", function(L, P, G, C, _, O)
 				d.icon = potionicon
 
 				d.value = count
-				format_valuetext(d, mode_cols, total, win.metadata, true)
+				format_valuetext(d, total, win.metadata, true)
 			end
 		end
 	end
@@ -185,7 +185,7 @@ Skada:RegisterModule("Potions", function(L, P, G, C, _, O)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.potion
-				format_valuetext(d, mode_cols, total, win.metadata)
+				format_valuetext(d, total, win.metadata)
 			end
 		end
 	end

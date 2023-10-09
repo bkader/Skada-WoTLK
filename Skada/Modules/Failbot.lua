@@ -15,10 +15,10 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M, O)
 	local classfmt = Skada.classcolors.format
 	local tank_events, mode_cols
 
-	local function format_valuetext(d, columns, total, metadata, subview)
+	local function format_valuetext(d, total, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
-			columns.Count and d.value,
-			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+			mode_cols.Count and d.value,
+			mode_cols[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
 		)
 
 		if metadata and d.value > metadata.maxvalue then
@@ -73,7 +73,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M, O)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.failspells[win.spellid]
-				format_valuetext(d, mode_cols, total, win.metadata, true)
+				format_valuetext(d, total, win.metadata, true)
 			end
 		end
 	end
@@ -102,7 +102,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M, O)
 
 			local d = win:spell(nr, spellid)
 			d.value = count
-			format_valuetext(d, mode_cols, total, win.metadata, true)
+			format_valuetext(d, total, win.metadata, true)
 		end
 	end
 
@@ -125,7 +125,7 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M, O)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.fail
-				format_valuetext(d, mode_cols, total, win.metadata)
+				format_valuetext(d, total, win.metadata)
 			end
 		end
 	end

@@ -15,11 +15,11 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 	local ignored_spells = Skada.ignored_spells.damage -- Edit Skada\Core\Tables.lua
 	local passive_spells = Skada.ignored_spells.time -- Edit Skada\Core\Tables.lua
 
-	local function format_valuetext(d, columns, total, dps, metadata, subview)
+	local function format_valuetext(d, total, dps, metadata, subview)
 		d.valuetext = Skada:FormatValueCols(
-			columns.Damage and Skada:FormatNumber(d.value),
-			columns[subview and "sDPS" or "DPS"] and dps and Skada:FormatNumber(dps),
-			columns[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
+			mode_cols.Damage and Skada:FormatNumber(d.value),
+			mode_cols[subview and "sDPS" or "DPS"] and dps and Skada:FormatNumber(dps),
+			mode_cols[subview and "sPercent" or "Percent"] and Skada:FormatPercent(d.value, total)
 		)
 
 		if metadata and d.value > metadata.maxvalue then
@@ -102,7 +102,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.amount
-			format_valuetext(d, mode_cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -132,7 +132,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 			local d = win:spell(nr, spellid, true)
 			d.value = spell.amount
-			format_valuetext(d, mode_cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -160,7 +160,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 			local d = win:actor(nr, target, target.enemy, targetname)
 			d.value = target.amount
-			format_valuetext(d, mode_cols, total, actortime and (d.value / actortime), win.metadata, true)
+			format_valuetext(d, total, actortime and (d.value / actortime), win.metadata, true)
 		end
 	end
 
@@ -183,7 +183,7 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.friendfire
-				format_valuetext(d, mode_cols, total, mode_cols.DPS and (d.value / actor:GetTime(set)), win.metadata)
+				format_valuetext(d, total, mode_cols.DPS and (d.value / actor:GetTime(set)), win.metadata)
 			end
 		end
 	end

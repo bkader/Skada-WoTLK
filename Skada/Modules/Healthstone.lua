@@ -17,10 +17,10 @@ Skada:RegisterModule("Healthstones", function(L)
 	local format = string.format
 	local mode_cols = nil
 
-	local function format_valuetext(d, columns, total, metadata)
+	local function format_valuetext(d, total, metadata)
 		d.valuetext = Skada:FormatValueCols(
-			columns.Count and d.value,
-			columns.Percent and Skada:FormatPercent(d.value, total)
+			mode_cols.Count and d.value,
+			mode_cols.Percent and Skada:FormatPercent(d.value, total)
 		)
 
 		if metadata and d.value > metadata.maxvalue then
@@ -61,7 +61,7 @@ Skada:RegisterModule("Healthstones", function(L)
 
 				local d = win:actor(nr, actor, actor.enemy, actorname)
 				d.value = actor.healthstone
-				format_valuetext(d, mode_cols, total, win.metadata)
+				format_valuetext(d, total, win.metadata)
 			end
 		end
 	end

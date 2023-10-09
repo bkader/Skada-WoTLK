@@ -513,15 +513,8 @@ do
 	local custom_units = {
 		-- ICC: Lady Deathwhisper
 		[36855] = {
-			{
-				text = L["%s - Phase 1"],
-				start = 1,
-				power = 0
-			},
-			{
-				text = L["%s - Phase 2"],
-				start = 1
-			}
+			{text = L["%s - Phase 1"], start = 1, power = 0},
+			{text = L["%s - Phase 2"], start = 0, power = 0}
 		},
 
 		-- ICC: Professor Putricide
@@ -534,17 +527,6 @@ do
 		[36853] = {
 			text = L["%s - Phase 2"],
 			start = 0.35
-		},
-		-- ICC: Ice Tomb
-		[36980] = {
-			{
-				text = "Tombs below 10%%",
-				start = 0.1,
-			},
-			{
-				text = "Tombs below 5%%",
-				start = 0.05,
-			},
 		},
 
 		-- ICC: The Lich King

@@ -383,8 +383,8 @@ Skada:RegisterModule("Damage", function(L, P)
 		d.label = title
 		d.value = value
 		d.valuetext = Skada:FormatValueCols(
-			mode.metadata.columns.Damage and (fmt and Skada:FormatNumber(value) or value),
-			(mode.metadata.columns.sPercent and percent) and Skada:FormatPercent(d.value, total)
+			mode_cols.Damage and (fmt and Skada:FormatNumber(value) or value),
+			(mode_cols.sPercent and percent) and Skada:FormatPercent(d.value, total)
 		)
 
 		if win.metadata and d.value > win.metadata.maxvalue then
@@ -909,7 +909,7 @@ Skada:RegisterModule("Damage Done By Spell", function(L, P, _, C)
 					sources[actorname].role = actor.role
 					sources[actorname].spec = actor.spec
 					sources[actorname].amount = amount
-					sources[actorname].time = mode.metadata.columns.sDPS and actor:GetTime(set)
+					sources[actorname].time = mode_cols.sDPS and actor:GetTime(set)
 
 					total = total + amount
 				end
