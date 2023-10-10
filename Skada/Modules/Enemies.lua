@@ -687,7 +687,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		for actorname, actor in pairs(actors) do
 			if actor.enemy then
 				local dtps, amount = actor:GetDTPS(set, nil, not mode_cols.sDTPS)
-				if amount > 0 then
+				if amount and amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor, actor.enemy, actorname)
@@ -1112,7 +1112,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		for actorname, actor in pairs(actors) do
 			if actor.enemy and not actor.fake then
 				local dps, amount = actor:GetDPS(set)
-				if amount > 0 then
+				if amount and amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor, actor.enemy, actorname)
@@ -1422,7 +1422,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		for actorname, actor in pairs(actors) do
 			if actor.enemy and not actor.fake then
 				local hps, amount = actor:GetHPS(set, nil, not mode_cols.HPS)
-				if amount > 0 then
+				if amount and amount > 0 then
 					nr = nr + 1
 
 					local d = win:actor(nr, actor, actor.enemy, actorname)
