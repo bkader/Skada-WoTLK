@@ -251,7 +251,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	local function log_custom_group(set, name, id, playername, spellid, amount, overkill, absorbed, isboss)
-		if trash_n_boss and set.name == totalset and not ignored_instance_units[name] then
+		if trash_n_boss and set.name == totalset and name and not ignored_instance_units[name] then
 			-- see if it was cached already
 			local trash_or_boss = instance_units[name]
 			if not trash_or_boss then -- process if not cached.

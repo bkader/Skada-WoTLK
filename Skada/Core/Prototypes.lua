@@ -274,6 +274,16 @@ function actorPrototype:GetTime(set, active)
 	return Skada:GetActiveTime(set, self, active)
 end
 
+-- calculate total for the given actor.
+function actorPrototype:GetTotal(...)
+	local total = nil
+	for i = 1, select("#", ...) do
+		local value = self[select(i, ...)]
+		if value then total = (total or 0) + value end
+	end
+	return total
+end
+
 -- ------------------------------------
 -- damage done functions
 -- ------------------------------------
