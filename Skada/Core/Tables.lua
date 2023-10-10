@@ -447,6 +447,11 @@ do
 	--
 
 	local grouped_units = {
+		-- EXPERIMENTAL: instance bosses and trash grouped units.
+		-- IMPORTANT: only recorded to the total segment.
+		BOSS = true,
+		TRASH = true,
+
 		-- The Lich King: Important targets
 		[36597] = L["Important targets"], -- The Lich King
 		[36609] = L["Important targets"], -- Val'kyr Shadowguard

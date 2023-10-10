@@ -28,11 +28,16 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	local grouped_units = Skada.grouped_units -- Edit Skada\Core\Tables.lua
 	local user_units = Skada.custom_units -- Edit Skada\Core\Tables.lua
 	local ignored_creatures = Skada.ignored_creatures -- Edit Skada\Core\Tables.lua
+	local trash_n_boss = grouped_units.BOSS or grouped_units.TRASH -- Edit Skada\Core\Tables.lua
 
-	local instanceDiff, max_health, max_power
+	local totalset = L["Total"]
+	local instance_diff, instance_type
+	local max_health, max_power
 	local custom_units = {}
 	local custom_groups = {}
+	local instance_units = {}
 	local ignored_units = {}
+	local ignored_instance_units = {}
 
 	-- table of acceptable/trackable instance difficulties
 	-- uncomment those you want to use or add custom ones.
@@ -61,10 +66,10 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	local function get_instance_diff()
-		if not instanceDiff then
-			instanceDiff = Skada:GetInstanceDiff() or "NaN"
+		if not instance_diff then
+			instance_diff = Skada:GetInstanceDiff() or "NaN"
 		end
-		return instanceDiff
+		return instance_diff
 	end
 
 	local function get_custom_unit_maxval(guid, unit, name)
@@ -245,7 +250,25 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 	end
 
-	local function log_custom_group(set, name, id, playername, spellid, amount, overkill, absorbed)
+	local function log_custom_group(set, name, id, playername, spellid, amount, overkill, absorbed, isboss)
+		if trash_n_boss and set.name == totalset and not ignored_instance_units[name] then
+			-- see if it was cached already
+			local trash_or_boss = instance_units[name]
+			if not trash_or_boss then -- process if not cached.
+				if grouped_units.BOSS and isboss then
+					trash_or_boss = instance_type == "raid" and L["Raid Bosses"] or L["Dungeon Bosses"]
+				elseif grouped_units.TRASH and not isboss then
+					trash_or_boss = instance_type == "raid" and L["Raid Trash"] or L["Dungeon Trash"]
+				end
+				instance_units[name] = trash_or_boss -- cache if found.
+			end
+			if trash_or_boss then -- record if found.
+				log_custom_unit(set, trash_or_boss, playername, spellid, amount, absorbed)
+			else -- otherwise, ignore it.
+				ignored_instance_units[name] = true
+			end
+		end
+
 		-- we use ignored units table to ignore grouped units
 		-- if not needed in order to reduce useless processing.
 		if not name or ignored_units[name] then return end
@@ -273,7 +296,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	local dmg = {}
-	local function log_damage(set)
+	local function log_damage(set, isboss)
 		local amount = dmg.amount
 		if not amount then return end
 
@@ -304,8 +327,8 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		local overkill = dmg.overkill or 0
 
 		-- saving this to total set may become a memory hog deluxe.
-		if set == Skada.total and not P.totalidc then
-			log_custom_group(set, actorname, actorid, srcName, spellid, amount, overkill, absorbed)
+		if set.name == totalset and not P.totalidc then
+			log_custom_group(set, actorname, actorid, srcName, spellid, amount, overkill, absorbed, isboss)
 			return
 		end
 
@@ -353,14 +376,14 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 
 		-- custom groups
-		log_custom_group(set, actorname, actorid, srcName, spellid, amount, overkill, absorbed)
+		log_custom_group(set, actorname, actorid, srcName, spellid, amount, overkill, absorbed, isboss)
 
 		-- the rest of the code is only for allowed instance diffs.
 		if not allowed_diffs[get_instance_diff()] then return end
 
 		-- until a better and simple way is found to handle custom units
 		-- this is temporarily disabled, only recorded to the current set.
-		if set ~= Skada.current then return end
+		if set.name == totalset then return end
 
 		-- custom units.
 		local units = get_custom_units(actorid, actorname, amount, overkill)
@@ -440,7 +463,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 			dmg.absorbed = t.absorbed
 
 			_, dmg.srcName = Skada:FixMyPets(t.srcGUID, t.srcName, t.srcFlags)
-			Skada:DispatchSets(log_damage)
+			Skada:DispatchSets(log_damage, t:DestIsBoss())
 		end
 	end
 
@@ -732,6 +755,7 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		)
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
+		Skada.RegisterMessage(self, "ZONE_TYPE_CHANGED", "CheckZone")
 		Skada:AddMode(self, "Enemies")
 	end
 
@@ -741,11 +765,18 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	function mode:CombatLeave()
-		instanceDiff = nil
+		instance_diff = nil
 		wipe(dmg)
 		clear(custom_units)
 		clear(custom_groups)
+		clear(instance_units)
 		clear(ignored_units)
+		clear(ignored_instance_units)
+	end
+
+	function mode:CheckZone(_, insType)
+		instance_type = insType
+		trash_n_boss = (insType == "raid" or insType == "party") and (grouped_units.BOSS or grouped_units.TRASH)
 	end
 
 	---------------------------------------------------------------------------
@@ -868,7 +899,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 
 		-- saving this to total set may become a memory hog deluxe.
-		if set == Skada.total and not P.totalidc then return end
+		if set.name == L["Total"] and not P.totalidc then return end
 
 		-- damage spell.
 		local spell = e.damagespells and e.damagespells[dmg.spellid]
@@ -1270,7 +1301,7 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		end
 
 		-- saving this to total set may become a memory hog deluxe.
-		if set == Skada.total and not P.totalidc then return end
+		if set.name == L["Total"] and not P.totalidc then return end
 
 		local spell = actor.healspells and actor.healspells[heal.spellid]
 		if not spell then

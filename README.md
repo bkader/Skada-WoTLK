@@ -38,6 +38,11 @@ Though it's not required, **PayPal**/**Paysera** donations are most welcome at *
 * Direct and indirect contributors: **Abel**, **Iqui**, **Jeb**, **Shoggoth**, **Havi** & **Ganrod**, **WotLK Community**.
 * The man behind the wheel: **[Nomadra](https://github.com/ridepad)**
 
+## Early Access
+
+If like some you cannot wait for updates to be pushed and releases to be published, visit [this link](https://mega.nz/folder/3gZFXa5T#nO6nqnv6gj1IYpCu4CJWaQ) and download the version (_expansion_) you want to use. Every time a progress is done and a milestone is reached, packages are updated, so you might want to check the date files were updated so you don't download the same package again (_compare date added to the in-game Skada date_).
+_Note that **3.4.x.zip** is for both **Retail** and **Classic Wrath**._
+
 ## OTHER ADDONS (Private Servers)
 
 * **!ElvinCDs**: [https://github.com/bkader/ElvinCDs](https://github.com/bkader/ElvinCDs)
