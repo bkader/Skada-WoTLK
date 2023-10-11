@@ -267,6 +267,8 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P, _, _, _
 		Skada.forPVP = true
 		specsCache = specsCache or {}
 		Skada.RegisterMessage(self, "ZONE_TYPE_CHANGED", "CheckZone")
+		Skada.RegisterMessage(self, "COMBAT_PVP_START", "CheckZone")
+		Skada.RegisterMessage(self, "COMBAT_PVP_END", "CheckZone")
 	end
 
 	function mode:OnDisable()

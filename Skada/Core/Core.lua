@@ -2531,6 +2531,8 @@ function combat_end()
 	if Skada.current.gotboss then
 		Skada:SendMessage("COMBAT_ENCOUNTER_END", Skada.current, curtime)
 		Skada:ClearFirstHit()
+	elseif Skada.current.type == "pvp" then
+		Skada:SendMessage("COMBAT_PVP_END", nil, Skada.insType)
 	end
 
 	-- process segment
@@ -2732,17 +2734,29 @@ do
 
 	-- list of registered combat log event functions.
 	local combatlog_events = {}
+
+	-- register a func to cleu event(s).
 	function Skada:RegisterForCL(func, flags, ...)
-		if func and flags then
-			local index = 1
-			local event = select(index, ...)
+		if type(func) ~= "function" or not flags then return end
 
-			while event do
-				combatlog_events[event] = combatlog_events[event] or {}
-				combatlog_events[event][func] = flags
+		local index = 1
+		local event = select(index, ...)
+		while event do
+			combatlog_events[event] = combatlog_events[event] or {}
+			combatlog_events[event][func] = flags
 
-				index = index + 1
-				event = select(index, ...)
+			index = index + 1
+			event = select(index, ...)
+		end
+	end
+
+	-- unregisters a func from cleu event(s)
+	function Skada:UnregisterFromCL(func)
+		if type(func) ~= "function" then return end
+		for _, funcs in pairs(combatlog_events) do
+			if funcs[func] then
+				funcs[func] = nil
+				break
 			end
 		end
 	end
@@ -2859,14 +2873,14 @@ do
 				if bit_band(t.dstFlags or 0, BITMASK_CONTROL_PLAYER) ~= 0 then
 					set.type = "pvp"
 					set.gotboss = false
-					Skada:SendMessage("ZONE_TYPE_CHANGED", "pvp", Skada.insType)
+					Skada:SendMessage("COMBAT_PVP_START", "pvp", Skada.insType)
 				end
 			elseif dst_is_interesting and not t:SourceIsFriendly() then
 				set.mobname = t.srcName
 				if bit_band(t.srcFlags or 0, BITMASK_CONTROL_PLAYER) ~= 0 then
 					set.type = "pvp"
 					set.gotboss = false
-					Skada:SendMessage("ZONE_TYPE_CHANGED", "pvp", Skada.insType)
+					Skada:SendMessage("COMBAT_PVP_START", "pvp", Skada.insType)
 				end
 			end
 		end
