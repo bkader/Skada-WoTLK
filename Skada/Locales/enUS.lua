@@ -268,9 +268,9 @@ L["Fixed bar width"] = true
 L["opt_fixedbarwidth_desc"] = "If checked, bar width is fixed. Otherwise, bar width depends on the text width."
 L["Class Colors"] = _G.CLASS_COLORS or "Class Colors"
 L["Use class colors for %s."] = true
-L["opt_isusingclasscolors_desc"] = "Class colors:\n\124cFFF58CBAKader\124r - 5.71M (21.7K)\n\nWithout:\nKader - 5.71M (21.7K)"
+L["opt_isusingclasscolors_desc"] = "With: %s - 5.71M (21.7K)\nWithout: %s - 5.71M (21.7K)"
 L["Put values on new line."] = true
-L["opt_isonnewline_desc"] = "New line:\nKader\n5.71M (21.7K)\n\nDivider:\nKader - 5.71M (21.7K)"
+L["opt_isonnewline_desc"] = "New line:\n%1$s\n5.71M (21.7K)\n\nDivider:\n%1$s - 5.71M (21.7K)"
 L["Use ElvUI skin if avaliable."] = true
 L["opt_isusingelvuiskin_desc"] = "Check this to use ElvUI skin instead.\nDefault: checked"
 L["Use solid background."] = true
@@ -465,11 +465,15 @@ L["Open Config"] = true
 L["btn_config_desc"] = "Opens the configuration window."
 L["btn_reset_desc"] = "Resets all fight data except those marked as kept."
 L["Segment"] = true
-L["btn_segment_desc"] = "Jump to a specific segment.\n\124cff00ff00Shift-LMB\124r for \124cffffbb00next\124r segment.\n\124cff00ff00Shift-RMB\124r for \124cffffbb00previous\124r segment.\n\124cff00ff00Middle-Click\124r for \124cffffbb00current\124r segment."
+L["btn_segment_desc"] = [[Jump to a specific segment.
+|cff00ff00Shift-LMB|r for |cffffbb00next|r segment.
+|cff00ff00Shift-RMB|r for |cffffbb00previous|r segment.
+|cff00ff00Middle-Click|r for |cffffbb00current|r segment.]]
 L["Mode"] = true
 L["Jump to a specific mode."] = true
 L["Report"] = true
-L["btn_report_desc"] = "Opens a dialog that lets you report your data to others in various ways.\n\124cff00ff00Shift-Click\124r to Quick Report."
+L["btn_report_desc"] = [[Opens a dialog that lets you report your data to others in various ways.
+|cff00ff00Shift-Click|r to Quick Report.]]
 L["Stop"] = "Stop/Resume"
 L["btn_stop_desc"] = "Stops or resumes the current segment. Useful for discounting data after a wipe. Can also be set to automatically stop in the settings."
 L["Segment Stopped."] = true

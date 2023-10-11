@@ -240,9 +240,9 @@ L["opt_barwidth_desc"] = "統計條的寬度。此項僅在“固定統計條寬
 L["Fixed bar width"] = "固定條列寬度"
 L["opt_fixedbarwidth_desc"] = "勾選後，條列寬度將會固定。否則條列寬度取決於文字寬度。"
 L["Use class colors for %s."] = "對 %s 使用類顏色。"
-L["opt_isusingclasscolors_desc"] = "職業顏色：\n\124cFFF58CBAKader\124r - 5.71M (21.7K)\n\n普通顏色：\nKader - 5.71M (21.7K)"
+L["opt_isusingclasscolors_desc"] = "和：%s - 5.71M (21.7K)\n沒：%s - 5.71M (21.7K)"
 L["Put values on new line."] = "提行顯示數值"
-L["opt_isonnewline_desc"] = "提行：\nKader\n5.71M (21.7K)\n\n單行：\nKader - 5.71M (21.7K)"
+L["opt_isonnewline_desc"] = "提行：\n%1$s\n5.71M (21.7K)\n\n單行：\n%1$s - 5.71M (21.7K)"
 L["Use ElvUI skin if avaliable."] = "可用時使用ElvUI皮膚。"
 L["opt_isusingelvuiskin_desc"] = "勾選此項以使用ElvUI皮膚。\n默認：勾選"
 L["Use solid background."] = "使用純色背景。"
@@ -421,11 +421,15 @@ L["Open Config"] = "打開配置"
 L["btn_config_desc"] = "讓你配置此啟用的Skada視窗。"
 L["btn_reset_desc"] = "除標記為保留外重置全部戰鬥數據。"
 L["Segment"] = "分段"
-L["btn_segment_desc"] = "跳至特定區段。\n\124cff00ff00Shift 點擊\124r: \124cffffbb00下一個\124r片段\n\124cff00ff00Shift 右鍵單擊\124r: \124cffffbb00以前的\124r片段\n\124cff00ff00中鍵\124r: \124cffffbb00目前的\124r片段"
+L["btn_segment_desc"] = [[跳至特定區段。
+|cff00ff00Shift 點擊|r: |cffffbb00下一個|r片段。
+|cff00ff00Shift 右鍵單擊|r: |cffffbb00以前的|r片段。
+|cff00ff00中鍵|r: |cffffbb00目前的|r片段。]]
 L["Mode"] = "模組"
 L["Jump to a specific mode."] = "跳至特定模組。"
 L["Report"] = "報告"
-L["btn_report_desc"] = "打開一個對話框，讓你以各種方式報告數據給他人。\n\124cff00ff00Shift-點擊後為\124r: 快速報告。"
+L["btn_report_desc"] = [[打開一個對話框，讓你以各種方式報告數據給他人。
+|cff00ff00Shift-點擊後為|r: 快速報告。]]
 L["Stop"] = "停止"
 L["btn_stop_desc"] = "停止或恢復當前區段。用於滅團後停止收集數據。也可在設置中設為自動停止。"
 L["Segment Stopped."] = "段已停止。"

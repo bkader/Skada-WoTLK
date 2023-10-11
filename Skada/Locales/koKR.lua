@@ -240,7 +240,7 @@ L["Font Color"] = "글자 색"
 L["Fixed bar width"] = "바 너비 고정"
 L["opt_fixedbarwidth_desc"] = "선택하면 바 너비가 고정됩니다. 선택하지 않으면 바 너비는 문자 길이에 따라 달라집니다."
 L["Use class colors for %s."] = "%s 에 클래스 색상을 사용합니다."
--- L["opt_isusingclasscolors_desc"] = ""
+L["opt_isusingclasscolors_desc"] = "와 함께: %s - 5.71M (21.7K)\n없이: %s - 5.71M (21.7K)"
 L["Put values on new line."] = "새 줄에 값을 넣습니다. "
 -- L["opt_isonnewline_desc"] = ""
 L["Use ElvUI skin if avaliable."] = "가능한 경우 사용 ElvUI 피부."
@@ -423,11 +423,15 @@ L["Open Config"] = "구성 열기"
 L["btn_config_desc"] = "설정 창 열기"
 L["btn_reset_desc"] = "유지하도록 설정한 것을 제외하고 모든 전투 자료를 초기화합니다."
 L["Segment"] = "세분화"
-L["btn_segment_desc"] = "특정 세분화로 변경합니다.\n\124cff00ff00Shift 클릭\124r -> \124cffffbb00다음\124r 전투.\n\124cff00ff00Shift 오른쪽 클릭\124r -> \124cffffbb00이전\124r 전투.\n\124cff00ff00가운데 클릭\124r -> \124cffffbb00현재\124r 전투"
+L["btn_segment_desc"] = [[특정 세분화로 변경합니다.
+|cff00ff00Shift 클릭|r -> |cffffbb00다음|r 전투.
+|cff00ff00Shift 오른쪽 클릭|r -> |cffffbb00이전|r 전투.
+|cff00ff00가운데 클릭|r -> |cffffbb00현재|r 전투.]]
 L["Mode"] = "모드"
 L["Jump to a specific mode."] = "특정 모드로 변경합니다."
 L["Report"] = "보고서"
-L["btn_report_desc"] = "다양한 방법으로 다른 사람에게 당신의 자료를 보고할 수 있는 대화창을 엽니다.\n\124cff00ff00Shift-클릭\124r -> 퀵 리포트."
+L["btn_report_desc"] = [[다양한 방법으로 다른 사람에게 당신의 자료를 보고할 수 있는 대화창을 엽니다.
+|cff00ff00Shift-클릭|r -> 퀵 리포트.]]
 L["Stop"] = "중지"
 L["btn_stop_desc"] = "현재 세분화를 중지하거나 재개합니다. 전멸 후 자료를 제외하는 데 유용합니다. 설정에서 자동으로 중지하도록 설정할 수 있습니다."
 L["Segment Stopped."] = "세그먼트 중지됨."

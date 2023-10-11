@@ -242,9 +242,9 @@ L["opt_barwidth_desc"] = "Largeur des barres. Ceci n'est applicable que si \"Lar
 L["Fixed bar width"] = "Largeur de barre fixe"
 L["opt_fixedbarwidth_desc"] = "Si coch\195\169, la largeur de barre sera fixe. Autrement, la largeur de barre d\195\169pend de la largeur du texte."
 L["Use class colors for %s."] = "Utiliser les couleurs des classes pour %s."
-L["opt_isusingclasscolors_desc"] = "Couleurs de classes:\n\124cFFF58CBAKader\124r - 5.71M (21.7K)\nSans:\nKader - 5.71M (21.7K)"
+L["opt_isusingclasscolors_desc"] = "Avec: %s - 5.71M (21.7K)\nSans: %s - 5.71M (21.7K)"
 L["Put values on new line."] = "Valeurs sur une nouvelle ligne."
-L["opt_isonnewline_desc"] = "Nouvelle ligne:\nKader\n5.71M (21.7K)\n\nS\195\169parateur:\nKader - 5.71M (21.7K)"
+L["opt_isonnewline_desc"] = "Nouvelle ligne:\n%1$s\n5.71M (21.7K)\n\nS\195\169parateur:\n%1$s - 5.71M (21.7K)"
 L["Use ElvUI skin if avaliable."] = "Utiliser le skin ElvUI si disponible."
 L["opt_isusingelvuiskin_desc"] = "Cochez pour utiliser un skin ElvUI.\nPar d\195\169faut: coch\195\169e"
 L["Use solid background."] = "Utiliser un fond opaque."
@@ -427,11 +427,15 @@ L["Open Config"] = "Ouvrir la configuration"
 L["btn_config_desc"] = "Ouvre la fen\195\170tre de configuration."
 L["btn_reset_desc"] = "R\195\169initialise les donn\195\169es de tous les combats sauf ceux que vous avez choisi de garder."
 L["Segment"] = "Segment"
-L["btn_segment_desc"] = "Vous permet de s\195\169lectionner un segment sp\195\169cific.\n\124cff00ff00Shift clic\124r: segment \124cffffbb00suivant\124r.\n\124cff00ff00Shift clic-droit\124r: segment \124cffffbb00pr\195\169c\195\169dent\124r.\n\124cff00ff00Clic du milieu\124r: segment \124cffffbb00actuel\124r."
+L["btn_segment_desc"] = [[Vous permet de sélectionner un segment spécific.
+|cff00ff00Shift clic|r: segment |cffffbb00suivant|r.
+|cff00ff00Shift clic-droit|r: segment |cffffbb00précédent|r.
+|cff00ff00Clic du milieu|r: segment |cffffbb00actuel|r.]]
 L["Mode"] = "Mode"
 L["Jump to a specific mode."] = "Vous permet de s\195\169lectionner un mode sp\195\169cific."
 L["Report"] = "Rapport"
-L["btn_report_desc"] = "Ouvre la fen\195\170tre qui vous permet de rapporter les donn\195\169es aux autres de diff\195\169rentes mani\195\168res.\n\124cff00ff00Shift clic\124r pour un rapport rapide."
+L["btn_report_desc"] = [[Ouvre la fenêtre qui vous permet de rapporter les données aux autres de différentes manières.
+|cff00ff00Shift clic|r pour un rapport rapide.]]
 L["Stop"] = "Arr\195\170ter/Reprendre"
 L["btn_stop_desc"] = "Arr\195\170te ou reprend le segment en cours. Utile pour arr\195\170ter la collecte des donn\195\169es apr\195\168s un wipe. L'arr\195\170t automatique peut \195\170tre activ\195\169 dans les param\195\168tres."
 L["Segment Stopped."] = "Segment arr\195\170t\195\169."

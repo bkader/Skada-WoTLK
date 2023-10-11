@@ -637,13 +637,13 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 				isusingclasscolors = {
 					type = "toggle",
 					name = L["Class Colors"],
-					desc = L["opt_isusingclasscolors_desc"],
+					desc = format(L["opt_isusingclasscolors_desc"], classcolors.format(Skada.userClass, Skada.userName), Skada.userName),
 					order = 80,
 				},
 				isonnewline = {
 					type = "toggle",
 					name = L["Put values on new line."],
-					desc = L["opt_isonnewline_desc"],
+					desc = format(L["opt_isonnewline_desc"], Skada.userName),
 					order = 90
 				},
 				clickthrough = {

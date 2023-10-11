@@ -242,9 +242,9 @@ L["opt_barwidth_desc"] = "Ancho de barras. Esto solo se aplica si se utiliza la 
 L["Fixed bar width"] = "Ancho de barra fijo"
 L["opt_fixedbarwidth_desc"] = "Si est\195\161 activado, el ancho de la barra ser\195\161 fijo. Si no, el ancho depender\195\161 de lo que ocupe el texto."
 L["Use class colors for %s."] = "Usar colores de clase para %s."
-L["opt_isusingclasscolors_desc"] = "Colores de clase:\n\124cFFF58CBAKader\124r - 5.71M (21.7K)\n\nSin:\nKader - 5.71M (21.7K)"
+L["opt_isusingclasscolors_desc"] = "Con: %s - 5.71M (21.7K)\nSin: %s - 5.71M (21.7K)"
 L["Put values on new line."] = "Ponga valores en una nueva l\195\173nea."
-L["opt_isonnewline_desc"] = "Nueva l\195\173nea:\nKader\n5.71M (21.7K)\n\nDivisor:\nKader - 5.71M (21.7K)"
+L["opt_isonnewline_desc"] = "Nueva l\195\173nea:\n%1$s\n5.71M (21.7K)\n\nDivisor:\n%1$s - 5.71M (21.7K)"
 L["Use ElvUI skin if avaliable."] = "Utilice piel ElvUI si est\195\161 disponible."
 L["opt_isusingelvuiskin_desc"] = "Marque esto para usar la piel ElvUI.\nPredeterminado: marcado"
 L["Use solid background."] = "Utilice un fondo s\195\179lido."
@@ -425,11 +425,15 @@ L["Open Config"] = "Abrir configuraci\195\179n"
 L["btn_config_desc"] = "Abre la ventana de configuraci\195\179n."
 L["btn_reset_desc"] = "Restablece todos los datos excepto los marcados como guardados."
 L["Segment"] = "Segmento"
-L["btn_segment_desc"] = "Salte a un segmento espec\195\173fico.\n\124cff00ff00Shift clic\124r: segmento \124cffffbb00siguiente\124r.\n\124cff00ff00Shift Clic derecho\124r: segmento \124cffffbb00anterior\124r.\n\124cff00ff00Clic central\124r: segmento \124cffffbb00actual\124r."
+L["btn_segment_desc"] = [[Salte a un segmento específico.
+|cff00ff00Shift clic|r: segmento |cffffbb00siguiente|r.
+|cff00ff00Shift Clic derecho|r: segmento |cffffbb00anterior|r.
+|cff00ff00Clic central|r: segmento |cffffbb00actual|r.]]
 L["Mode"] = "Modo"
 L["Jump to a specific mode."] = "Salta a un modo espec\195\173fico."
 L["Report"] = "Informar"
-L["btn_report_desc"] = "Abre el di\195\161logo que te permite informar de tus datos a otros de varias maneras.\n\124cff00ff00Shift-click\124r para Informe r\195\161pido."
+L["btn_report_desc"] = [[Abre el diálogo que te permite informar de tus datos a otros de varias maneras.
+|cff00ff00Shift-click|r para Informe rápido.]]
 L["Stop"] = "Parar"
 L["btn_stop_desc"] = "Para o resume el segmento actual. \195\154til para descontar los datos despu\195\169s de una muerte del grupo. Puede ser establecido para que se pare autom\195\161ticamente en las opciones."
 L["Segment Stopped."] = "Segmento detenido."

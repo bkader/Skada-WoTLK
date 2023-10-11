@@ -241,9 +241,9 @@ L["opt_barwidth_desc"] = "统计条的宽度。此项仅在“固定统计条宽
 L["Fixed bar width"] = "固定统计条宽度"
 L["opt_fixedbarwidth_desc"] = "勾选后，统计条的宽度固定。否则，统计条宽度取决于文字长度。"
 L["Use class colors for %s."] = "对 %s 使用职业颜色。"
-L["opt_isusingclasscolors_desc"] = "职业颜色：\n\124cFFF58CBAKader\124r - 5.71M (21.7K)\n\n普通颜色：\nKader - 5.71M (21.7K)"
+L["opt_isusingclasscolors_desc"] = "随着：%s - 5.71M (21.7K)\n不带：%s - 5.71M (21.7K)"
 L["Put values on new line."] = "提行显示数值"
-L["opt_isonnewline_desc"] = "提行：\nKader\n5.71M (21.7K)\n\n单行：\nKader - 5.71M (21.7K)"
+L["opt_isonnewline_desc"] = "提行：\n%1$s\n5.71M (21.7K)\n\n单行：\n%1$s - 5.71M (21.7K)"
 L["Use ElvUI skin if avaliable."] = "可用时使用ElvUI皮肤。"
 L["opt_isusingelvuiskin_desc"] = "勾选此项以使用ElvUI皮肤。\n默认：勾选"
 L["Use solid background."] = "使用纯色背景。"
@@ -421,11 +421,15 @@ L["Open Config"] = "打开配置"
 L["btn_config_desc"] = "打开配置窗口。"
 L["btn_reset_desc"] = "重置除标记为保留之外的全部数据。"
 L["Segment"] = "分段"
-L["btn_segment_desc"] = "跳转至一个指定分段。\n\124cff00ff00Shift 点击\124r: \124cffffbb00下一个\124r片段。\n\124cff00ff00Shift 右键单击\124r: \124cffffbb00以前的\124r片段。\n\124cff00ff00中键\124r: \124cffffbb00当前\124r片段。"
+L["btn_segment_desc"] = [[跳转至一个指定分段。
+|cff00ff00Shift 点击|r: |cffffbb00下一个|r片段。
+|cff00ff00Shift 右键单击|r: |cffffbb00以前的|r片段。
+|cff00ff00中键|r: |cffffbb00当前|r片段。]]
 L["Mode"] = "模式"
 L["Jump to a specific mode."] = "跳转至一个指定模式。"
 L["Report"] = "报告"
-L["btn_report_desc"] = "打开一个可以通过各种方式向他人报告数据的对话框。\n\124cff00ff00Shift-点击后为\124r: 快速报告."
+L["btn_report_desc"] = [[打开一个可以通过各种方式向他人报告数据的对话框。
+|cff00ff00Shift-点击后为|r: 快速报告。]]
 L["Stop"] = "停止"
 L["btn_stop_desc"] = "停止或继续当前分段。在团灭后很有用。可在设置中设为自动停止。"
 L["Segment Stopped."] = "区段已停止。"

@@ -239,9 +239,9 @@ L["opt_barwidth_desc"] = "Breite der Balken. Dies gilt nur, wenn die Option \"Fe
 L["Fixed bar width"] = "Feste Leistenbreite"
 L["opt_fixedbarwidth_desc"] = "Das Aktivieren dieser Option macht die Leistenbreite konstant. Andernfalls ist die Leistenbreite von der Textbreite abh\195\164ngig."
 L["Use class colors for %s."] = "Verwenden Sie Klassenfarben f\195\188r %s."
-L["opt_isusingclasscolors_desc"] = "Klassenfarben:\n\124cFFF58CBAKader\124r - 5.71M (21.7K)\nOhne:\nKader - 5.71M (21.7K)"
+L["opt_isusingclasscolors_desc"] = "Mit: %s - 5.71M (21.7K)\nOhne: %s - 5.71M (21.7K)"
 L["Put values on new line."] = "Setzen Sie Werte in eine neue Zeile."
-L["opt_isonnewline_desc"] = "Neue Zeile:\nKader\n5.71M (21.7K)\n\nTeiler:\nKader - 5.71M (21.7K)"
+L["opt_isonnewline_desc"] = "Neue Zeile:\n%1$s\n5.71M (21.7K)\n\nTeiler:\n%1$s - 5.71M (21.7K)"
 L["Use ElvUI skin if avaliable."] = "Verwenden Sie ElvUI-Skin, falls verf\195\188gbar."
 L["opt_isusingelvuiskin_desc"] = "Aktivieren Sie diese Option, um stattdessen ElvUI-Skin zu verwenden.\nStandard: aktiviert"
 L["Use solid background."] = "Verwenden Sie soliden Hintergrund."
@@ -422,11 +422,15 @@ L["Open Config"] = "Konfiguration \195\182ffnen"
 L["btn_config_desc"] = "\195\150ffnet das Konfigurationsfenster."
 L["btn_reset_desc"] = "Setzt alle Kampfdaten zur\195\188ck mit Ausnahme der markierten, sie werden beibehalten."
 L["Segment"] = "Segment"
-L["btn_segment_desc"] = "Wechseln zu einem bestimmten Segment.\n\124cff00ff00Shift Linksklick\124r f\195\188r \124cffffbb00n\195\164chstes\124r Segment.\n\124cff00ff00Shift Rechtsklick\124r f\195\188r \124cffffbb00vorheriges\124r Segment.\n\124cff00ff00Mittelklick\124r f\195\188r \124cffffbb00aktuelles\124r Segment."
+L["btn_segment_desc"] = [[Wechseln zu einem bestimmten Segment.
+|cff00ff00Shift Linksklick|r für |cffffbb00Nächstes|r Segment.
+|cff00ff00Shift Rechtsklick|r für |cffffbb00Vorheriges|r Segment.
+|cff00ff00Mittelklick|r für |cffffbb00Aktuelles|r Segment.]]
 L["Mode"] = "Modus"
 L["Jump to a specific mode."] = "In einen bestimmten Modus springen."
 L["Report"] = "Bericht"
-L["btn_report_desc"] = "\195\150ffnet ein Dialogfeld, damit Sie Ihre Daten an andere auf verschiedene Weise mitteilen k\195\182nnen.\n\124cff00ff00Shift-Klick\124r f\195\188r Schnellbericht."
+L["btn_report_desc"] = [[Öffnet ein Dialogfeld, damit Sie Ihre Daten an andere auf verschiedene Weise mitteilen können.
+|cff00ff00Shift-Klick|r für Schnellbericht.]]
 L["Stop"] = "Stopp"
 L["btn_stop_desc"] = "Stoppt oder setzt das aktuelle Segment fort. N\195\188tzlich zur Diskontierung von Daten nach einem Wipe. Kann auch so eingestellt werden, dass in den Einstellungen automatisch gestoppt wird."
 L["Segment Stopped."] = "Segment angehalten."
