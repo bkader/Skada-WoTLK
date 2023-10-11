@@ -334,9 +334,9 @@ L["opt_feed_desc"] = "Choisissez le flux de donn\195\169es \195\160 afficher sur
 L["Time Measure"] = "Mesure du temps"
 L["Activity Time"] = "Temps d'activit\195\169"
 L["Effective Time"] = "Temps effectif"
-L["opt_timemesure_desc"] = [=[|cFFFFFF00Activité|r : le chronomètre de chaque membre du raid est mis en pause si son activité est interrompue et reprend le compte quand l'activité reprend, méthode commune de mesure des DPS et HPS.
+L["opt_timemesure_desc"] = [=[|cffffff00Activité|r : le chronomètre de chaque membre du raid est mis en pause si son activité est interrompue et reprend le compte quand l'activité reprend, méthode commune de mesure des DPS et HPS.
 
-|cFFFFFF00Effective|r : utilisée pour les classements, cette méthode utilise le temps de combat écoulé pour mesurer le DPS et le HPS de tous les membres du raid.]=]
+|cffffff00Effective|r : utilisée pour les classements, cette méthode utilise le temps de combat écoulé pour mesurer le DPS et le HPS de tous les membres du raid.]=]
 L["Number set duplicates"] = "Nombre de doublons"
 L["Append a count to set names with duplicate mob names."] = "Ajoute un compteur aux noms d'ensemble ayant des noms de monstres dupliqu\195\169s."
 L["Set Format"] = "Format des ensembles"
@@ -425,7 +425,8 @@ L["Deselect All"] = "Tout d\195\169selectionner"
 L["Configure"] = "Configurer"
 L["Open Config"] = "Ouvrir la configuration"
 L["btn_config_desc"] = "Ouvre la fen\195\170tre de configuration."
-L["btn_reset_desc"] = "R\195\169initialise les donn\195\169es de tous les combats sauf ceux que vous avez choisi de garder."
+L["btn_reset_desc"] = [[Réinitialise les données de tous les combats sauf ceux que vous avez choisi de garder.
+|cff00ff00Shift clic|r: Supprimer le segment.]]
 L["Segment"] = "Segment"
 L["btn_segment_desc"] = [[Vous permet de sélectionner un segment spécific.
 |cff00ff00Shift clic|r: segment |cffffbb00suivant|r.

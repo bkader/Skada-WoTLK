@@ -1254,7 +1254,8 @@ end
 
 -- deletes a set
 function Skada:DeleteSet(set, index)
-	local sets = self.sets
+	local sets = index ~= "current" and index ~= "total" and self.sets
+	if not sets then return end
 
 	if not (set and index) then
 		for i = 1, #sets do

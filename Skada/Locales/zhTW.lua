@@ -4,8 +4,8 @@ if not L then return end
 L["A damage meter."] = "模組化的傷害統計。"
 L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."] = "記憶體使用過高，你或許想要重置Skada，並且啟用一個自動重設的選項。"
 L["Skada is out of date. You can download the newest version from \124cffffbb00%s\124r"] = "Skada 已過期. 你可以在 \124cffffbb00%s\124r 下載到最新的版本."
-L["Skada: Modes"] = "Skada:模組"
-L["Skada: Fights"] = "Skada:戰鬥"
+L["Skada: Modes"] = "Skada：模組"
+L["Skada: Fights"] = "Skada：戰鬥"
 L["Data Collection"] = "數據收集"
 L["ENABLED"] = "啟用"
 L["DISABLED"] = "停用"
@@ -13,7 +13,7 @@ L["Enable All"] = "全部啟用"
 L["Disable All"] = "禁用所有"
 L["Stopping for wipe."] = "因擦拭而停止。"
 L["Usage:"] = "利用："
-L["Commands:"] = "指令:"
+L["Commands:"] = "指令："
 L["Import"] = "导入"
 L["Export"] = "导出"
 L["Import/Export"] = "导入/导出"
@@ -328,9 +328,9 @@ L["opt_feed_desc"] = "選擇需要顯示在DataBroker上的資料來源。需要
 L["Time Measure"] = "時間測量方式"
 L["Activity Time"] = "活躍時間"
 L["Effective Time"] = "介面效果微調"
-L["opt_timemesure_desc"] = [=[|cFFFFFF00活躍時間|r: 每一位團隊成員停止活動時，便會暫停各自的計時，並在恢復後再次開始計時。這是用來測量 DPS 和 HPS 最常用的方法。
+L["opt_timemesure_desc"] = [=[|cffffff00活躍時間|r： 每一位團隊成員停止活動時，便會暫停各自的計時，並在恢復後再次開始計時。這是用來測量 DPS 和 HPS 最常用的方法。
 
-|cFFFFFF00有效時間|r: 用於排名，此方法會使用整場戰鬥時間來測量所有團隊成員的 DPS 和 HPS。]=]
+|cffffff00有效時間|r： 用於排名，此方法會使用整場戰鬥時間來測量所有團隊成員的 DPS 和 HPS。]=]
 L["Number set duplicates"] = "重複數字設置"
 L["Append a count to set names with duplicate mob names."] = "追加一個統計以設置重複的怪物名稱。"
 L["Set Format"] = "設定格式"
@@ -371,7 +371,7 @@ L["Bottom"] = "下"
 L["Right"] = "右"
 L["Left"] = "左"
 -- disabled modules
-L["\124cff00ff00Requires\124r: %s"] = "\124cff00ff00需要\124r: %s"
+L["\124cff00ff00Requires\124r: %s"] = "\124cff00ff00需要\124r：%s"
 L["Modules"] = "组件"
 L["Disabled Modules"] = "停用模組"
 L["Modules Options"] = "模塊選項"
@@ -419,17 +419,18 @@ L["Deselect All"] = "取消全選"
 L["Configure"] = "設定"
 L["Open Config"] = "打開配置"
 L["btn_config_desc"] = "讓你配置此啟用的Skada視窗。"
-L["btn_reset_desc"] = "除標記為保留外重置全部戰鬥數據。"
+L["btn_reset_desc"] = [[除標記為保留外重置全部戰鬥數據。
+|cff00ff00Shift 點擊|r：刪除分段資料。]]
 L["Segment"] = "分段"
 L["btn_segment_desc"] = [[跳至特定區段。
-|cff00ff00Shift 點擊|r: |cffffbb00下一個|r片段。
-|cff00ff00Shift 右鍵單擊|r: |cffffbb00以前的|r片段。
-|cff00ff00中鍵|r: |cffffbb00目前的|r片段。]]
+|cff00ff00Shift 點擊|r：|cffffbb00下一個|r片段。
+|cff00ff00Shift 右鍵單擊|r：|cffffbb00以前的|r片段。
+|cff00ff00中鍵|r：|cffffbb00目前的|r片段。]]
 L["Mode"] = "模組"
 L["Jump to a specific mode."] = "跳至特定模組。"
 L["Report"] = "報告"
 L["btn_report_desc"] = [[打開一個對話框，讓你以各種方式報告數據給他人。
-|cff00ff00Shift-點擊後為|r: 快速報告。]]
+|cff00ff00Shift-點擊後為|r：快速報告。]]
 L["Stop"] = "停止"
 L["btn_stop_desc"] = "停止或恢復當前區段。用於滅團後停止收集數據。也可在設置中設為自動停止。"
 L["Segment Stopped."] = "段已停止。"
@@ -440,7 +441,7 @@ L["Quick Access"] = "快速訪問"
 L["Total"] = "總體的"
 L["Current"] = "目前的"
 -- report module and window
-L["Skada: %s for %s:"] = "Skada:%s來自%s:"
+L["Skada: %s for %s:"] = "Skada：%s來自%s："
 L["Self"] = "自己"
 L["Whisper Target"] = "悄悄話目標"
 L["Copy & Paste"] = "複製 & 貼上"
@@ -502,7 +503,7 @@ L["Show Pull Aggro Bar"] = "顯示獲得仇恨棒條"
 L["opt_threat_showaggrobar_desc"] = "顯示獲得仇恨所需威脅數值的棒條。"
 L["Test Warnings"] = "測試警報"
 L["TPS"] = "每秒威脅值"
-L["Threat: Personal Threat"] = "威脅值:個人的威脅值"
+L["Threat: Personal Threat"] = "威脅值：個人的威脅值"
 -- Absorbs & Healing Module --
 L["Healing"] = "治療"
 L["Healing Done"] = "造成治療"
@@ -555,9 +556,9 @@ L["Damage Done By Spell"] = "法術造成傷害"
 L["%s's sources"] = "%s的來源"
 L["DPS"] = "每秒傷害"
 L["sDPS"] = "每秒傷害 (子模塊)"
-L["Damage: Personal DPS"] = "傷害:個人的DPS"
+L["Damage: Personal DPS"] = "傷害：個人的DPS"
 L["RDPS"] = "團隊DPS"
-L["Damage: Raid DPS"] = "傷害:團隊的DPS"
+L["Damage: Raid DPS"] = "傷害：團隊的DPS"
 L["Absorbed Damage"] = "吸收傷害"
 L["Enable this if you want the damage absorbed to be included in the damage done."] = "如果你想包括吸收傷害到造成的傷害啟用此。"
 L["Damage Done By School"] = "学校造成的伤害"
@@ -654,7 +655,7 @@ L["%s parried %s (%s)"] = "%s招架%s (%s)"
 L["Potions"] = "藥水"
 L["%s's potions"] = "%s的藥水"
 L["Pre-potion"] = "預使用藥水"
-L["pre-potion: %s"] = "預使用藥水:%s"
+L["pre-potion: %s"] = "預使用藥水：%s"
 L["Prints pre-potion after the end of the combat."] = "戰鬥結束後發布預使用藥水訊息。"
 -- healthstone --
 L["Healthstones"] = "治療石"
@@ -681,8 +682,8 @@ L["Overkill"] = "過度損壞"
 L["Improvement"] = "改進"
 L["Tweaks"] = "調整"
 L["First hit"] = "第一擊"
-L["\124cffffff00First Hit\124r: %s from %s"] = "\124cffffff00第一擊\124r : 從%2$s%1$s"
-L["\124cffffbb00First Hit\124r: *?*"] = "\124cffffbb00First Hit\124r: *?*"
+L["\124cffffff00First Hit\124r: %s from %s"] = "\124cffffff00第一擊\124r：從%2$s%1$s"
+L["\124cffffbb00First Hit\124r: *?*"] = "\124cffffbb00First Hit\124r：*?*"
 L["\124cffffbb00Boss First Target\124r: %s"] = "\124cffffbb00BOSS第一個目標\124r：%s"
 L["opt_tweaks_firsthit_desc"] = "發布一條訊息，顯示是誰施放了第一次攻擊。 \n僅對BOSS戰有效。"
 L["Filter DPS meters Spam"] = "過濾DPS統計的垃圾訊息"
@@ -726,9 +727,9 @@ L["opt_toast_desc"] = "在適用時使用視覺通知而不是聊天窗口消息
 L["Test Notifications"] = "測試通知"
 -- comparison module
 L["Comparison"] = "比較"
-L["%s vs %s: %s"] = "%s 與 %s: %s"
-L["%s vs %s: Spells"] = "%s 與 %s: 法術"
-L["%s vs %s: Targets"] = "%s 與 %s: 目標"
+L["%s vs %s: %s"] = "%s 與 %s：%s"
+L["%s vs %s: Spells"] = "%s 與 %s：法術"
+L["%s vs %s: Targets"] = "%s 與 %s：目標"
 -- spellcast module
 L["Casts"] = "施法"
 L["%s's spells"] = "%s的咒語"

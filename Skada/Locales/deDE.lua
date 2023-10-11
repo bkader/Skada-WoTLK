@@ -330,8 +330,8 @@ L["opt_feed_desc"] = "Ausw\195\164hlen welche Datensammlung in der DataBroker-An
 L["Time Measure"] = "Zeitmessung"
 L["Activity Time"] = "Aktivzeit"
 L["Effective Time"] = "Effektivzeit"
-L["opt_timemesure_desc"] = [=[|cFFFFFF00Aktivität|r: Die Teilnehmer-Uhr stoppt, wenn er inaktiv ist, und läuft bei Aktivitäten weiter. Gewöhnliche Art zur Messung von DpS und HpS.
-|cFFFFFF00Effektiv|r: gebräuchlich für Ranglisten. Diese Methode nutzt die Kampfzeit für DpS-/HpS-Messungen aller Schlachtzugteilnehmer.]=]
+L["opt_timemesure_desc"] = [=[|cffffff00Aktivität|r: Die Teilnehmer-Uhr stoppt, wenn er inaktiv ist, und läuft bei Aktivitäten weiter. Gewöhnliche Art zur Messung von DpS und HpS.
+|cffffff00Effektiv|r: gebräuchlich für Ranglisten. Diese Methode nutzt die Kampfzeit für DpS-/HpS-Messungen aller Schlachtzugteilnehmer.]=]
 L["Number set duplicates"] = "Anzahl der Duplikate"
 L["Append a count to set names with duplicate mob names."] = "F\195\188gt eine Anzahl hinzu, um Namen, mit doppelten Gegnernamen, festzulegen."
 L["Set Format"] = "Format setzen"
@@ -420,7 +420,8 @@ L["Deselect All"] = "Alle abw\195\164hlen"
 L["Configure"] = "Konfigurieren"
 L["Open Config"] = "Konfiguration \195\182ffnen"
 L["btn_config_desc"] = "\195\150ffnet das Konfigurationsfenster."
-L["btn_reset_desc"] = "Setzt alle Kampfdaten zur\195\188ck mit Ausnahme der markierten, sie werden beibehalten."
+L["btn_reset_desc"] = [[Setzt alle Kampfdaten zurück mit Ausnahme der markierten, sie werden beibehalten.
+|cff00ff00Shift Linksklick|r: Segment löschen.]]
 L["Segment"] = "Segment"
 L["btn_segment_desc"] = [[Wechseln zu einem bestimmten Segment.
 |cff00ff00Shift Linksklick|r für |cffffbb00Nächstes|r Segment.

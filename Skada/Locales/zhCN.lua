@@ -14,7 +14,7 @@ L["Enable All"] = "全部启用"
 L["Disable All"] = "全部禁用"
 L["Stopping for wipe."] = "因团灭而停止统计。"
 L["Usage:"] = "用法："
-L["Commands:"] = "指令:"
+L["Commands:"] = "指令："
 L["Import"] = "导入"
 L["Export"] = "导出"
 L["Import/Export"] = "导入/导出"
@@ -419,17 +419,18 @@ L["Deselect All"] = "取消全选"
 L["Configure"] = "配置"
 L["Open Config"] = "打开配置"
 L["btn_config_desc"] = "打开配置窗口。"
-L["btn_reset_desc"] = "重置除标记为保留之外的全部数据。"
+L["btn_reset_desc"] = [[重置除标记为保留之外的全部数据。
+|cff00ff00Shift 点击|r：删除分段。]]
 L["Segment"] = "分段"
 L["btn_segment_desc"] = [[跳转至一个指定分段。
-|cff00ff00Shift 点击|r: |cffffbb00下一个|r片段。
-|cff00ff00Shift 右键单击|r: |cffffbb00以前的|r片段。
-|cff00ff00中键|r: |cffffbb00当前|r片段。]]
+|cff00ff00Shift 点击|r：|cffffbb00下一个|r片段。
+|cff00ff00Shift 右键单击|r：|cffffbb00以前的|r片段。
+|cff00ff00中键|r：|cffffbb00当前|r片段。]]
 L["Mode"] = "模式"
 L["Jump to a specific mode."] = "跳转至一个指定模式。"
 L["Report"] = "报告"
 L["btn_report_desc"] = [[打开一个可以通过各种方式向他人报告数据的对话框。
-|cff00ff00Shift-点击后为|r: 快速报告。]]
+|cff00ff00Shift-点击后为|r：快速报告。]]
 L["Stop"] = "停止"
 L["btn_stop_desc"] = "停止或继续当前分段。在团灭后很有用。可在设置中设为自动停止。"
 L["Segment Stopped."] = "区段已停止。"
@@ -654,7 +655,7 @@ L["%s parried %s (%s)"] = "%s招架%s (%s)"
 L["Potions"] = "药水"
 L["%s's potions"] = "%s的药水"
 L["Pre-potion"] = "预使用药水"
-L["pre-potion: %s"] = "预使用药水:%s"
+L["pre-potion: %s"] = "预使用药水：%s"
 L["Prints pre-potion after the end of the combat."] = "战斗结束后发布预使用药水信息。"
 -- healthstone --
 L["Healthstones"] = "治疗石"
@@ -681,8 +682,8 @@ L["Overkill"] = "过度杀伤"
 L["Improvement"] = "提升"
 L["Tweaks"] = "调整"
 L["First hit"] = "第一击"
-L["\124cffffff00First Hit\124r: %s from %s"] = "\124cffffff00第一击\124r : 从%2$s%1$s"
-L["\124cffffbb00First Hit\124r: *?*"] = "\124cffffbb00First Hit\124r: *?*"
+L["\124cffffff00First Hit\124r: %s from %s"] = "\124cffffff00第一击\124r：从%2$s%1$s"
+L["\124cffffbb00First Hit\124r: *?*"] = "\124cffffbb00First Hit\124r：*?*"
 L["\124cffffbb00Boss First Target\124r: %s"] = "\124cffffbb00BOSS第一个目标\124r：%s"
 L["opt_tweaks_firsthit_desc"] = "发布一条信息，显示是谁施放了第一次攻击。\n仅对首领战有效。"
 L["Filter DPS meters Spam"] = "过滤DPS统计的垃圾信息"
@@ -726,9 +727,9 @@ L["opt_toast_desc"] = "在适用时使用视觉通知而不是聊天窗口消息
 L["Test Notifications"] = "测试通知"
 -- comparison module
 L["Comparison"] = "比较"
-L["%s vs %s: %s"] = "%s 与 %s: %s"
-L["%s vs %s: Spells"] = "%s 与 %s: 法术"
-L["%s vs %s: Targets"] = "%s 与 %s: 目标"
+L["%s vs %s: %s"] = "%s 与 %s：%s"
+L["%s vs %s: Spells"] = "%s 与 %s：法术"
+L["%s vs %s: Targets"] = "%s 与 %s：目标"
 -- spellcast module
 L["Casts"] = "施放"
 L["%s's spells"] = "%s的咒语"

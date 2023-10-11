@@ -360,8 +360,8 @@ L["opt_feed_desc"] = "Choose which data feed to show in the DataBroker view. Thi
 L["Time Measure"] = true
 L["Activity Time"] = true
 L["Effective Time"] = true
-L["opt_timemesure_desc"] = [=[|cFFFFFF00Activity|r: the timer of each raid member is put on hold if their activity is ceased and back again to count when resumed, common way of measuring DPS and HPS.
-|cFFFFFF00Effective|r: used on rankings, this method uses the elapsed combat time to measure the DPS and HPS of all raid members.]=]
+L["opt_timemesure_desc"] = [=[|cffffff00Activity|r: the timer of each raid member is put on hold if their activity is ceased and back again to count when resumed, common way of measuring DPS and HPS.
+|cffffff00Effective|r: used on rankings, this method uses the elapsed combat time to measure the DPS and HPS of all raid members.]=]
 L["Number set duplicates"] = true
 L["Append a count to set names with duplicate mob names."] = true
 L["Set Format"] = true
@@ -463,7 +463,8 @@ L["Previous"] = _G.PREVIOUS
 L["Configure"] = true
 L["Open Config"] = true
 L["btn_config_desc"] = "Opens the configuration window."
-L["btn_reset_desc"] = "Resets all fight data except those marked as kept."
+L["btn_reset_desc"] = [[Resets all fight data except those marked as kept.
+|cff00ff00Shift-LMB|r: Delete segment.]]
 L["Segment"] = true
 L["btn_segment_desc"] = [[Jump to a specific segment.
 |cff00ff00Shift-LMB|r for |cffffbb00next|r segment.

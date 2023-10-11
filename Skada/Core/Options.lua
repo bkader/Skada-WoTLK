@@ -1088,8 +1088,22 @@ do
 		end
 	end
 
-	local modesList = nil
+	local modesList, modeValues
 	function Private.FrameOptions(db, include_dimensions)
+		if not modeValues then
+			modeValues = function()
+				if not modesList then
+					modesList = {[""] = L["None"]}
+					for i = 1, #modes do
+						if modes[i] then
+							modesList[modes[i].moduleName] = modes[i].localeName
+						end
+					end
+				end
+				return modesList
+			end
+		end
+
 		local obj = {
 			type = "group",
 			name = L["Window"],
@@ -1327,34 +1341,14 @@ do
 									name = L["Combat Mode"],
 									desc = L["opt_combatmode_desc"],
 									order = 10,
-									values = function()
-										if not modesList then
-											modesList = {[""] = L["None"]}
-											for i = 1, #modes do
-												if modes[i] then
-													modesList[modes[i].moduleName] = modes[i].localeName
-												end
-											end
-										end
-										return modesList
-									end
+									values = modeValues
 								},
 								wipemode = {
 									type = "select",
 									name = L["Wipe Mode"],
 									desc = L["opt_wipemode_desc"],
 									order = 20,
-									values = function()
-										if not modesList then
-											modesList = {[""] = L["None"]}
-											for i = 1, #modes do
-												if modes[i] then
-													modesList[modes[i].moduleName] = modes[i].localeName
-												end
-											end
-										end
-										return modesList
-									end
+									values = modeValues
 								},
 								returnaftercombat = {
 									type = "toggle",

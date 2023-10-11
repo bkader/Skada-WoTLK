@@ -329,9 +329,9 @@ L["Data Feed"] = "자료 제공"
 L["Time Measure"] = "시간 측정"
 L["Activity Time"] = "활동 시간"
 L["Effective Time"] = "실질 시간"
-L["opt_timemesure_desc"] = [=[|cFFFFFF00활동 시간|r: 각 공격대원의 타이머가 해당 공대원의 활동이 중단되면 초읽기를 중지했다가 활동 재개시 다시 초읽기에 들어갑니다. Dps와 Hps 산출의 일반적인 방법입니다.
+L["opt_timemesure_desc"] = [=[|cffffff00활동 시간|r: 각 공격대원의 타이머가 해당 공대원의 활동이 중단되면 초읽기를 중지했다가 활동 재개시 다시 초읽기에 들어갑니다. Dps와 Hps 산출의 일반적인 방법입니다.
 
-|cFFFFFF00실질 시간|r: 순위를 매길때 쓰입니다, 이 방법은 모든 공격대원의 Dps와 Hps를 산출하기 위해 측정된 전투 시간을 사용합니다.]=]
+|cffffff00실질 시간|r: 순위를 매길때 쓰입니다, 이 방법은 모든 공격대원의 Dps와 Hps를 산출하기 위해 측정된 전투 시간을 사용합니다.]=]
 L["opt_feed_desc"] = "DataBroker 보기에 어떤 자료를 표시할 지 선택하세요. Titan Panel같은 LDB 표시 애드온이 필요합니다."
 L["Number set duplicates"] = "중복 횟수"
 L["Append a count to set names with duplicate mob names."] = "몹 이름을 복제하여 세트 이름에 수를 추가합니다."
@@ -421,7 +421,8 @@ L["Deselect All"] = "모두 선택 해제"
 L["Configure"] = "설정"
 L["Open Config"] = "구성 열기"
 L["btn_config_desc"] = "설정 창 열기"
-L["btn_reset_desc"] = "유지하도록 설정한 것을 제외하고 모든 전투 자료를 초기화합니다."
+L["btn_reset_desc"] = [[유지하도록 설정한 것을 제외하고 모든 전투 자료를 초기화합니다.
+|cff00ff00Shift 클릭|r -> 세분화 삭제.]]
 L["Segment"] = "세분화"
 L["btn_segment_desc"] = [[특정 세분화로 변경합니다.
 |cff00ff00Shift 클릭|r -> |cffffbb00다음|r 전투.

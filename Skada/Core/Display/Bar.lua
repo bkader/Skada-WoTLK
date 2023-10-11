@@ -87,13 +87,15 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 		local function configOnClick(self, button)
 			if button == "RightButton" then
 				OpenOptions(self.list.win)
-			else
+			elseif button == "LeftButton" then
 				Skada:OpenMenu(self.list.win)
 			end
 		end
 
 		local function resetOnClick(self, button)
-			if button == "LeftButton" then
+			if button == "LeftButton" and IsShiftKeyDown() then
+				Skada:DeleteSet(nil, self.list.win.selectedset)
+			elseif button == "LeftButton" then
 				Skada:ShowPopup(self.list.win)
 			end
 		end
@@ -121,12 +123,16 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 			end
 		end
 
-		local function splitOnClick()
-			return Skada:NewSegment()
+		local function splitOnClick(self, button)
+			if button == "LeftButton" then
+				return Skada:NewSegment()
+			end
 		end
 
-		local function phaseOnClick()
-			return Skada:NewPhase()
+		local function phaseOnClick(self, button)
+			if button == "LeftButton" then
+				return Skada:NewPhase()
+			end
 		end
 
 		local function stopOnClick(self, button)

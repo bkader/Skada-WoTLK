@@ -333,8 +333,8 @@ L["opt_feed_desc"] = "Escoger que datos recogidos son mostrados en la vista del 
 L["Time Measure"] = "Medida de tiempo"
 L["Activity Time"] = "Tiempo activo"
 L["Effective Time"] = "Tiempo efectivo"
-L["opt_timemesure_desc"] = [=[|cFFFFFF00Actividad|r: el temporizador de cada miembro de la banda se pone en espera si se detiene su actividad y vuelve a contar cuando se reanuda, forma común de medir DPS y SPS.
-|cFFFFFF00Efectivo|r: utilizado en las clasificaciones, este método utiliza el tiempo de combate transcurrido para medir el DPS y el SPS de todos los miembros de la banda.]=]
+L["opt_timemesure_desc"] = [=[|cffffff00Actividad|r: el temporizador de cada miembro de la banda se pone en espera si se detiene su actividad y vuelve a contar cuando se reanuda, forma común de medir DPS y SPS.
+|cffffff00Efectivo|r: utilizado en las clasificaciones, este método utiliza el tiempo de combate transcurrido para medir el DPS y el SPS de todos los miembros de la banda.]=]
 L["Number set duplicates"] = "N\195\186mero de duplicados"
 L["Append a count to set names with duplicate mob names."] = "Agregue un recuento para establecer nombres con nombres de segmento duplicados."
 L["Set Format"] = "Formato del conjunto"
@@ -423,7 +423,8 @@ L["Deselect All"] = "Deselecciona todo"
 L["Configure"] = "Configurar"
 L["Open Config"] = "Abrir configuraci\195\179n"
 L["btn_config_desc"] = "Abre la ventana de configuraci\195\179n."
-L["btn_reset_desc"] = "Restablece todos los datos excepto los marcados como guardados."
+L["btn_reset_desc"] = [[Restablece todos los datos excepto los marcados como guardados.
+|cff00ff00Shift clic|r: Borrar segmento.]]
 L["Segment"] = "Segmento"
 L["btn_segment_desc"] = [[Salte a un segmento específico.
 |cff00ff00Shift clic|r: segmento |cffffbb00siguiente|r.
