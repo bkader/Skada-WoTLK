@@ -931,11 +931,24 @@ Skada:RegisterModule("Absorbs", function(L, P, G)
 		end
 	end
 
+	function mode_spell:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		if not actor or not actor.absorb then return end
+
+		local aps, amount = actor:GetAPS(set, false, not mode_cols.sAPS)
+		local valuetext = Skada:FormatValueCols(
+			mode_cols.Absorbs and Skada:FormatNumber(amount),
+			mode_cols.sAPS and Skada:FormatNumber(aps)
+		)
+		return amount, valuetext
+	end
+	mode_target.GetSetSummary = mode_spell.GetSetSummary
+
 	function mode:GetSetSummary(set, win)
 		local aps, amount = set:GetAPS(win and win.class)
 		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns.Absorbs and Skada:FormatNumber(amount),
-			self.metadata.columns.APS and Skada:FormatNumber(aps)
+			mode_cols.Absorbs and Skada:FormatNumber(amount),
+			mode_cols.APS and Skada:FormatNumber(aps)
 		)
 		return amount, valuetext
 	end
@@ -1373,12 +1386,27 @@ Skada:RegisterModule("Absorbs and Healing", function(L, P)
 		end
 	end
 
+	function mode_spell:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		if not actor then return end
+
+		local hps, amount = actor:GetAHPS(set, false, not mode_cols.sHPS)
+		if amount <= 0 then return end
+
+		local valuetext = Skada:FormatValueCols(
+			mode_cols.Healing and Skada:FormatNumber(amount),
+			mode_cols.sHPS and Skada:FormatNumber(hps)
+		)
+		return amount, valuetext
+	end
+	mode_target.GetSetSummary = mode_spell.GetSetSummary
+
 	function mode:GetSetSummary(set, win)
 		if not set then return end
 		local hps, amount = set:GetAHPS(win and win.class)
 		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns.Healing and Skada:FormatNumber(amount),
-			self.metadata.columns.HPS and Skada:FormatNumber(hps)
+			mode_cols.Healing and Skada:FormatNumber(amount),
+			mode_cols.HPS and Skada:FormatNumber(hps)
 		)
 		return amount, valuetext
 	end

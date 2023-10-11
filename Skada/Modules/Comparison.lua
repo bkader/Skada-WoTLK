@@ -728,7 +728,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 
 		for actorname, actor in pairs(set.actors) do
 			if can_compare(actor) then
-				local dps, amount = actor:GetDPS(set)
+				local dps, amount = actor:GetDPS(set, false, false, not mode_cols.DPS)
 				if amount > 0 then
 					nr = nr + 1
 					local d = win:actor(nr, actor, actor.enemy, actorname)

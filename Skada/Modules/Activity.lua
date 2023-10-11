@@ -92,6 +92,12 @@ Skada:RegisterModule("Activity", function(L, P, _, C)
 		end
 	end
 
+	function mode_target:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		if not actor or not actor.time then return end
+		return actor.time, Skada:FormatTime(actor.time)
+	end
+
 	function mode:GetSetSummary(set)
 		if not set or not set.time then return end
 		local valuetext = Skada:FormatValueCols(

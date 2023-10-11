@@ -202,8 +202,13 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M, O)
 		end
 	end
 
+	function mode_target:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		return actor and actor.sunder
+	end
+
 	function mode:GetSetSummary(set)
-		return set and set.sunder or 0
+		return set and set.sunder
 	end
 
 	function mode:AddToTooltip(set, tooltip)

@@ -603,7 +603,7 @@ Skada:RegisterModule("Damage", function(L, P)
 
 		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.damage then
-				local dps, amount = actor:GetDPS(set, nil, nil, not mode_cols.DPS)
+				local dps, amount = actor:GetDPS(set, false, false, not mode_cols.DPS)
 				if amount > 0 then
 					nr = nr + 1
 
@@ -615,6 +615,19 @@ Skada:RegisterModule("Damage", function(L, P)
 			end
 		end
 	end
+
+	function mode_spell:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		if not actor then return end
+
+		local dps, amount = actor:GetDPS(set, false, false, not mode_cols.sDPS)
+		local valuetext = Skada:FormatValueCols(
+			mode_cols.Damage and Skada:FormatNumber(amount),
+			mode_cols.sDPS and Skada:FormatNumber(dps)
+		)
+		return amount, valuetext
+	end
+	mode_target.GetSetSummary = mode_spell.GetSetSummary
 
 	function mode:GetSetSummary(set, win)
 		local dps, amount = set:GetDPS(nil, win and win.class)
@@ -765,7 +778,7 @@ Skada:RegisterModule("DPS", function(L, P)
 
 		local totaltime = set:GetTime()
 		local activetime = actor:GetTime(set, true)
-		local dps, damage = actor:GetDPS(set, nil, nil, false)
+		local dps, damage = actor:GetDPS(set)
 		tooltip:AddLine(uformat("%s - %s", classfmt(actor.class, label), L["DPS"]))
 		tooltip:AddDoubleLine(L["Segment Time"], Skada:FormatTime(totaltime), 1, 1, 1)
 		tooltip:AddDoubleLine(L["Active Time"], Skada:FormatTime(activetime), 1, 1, 1)
@@ -1119,7 +1132,7 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 
 		for actorname, actor in pairs(actors) do
 			if win:show_actor(actor, set, true) and actor.damage then
-				local dps, amount = actor:GetDPS(set, true, nil, not mode_cols.DPS)
+				local dps, amount = actor:GetDPS(set, true, false, not mode_cols.DPS)
 				if amount > 0 then
 					nr = nr + 1
 
@@ -1131,6 +1144,19 @@ Skada:RegisterModule("Useful Damage", function(L, P)
 			end
 		end
 	end
+
+	function mode_spell:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		if not actor then return end
+
+		local dps, amount = actor:GetDPS(set, true, false, not mode_cols.sDPS)
+		local valuetext = Skada:FormatValueCols(
+			mode_cols.Damage and Skada:FormatNumber(amount),
+			mode_cols.sDPS and Skada:FormatNumber(dps)
+		)
+		return amount, valuetext
+	end
+	mode_target.GetSetSummary = mode_spell.GetSetSummary
 
 	function mode:GetSetSummary(set, win)
 		if not set then return end
@@ -1334,6 +1360,14 @@ Skada:RegisterModule("Overkill", function(L, _, _, C)
 			end
 		end
 	end
+
+	function mode_spell:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		local overkill = actor and actor.overkill
+		if not overkill then return end
+		return overkill, Skada:FormatNumber(overkill)
+	end
+	mode_target.GetSetSummary = mode_spell.GetSetSummary
 
 	function mode:GetSetSummary(set, win)
 		local overkill = set:GetOverkill(win and win.class)
@@ -1661,6 +1695,19 @@ Skada:RegisterModule("Absorbed Damage", function(L, _, _, C)
 	function mode:OnDisable()
 		Skada:RemoveMode(self)
 	end
+
+	function mode_spell:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		if not actor or not actor.totaldamage then return end
+
+		local amount = max(0, actor.totaldamage - actor.damage)
+		local valuetext = Skada:FormatValueCols(
+			mode_cols.Damage and Skada:FormatNumber(amount),
+			mode_cols.sDPS and Skada:FormatNumber(amount / set:GetTime())
+		)
+		return amount, valuetext
+	end
+	mode_target.GetSetSummary = mode_spell.GetSetSummary
 
 	function mode:GetSetSummary(set, win)
 		local amount = set and get_set_absorbed_damage(set, win and win.class) or 0

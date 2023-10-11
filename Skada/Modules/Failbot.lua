@@ -130,9 +130,14 @@ Skada:RegisterModule("Fails", function(L, P, _, _, M, O)
 		end
 	end
 
+	function mode_spell:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		return actor and actor.fail
+	end
+
 	function mode:GetSetSummary(set, win)
 		if not set then return end
-		return set:GetTotal(win and win.class, nil, "fail") or 0
+		return set:GetTotal(win and win.class, nil, "fail")
 	end
 
 	function mode:AddToTooltip(set, tooltip)

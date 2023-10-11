@@ -351,6 +351,19 @@ Skada:RegisterModule("Healing", function(L, P)
 		end
 	end
 
+	function mode_spell:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		if not actor then return end
+
+		local hps, amount = actor:GetHPS(set, false, not mode_cols.sHPS)
+		local valuetext = Skada:FormatValueCols(
+			mode_cols.Healing and Skada:FormatNumber(amount),
+			mode_cols.sHPS and Skada:FormatNumber(hps)
+		)
+		return amount, valuetext
+	end
+	mode_target.GetSetSummary = mode_spell.GetSetSummary
+
 	function mode:GetSetSummary(set, win)
 		local hps, amount = set:GetHPS(win and win.class)
 		local valuetext = Skada:FormatValueCols(
@@ -570,6 +583,19 @@ Skada:RegisterModule("Overhealing", function(L)
 			end
 		end
 	end
+
+	function mode_spell:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		if not actor then return end
+
+		local ohps, overheal = actor:GetOHPS(set, false, not mode_cols.sHPS)
+		local valuetext = Skada:FormatValueCols(
+			mode_cols.Overhealing and Skada:FormatNumber(overheal),
+			mode_cols.sHPS and Skada:FormatNumber(ohps)
+		)
+		return overheal, valuetext
+	end
+	mode_target.GetSetSummary = mode_spell.GetSetSummary
 
 	function mode:GetSetSummary(set, win)
 		local ohps, overheal = set:GetOHPS(win and win.class)
@@ -800,6 +826,19 @@ Skada:RegisterModule("Total Healing", function(L)
 			end
 		end
 	end
+
+	function mode_spell:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		if not actor then return end
+
+		local ops, amount = actor:GetTHPS(set, false, not mode_cols.sHPS)
+		local valuetext = Skada:FormatValueCols(
+			mode_cols.Healing and Skada:FormatNumber(amount),
+			mode_cols.sHPS and Skada:FormatNumber(ops)
+		)
+		return amount, valuetext
+	end
+	mode_target.GetSetSummary = mode_spell.GetSetSummary
 
 	function mode:GetSetSummary(set, win)
 		local ops, amount = set:GetTHPS(win and win.class)

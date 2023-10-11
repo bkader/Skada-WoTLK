@@ -698,10 +698,23 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 		end
 	end
 
+	function mode_source:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.targetname, win.targetid)
+		if not actor then return end
+
+		local dtps, amount = actor:GetDTPS(set, not mode_cols.sDTPS)
+		local valuetext = Skada:FormatValueCols(
+			mode_cols.Damage and Skada:FormatNumber(amount),
+			mode_cols.sDTPS and Skada:FormatNumber(dtps)
+		)
+		return amount, valuetext
+	end
+	mode_spell.GetSetSummary = mode_source.GetSetSummary
+
 	function mode:GetSetSummary(set, win)
 		local dtps, amount = set:GetDTPS(win and win.class, true)
 		local valuetext = Skada:FormatValueCols(
-			mode_cols.Damage and Skada:FormatNumber(amount or 0),
+			mode_cols.Damage and Skada:FormatNumber(amount),
 			mode_cols.DTPS and Skada:FormatNumber(dtps)
 		)
 		return amount, valuetext
@@ -1111,7 +1124,7 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 
 		for actorname, actor in pairs(actors) do
 			if actor.enemy and not actor.fake then
-				local dps, amount = actor:GetDPS(set)
+				local dps, amount = actor:GetDPS(set, false, false, not mode_cols.DPS)
 				if amount and amount > 0 then
 					nr = nr + 1
 
@@ -1123,10 +1136,23 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		end
 	end
 
+	function mode_target:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.targetname, win.targetid)
+		if not actor then return end
+
+		local dps, amount = actor:GetDPS(set, false, false, not mode_cols.sDPS)
+		local valuetext = Skada:FormatValueCols(
+			mode_cols.Damage and Skada:FormatNumber(amount),
+			mode_cols.sDPS and Skada:FormatNumber(dps)
+		)
+		return amount, valuetext
+	end
+	mode_spell.GetSetSummary = mode_target.GetSetSummary
+
 	function mode:GetSetSummary(set, win)
 		local dps, amount = set:GetEnemyDPS(win and win.class)
 		local valuetext = Skada:FormatValueCols(
-			mode_cols.Damage and Skada:FormatNumber(amount or 0),
+			mode_cols.Damage and Skada:FormatNumber(amount),
 			mode_cols.DPS and Skada:FormatNumber(dps)
 		)
 		return amount, valuetext
@@ -1188,10 +1214,10 @@ Skada:RegisterModule("Enemy Damage Done", function(L, P, _, C)
 		return P.absdamage and self:GetTotal(class, nil, "etotaldamage") or self:GetTotal(class, nil, "edamage")
 	end
 
-	function setPrototype:GetEnemyDPS(class)
+	function setPrototype:GetEnemyDPS(class, no_calc)
 		local total = self:GetEnemyDamage(class)
-		if not total or total == 0 then
-			return 0, total
+		if not total or total == 0 or no_calc then
+			return 0, total or 0
 		end
 		return total / self:GetTime(), total
 	end
@@ -1433,10 +1459,23 @@ Skada:RegisterModule("Enemy Healing Done", function(L, P)
 		end
 	end
 
+	function mode_target:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.targetname, win.targetid)
+		if not actor then return end
+
+		local hps, amount = actor:GetHPS(set, false, not mode_cols.sHPS)
+		local valuetext = Skada:FormatValueCols(
+			mode_cols.Healing and Skada:FormatNumber(amount),
+			mode_cols.sHPS and Skada:FormatNumber(hps)
+		)
+		return amount, valuetext
+	end
+	mode_spell.GetSetSummary = mode_target.GetSetSummary
+
 	function mode:GetSetSummary(set, win)
 		local hps, amount = set:GetHPS(win and win.class, true)
 		local valuetext = Skada:FormatValueCols(
-			mode_cols.Healing and Skada:FormatNumber(amount or 0),
+			mode_cols.Healing and Skada:FormatNumber(amount),
 			mode_cols.HPS and Skada:FormatNumber(hps)
 		)
 		return amount, valuetext

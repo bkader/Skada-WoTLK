@@ -203,6 +203,12 @@ Skada:RegisterModule("Killing Blows", function(L, P, _, C, M, O)
 		return value, Skada:FormatNumber(value)
 	end
 
+	function mode_target:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		if not actor or not actor.kill then return end
+		return actor.kill, Skada:FormatNumber(actor.kill)
+	end
+
 	function mode:GetSetSummary(set, win)
 		if not set then return end
 		local value = set:GetTotal(win and win.class, nil, "kill") or 0

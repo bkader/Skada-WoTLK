@@ -188,12 +188,25 @@ Skada:RegisterModule("Friendly Fire", function(L, P, _, C)
 		end
 	end
 
+	function mode_target:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		local value = actor and actor.friendfire
+		if not value or value == 0 then return end
+
+		local valuetext = Skada:FormatValueCols(
+			mode_cols.Damage and Skada:FormatNumber(value),
+			mode_cols.sDPS and Skada:FormatNumber(value / actor:GetTime())
+		)
+		return value, valuetext
+	end
+	mode_spell.GetSetSummary = mode_target.GetSetSummary
+
 	function mode:GetSetSummary(set, win)
 		if not set then return end
 		local value = set:GetTotal(win and win.class, nil, "friendfire") or 0
 		local valuetext = Skada:FormatValueCols(
-			self.metadata.columns.Damage and Skada:FormatNumber(value),
-			self.metadata.columns.DPS and Skada:FormatNumber(value / set:GetTime())
+			mode_cols.Damage and Skada:FormatNumber(value),
+			mode_cols.DPS and Skada:FormatNumber(value / set:GetTime())
 		)
 		return value, valuetext
 	end

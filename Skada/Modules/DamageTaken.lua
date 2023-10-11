@@ -554,10 +554,23 @@ Skada:RegisterModule("Damage Taken", function(L, P)
 		end
 	end
 
+	function mode_spell:GetSetSummary(set, win)
+		local actor = set and win and set:GetActor(win.actorname, win.actorid)
+		if not actor then return end
+
+		local dtps, amount = actor:GetDTPS(set, not mode_cols.sDTPS)
+		local valuetext = Skada:FormatValueCols(
+			mode_cols.Damage and Skada:FormatNumber(amount),
+			mode_cols.sDTPS and Skada:FormatNumber(dtps)
+		)
+		return amount, valuetext
+	end
+	mode_source.GetSetSummary = mode_spell.GetSetSummary
+
 	function mode:GetSetSummary(set, win)
 		local dtps, amount = set:GetDTPS(win and win.class)
 		local valuetext = Skada:FormatValueCols(
-			mode_cols.Damage and Skada:FormatNumber(amount or 0),
+			mode_cols.Damage and Skada:FormatNumber(amount),
 			mode_cols.DTPS and Skada:FormatNumber(dtps)
 		)
 		return amount, valuetext
