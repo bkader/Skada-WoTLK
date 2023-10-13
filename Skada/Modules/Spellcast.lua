@@ -133,7 +133,7 @@ Skada:RegisterModule("Casts", function(L, P)
 	---------------------------------------------------------------------------
 
 	local actorPrototype = Skada.actorPrototype
-	local SpellInfo = Private.SpellInfo
+	local spellnames = Skada.spellnames
 	local cast_string = "%s (\124cffffd100?\124r)"
 
 	function actorPrototype:GetSpellCast(spellid)
@@ -142,9 +142,9 @@ Skada:RegisterModule("Casts", function(L, P)
 				return self.castspells[spellid]
 			end
 
-			local spellname = SpellInfo((spellid))
+			local spellname = spellnames[spellid]
 			for spellstring, cast in pairs(self.castspells) do
-				local name = SpellInfo(spellstring)
+				local name = spellnames[spellstring]
 				if spellname == name then
 					return format(cast_string, cast)
 				end
