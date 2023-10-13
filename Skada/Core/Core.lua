@@ -216,7 +216,7 @@ local function process_set(set, curtime, mobname)
 
 	if not P.onlykeepbosses or set.gotboss then
 		set.mobname = mobname or set.mobname -- override name
-		if set.mobname ~= nil and curtime - set.starttime >= (P.minsetlength or 5) then
+		if set.mobname ~= nil and (P.inCombat or curtime - set.starttime >= (P.minsetlength or 5)) then
 			set.endtime = set.endtime and set.endtime > set.starttime and set.endtime or curtime
 			set.time = max(1, set.endtime - set.starttime)
 			set.name = check_set_name(set)
@@ -1732,6 +1732,12 @@ function Skada:PLAYER_ENTERING_WORLD()
 	self:ApplySettings()
 end
 
+function Skada:PLAYER_LEAVING_WORLD()
+	if not self.inCombat then return end
+	P.inCombat = true
+	combat_end()
+end
+
 do
 	local UnitIterator = Skada.UnitIterator
 	local AddCombatant = Private.AddCombatant
@@ -2258,11 +2264,34 @@ function Skada:ApplySettings(name, hidemenu)
 	Private.SetNumberFormat(P.numbersystem)
 	Private.SetValueFormat(P.brackets, P.separator)
 
-	-- unset the global combat flag.
-	if G.inCombat and not InCombatLockdown() and not IsGroupInCombat() then
-		G.inCombat = false
+	-- the player wasn't in combat?
+	if not P.inCombat then
+		Skada:UpdateDisplay(true)
+		return
 	end
 
+	-- reset the flag...
+	P.inCombat = false
+
+	-- no longer in combat?
+	if not InCombatLockdown() and not IsGroupInCombat() then
+		Skada:UpdateDisplay(true)
+		return
+	end
+
+	local set = Skada.sets[1] -- last fight
+	-- unexistent/old fight? nothing to do... (imho 15 sec is fair)
+	if not set or not set.endtime or Skada._time - set.endtime >= 15 then
+		Skada:UpdateDisplay(true)
+		return
+	end
+
+	-- reuse set and start combat.
+	set = tremove(Skada.sets, 1)
+	set.time, set.endtime = 0, nil
+	Skada.current = setPrototype:Bind(set)
+	Skada.total = setPrototype:Bind(Skada.sets[0])
+	combat_start()
 	Skada:UpdateDisplay(true)
 end
 
@@ -2354,7 +2383,7 @@ function Skada:OnInitialize()
 	P.setslimit = min(25, max(0, P.setslimit or 0))
 	P.timemesure = min(2, max(1, P.timemesure or 0))
 	P.totalflag = P.totalflag or 0x10
-	G.version, G.revision = nil, nil
+	G.version, G.revision, G.inCombat = nil, nil, nil
 
 	-- sets limit
 	self.maxsets = P.setstokeep + P.setslimit
@@ -2377,6 +2406,7 @@ end
 
 function Skada:OnEnable()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
+	self:RegisterEvent("PLAYER_LEAVING_WORLD")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "CheckZone")
 	self:RegisterBucketEvent("UNIT_PET", 0.2)
@@ -2568,14 +2598,13 @@ function combat_end()
 		end
 	end
 
-	if Skada.current.time and Skada.current.time >= P.minsetlength then
+	if Skada.current.time and (P.inCombat or Skada.current.time >= P.minsetlength) then
 		Skada.total.time = (Skada.total.time or 0) + Skada.current.time
 	end
 
 	Skada.last = Skada.current
 	Skada.current = nil
 	Skada.inCombat = false
-	G.inCombat = false
 	_targets = del(_targets)
 
 	clean_sets()
@@ -2805,7 +2834,6 @@ do
 		end
 
 		Skada.inCombat = true
-		G.inCombat = true
 		Skada:Wipe()
 
 		for i = 1, #windows do
