@@ -509,13 +509,13 @@ do
 				index = (points and points > 0) and 3 or 2
 			end
 
-			GetUnitSpec[guid] = specsTable[class][index]
+			rawset(GetUnitSpec, guid, specsTable[class][index])
 		end
 	end)
 
 	LGT:RegisterCallback("LibGroupTalents_RoleChange", function(_, guid, _, role, oldrole)
 		if not guid or role == oldrole then return end
-		GetUnitRole[guid] = LGTRoleTable[role] or role
+		rawset(GetUnitRole, guid, LGTRoleTable[role] or role)
 	end)
 
 	lib.GetUnitSpec = GetUnitSpec

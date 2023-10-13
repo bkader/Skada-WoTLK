@@ -1532,33 +1532,33 @@ do
 			if guidToName[guid] then
 				__t1[guid] = 1
 				__t2[guid] = (__t2[guid] == nil) and false or __t2[guid]
-				return __t1[guid]
+				return 1
 			end
 
 			-- group pet?
 			if guidToClass[guid] then
 				__t1[guid] = false
 				__t2[guid] = __t2[guid] or 1
-				return __t1[guid]
+				return false
 			end
 
 			-- player by flgs?
 			if band(flags or 0, BITMASK_PLAYER) == BITMASK_PLAYER then
 				__t1[guid] = true
 				__t2[guid] = (__t2[guid] == nil) and false or __t2[guid]
-				return __t1[guid]
+				return true
 			end
 
 			-- player by UnitIsPlayer?
 			if name and UnitIsPlayer(name) then
 				__t1[guid] = true
 				__t2[guid] = (__t2[guid] == nil) and false or __t2[guid]
-				return __t1[guid]
+				return true
 			end
 
 			-- just set it to false
 			__t1[guid] = false
-			return __t1[guid]
+			return false
 		end
 
 		-- checks if the guid is a pet (extra: helps IsPlayer)
@@ -1572,25 +1572,26 @@ do
 			if guidToName[guid] then
 				__t2[guid] = false
 				__t1[guid] = 1
-				return __t2[guid]
+				return false
 			end
 
 			-- grouped pet?
 			if guidToClass[guid] then
 				__t2[guid] = 1
 				__t1[guid] = false
-				return __t2[guid]
+				return 1
 			end
 
 			-- ungrouped pet?
 			if band(flags or 0, BITMASK_PETS) ~= 0 then
-				__t2[guid] = (band(flags or 0, BITMASK_FRIENDLY) ~= 0) and 1 or true
+				local res = (band(flags or 0, BITMASK_FRIENDLY) ~= 0) and 1 or true
+				__t2[guid] = res
 				__t1[guid] = false
-				return __t2[guid]
+				return res
 			end
 
 			__t2[guid] = false
-			return __t2[guid]
+			return false
 		end
 	end
 
