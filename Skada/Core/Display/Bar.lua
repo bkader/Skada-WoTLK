@@ -2,6 +2,8 @@ local folder, Skada = ...
 local Private = Skada.Private
 Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 	local mod = Skada:NewModule("Bar Display", "SpecializedLibBars-1.0")
+	local LEFT_TO_RIGHT = mod.LEFT_TO_RIGHT or 1
+	local RIGHT_TO_LEFT = mod.RIGHT_TO_LEFT or 2
 	local callbacks = mod.callbacks
 
 	local pairs, tsort, format = pairs, table.sort, string.format
@@ -159,7 +161,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 			local bargroup = mod:GetBarGroup(p.name)
 
 			-- fix old oriantation & buttons texture
-			p.barorientation = max(1, min(2, p.barorientation or 1))
+			p.barorientation = max(LEFT_TO_RIGHT, min(RIGHT_TO_LEFT, p.barorientation or LEFT_TO_RIGHT))
 			p.title.toolbar = max(1, min(2, p.title.toolbar or 2))
 
 			if not bargroup then
@@ -1173,8 +1175,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 
 	local optionsValues = {
 		ORIENTATION = {
-			[1] = L["Left to right"],
-			[2] = L["Right to left"]
+			[LEFT_TO_RIGHT] = L["Left to right"],
+			[RIGHT_TO_LEFT] = L["Right to left"]
 		},
 		TITLEBTNS = {
 			[1] = format("\124T%s:22:88\124t", format(buttonsTexPath, 1, "_prev")),

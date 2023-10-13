@@ -4,7 +4,7 @@
 -- in the unlikely event they end up being usable outside of Skada.
 -- Renaming the library (MAJOR) might break few things.
 
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90023
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90024
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 local folder = ...
@@ -24,7 +24,7 @@ local callbacks = lib.callbacks
 local GetTime = GetTime
 local min, max, floor = math.min, math.max, math.floor
 local tsort, tinsert, tremove, wipe = table.sort, tinsert, tremove, wipe
-local next, pairs, error, type = next, pairs, error, type
+local next, pairs, error, type, format = next, pairs, error, type, string.format
 local CreateFrame = CreateFrame
 local GameTooltip = GameTooltip
 local setmetatable = setmetatable
@@ -196,6 +196,11 @@ local ICON_UNLOCK = ([[Interface\AddOns\%s\Libs\%s\unlock.tga]]):format(folder, 
 local ICON_RESIZE = [[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Up]]
 local ICON_STRETCH = [[Interface\MINIMAP\ROTATING-MINIMAPGUIDEARROW.blp]]
 
+lib.LEFT_TO_RIGHT = 1
+lib.RIGHT_TO_LEFT = 2
+local LEFT_TO_RIGHT = lib.LEFT_TO_RIGHT
+local RIGHT_TO_LEFT = lib.RIGHT_TO_LEFT
+
 -------------------------------------------------------------------------------
 -- local functions
 -------------------------------------------------------------------------------
@@ -314,9 +319,9 @@ do
 
 		barLists[self] = barLists[self] or {}
 
-		orientation = orientation or 1
-		orientation = (orientation == "LEFT") and 1 or orientation
-		orientation = (orientation == "RIGHT") and 3 or orientation
+		orientation = orientation or LEFT_TO_RIGHT
+		orientation = (orientation == "LEFT") and LEFT_TO_RIGHT or orientation
+		orientation = (orientation == "RIGHT") and RIGHT_TO_LEFT or orientation
 
 		frameName = frameName:gsub("%W","")
 		local list = barListPrototype:Bind(createFrame("Frame", frameName, UIParent))
@@ -686,8 +691,8 @@ end
 function barListPrototype:SetOrientation(o)
 	if not o or self.orientation == 0 then return end
 
-	if o ~= 1 and o ~= 2 then
-		error("orientation must be 1 or 2.")
+	if o ~= LEFT_TO_RIGHT and o ~= RIGHT_TO_LEFT then
+		error(format("orientation must be %s or %s.", LEFT_TO_RIGHT, RIGHT_TO_LEFT))
 	end
 
 	self.orientation = o
@@ -918,13 +923,13 @@ end
 
 -- adjusts anchor text
 function barListPrototype:AdjustTitle(nomouseover)
-	self.button.text:SetJustifyH(self.orientation == 2 and "RIGHT" or "LEFT")
+	self.button.text:SetJustifyH(self.orientation == RIGHT_TO_LEFT and "RIGHT" or "LEFT")
 	self.button.text:SetJustifyV("MIDDLE")
 
 	self.button.icon:ClearAllPoints()
 	self.button.text:ClearAllPoints()
 
-	if self.lastbtn and self.orientation == 2 then
+	if self.lastbtn and self.orientation == RIGHT_TO_LEFT then
 		if self.mouseover and not nomouseover then
 			self.button.text:SetPoint("LEFT", self.button, "LEFT", 5, 1)
 		else
@@ -960,11 +965,11 @@ function barListPrototype:AdjustButtons()
 			btn:ClearAllPoints()
 
 			if btn.visible then
-				if nr == 0 and self.orientation == 2 then
+				if nr == 0 and self.orientation == RIGHT_TO_LEFT then
 					btn:SetPoint("TOPLEFT", self.button, "TOPLEFT", 5, -(max(height - btn:GetHeight(), 0) / 2))
 				elseif nr == 0 then
 					btn:SetPoint("TOPRIGHT", self.button, "TOPRIGHT", -5, -(max(height - btn:GetHeight(), 0) / 2))
-				elseif self.orientation == 2 then
+				elseif self.orientation == RIGHT_TO_LEFT then
 					btn:SetPoint("TOPLEFT", self.lastbtn, "TOPRIGHT", spacing, 0)
 				else
 					btn:SetPoint("TOPRIGHT", self.lastbtn, "TOPLEFT", -spacing, 0)
@@ -1671,7 +1676,7 @@ do
 
 			local x1, x2 = 0, 0 -- TODO: find a better way
 			if showIcon and lastBar == self then
-				if orientation == 1 then
+				if orientation == LEFT_TO_RIGHT then
 					x1 = thickness
 				else
 					x2 = -thickness
@@ -1768,6 +1773,9 @@ do
 		self.bg:SetVertexColor(0.3, 0.3, 0.3, 0.6)
 
 		self.fg = self.fg or self:CreateTexture(nil, "BORDER")
+		self.fg:SetAllPoints()
+		self.fg.SetValue = self.fg.SetWidth
+		self.fg:SetValue(0)
 
 		self.hg = self.hg or self:CreateTexture(nil, "ARTWORK")
 		self.hg:SetAllPoints()
@@ -1818,7 +1826,7 @@ do
 
 		self.length = length or 200
 		self.thickness = thickness or 15
-		self:SetOrientation(orientation or 1)
+		self:SetOrientation(orientation or LEFT_TO_RIGHT)
 
 		self.value = value or 1
 		self.maxValue = maxVal or self.value
@@ -2020,13 +2028,13 @@ end
 
 -- updates bar's orientation
 function barPrototype:UpdateOrientationLayout(orientation)
-	local t = nil
-	if orientation == 1 then
-		t = self.iconFrame
+	if orientation == LEFT_TO_RIGHT then
+		local t = self.iconFrame
 		t:ClearAllPoints()
 		t:SetPoint("RIGHT", self, "LEFT")
 
 		t = self.fg
+		t.SetValue = t.SetWidth
 		t:ClearAllPoints()
 		t:SetPoint("TOPLEFT", self, "TOPLEFT")
 		t:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT")
@@ -2051,12 +2059,13 @@ function barPrototype:UpdateOrientationLayout(orientation)
 		t:SetJustifyV("MIDDLE")
 
 		self.bg:SetTexCoord(0, 1, 0, 1)
-	elseif orientation == 2 then
-		t = self.iconFrame
+	elseif orientation == RIGHT_TO_LEFT then
+		local t = self.iconFrame
 		t:ClearAllPoints()
 		t:SetPoint("LEFT", self, "RIGHT")
 
 		t = self.fg
+		t.SetValue = t.SetWidth
 		t:ClearAllPoints()
 		t:SetPoint("TOPRIGHT", self, "TOPRIGHT")
 		t:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
@@ -2089,11 +2098,11 @@ end
 do
 	local function SetTextureValue(self, amt, dist)
 		dist = max(0.0001, dist - (self.showIcon and self.thickness or 0))
-		self.fg:SetWidth(amt * dist)
+		self.fg:SetValue(amt * dist)
 
-		if self.ownerGroup.orientation == 1 then
+		if self.ownerGroup.orientation == LEFT_TO_RIGHT then
 			self.fg:SetTexCoord(0, amt, 0, 1)
-		elseif self.ownerGroup.orientation == 2 then
+		elseif self.ownerGroup.orientation == RIGHT_TO_LEFT then
 			self.fg:SetTexCoord(1 - amt, 1, 0, 1)
 		end
 	end
@@ -2448,7 +2457,9 @@ do
 		"GetBarGroups",
 		"SetScrollSpeed",
 		"RegisterCallback",
-		"callbacks"
+		"callbacks",
+		"LEFT_TO_RIGHT",
+		"RIGHT_TO_LEFT"
 	}
 
 	function lib:Embed(target)
