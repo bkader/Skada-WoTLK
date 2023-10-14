@@ -222,6 +222,28 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M, O)
 	end
 
 	-- Shamelessly copied from Omen - thanks!
+	local function flasher_OnShow(self)
+		self.elapsed = 0
+		self:SetAlpha(0)
+	end
+
+	local function flasher_OnUpdate(self, elapsed)
+		elapsed = self.elapsed + elapsed
+		if elapsed < 2.6 then
+			local alpha = elapsed % 1.3
+			if alpha < 0.15 then
+				self:SetAlpha(alpha / 0.15)
+			elseif alpha < 0.9 then
+				self:SetAlpha(max(0, 1 - (alpha - 0.15) / 0.6))
+			else
+				self:SetAlpha(0)
+			end
+		else
+			self:Hide()
+		end
+		self.elapsed = elapsed
+	end
+
 	function mode:Flash()
 		if not self.FlashFrame then
 			local flasher = CreateFrame("Frame", "SkadaThreatFlashFrame")
@@ -234,26 +256,8 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M, O)
 			flasher.texture:SetTexture([[Interface\FullScreenTextures\LowHealth]])
 			flasher.texture:SetAllPoints(UIParent)
 			flasher.texture:SetBlendMode("ADD")
-			flasher:SetScript("OnShow", function(self)
-				self.elapsed = 0
-				self:SetAlpha(0)
-			end)
-			flasher:SetScript("OnUpdate", function(self, elapsed)
-				elapsed = self.elapsed + elapsed
-				if elapsed < 2.6 then
-					local alpha = elapsed % 1.3
-					if alpha < 0.15 then
-						self:SetAlpha(alpha / 0.15)
-					elseif alpha < 0.9 then
-						self:SetAlpha(1 - (alpha - 0.15) / 0.6)
-					else
-						self:SetAlpha(0)
-					end
-				else
-					self:Hide()
-				end
-				self.elapsed = elapsed
-			end)
+			flasher:SetScript("OnShow", flasher_OnShow)
+			flasher:SetScript("OnUpdate", flasher_OnUpdate)
 			self.FlashFrame = flasher
 		end
 
@@ -261,43 +265,47 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M, O)
 	end
 
 	-- Shamelessly copied from Omen (which copied from BigWigs) - thanks!
+	local function shaker_OnShow(self)
+		-- Store old worldframe positions, we need them all, people have frame modifiers for it
+		if not self.originalPoints then
+			self.originalPoints = {}
+			for i = 1, WorldFrame:GetNumPoints() do
+				self.originalPoints[#self.originalPoints + 1] = {WorldFrame:GetPoint(i)}
+			end
+		end
+		self.elapsed = 0
+	end
+
+	local function shaker_OnUpdate(self, elapsed)
+		elapsed = self.elapsed + elapsed
+		local x, y = 0, 0 -- Resets to original position if we're supposed to stop.
+		if elapsed >= 0.8 then
+			self:Hide()
+		else
+			x, y = random(-8, 8), random(-8, 8)
+		end
+		if WorldFrame:IsProtected() and InCombatLockdown() then
+			if not self.fail then
+				self.fail = true
+			end
+			self:Hide()
+		else
+			WorldFrame:ClearAllPoints()
+			for i = 1, #self.originalPoints do
+				local v = self.originalPoints[i]
+				WorldFrame:SetPoint(v[1], v[2], v[3], v[4] + x, v[5] + y)
+			end
+		end
+		self.elapsed = elapsed
+	end
+
 	function mode:Shake()
 		local shaker = self.ShakerFrame
 		if not shaker then
 			shaker = CreateFrame("Frame", "SkadaThreatShaker", UIParent)
 			shaker:Hide()
-			shaker:SetScript("OnShow", function(self)
-				-- Store old worldframe positions, we need them all, people have frame modifiers for it
-				if not self.originalPoints then
-					self.originalPoints = {}
-					for i = 1, WorldFrame:GetNumPoints() do
-						self.originalPoints[#self.originalPoints + 1] = {WorldFrame:GetPoint(i)}
-					end
-				end
-				self.elapsed = 0
-			end)
-			shaker:SetScript("OnUpdate", function(self, elapsed)
-				elapsed = self.elapsed + elapsed
-				local x, y = 0, 0 -- Resets to original position if we're supposed to stop.
-				if elapsed >= 0.8 then
-					self:Hide()
-				else
-					x, y = random(-8, 8), random(-8, 8)
-				end
-				if WorldFrame:IsProtected() and InCombatLockdown() then
-					if not shaker.fail then
-						shaker.fail = true
-					end
-					self:Hide()
-				else
-					WorldFrame:ClearAllPoints()
-					for i = 1, #self.originalPoints do
-						local v = self.originalPoints[i]
-						WorldFrame:SetPoint(v[1], v[2], v[3], v[4] + x, v[5] + y)
-					end
-				end
-				self.elapsed = elapsed
-			end)
+			shaker:SetScript("OnShow", shaker_OnShow)
+			shaker:SetScript("OnUpdate", shaker_OnUpdate)
 			self.ShakerFrame = shaker
 		end
 
@@ -348,7 +356,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M, O)
 	-- Shamelessly copied from Omen - thanks!
 	function mode:Warn(sound, flash, shake, message)
 		if sound then
-			PlaySoundFile(Skada:MediaFetch("sound", self.db.soundfile))
+			PlaySoundFile(Skada:MediaFetch("sound", self.db.soundfile), "Master")
 		end
 		if flash then
 			self:Flash()
