@@ -1270,7 +1270,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 			end
 
 			if type(mode) == "function" then
-				mode(mode, win, id, label, class)
+				mode(win, id, label, class)
 			else
 				if mode.Enter then
 					mode:Enter(win, id, label, class, mode)

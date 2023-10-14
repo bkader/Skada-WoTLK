@@ -944,14 +944,14 @@ do
 					},
 					date = {
 						type = "description",
-						name = format("\n\124cffffd200%s\124r:  %s", L["Date"], GetAddOnMetadata(folder, "X-Date")),
+						name = format("\n\124cffffd200%s\124r:  %s", L["Date"], Skada.date),
 						fontSize = "medium",
 						width = "double",
 						order = 20
 					},
 					author = {
 						type = "description",
-						name = format("\n\124cffffd200%s\124r:  %s", L["Author"], GetAddOnMetadata(folder, "Author")),
+						name = format("\n\124cffffd200%s\124r:  %s", L["Author"], Skada.author),
 						fontSize = "medium",
 						width = "double",
 						order = 30

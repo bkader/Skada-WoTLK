@@ -768,7 +768,10 @@ function Window:DisplayMode(mode)
 	self.selectedmode = mode
 	wipe(self.metadata)
 
-	if not self.parentmode or (mode.isParent and self.parentmode ~= mode) then
+	if mode.isParent then
+		self.parentmode = self.parentmode ~= mode and mode or self.parentmode
+		self:clean()
+	elseif not self.parentmode then
 		self.parentmode = mode
 	end
 
@@ -1008,6 +1011,8 @@ end
 -- window deletion
 do
 	local function delete_window(name)
+		Skada:CloseMenus()
+
 		for i = 1, #windows do
 			local win = windows[i]
 			local db = win and win.db
@@ -1035,7 +1040,6 @@ do
 		if internal then
 			delete_window(name)
 			Skada:NotifyChange()
-			Skada:CloseMenus()
 			return
 		end
 
@@ -1048,7 +1052,6 @@ do
 				whileDead = 0,
 				hideOnEscape = 1,
 				OnAccept = function(self, data)
-					Skada:CloseMenus()
 					Skada:NotifyChange()
 					return delete_window(data)
 				end
@@ -1379,7 +1382,7 @@ do
 
 		-- windows should have separate tooltip tables in order
 		-- to display different numbers for same spells for example.
-		win.ttwin = win.ttwin or Window.new(true)
+		win.ttwin = win.ttwin or Window.new(win)
 		win.ttwin:reset()
 
 		if mode.Enter then
@@ -1594,7 +1597,6 @@ local function generate_total()
 	ReloadUI()
 end
 
-local GetAddOnMetadata = GetAddOnMetadata
 local Print = Private.Print
 local function slash_command(param)
 	local cmd, arg1, arg2, arg3 = Skada:GetArgs(param, 4)
@@ -1639,8 +1641,8 @@ local function slash_command(param)
 		Skada:ProfileExport()
 	elseif cmd == "about" or cmd == "info" then
 		InterfaceOptionsFrame_OpenToCategory(folder)
-	elseif cmd == "version" or cmd == "checkversion" then
-		Skada:Printf("\124cffffbb00%s\124r: %s - \124cffffbb00%s\124r: %s", L["Version"], Skada.version, L["Date"], GetAddOnMetadata(folder, "X-Date"))
+	elseif cmd == "version" or cmd == "ver" or cmd == "checkversion" then
+		Skada:Printf("\124cffffbb00%s\124r: %s - \124cffffbb00%s\124r: %s", L["Version"], Skada.version, L["Date"], Skada.date)
 		check_version()
 	elseif cmd == "website" or cmd == "github" then
 		Skada:Printf("\124cffffbb00%s\124r", Skada.website)
@@ -2137,14 +2139,9 @@ end
 
 function restore_window_view(self, theset, themode)
 	if self.history[1] then
-		-- clear history and title
 		wipe(self.history)
 		self.title = nil
-
-		-- all all stuff that were registered by modules
-		self.actorid, self.actorname, self.actorclass = nil, nil, nil
-		self.targetid, self.targetname, self.targetclass = nil, nil, nil
-		self.spellid, self.spellname = nil, nil
+		self:clean()
 	end
 
 	-- force menu to close and let Skada handle the rest

@@ -1,7 +1,9 @@
 local folder, ns = ...
 
 local GetAddOnMetadata = GetAddOnMetadata
+ns.author = GetAddOnMetadata(folder, "Author")
 ns.version = GetAddOnMetadata(folder, "Version")
+ns.date = GetAddOnMetadata(folder, "X-Date")
 ns.website = "https://github.com/bkader/Skada-WoTLK"
 ns.logo = [[Interface\ICONS\spell_lightning_lightningbolt01]]
 ns.revisited = true -- Skada-Revisited flag
@@ -1812,32 +1814,46 @@ do
 
 	-- creates a new window
 	local new = Private.newTable
-	local window_mt = {__index = Window, __metatable = true}
-	function Window.new(tooltip)
-		local win = next(window_bin)
-		if win then
-			window_bin[win] = nil
-		else
-			win = setmetatable({}, window_mt)
+	local window_mt = {__index = Window}
+	local tooltip_mt = {
+		__index = function(self, key)
+			if key == "metadata" then return end
+			return self.super and self.super[key]
+		end,
+		__newindex = function(self, key, value)
+			rawset(self.super, key, value)
+		end
+	}
+	function Window.new(parent)
+		local win = next(window_bin) or {}
+		window_bin[win] = nil
+
+		if parent then
+			win.super = parent
+			win.dataset = new()
+			return setmetatable(win, tooltip_mt)
 		end
 
+		win.super = nil
 		win.dataset = new()
-		if not tooltip then
-			win.history = new()
-			win.metadata = new()
-		end
-		return win
+		win.history = new()
+		win.metadata = new()
+		return setmetatable(win, window_mt)
 	end
 
 	-- deletes a window and recycles its tables
 	local del = Private.delTable
 	function Window.del(win)
+		win.super = nil
 		win.dataset = del(win.dataset)
-		win.history = del(win.history)
-		win.metadata = del(win.metadata)
+		if not win.super then
+			win.history = del(win.history)
+			win.metadata = del(win.metadata)
+		end
 		if win.ttwin then -- tooltip
 			win.ttwin = Window.del(win.ttwin)
 		end
+		setmetatable(win, nil)
 		window_bin[win] = true
 		return nil -- assign input reference
 	end
@@ -1875,6 +1891,14 @@ do
 				wipe(self.dataset[i])
 			end
 		end
+	end
+
+	-- cleans window from what was set by modules.
+	function Window:clean()
+		self.actorid, self.actorname, self.actorclass = nil, nil, nil
+		self.otherid, self.othername, self.otherclass = nil, nil, nil
+		self.targetid, self.targetname, self.targetclass = nil, nil, nil
+		self.spellid, self.spellname = nil, nil
 	end
 
 	-- generates a spell dataset/bar.

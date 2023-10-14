@@ -536,7 +536,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 			inserthistory(win)
 
 			if type(mode) == "function" then
-				mode(mode, win, id, label, class)
+				mode(win, id, label, class)
 			else
 				if mode.Enter then
 					onEnter(win, id, label, class, mode)

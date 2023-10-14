@@ -65,7 +65,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		inserthistory(win)
 
 		if type(mode) == "function" then
-			mode(mode, win, id, label, class)
+			mode(win, id, label, class)
 		else
 			if mode.Enter then
 				onEnter(win, id, label, class, mode)
