@@ -77,7 +77,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 		end
 	end
 
-	local buttonsTexPath = format([[%s\Textures\toolbar%%s\%%s.blp]], Skada.mediapath)
+	local buttonsTexPath = format([[%s\Textures\toolbar%%s\%%s]], Skada.mediapath)
 	do
 		local function AddWindowButton(win, style, index, title, description, func)
 			if win and win.AddButton and index then
