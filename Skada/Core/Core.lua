@@ -768,7 +768,7 @@ function Window:DisplayMode(mode)
 	self.selectedmode = mode
 	wipe(self.metadata)
 
-	if mode and self.parentmode ~= mode and Skada:GetModule(mode.moduleName, true) then
+	if not self.parentmode or (mode.isParent and self.parentmode ~= mode) then
 		self.parentmode = mode
 	end
 
@@ -779,7 +779,6 @@ function Window:DisplayMode(mode)
 	end
 
 	self.changed = true
-	set_window_mode_title(self)
 
 	if self.child and (self.db.childmode == 1 or self.db.childmode == 3) then
 		if self.db.childmode == 1 and self.child.selectedset ~= self.selectedset then
@@ -928,7 +927,11 @@ function Window:RightClick(bar, button)
 			self:Wipe()
 			self:UpdateDisplay()
 		elseif #self.history > 0 then
-			self:DisplayMode(tremove(self.history))
+			local prev_mode = tremove(self.history)
+			while prev_mode == self.selectedmode and #self.history > 0 do
+				prev_mode = tremove(self.history)
+			end
+			self:DisplayMode(prev_mode)
 		else
 			self.class = nil
 			self:DisplayModes(self.selectedset)
@@ -2093,14 +2096,10 @@ do
 
 		if self.parentmode then
 			name = self.selectedmode.localeName or name
-			savemode = self.selectedmode.moduleName or savemode
+			savemode = self.parentmode.moduleName or savemode
 		end
 
-		-- save window settings for RestoreView after reload
 		self.db.set = self.selectedset
-		if self.history[1] then -- can't currently preserve a nested mode, use topmost one
-			savemode = self.history[1].moduleName or savemode
-		end
 		self.db.mode = savemode
 
 		if self.changed and self.title then
@@ -2841,22 +2840,24 @@ do
 			local db = win and win.db
 			if db then
 				-- combat mode switch
-				if db.modeincombat ~= "" then
-					local mymode = find_mode(db.modeincombat)
-
-					if mymode ~= nil then
-						if db.returnaftercombat then
-							if win.selectedset then
-								win.restore_set = win.selectedset
-							end
-							if win.selectedmode then
-								win.restore_mode = win.selectedmode.moduleName
-							end
+				local mymode = find_mode(db.modeincombat)
+				if mymode then
+					if db.returnaftercombat then
+						if win.selectedset then
+							win.restore_set = win.selectedset
 						end
-
-						win.selectedset = "current"
-						win:DisplayMode(mymode)
+						if win.selectedmode then
+							win.restore_mode = win.selectedmode.moduleName
+						end
 					end
+
+					win.selectedset = "current"
+				else
+					mymode = find_mode(db.mode)
+				end
+
+				if mymode then
+					win:DisplayMode(mymode)
 				end
 
 				-- combat switch to current

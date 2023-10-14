@@ -120,6 +120,7 @@ do
 	function Skada:OnModuleCreated(module)
 		module.localeName = L[module.moduleName]
 		module.OnModuleCreated = module.OnModuleCreated or self.OnModuleCreated
+		module.isParent = (self == Skada)
 	end
 
 	do
@@ -368,6 +369,7 @@ do
 	end
 
 	local strrep = strrep or string.rep
+	local tinsert = table.insert
 	local SpellLink = Private.SpellLink
 
 	local function BuildReportTable(mode, firstline, dataset, maxlines, fmt, barid)

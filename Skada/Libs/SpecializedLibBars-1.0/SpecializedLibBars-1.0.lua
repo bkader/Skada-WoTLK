@@ -23,7 +23,7 @@ local callbacks = lib.callbacks
 
 local GetTime = GetTime
 local min, max, floor = math.min, math.max, math.floor
-local tsort, tinsert, tremove, wipe = table.sort, tinsert, tremove, wipe
+local tsort, tinsert, tremove, wipe = table.sort, table.insert, table.remove, wipe
 local next, pairs, error, type, format = next, pairs, error, type, string.format
 local CreateFrame = CreateFrame
 local GameTooltip = GameTooltip

@@ -759,7 +759,7 @@ Skada:RegisterModule("Comparison", function(L, P)
 		end
 	end
 
-	local function set_actor(_, win, id, label)
+	local function set_actor(_, win, id, label, class)
 		-- no DisplayMode func?
 		if not win or not win.DisplayMode then return end
 		userGUID = userGUID or Skada.userGUID
@@ -771,17 +771,12 @@ Skada:RegisterModule("Comparison", function(L, P)
 			otherGUID = userGUID
 			otherName = userName
 			otherClass = userClass
-			win:DisplayMode(mode)
-		elseif win.GetSelectedSet then
-			local set = win:GetSelectedSet()
-			local actor = set and set:GetActor(label, id)
-			if actor then
-				otherGUID = actor.id
-				otherName = label
-				otherClass = actor.class
-				win:DisplayMode(mode)
-			end
+		else
+			otherGUID = id
+			otherName = label
+			otherClass = class
 		end
+		win:DisplayMode(mode)
 	end
 
 	function mode:OnEnable()
