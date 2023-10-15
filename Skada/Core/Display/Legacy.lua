@@ -1182,7 +1182,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 	-- Legacy Bar Display
 	----------------------------------------------------------------
 	do
-		local mod = Skada:NewModule("Legacy Bar Display")
+		local mod = Skada:NewModule("Legacy Bar Display", Skada.displayPrototype)
 
 		local IsShiftKeyDown = IsShiftKeyDown
 		local IsAltKeyDown = IsAltKeyDown
@@ -1233,34 +1233,6 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 			-- Restore window position.
 			RestorePosition(window.bargroup, p)
-		end
-
-		-- Called by Skada windows when the window is to be destroyed/cleared.
-		function mod:Destroy(win)
-			win.bargroup:Hide()
-			win.bargroup.bgframe = nil
-			win.bargroup = nil
-		end
-
-		-- Called by Skada windows when the window is to be completely cleared and prepared for new data.
-		function mod:Wipe(win)
-			-- Reset sort function.
-			win.bargroup:SetSortFunction(nil)
-
-			-- Reset scroll offset.
-			win.bargroup:SetBarOffset(0)
-
-			-- Remove the bars.
-			local bars = win.bargroup:GetBars()
-			if bars then
-				for i, bar in pairs(bars) do
-					bar:Hide()
-					win.bargroup:RemoveBar(bar)
-				end
-			end
-
-			-- Clean up.
-			win.bargroup:SortBars()
 		end
 
 		local function showmode(win, id, label, class, mode)
@@ -1582,19 +1554,6 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 		function mod:AnchorMoved(_, group, x, y)
 			SavePosition(group, group.win.db)
-		end
-
-		function mod:Show(win)
-			win.bargroup:Show()
-			win.bargroup:SortBars()
-		end
-
-		function mod:Hide(win)
-			win.bargroup:Hide()
-		end
-
-		function mod:IsShown(win)
-			return win.bargroup:IsShown()
 		end
 
 		local function getNumberOfBars(win)

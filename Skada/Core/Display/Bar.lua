@@ -1,7 +1,7 @@
 local folder, Skada = ...
 local Private = Skada.Private
 Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
-	local mod = Skada:NewModule("Bar Display", "SpecializedLibBars-1.0")
+	local mod = Skada:NewModule("Bar Display", Skada.displayPrototype, "SpecializedLibBars-1.0")
 	local LEFT_TO_RIGHT = mod.LEFT_TO_RIGHT or 1
 	local RIGHT_TO_LEFT = mod.RIGHT_TO_LEFT or 2
 	local callbacks = mod.callbacks
@@ -201,45 +201,6 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 			end
 
 			window.bargroup = bargroup
-		end
-	end
-
-	function mod:Destroy(win)
-		if win and win.bargroup then
-			win.bargroup:Hide()
-			win.bargroup = nil
-		end
-	end
-
-	function mod:Wipe(win)
-		if win and win.bargroup then
-			win.bargroup:SetSortFunction(nil)
-			win.bargroup:SetBarOffset(0)
-
-			for _, bar in pairs(win.bargroup:GetBars()) do
-				win.bargroup:RemoveBar(bar)
-			end
-
-			win.bargroup:SortBars()
-		end
-	end
-
-	function mod:Show(win)
-		if self:IsShown(win) == false then
-			win.bargroup:Show()
-			win.bargroup:SortBars()
-		end
-	end
-
-	function mod:Hide(win)
-		if self:IsShown(win) == true then
-			win.bargroup:Hide()
-		end
-	end
-
-	function mod:IsShown(win)
-		if win and win.bargroup then
-			return win.bargroup:IsShown() and true or false
 		end
 	end
 

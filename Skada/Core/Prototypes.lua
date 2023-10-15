@@ -803,3 +803,86 @@ do
 		return tbl
 	end
 end
+
+-------------------------------------------------------------------------------
+-- display prototype & functions
+
+do
+	local displayPrototype = {}
+	Skada.displayPrototype = displayPrototype
+
+	function displayPrototype:IsShown(win)
+		local frame = win and win.frame or win.bargroup
+		if not frame then
+			return
+		elseif frame:IsShown() then
+			return true, frame
+		else
+			return false, frame
+		end
+	end
+
+	function displayPrototype:Show(win)
+		local isshown, frame = self:IsShown(win)
+		if isshown or not frame then return end
+
+		frame:Show()
+		if frame.SortBars then
+			frame:SortBars()
+		end
+	end
+
+	function displayPrototype:Hide(win)
+		local isshown, frame = self:IsShown(win)
+		if isshown and frame then
+			frame:Hide()
+		end
+	end
+
+	function displayPrototype:Wipe(win)
+		if not win then
+			return
+		elseif win.frame then -- broker/inline
+			if win.obj then -- broker
+				if win.obj.text then
+					win.obj.text = ""
+				end
+				return true
+			end
+			return -- inline
+		elseif win.bargroup then -- bar/legacy
+			win.bargroup:SetSortFunction(nil)
+			win.bargroup:SetBarOffset(0)
+			local bars = win.bargroup:GetBars()
+			if bars then
+				for _, bar in pairs(bars) do
+					bar:Hide()
+					win.bargroup:RemoveBar(bar)
+				end
+			end
+			win.bargroup:SortBars()
+			return true
+		end
+		return false
+	end
+
+	function displayPrototype:Destroy(win)
+		if win and win.bargroup then -- bar/legacy
+			win.bargroup:Hide()
+			win.bargroup.bgframe = nil
+			win.bargroup = nil
+			return true
+		elseif win and win.frame then -- broker/inline
+			if win.obj then -- broker
+				if win.obj.text then
+					win.obj.text = ""
+				end
+				win.obj = nil
+			end
+			win.frame:Hide()
+			win.frame = nil
+			return true
+		end
+		return false
+	end
+end

@@ -1,7 +1,7 @@
 local folder, Skada = ...
 local Private = Skada.Private
 Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
-	local mod = Skada:NewModule("Inline Bar Display")
+	local mod = Skada:NewModule("Inline Bar Display", Skada.displayPrototype)
 
 	local pairs, tostring, type = pairs, tostring, type
 	local format, strmatch = string.format, string.match
@@ -220,15 +220,6 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		self:Update(window)
 	end
 
-	function mod:Destroy(win)
-		if win and win.frame then
-			win.frame:Hide()
-			win.frame = nil
-		end
-	end
-
-	mod.Wipe = Skada.EmptyFunc
-
 	function mod:SetTitle(win, title)
 		local frame = win and win.frame
 		if not win then return end
@@ -427,24 +418,6 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 				bar.bg:Hide()
 				bar.label:Hide()
 			end
-		end
-	end
-
-	function mod:Show(win)
-		if self:IsShown(win) == false then
-			win.frame:Show()
-		end
-	end
-
-	function mod:Hide(win)
-		if self:IsShown(win) == true then
-			win.frame:Hide()
-		end
-	end
-
-	function mod:IsShown(win)
-		if win and win.frame then
-			return win.frame:IsShown() and true or false
 		end
 	end
 
