@@ -1814,16 +1814,16 @@ do
 
 	-- creates a new window
 	local new = Private.newTable
-	local window_mt = {__index = Window}
-	local tooltip_mt = {
-		__index = function(self, key)
-			if key == "metadata" then return end
-			return self.super and self.super[key]
-		end,
+	local window_mt = {
+		__index = Window,
 		__newindex = function(self, key, value)
-			rawset(self.super, key, value)
+			rawset(self, key, value)
+			if not self.ttwin or key == "ttwin" then return end
+			rawset(self.ttwin, key, value)
 		end
 	}
+	local tooltip_mt = {__index = setmetatable({}, window_mt)}
+
 	function Window.new(parent)
 		local win = next(window_bin) or {}
 		window_bin[win] = nil
