@@ -1102,21 +1102,14 @@ function Skada:ShowHide()
 end
 
 -- restores a view for the selected window
-function restore_view(win, theset, themode)
-	if theset and type(theset) == "string" and (theset == "current" or theset == "total" or theset == "last") then
-		win.selectedset = theset
-	elseif theset and type(theset) == "number" and theset <= #Skada.sets then
-		win.selectedset = theset
-	else
-		win.selectedset = "current"
-	end
+function restore_view(self, set, mode)
+	self.selectedset = (set == "current" or set == "total" or set == "last" or (type(set) == "number" and set <= #Skada.sets)) and set or "current"
+	self.changed = true
 
-	win.changed = true
-
-	if themode then
-		win:DisplayMode(find_mode(themode) or win.selectedset)
+	if mode then
+		self:DisplayMode(find_mode(mode) or self.selectedset)
 	else
-		win:DisplayModes(win.selectedset)
+		self:DisplayModes(self.selectedset)
 	end
 end
 
@@ -2137,7 +2130,7 @@ do
 	end
 end
 
-function restore_window_view(self, theset, themode)
+function restore_window_view(self, set, mode)
 	if self.history[1] then
 		wipe(self.history)
 		self.title = nil
@@ -2146,7 +2139,7 @@ function restore_window_view(self, theset, themode)
 
 	-- force menu to close and let Skada handle the rest
 	Skada:CloseMenus()
-	restore_view(self, theset or self.selectedset, themode or self.db.mode)
+	restore_view(self, set or self.selectedset, mode or self.db.mode)
 end
 
 -------------------------------------------------------------------------------

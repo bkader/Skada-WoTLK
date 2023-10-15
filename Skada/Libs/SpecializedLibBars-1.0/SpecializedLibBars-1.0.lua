@@ -4,7 +4,7 @@
 -- in the unlikely event they end up being usable outside of Skada.
 -- Renaming the library (MAJOR) might break few things.
 
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90024
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90025
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 local folder = ...
@@ -586,37 +586,33 @@ barListPrototype.SavePosition = SavePosition
 barListPrototype.RestorePosition = RestorePosition
 
 -- returns bar(s) height
-local function GetThickness(self)
+function barListPrototype:GetThickness()
 	return self.thickness
 end
-barListPrototype.GetThickness = GetThickness
-barPrototype.GetThickness = GetThickness
+barPrototype.GetThickness = barListPrototype.GetThickness
 
 -- returns bar's length/group width
-local function GetLength(self)
+function barListPrototype:GetLength()
 	return self.length
 end
-barListPrototype.GetLength = GetLength
-barPrototype.GetLength = GetLength
+barPrototype.GetLength = barListPrototype.GetLength
 
 -- changes size
-local function SetSize(self, width, height)
+function barListPrototype:SetSize(width, height)
 	self:SetWidth(width)
 	self:SetHeight(height)
 end
-barListPrototype.SetSize = SetSize
-barPrototype.SetSize = SetSize
+barPrototype.SetSize = barListPrototype.SetSize
 
 -- handles bar/group show/hide
-local function SetShown(self, show)
+function barListPrototype:SetShown(show)
 	if show and not self:IsShown() then
 		self:Show()
 	elseif not show and self:IsShown() then
 		self:Hide()
 	end
 end
-barListPrototype.SetShown = SetShown
-barPrototype.SetShown = SetShown
+barPrototype.SetShown = barListPrototype.SetShown
 
 -------------------------------------------------------------------------------
 -- bar lists/groups functions
@@ -673,6 +669,7 @@ function barListPrototype:SetThickness(thickness)
 	end
 	self:UpdateOrientationLayout()
 end
+barListPrototype.SetBarHeight = barListPrototype.SetThickness
 
 -- changes spacing between bars
 function barListPrototype:SetSpacing(spacing)
@@ -706,8 +703,9 @@ end
 
 -- returns bars orientation
 function barListPrototype:GetOrientation()
-	return self.orientation
+	return self.ownerGroup and self.ownerGroup.orientation or self.orientation
 end
+barPrototype.GetOrientation = barListPrototype.GetOrientation
 
 -- updates orientation layout
 function barListPrototype:UpdateOrientationLayout()
@@ -1344,6 +1342,7 @@ function barListPrototype:SetLength(length)
 	end
 	self:UpdateOrientationLayout()
 end
+barListPrototype.SetBarWidth = barListPrototype.SetLength
 
 -- changes group height
 function barListPrototype:SetHeight(height)
@@ -1365,16 +1364,6 @@ end
 -- returns bars sort function
 function barListPrototype:GetSortFunction(func)
 	return self.sortFunc
-end
-
--- changes bars width
-function barListPrototype:SetBarWidth(width)
-	self:SetLength(width)
-end
-
--- changes bars height
-function barListPrototype:SetBarHeight(height)
-	self:SetThickness(height)
 end
 
 -- sets max bars
@@ -1418,6 +1407,7 @@ function barListPrototype:SetTexture(tex)
 		bar.bg:SetTexture(self.texture)
 	end
 end
+barPrototype.SetTexture = barListPrototype.SetTexture
 
 -- changes labels and timerLabels fonts
 function barListPrototype:SetFont(font, size, outline, numFont, numSize, numOutline)
@@ -1480,6 +1470,7 @@ end
 function barListPrototype:IsIconShown()
 	return self.showIcon
 end
+barPrototype.IsIconShown = barListPrototype.IsIconShown
 
 -- shows bar labels
 function barListPrototype:ShowLabel()
@@ -1720,6 +1711,7 @@ do
 		self.updateFuncs[func] = true
 		self:SetScript("OnUpdate", listOnUpdate)
 	end
+	barPrototype.AddOnUpdate = barListPrototype.AddOnUpdate
 end
 
 -- removes OnUpdate function
@@ -1730,6 +1722,7 @@ function barListPrototype:RemoveOnUpdate(func)
 		self.updateFuncs = del(self.updateFuncs)
 	end
 end
+barPrototype.RemoveOnUpdate = barListPrototype.RemoveOnUpdate
 
 -------------------------------------------------------------------------------
 -- bar functions
@@ -1899,11 +1892,6 @@ function barPrototype:HideIcon()
 	end
 end
 
--- returns true if bar's icon is set to be shown
-function barPrototype:IsIconShown()
-	return self.showIcon
-end
-
 -- changes bar's label text
 function barPrototype:SetLabel(text)
 	self.label:SetText(text)
@@ -2019,11 +2007,6 @@ end
 function barPrototype:SetOrientation(o)
 	self:UpdateOrientationLayout(o)
 	self:SetThickness(self.thickness)
-end
-
--- returns bar's orientation
-function barPrototype:GetOrientation()
-	return self.orientation
 end
 
 -- updates bar's orientation
