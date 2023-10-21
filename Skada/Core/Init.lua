@@ -1500,6 +1500,10 @@ do
 	-- used to protect tables
 	local table_mt = {__metatable = true}
 
+	-- players & pets [guid] = UnitID
+	local guidToUnit = setmetatable(Private.guidToUnit or {}, table_mt)
+	Private.guidToUnit = guidToUnit
+
 	-- players: [guid] = class / pets: [guid] = owner guid
 	local guidToClass = setmetatable(Private.guidToClass or {}, table_mt)
 	Private.guidToClass = guidToClass
@@ -1612,13 +1616,19 @@ do
 	-- adds a combatant
 	function Private.AddCombatant(unit, ownerUnit)
 		local guid = UnitGUID(unit)
-		if guid and ownerUnit then
+		if not guid then return end
+		guidToUnit[guid] = unit -- store the unit.
+
+		-- for pets...
+		if ownerUnit then
 			guidToOwner[guid] = UnitGUID(ownerUnit)
-		elseif guid then
-			local _, class = UnitClass(unit)
-			guidToClass[guid] = class
-			guidToName[guid] = UnitFullName(unit)
+			return
 		end
+
+		-- for players...
+		local _, class = UnitClass(unit)
+		guidToClass[guid] = class
+		guidToName[guid] = UnitFullName(unit)
 	end
 
 	ns.userGUID = UnitGUID('player')

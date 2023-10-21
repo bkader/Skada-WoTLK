@@ -58,6 +58,7 @@ local check_version, convert_version
 local check_for_join_and_leave
 
 -- list of players, pets and vehicles
+local guidToUnit = Private.guidToUnit
 local guidToClass = Private.guidToClass
 local guidToName = Private.guidToName
 local guidToOwner = Private.guidToOwner
@@ -1748,6 +1749,7 @@ do
 			last_check_group = checkTime -- update cooldown
 
 			-- wipe tables
+			wipe(guidToUnit)
 			wipe(guidToClass)
 			wipe(guidToName)
 
@@ -1766,6 +1768,7 @@ do
 				if not guidToClass[ownerGUID] then
 					guidToOwner[petGUID] = nil
 					guidToClass[petGUID] = nil
+					guidToUnit[petGUID] = nil
 				end
 			end
 		end
@@ -2755,7 +2758,8 @@ do
 
 	-- register a func to cleu event(s).
 	function Skada:RegisterForCL(func, flags, ...)
-		if type(func) ~= "function" or not flags then return end
+		if type(func) ~= "function" then return end
+		flags = flags or self.dummyTable -- allow empty flags
 
 		local index = 1
 		local event = select(index, ...)
