@@ -861,7 +861,7 @@ function Private.CheckDuplicate(value, tbl, key)
 		local is_array = (#tbl > 0)
 
 		for k, v in pairs(tbl) do
-			local val = is_array and v[key] or k
+			local val = is_array and type(v) == "table" and v[key] or k
 			if val == value and num == 0 then
 				num = 1
 			elseif val then
