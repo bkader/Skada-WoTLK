@@ -33,7 +33,7 @@ do
 	local boss = {}
 	for i = 1, 5 do
 		boss[i] = format("boss%d", i)
-		target[#target + 1] = format("boss%d", i)
+		target[#target + 1] = format("boss%dtarget", i)
 	end
 
 	-- party
@@ -49,6 +49,7 @@ do
 		grouppet[unit] = true
 
 		target[#target + 1] = format("party%dtarget", i)
+		target[#target + 1] = format("partypet%dtarget", i)
 	end
 
 	-- raid
@@ -64,6 +65,7 @@ do
 		grouppet[unit] = true
 
 		target[#target + 1] = format("raid%dtarget", i)
+		target[#target + 1] = format("raidpet%dtarget", i)
 	end
 
 	-- arena
@@ -72,7 +74,8 @@ do
 	for i = 1, 5 do
 		arena[i] = format("arena%d", i)
 		arenapet[i] = format("arenapet%d", i)
-		target[#target + 1] = format("arena%d", i)
+		target[#target + 1] = format("arena%dtarget", i)
+		target[#target + 1] = format("arenapet%dtarget", i)
 	end
 
 	lib.Units = {
