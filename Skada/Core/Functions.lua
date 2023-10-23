@@ -1778,7 +1778,10 @@ do
 					end
 				end
 
-				return nopets and args._srcInGroupNopets or args._srcInGroup
+				if nopets then
+					return args._srcInGroupNopets
+				end
+				return args._srcInGroup
 			end
 
 			function ARGS_MT.DestInGroup(args, nopets)
@@ -1807,7 +1810,10 @@ do
 					end
 				end
 
-				return nopets and args._dstInGroupNopets or args._dstInGroup
+				if nopets then
+					return args._dstInGroupNopets
+				end
+				return args._dstInGroup
 			end
 
 			function ARGS_MT.IsGroupEvent(args, nopets)
@@ -1819,11 +1825,16 @@ do
 					args._srcIsPet = (bit_band(args.srcFlags, BITMASK_PETS) ~= 0)
 				end
 
-				if args._srcIsGroupPet == nil then
-					args._srcIsGroupPet = args._srcIsPet and (guidToOwner[args.srcGUID] ~= nil)
+				if not args._srcIsPet then
+					return false
+				elseif args._srcIsGroupPet == nil then
+					args._srcIsGroupPet = (guidToOwner[args.srcGUID] ~= nil)
 				end
 
-				return ingroup and args._srcIsGroupPet or args._srcIsPet
+				if ingroup then
+					return args._srcIsGroupPet
+				end
+				return args._srcIsPet
 			end
 
 			-- owner=true? acts like "ingroup" (SourceIsPet)
