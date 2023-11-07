@@ -1592,6 +1592,7 @@ local function generate_total()
 end
 
 local Print = Private.Print
+local report_channels, report_help
 local function slash_command(param)
 	local cmd, arg1, arg2, arg3 = Skada:GetArgs(param, 4)
 	cmd = (cmd and cmd ~= "") and strlower(cmd) or cmd
@@ -1674,11 +1675,21 @@ local function slash_command(param)
 		end
 
 		-- Sanity checks.
-		if chan and (chan == "say" or chan == "guild" or chan == "raid" or chan == "party" or chan == "officer") and (report_mode_name and find_mode(report_mode_name)) then
+		report_channels = report_channels or {self = true, say = true, yell = true, guild = true, officer = true, party = true, raid = true, auto = true}
+		if chan and report_channels[strlower(chan)] and report_mode_name then
 			Skada:Report(chan, "preset", report_mode_name, "current", num)
 		else
 			Skada:Print(L["Usage:"])
-			Skada:Printf("%-20s", "/skada report [channel] [mode] [lines]")
+			Skada:Printf("%-20s", "/skada report [\124cffffff33channel\124r] [\124cffffff33mode\124r] [\124cffffff33numlines\124r]")
+			if not report_help then
+				local temp = new()
+				for name in next, report_channels do
+					temp[#temp + 1] = name
+				end
+				report_help = format("\124cffffff33channel\124r: %s", table.concat(temp, ", "))
+				temp = del(temp)
+			end
+			Skada:Printf(report_help)
 		end
 	else
 		Skada:Print(L["Commands:"])

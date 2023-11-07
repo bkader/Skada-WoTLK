@@ -443,10 +443,17 @@ do
 		end
 	end
 
+	local strupper, strlower = string.upper, string.lower
+	local function camel_case(first, rest)
+		return format("%s%s", strupper(first), strlower(rest))
+	end
+
 	local GetChannelList = GetChannelList
 	local OpenExport = Private.ImportExport
 
 	function Skada:Report(channel, chantype, modename, setname, maxlines, window, barid)
+		if maxlines == 0 then return end
+
 		if chantype == "channel" then
 			local list = TempTable(GetChannelList())
 			for i = 1, #list * 0.5 do
@@ -468,7 +475,9 @@ do
 				return
 			end
 
-			mode = self:GetModule(modename or "Damage", true)
+			modename = modename and gsub(gsub(modename, "_", " "), "(%a)([%w_']*)", camel_case) or "Damage"
+			mode = self.modules[modename] or self.modules[strupper(modename)] or self.modules[strlower(modename)]
+			if not mode then return end
 			window = Window.new(true)
 			mode:Update(window, set)
 		elseif type(window) == "string" then
