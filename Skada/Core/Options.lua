@@ -1498,8 +1498,7 @@ end
 -- profile import, export and sharing
 
 do
-	local ipairs, strmatch, uformat = ipairs, strmatch, Private.uformat
-	local UnitName, GetRealmName, collectgarbage = UnitName, GetRealmName, collectgarbage
+	local ipairs, strmatch, uformat, collectgarbage = ipairs, strmatch, Private.uformat, collectgarbage
 	local serialize, deserialize = Private.serialize, Private.deserialize
 	local copy, open_window = Private.tCopy, Private.ImportExport
 	local serialize_profile = nil
@@ -1522,7 +1521,7 @@ do
 			end
 		end
 
-		name = name or format("%s - %s", UnitName("player"), GetRealmName())
+		name = name or Skada.userName
 
 		local n, i = name, 1
 		while ProfileExists(name) do
