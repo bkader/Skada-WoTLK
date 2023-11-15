@@ -115,7 +115,7 @@ Skada:RegisterModule("Casts", function(L, P)
 
 		mode_cols = self.metadata.columns
 
-		Skada:RegisterForCL(spell_cast, {src_is_interesting = true}, "SPELL_CAST_START", "SPELL_CAST_SUCCESS")
+		Skada:RegisterForCL(spell_cast, {src_is_interesting = true}, "SPELL_CAST_SUCCESS")
 
 		Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		Skada:AddMode(self)

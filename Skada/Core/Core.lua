@@ -1844,7 +1844,8 @@ do
 	function Skada:VersionCheck(sender, version)
 		if sender and version then
 			version = convert_version(version)
-			local ver = convert_version(self.version)
+			local ver = self.version_num or convert_version(self.version)
+			self.version_num = ver
 			if not (version and ver) or self.versionChecked then
 				return
 			elseif version > ver then
