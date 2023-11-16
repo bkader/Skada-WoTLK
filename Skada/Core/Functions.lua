@@ -1998,9 +1998,6 @@ do
 
 		local args = Handlers[event](ARGS, timestamp, event, ...)
 
-		-- the event happens within the group?
-		args.inside_event = args:IsGroupEvent()
-
 		if event == "SPELL_EXTRA_ATTACKS" then
 			create_extra_attack(args)
 			return -- queue for later!
@@ -2041,24 +2038,34 @@ do
 
 		if args.spellid and args.spellschool and not args.spellstring then
 			args.spellstring = format((args.is_dot or args.is_hot) and "-%s.%s" or "%s.%s", args.spellid, args.spellschool)
-			if args.inside_event then
-				callbacks:Fire("Skada_SpellString", args, args.spellid, args.spellstring)
-			end
 		end
 
 		if args.extraspellid and args.extraschool and not args.extrastring then
 			args.extrastring = format("%s.%s", args.extraspellid, args.extraschool)
-			if args.inside_event then
-				callbacks:Fire("Skada_SpellString", args, args.extraspellid, args.extrastring)
-			end
+		end
+
+		-- the event happens within the group?
+		args.inside_event = args:IsGroupEvent()
+		self.LastEvent = args
+
+		-- not really? skip everything else...
+		if not args.inside_event then
+			return self:OnCombatEvent(args)
+		end
+
+		if args.spellstring then
+			callbacks:Fire("Skada_SpellString", args, args.spellid, args.spellstring)
+		end
+
+		if args.extrastring then
+			callbacks:Fire("Skada_SpellString", args, args.extraspellid, args.extrastring)
 		end
 
 		-- check first hit!
-		if self.profile.firsthit and not self.firsthit and TRIGGER_EVENTS[args.event] and args.inside_event then
+		if self.profile.firsthit and not self.firsthit and TRIGGER_EVENTS[args.event] then
 			self:CheckFirstHit(args)
 		end
 
-		self.LastEvent = args
 		return self:OnCombatEvent(args)
 	end
 end

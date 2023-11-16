@@ -2978,6 +2978,11 @@ do
 		end
 	end
 
+	local function check_cached_names(t)
+		t.srcName = t.srcName and t.srcGUID and guidToName[t.srcGUID] or t.srcName
+		t.dstName = t.dstName and t.dstGUID and guidToName[t.dstGUID] or t.dstName
+	end
+
 	local function tentative_handler()
 		tentative_set = Skada.current
 		Skada.current = nil
@@ -3035,6 +3040,8 @@ do
 		if self.current.stopped or not combatlog_events[t.event] then return end
 
 		self._Time = GetTime()
+		check_cached_names(t)
+
 		for func, flags in next, combatlog_events[t.event] do
 			local fail = false
 

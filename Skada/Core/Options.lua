@@ -103,6 +103,7 @@ Skada.defaults = {
 		memorycheck = true,
 		mergepets = true,
 		setnumber = true,
+		realmless = true,
 		showranks = true,
 		tooltips = true,
 		brackets = 1,
