@@ -246,7 +246,7 @@ Skada:RegisterModule("Player vs. Player", "mod_pvp_desc", function(L, P, _, _, _
 		else
 			Skada.UnregisterAllBuckets(self)
 			Skada.UnregisterEvent(self, "UNIT_SPELLCAST_SUCCEEDED")
-			Skada.UnregisterCallback(self, "Skada_GetEnemy", "GetEnemy")
+			Skada.UnregisterCallback(self, "Skada_GetEnemy")
 		end
 	end
 

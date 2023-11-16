@@ -227,7 +227,7 @@ Skada:RegisterModule("Potions", function(L, P, G, C, _, O)
 			Skada.RegisterCallback(self, "Skada_UnitBuffs", "UnitBuff")
 			Skada.RegisterMessage(self, "COMBAT_PLAYER_LEAVE", "CombatLeave")
 		else
-			Skada.UnregisterAllCallbacks(self)
+			Skada.UnregisterCallback(self, "Skada_UnitBuffs")
 			Skada.UnregisterAllMessages(self)
 		end
 	end
