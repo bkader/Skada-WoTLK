@@ -1959,13 +1959,11 @@ do
 			if type(actor) == "string" then
 				d.id = actor
 				d.label = actorname or actor
-				d.text = ns:FormatName(d.label)
 				return d
 			end
 
 			d.id = actor.id or actorname
 			d.label = actorname or L["Unknown"]
-			d.text = ns:FormatName(d.label)
 
 			-- speed up things if it's a pet/enemy.
 			if strmatch(d.label, "%<(%a+)%>") then
@@ -1985,7 +1983,7 @@ do
 			d.role = actor.role
 			d.spec = actor.spec
 
-			if actor.id and ns.validclass[d.class] then
+			if ns.validclass[d.class] then
 				d.text = ns:FormatName(d.label, actor.id)
 			end
 		end
