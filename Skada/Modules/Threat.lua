@@ -75,8 +75,8 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M, O)
 					actor.class = "PET"
 				else
 					actor.class = guidToClass[guid] or select(2, UnitClass(unit))
-					actor.role = GetUnitRole(guid)
 					actor.spec = GetUnitSpec(guid)
+					actor.role = GetUnitRole(guid)
 				end
 
 				-- cache the actor.
