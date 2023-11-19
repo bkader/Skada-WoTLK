@@ -1989,7 +1989,7 @@ do
 	local SWING_EVENTS = {SWING_DAMAGE = true, SWING_MISSED = true}
 	local ENVIRONMENT_EVENTS = {ENVIRONMENTAL_DAMAGE = true, ENVIRONMENTAL_MISSED = true}
 	local DOT_EVENTS = {SPELL_PERIODIC_DAMAGE = true, SPELL_PERIODIC_MISSED = true}
-	local HOT_EVENTS = {SPELL_PERIODIC_HEAL = true, SPELL_PERIODIC_ENERGIZE = true}
+	local HOT_EVENTS = {SPELL_PERIODIC_HEAL = true--[[, SPELL_PERIODIC_ENERGIZE = true--]]}
 
 	-- combat log handler
 	function Skada:ParseCombatLog(_, timestamp, event, ...)
