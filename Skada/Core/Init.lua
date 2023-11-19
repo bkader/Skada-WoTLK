@@ -1449,10 +1449,10 @@ do
 		__mode = "kv",
 		__index = function(t, spellid)
 			local name, _, icon = SpellInfo(spellid)
-			if name then
-				rawset(t, spellid, name)
-				rawset(ns.spellicons, spellid, icon)
-			end
+			name = name or L["Unknown"]
+			icon = icon or [[Interface\ICONS\INV_Misc_QuestionMark]]
+			rawset(t, spellid, name)
+			rawset(ns.spellicons, spellid, icon)
 			return name
 		end,
 		__newindex = function(t, spellid, name)
@@ -1463,10 +1463,10 @@ do
 		__mode = "kv",
 		__index = function(t, spellid)
 			local name, _, icon = SpellInfo(spellid)
-			if name then
-				rawset(t, spellid, icon)
-				rawset(ns.spellnames, spellid, name)
-			end
+			name = name or L["Unknown"]
+			icon = icon or [[Interface\ICONS\INV_Misc_QuestionMark]]
+			rawset(t, spellid, icon)
+			rawset(ns.spellnames, spellid, name)
 			return icon
 		end,
 		__newindex = function(t, spellid, icon)
