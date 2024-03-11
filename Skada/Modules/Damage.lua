@@ -396,7 +396,7 @@ Skada:RegisterModule("Damage", function(L, P)
 
 	function mode_spell_details:Enter(win, id, label)
 		win.spellid, win.spellname = id, label
-		win.title = uformat("%s: %s", classfmt(win.actorclass, win.actorname), format(L["%s's details"], label))
+		win.title = uformat("%s: %s", classfmt(win.actorclass, win.actorname), uformat(L["%s's details"], label))
 	end
 
 	function mode_spell_details:Tooltip(win, set, id, label, tooltip)
