@@ -73,13 +73,12 @@ Skada:RegisterModule("Enemy Damage Taken", function(L, P, _, C)
 	end
 
 	local function get_custom_unit_maxval(guid, unit, name)
-		local creatureId = GetCreatureId(guid)
-		local tracking_power = (unit.power ~= nil)
 		if not unit then return end -- no user-defined custom unit?
 
+		local creatureId = GetCreatureId(guid)
 		local diff = get_instance_diff()
 
-		if tracking_power then
+		if unit.power ~= nil then
 			-- already cached power?
 			if max_power and max_power[creatureId] and max_power[creatureId][diff] then
 				return max_power[creatureId][diff]

@@ -27,25 +27,18 @@ do
 	local solo = {"player", "pet"}
 	local group = {player = true}
 	local grouppet = {playerpet = true}
-	local target = {"target", "targettarget", "focus", "focustarget", "mouseover", "mouseovertarget"}
-
-	-- boss
-	local boss = {}
-	for i = 1, 5 do
-		boss[i] = format("boss%d", i)
-		target[#target + 1] = format("boss%dtarget", i)
-	end
+	local target = {"target", "targettarget", "pettarget", "pettargettarget", "focus", "focustarget", "mouseover", "mouseovertarget"}
 
 	-- party
-	local party = {}
-	local partypet = {}
+	local party = {"player"}
+	local partypet = {"pet"}
 	for i = 1, 4 do
 		local unit = format("party%d", i)
-		party[i] = unit
+		party[i + 1] = unit
 		group[unit] = true
 
 		unit = format("partypet%d", i)
-		partypet[i] = unit
+		partypet[i + 1] = unit
 		grouppet[unit] = true
 
 		target[#target + 1] = format("party%dtarget", i)
@@ -53,15 +46,15 @@ do
 	end
 
 	-- raid
-	local raid = {}
-	local raidpet = {}
+	local raid = {"player"}
+	local raidpet = {"pet"}
 	for i = 1, 40 do
 		local unit = format("raid%d", i)
-		raid[i] = unit
+		raid[i + 1] = unit
 		group[unit] = true
 
 		unit = format("raidpet%d", i)
-		raidpet[i] = unit
+		raidpet[i + 1] = unit
 		grouppet[unit] = true
 
 		target[#target + 1] = format("raid%dtarget", i)
@@ -76,6 +69,13 @@ do
 		arenapet[i] = format("arenapet%d", i)
 		target[#target + 1] = format("arena%dtarget", i)
 		target[#target + 1] = format("arenapet%dtarget", i)
+	end
+
+	-- boss
+	local boss = {}
+	for i = 1, 5 do
+		boss[i] = format("boss%d", i)
+		target[#target + 1] = format("boss%dtarget", i)
 	end
 
 	lib.Units = {
