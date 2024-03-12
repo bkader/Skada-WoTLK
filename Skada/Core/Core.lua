@@ -1593,6 +1593,7 @@ end
 
 local Print = Private.Print
 local report_channels, report_help
+local UnitExists, UnitName = UnitExists, UnitName
 local function slash_command(param)
 	local cmd, arg1, arg2, arg3 = Skada:GetArgs(param, 4)
 	cmd = (cmd and cmd ~= "") and strlower(cmd) or cmd
@@ -1641,6 +1642,9 @@ local function slash_command(param)
 		check_version()
 	elseif cmd == "website" or cmd == "github" then
 		Skada:Printf("\124cffffbb00%s\124r", Skada.website)
+	elseif (cmd == "target" or cmd == "cid") and UnitExists("target") then
+		local guid = UnitGUID("target")
+		Skada:Printf("[\124cffffbb00%s\124r] %s (%s)", GetCreatureId(guid), UnitName("target"), guid)
 	elseif cmd == "timemesure" or cmd == "measure" then
 		if P.timemesure == 2 then
 			P.timemesure = 1
@@ -1909,7 +1913,7 @@ do
 end
 
 do
-	local UnitExists, UnitHasVehicleUI = UnitExists, UnitHasVehicleUI
+	local UnitHasVehicleUI = UnitHasVehicleUI
 	local groupUnits = Skada.Units.group
 
 	function Skada:UNIT_PET(owners)
