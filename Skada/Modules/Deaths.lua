@@ -18,6 +18,7 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M, O)
 	local GetTime, time, date, wipe = GetTime, time, date, wipe
 	local classfmt = Skada.classcolors.format
 	local mode_cols, submode_cols = nil, nil
+	local death_timers -- holds Spirit of Redemption scheduled death timers
 
 	--------------------------------------------------------------------------
 	-- colors and icons
@@ -300,7 +301,13 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M, O)
 			dead[t.dstName] = true
 			Skada:DispatchSets(log_death, t.dstName, t.dstGUID, t.dstFlags)
 		end
-		if t.__temp then t = del(t) end
+		if death_timers and t.dstGUID and death_timers[t.dstGUID] then
+			Skada:CancelTimer(death_timers[t.dstGUID], true)
+			death_timers[t.dstGUID] = nil
+			if not next(death_timers) then
+				death_timers = del(death_timers)
+			end
+		end
 	end
 
 	local function sor_applied(t)
@@ -309,8 +316,9 @@ Skada:RegisterModule("Deaths", function(L, P, _, _, M, O)
 			args.dstGUID = t.dstGUID
 			args.dstName = t.dstName
 			args.dstFlags = t.dstFlags
-			args.__temp = true
-			Skada:ScheduleTimer(unit_died, 0.01, args)
+
+			death_timers = death_timers or new()
+			death_timers[t.dstGUID] = Skada:ScheduleTimer(unit_died, 0.01, args)
 		end
 	end
 

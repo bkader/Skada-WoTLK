@@ -585,7 +585,7 @@ do
 	local setPrototype = Skada.setPrototype
 	local playerPrototype = Skada.playerPrototype
 
-	local fakeSet, updateTimer = nil, nil
+	local fake_set, update_timer = nil, nil
 
 	-- there was no discrimination with classes and specs
 	-- the only reason this group composition was made is
@@ -616,7 +616,7 @@ do
 	end
 
 	local function generate_fake_data()
-		fakeSet = tablePool.acquireHash(
+		fake_set = tablePool.acquireHash(
 			"name", "Fake Fight",
 			"starttime", time() - 120,
 			"damage", 0,
@@ -653,14 +653,14 @@ do
 				"id", name, "name", name, "class", class, "role", role, "spec", spec,
 				"damage", damage, "heal", heal, "absorb", absorb
 			)
-			fakeSet.actors[name] = playerPrototype:Bind(actor)
+			fake_set.actors[name] = playerPrototype:Bind(actor)
 
-			fakeSet.damage = fakeSet.damage + damage
-			fakeSet.heal = fakeSet.heal + heal
-			fakeSet.absorb = fakeSet.absorb + absorb
+			fake_set.damage = fake_set.damage + damage
+			fake_set.heal = fake_set.heal + heal
+			fake_set.absorb = fake_set.absorb + absorb
 		end
 
-		return setPrototype:Bind(fakeSet)
+		return setPrototype:Bind(fake_set)
 	end
 
 	local function randomize_fake_data(set, coef)
@@ -705,20 +705,20 @@ do
 
 	function Skada:TestMode()
 		if InCombatLockdown() or IsGroupInCombat() then
-			fakeSet = del(fakeSet, true)
+			fake_set = del(fake_set, true)
 			self.testMode = nil
-			if updateTimer then
-				self:CancelTimer(updateTimer)
-				updateTimer = nil
+			if update_timer then
+				self:CancelTimer(update_timer)
+				update_timer = nil
 			end
 			return
 		end
 		self.testMode = not self.testMode
 		if not self.testMode then
-			fakeSet = del(fakeSet, true)
-			if updateTimer then
-				self:CancelTimer(updateTimer)
-				updateTimer = nil
+			fake_set = del(fake_set, true)
+			if update_timer then
+				self:CancelTimer(update_timer)
+				update_timer = nil
 			end
 			self.current = del(self.current, true)
 			return
@@ -726,7 +726,7 @@ do
 
 		self:Wipe()
 		self.current = generate_fake_data()
-		updateTimer = self:ScheduleRepeatingTimer(update_fake_data, self.profile.updatefrequency or 0.25, self)
+		update_timer = update_timer or self:ScheduleRepeatingTimer(update_fake_data, self.profile.updatefrequency or 0.25, self)
 	end
 end
 
@@ -1225,11 +1225,32 @@ end
 
 -- memory usage check
 function Skada:CheckMemory()
+	if self.__memory_timer then
+		self:CancelTimer(self.__memory_timer, true)
+		self.__memory_timer = nil
+	end
+
 	if not self.profile.memorycheck then return end
 	UpdateAddOnMemoryUsage()
 	local memory = GetAddOnMemoryUsage(folder)
 	if memory > (self.maxmeme * 1024) then
 		self:Notify(L["Memory usage is high. You may want to reset Skada, and enable one of the automatic reset options."], L["Memory Check"], nil, "emergency")
+	end
+end
+
+-- clean garbage
+do
+	local InCombatLockdown = InCombatLockdown
+	local collectgarbage = collectgarbage
+	function Skada:CleanGarbage()
+		if self.__garbage_timer then
+			self:CancelTimer(self.__garbage_timer, true)
+			self.__garbage_timer = nil
+		end
+
+		if InCombatLockdown() then return end
+		collectgarbage("collect")
+		self:Debug("Garbage \124cffffbb00Cleaned\124r!")
 	end
 end
 
@@ -2243,8 +2264,7 @@ do
 				return self:ClearFirstHit()
 			end
 
-			if firsthit_timer then return end
-			firsthit_timer = self:ScheduleTimer(PrintFirstHit, 0.5)
+			firsthit_timer = firsthit_timer or self:ScheduleTimer(PrintFirstHit, 0.5)
 		end
 
 		function Skada:ClearFirstHit()
@@ -2264,6 +2284,7 @@ end
 -- smart stop
 
 do
+	local smartstop_timer = nil
 	-- list of creature IDs to be ignored
 	local ignored_creature = {
 		[37217] = true, -- ICC: Precious
@@ -2271,6 +2292,11 @@ do
 	}
 
 	local function SmartStop(set)
+		if smartstop_timer then
+			Skada:CancelTimer(smartstop_timer, true)
+			smartstop_timer = nil
+		end
+
 		if set.endtime then return end
 		Skada:StopSegment(L["Smart Stop"])
 		Skada:SetModes()
@@ -2286,7 +2312,11 @@ do
 			return
 		end
 
-		-- schedule smart stop.
-		self:ScheduleTimer(SmartStop, self.profile.smartwait or 3, set)
+		-- (re)schedule smart stop.
+		if smartstop_timer then
+			Skada:CancelTimer(smartstop_timer, true)
+			smartstop_timer = nil
+		end
+		smartstop_timer = self:ScheduleTimer(SmartStop, self.profile.smartwait or 3, set)
 	end
 end

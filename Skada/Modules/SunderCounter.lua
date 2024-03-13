@@ -14,6 +14,7 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M, O)
 	local spellnames = Skada.spellnames
 
 	local sunder_targets -- holds sunder targets details for announcement
+	local sunder_timers -- holds scheduled sunder drop timers
 	local active_sunders = {} -- holds sunder targets to consider refreshes
 	local spell_sunder, spell_devastate, sunder_link
 	local last_srcGUID, last_srcName, last_srcFlags
@@ -45,10 +46,23 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M, O)
 	end
 
 	local function sunder_dropped(dstGUID)
-		if sunder_targets and dstGUID and sunder_targets[dstGUID] then
+		if not dstGUID then return end
+
+		-- announce drop...
+		if sunder_targets and sunder_targets[dstGUID] then
 			local dstName = sunder_targets[dstGUID].name
 			sunder_targets[dstGUID] = del(sunder_targets[dstGUID])
 			mode:Announce(uformat(L["%s dropped from %s!"], sunder_link or spell_sunder, dstName))
+		end
+
+		-- cancel drop timer...
+		if sunder_timers and sunder_timers[dstGUID] then
+			Skada:CancelTimer(sunder_timers[dstGUID], true)
+			sunder_timers[dstGUID] = nil
+
+			if not next(sunder_timers) then
+				sunder_timers = del(sunder_timers)
+			end
 		end
 	end
 
@@ -57,7 +71,8 @@ Skada:RegisterModule("Sunder Counter", function(L, P, _, C, M, O)
 
 		-- sunder removed!
 		if t.event == "SPELL_AURA_REMOVED" then
-			Skada:ScheduleTimer(sunder_dropped, 0.1, t.dstGUID)
+			sunder_timers = sunder_timers or new()
+			sunder_timers[t.dstGUID] = Skada:ScheduleTimer(sunder_dropped, 0.1, t.dstGUID)
 			return
 		end
 

@@ -9,6 +9,9 @@ CHANGELOG.md        export-ignore
 CITATION.cff        export-ignore
 
 * text=auto
+*.gitattributes text eol=lf
+*.lua text eol=lf
+*.toc text eol=lf
 
 # GitHub
 .github         text

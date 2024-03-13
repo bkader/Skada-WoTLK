@@ -54,6 +54,7 @@ ns.display_with_totals = display_with_totals
 
 -- update & tick timers
 local update_timer, tick_timer, toggle_timer, version_timer
+local roster_timer, bossdefeat_timer
 local check_version, convert_version
 local check_for_join_and_leave
 
@@ -307,13 +308,24 @@ end
 
 local dismiss_pet
 do
+	local dismiss_timers = nil
 	local function dismiss_handler(guid)
 		guidToOwner[guid] = nil
 		guidToClass[guid] = nil
+
+		if dismiss_timers and dismiss_timers[guid] then
+			Skada:CancelTimer(dismiss_timers[guid], true)
+			dismiss_timers[guid] = nil
+
+			if not next(dismiss_timers) then
+				dismiss_timers[guid] = del(dismiss_timers[guid])
+			end
+		end
 	end
 	function dismiss_pet(guid, delay)
 		if guid and guidToClass[guid] and not guidToName[guid] then
-			Skada:ScheduleTimer(dismiss_handler, delay or 0.1, guid)
+			dismiss_timers = dismiss_timers or new()
+			dismiss_timers[guid] = Skada:ScheduleTimer(dismiss_handler, delay or 0.1, guid)
 		end
 	end
 end
@@ -1732,9 +1744,9 @@ function Skada:PLAYER_ENTERING_WORLD()
 	userGUID = self.userGUID or UnitGUID("player")
 	self.userGUID = userGUID
 
-	Skada:CheckZone()
+	self:CheckZone()
 	if was_in_party == nil then
-		Skada:ScheduleTimer("UpdateRoster", 1)
+		roster_timer = self:ScheduleTimer("UpdateRoster", 1)
 	end
 
 	-- force reset for old structure
@@ -1909,6 +1921,11 @@ do
 		end
 
 		Skada:SendMessage("GROUP_ROSTER_UPDATE")
+
+		if roster_timer then
+			Skada:CancelTimer(roster_timer, true)
+			roster_timer = nil
+		end
 	end
 end
 
@@ -2446,19 +2463,17 @@ function Skada:OnEnable()
 	end
 
 	Private.ReloadSettings()
-	self:ScheduleTimer("CheckMemory", 3)
-	self:ScheduleTimer("CleanGarbage", 4)
-end
-
-local collectgarbage = collectgarbage
-function Skada:CleanGarbage()
-	if InCombatLockdown() then return end
-	collectgarbage("collect")
-	self:Debug("Garbage \124cffffbb00Cleaned\124r!")
+	self.__memory_timer = self:ScheduleTimer("CheckMemory", 3)
+	self.__garbage_timer = self:ScheduleTimer("CleanGarbage", 4)
 end
 
 -- called on boss defeat
 local function BossDefeated()
+	if bossdefeat_timer then
+		Skada:CancelTimer(bossdefeat_timer, true)
+		bossdefeat_timer = nil
+	end
+
 	local set = Skada.current
 	if not set or set.success then return end
 
@@ -2883,11 +2898,27 @@ do
 
 		Skada:UpdateDisplay(true)
 
+		if update_timer then
+			Skada:CancelTimer(update_timer, true)
+			update_timer = nil
+		end
 		update_timer = Skada:ScheduleRepeatingTimer("UpdateDisplay", P.updatefrequency or 0.5)
+
+		if tick_timer then
+			Skada:CancelTimer(tick_timer, true)
+			tick_timer = nil
+		end
 		tick_timer = Skada:ScheduleRepeatingTimer(combat_tick, 1)
 
 		if P.tentativecombatstart then
+			if toggle_timer then
+				Skada:CancelTimer(toggle_timer, true)
+				toggle_timer = nil
+			end
 			toggle_timer = Skada:ScheduleTimer("Toggle", 0.1)
+		elseif toggle_timer then
+			Skada:CancelTimer(toggle_timer, true)
+			toggle_timer = nil
 		end
 	end
 
@@ -2940,7 +2971,7 @@ do
 		if set.gotboss then
 			-- default boss defeated event? (no DBM/BigWigs)
 			if not Skada.bossmod and death_events[t.event] and set.gotboss == GetCreatureId(t.dstGUID) then
-				Skada:ScheduleTimer(BossDefeated, 0.1)
+				bossdefeat_timer = bossdefeat_timer or Skada:ScheduleTimer(BossDefeated, 0.1)
 			end
 			return
 		end
@@ -2990,9 +3021,11 @@ do
 	local function tentative_handler()
 		tentative_set = Skada.current
 		Skada.current = nil
-		Skada:CancelTimer(tentative_timer, true)
-		tentative_timer = nil
 		tentative = nil
+		if tentative_timer then
+			Skada:CancelTimer(tentative_timer, true)
+			tentative_timer = nil
+		end
 	end
 
 	local GetTempUnit = Private.GetTempUnit
@@ -3016,6 +3049,11 @@ do
 			if src_is_interesting or dst_is_interesting then
 				self.current = create_set(L["Current"], tentative_set)
 				self.total = self.total or create_set(L["Total"])
+
+				if tentative_timer then
+					self:CancelTimer(tentative_timer, true)
+					tentative_timer = nil
+				end
 
 				tentative_timer = self:ScheduleTimer(tentative_handler, 1)
 				tentative = P.tentativecombatstart and 4 or 0

@@ -206,12 +206,16 @@ Skada:RegisterModule("Tweaks", function(L, P, _, _, _, O)
 			if self.timeout >= P.combatlogfixtime then
 				CombatLogClearEntries()
 				self.timeout = 0
+				if self.timer then
+					Skada:CancelTimer(self.timer, true)
+					self.timer = nil
+				end
 			end
 		end
 
 		function mode:CombatEnter()
 			if not P.combatlogfix then return end
-			Skada:ScheduleTimer(CombatLogClearEntries, 0.1)
+			frame.timer = frame.timer or Skada:ScheduleTimer(CombatLogClearEntries, 0.1)
 		end
 
 		function mode:CombatLogFix()
