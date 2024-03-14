@@ -20,6 +20,7 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 		FONT_FLAGS = {
 			[""] = L["None"],
 			["OUTLINE"] = L["Outline"],
+			["THICK"] = L["Thick"],
 			["THICKOUTLINE"] = L["Thick outline"],
 			["MONOCHROME"] = L["Monochrome"],
 			["OUTLINEMONOCHROME"] = L["Outlined monochrome"]

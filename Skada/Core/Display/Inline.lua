@@ -27,6 +27,7 @@ Skada:RegisterDisplay("Inline Bar Display", "mod_inline_desc", function(L)
 		FONT_FLAGS = {
 			[""] = L["None"],
 			["OUTLINE"] = L["Outline"],
+			["THICK"] = L["Thick"],
 			["THICKOUTLINE"] = L["Thick outline"],
 			["MONOCHROME"] = L["Monochrome"],
 			["OUTLINEMONOCHROME"] = L["Outlined monochrome"]

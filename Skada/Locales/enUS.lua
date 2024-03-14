@@ -164,6 +164,7 @@ L["The font size of %s."] = true
 L["Font Outline"] = true
 L["Sets the font outline."] = true
 L["Outline"] = true
+L["Thick"] = true
 L["Thick outline"] = true
 L["Monochrome"] = true
 L["Outlined monochrome"] = true

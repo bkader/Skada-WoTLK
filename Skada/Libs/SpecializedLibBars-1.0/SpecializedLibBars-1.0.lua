@@ -4,7 +4,7 @@
 -- in the unlikely event they end up being usable outside of Skada.
 -- Renaming the library (MAJOR) might break few things.
 
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90025
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90026
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 local folder = ...
@@ -1854,10 +1854,14 @@ end
 -- changes label and timer fonts
 function barPrototype:SetFont(font, size, outline, numFont, numSize, numOutline)
 	local f, s, o = self.label:GetFont()
-	self.label:SetFont(font or f, size or s, outline or o)
+	outline = outline or o
+	self.label:SetFont(font or f, size or s, outline)
+	self.label:SetShadowColor(0, 0, 0, outline == "" and 0 or 1)
 
 	f, s, o = self.timerLabel:GetFont()
-	self.timerLabel:SetFont(numFont or f, numSize or s, numOutline or o)
+	numOutline = numOutline or o
+	self.timerLabel:SetFont(numFont or f, numSize or s, numOutline)
+	self.timerLabel:SetShadowColor(0, 0, 0, numOutline == "" and 0 or 1)
 end
 
 -- changes bar icon texture
