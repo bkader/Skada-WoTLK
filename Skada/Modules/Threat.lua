@@ -21,7 +21,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M, O)
 		local nr, max_threat, aggro_coef, my_percent = 0, 0, 1.1, nil
 		local last_warn, last_time = Skada._time, 0
 		local threat_table, we_should_warn = {}, false
-		local tank_threat, tank_value, ruby_acorn, queried
+		local tank_threat, ruby_acorn, queried
 
 		-- bar colors
 		local aggro_color = RED_FONT_COLOR
@@ -54,7 +54,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M, O)
 				end
 
 				d.threat = tank_threat * aggro_coef
-				d.value = tank_value * aggro_coef
+				d.value = max_threat * aggro_coef
 
 				return
 			end
@@ -118,8 +118,10 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M, O)
 
 				if d.value > max_threat then
 					max_threat = d.value
+				end
+
+				if isTanking then
 					tank_threat = d.threat
-					tank_value = d.value
 				end
 			end
 		end
@@ -215,7 +217,7 @@ Skada:RegisterModule("Threat", function(L, P, _, _, M, O)
 		end
 
 		function mode:CombatLeave()
-			tank_threat, tank_value = nil, nil
+			tank_threat = nil
 			clear(threat_table)
 			self.unitID, self.unitName = nil, nil
 		end

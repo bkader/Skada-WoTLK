@@ -14,6 +14,7 @@ CITATION.cff        export-ignore
 *.toc text eol=lf
 *.xml text eol=lf
 *.md text eol=lf
+*.cff text eol=lf
 
 # GitHub
 .github         text
