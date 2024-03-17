@@ -508,22 +508,6 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 
 		do
 			local values = {}
-			local function sortFuncReverse(a, b)
-				if a.isTimer ~= b.isTimer then
-					return a.isTimer
-				end
-
-				local apct, bpct = a.value / a.maxValue, b.value / b.maxValue
-				if apct == bpct then
-					if a.maxValue == b.maxValue then
-						return a.name < b.name
-					else
-						return a.maxValue < b.maxValue
-					end
-				else
-					return apct < bpct
-				end
-			end
 			local function sortFunc(a, b)
 				if a.isTimer ~= b.isTimer then
 					return a.isTimer
@@ -553,11 +537,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 					values[i] = nil
 				end
 
-				if self.growup then
-					tsort(values, self.sortFunc or sortFuncReverse)
-				else
-					tsort(values, self.sortFunc or sortFunc)
-				end
+				tsort(values, self.sortFunc or sortFunc)
 
 				local orientation = self.orientation
 				local growup = self.growup
@@ -1566,6 +1546,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		end
 
 		function mod:OnMouseWheel(win, frame, direction)
+			direction = win.bargroup.growup and (0 - direction) or direction
 			if direction == 1 and win.bargroup.offset > 0 then
 				win.bargroup:SetBarOffset(win.bargroup.offset - 1)
 			elseif direction == -1 and ((getNumberOfBars(win) - win.bargroup.maxBars - win.bargroup.offset) > 0) then

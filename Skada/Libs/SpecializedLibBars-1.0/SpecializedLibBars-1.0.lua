@@ -4,7 +4,7 @@
 -- in the unlikely event they end up being usable outside of Skada.
 -- Renaming the library (MAJOR) might break few things.
 
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90026
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90027
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 local folder = ...
@@ -284,6 +284,7 @@ do
 		local maxbars = self:GetMaxBars()
 		local numbars = self:GetNumBars()
 		local offset = self:GetBarOffset()
+		direction = self.growup and (0 - direction) or direction
 
 		if direction == 1 and offset > 0 then
 			self:SetBarOffset(IsShiftKeyDown() and 0 or max(0, offset - (IsControlKeyDown() and maxbars or scrollspeed)))
@@ -1611,25 +1612,20 @@ do
 		local spacing = self.spacing
 		local startpoint = self.button:IsVisible() and (self.button:GetHeight() + self.startpoint) or 0
 
-		local from, to
 		local offset = self.offset
 		local y1, y2 = startpoint, startpoint
 		local maxbars = min(#values, self.maxBars)
+		local start = min(1 + offset, #values)
+		local stop = min(maxbars + offset, #values)
 
-		local start, stop, step, fixnum
+		local from, to, fixnum
 		if growup then
 			from = "BOTTOM"
 			to = "TOP"
-			start = min(#values, maxbars + offset)
-			stop = min(#values, 1 + offset)
-			step = -1
 			fixnum = start
 		else
 			from = "TOP"
 			to = "BOTTOM"
-			start = min(1 + offset, #values)
-			stop = min(maxbars + offset, #values)
-			step = 1
 			fixnum = stop
 		end
 
@@ -1647,7 +1643,7 @@ do
 		local thickness = self.thickness
 		local shown = 0
 
-		for i = start, stop, step do
+		for i = start, stop, 1 do
 			local origTo = to
 			local v = values[i]
 			if lastBar == self then
