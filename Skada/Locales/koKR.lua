@@ -180,6 +180,8 @@ L["Animate bar changes smoothly rather than immediately."] = "바를 즉시 변�
 -- title bar
 L["Title Bar"] = "제목 바"
 L["Enables the title bar."] = "제목 표시줄을 활성화합니다."
+L["Swap Position"] = "위치 바꾸기"
+L["When enabled, the title bar will be moved to the opposite side of its current position."] = "활성화되면 타이틀 바가 현재 위치의 반대쪽으로 이동됩니다."
 L["Include set"] = "세트 포함"
 L["Include set name in title bar"] = "제목 바에 세트 이름 포함"
 L["Encounter Timer"] = "우두머리 전투 타이머"

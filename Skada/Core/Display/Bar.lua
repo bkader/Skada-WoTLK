@@ -1009,7 +1009,7 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 			local p = win.db
 
 			g.name = p.name -- update name
-			g:SetReverseGrowth(p.reversegrowth)
+			g:SetReverseGrowth(p.reversegrowth, p.title.swap)
 			g:SetOrientation(p.barorientation)
 			g:SetBarHeight(p.barheight)
 			g:SetHeight(p.background.height)
@@ -1092,11 +1092,11 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 			backdrop.insets.left, backdrop.insets.right = 0, 0
 			backdrop.insets.top, backdrop.insets.bottom = 0, 0
 			if p.enabletitle and p.reversegrowth then
-				backdrop.insets.top = 0
-				backdrop.insets.bottom = p.title.height
+				backdrop.insets.top = p.title.swap and p.title.height or 0
+				backdrop.insets.bottom = p.title.swap and 0 or p.title.height
 			elseif p.enabletitle then
-				backdrop.insets.top = p.title.height
-				backdrop.insets.bottom = 0
+				backdrop.insets.top = p.title.swap and 0 or p.title.height
+				backdrop.insets.bottom = p.title.swap and p.title.height or 0
 			end
 			g:SetBackdrop(backdrop)
 
@@ -1547,7 +1547,8 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 							type = "toggle",
 							name = L["Enable"],
 							desc = L["Enables the title bar."],
-							order = 10,
+							width = "double",
+							order = 0,
 							get = function()
 								return db.enabletitle
 							end,
@@ -1555,6 +1556,12 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 								db.enabletitle = not db.enabletitle
 								Skada:ApplySettings(db.name)
 							end
+						},
+						swap = {
+							type = "toggle",
+							name = L["Swap Position"],
+							desc = L["When enabled, the title bar will be moved to the opposite side of its current position."],
+							order = 10
 						},
 						titleset = {
 							type = "toggle",

@@ -4,7 +4,7 @@
 -- in the unlikely event they end up being usable outside of Skada.
 -- Renaming the library (MAJOR) might break few things.
 
-local MAJOR, MINOR = "SpecializedLibBars-1.0", 90027
+local MAJOR, MINOR = "SpecializedLibBars-1.0", 90028
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end -- No Upgrade needed.
 local folder = ...
@@ -457,7 +457,7 @@ do
 		list:SetScript("OnMouseWheel", listOnMouseWheel)
 
 		list:SetOrientation(orientation)
-		list:SetReverseGrowth(nil, true)
+		list:SetReverseGrowth(nil, nil, true)
 		list:SetWidth(length)
 		list:SetHeight(height)
 
@@ -712,7 +712,7 @@ barPrototype.GetOrientation = barListPrototype.GetOrientation
 function barListPrototype:UpdateOrientationLayout()
 	barListPrototype.super.SetWidth(self, self.length)
 	self.button:SetWidth(self.length)
-	self:SetReverseGrowth(self.growup, true)
+	self:SetReverseGrowth(self.growup, self.swaptitle, true)
 end
 
 -- barListPrototype:SetSmoothing - bars animation
@@ -721,17 +721,18 @@ function barListPrototype:SetSmoothing(smoothing)
 end
 
 -- changes group grow direction
-function barListPrototype:SetReverseGrowth(reverse, update)
+function barListPrototype:SetReverseGrowth(reverse, swaptitle, update)
 	if (self.growup == reverse) and update then return end -- only update if necessary
 
 	self.growup = reverse or nil
+	self.swaptitle = swaptitle or nil
 
 	self.button:ClearAllPoints()
 	self.resizeright:ClearAllPoints()
 	self.resizeleft:ClearAllPoints()
 	self.lockbutton:ClearAllPoints()
 
-	if self.growup then
+	if (self.growup and not self.swaptitle) or (self.swaptitle and not self.growup) then
 		self.button:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT")
 		self.button:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
 		self.resizeright.icon:SetTexCoord(0, 1, 1, 0)
@@ -739,18 +740,16 @@ function barListPrototype:SetReverseGrowth(reverse, update)
 		self.resizeleft.icon:SetTexCoord(1, 0, 1, 0)
 		self.resizeleft:SetPoint("TOPLEFT", self, "TOPLEFT")
 		self.lockbutton:SetPoint("TOP", self, "TOP", 0, -2)
-		self:SortBars()
-
-		return
+	else
+		self.button:SetPoint("TOPLEFT", self, "TOPLEFT")
+		self.button:SetPoint("TOPRIGHT", self, "TOPRIGHT")
+		self.resizeright.icon:SetTexCoord(0, 1, 0, 1)
+		self.resizeright:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
+		self.resizeleft.icon:SetTexCoord(1, 0, 0, 1)
+		self.resizeleft:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT")
+		self.lockbutton:SetPoint("BOTTOM", self, "BOTTOM", 0, 2)
 	end
 
-	self.button:SetPoint("TOPLEFT", self, "TOPLEFT")
-	self.button:SetPoint("TOPRIGHT", self, "TOPRIGHT")
-	self.resizeright.icon:SetTexCoord(0, 1, 0, 1)
-	self.resizeright:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT")
-	self.resizeleft.icon:SetTexCoord(1, 0, 0, 1)
-	self.resizeleft:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT")
-	self.lockbutton:SetPoint("BOTTOM", self, "BOTTOM", 0, 2)
 	self:SortBars()
 end
 
@@ -1610,7 +1609,7 @@ do
 		local orientation = self.orientation
 		local growup = self.growup
 		local spacing = self.spacing
-		local startpoint = self.button:IsVisible() and (self.button:GetHeight() + self.startpoint) or 0
+		local startpoint = (self.button:IsVisible() and not self.swaptitle) and (self.button:GetHeight() + self.startpoint) or 0
 
 		local offset = self.offset
 		local y1, y2 = startpoint, startpoint

@@ -180,6 +180,8 @@ L["Animate bar changes smoothly rather than immediately."] = "計量條動態平
 -- title bar
 L["Title Bar"] = "標題條"
 L["Enables the title bar."] = "啟用標題條。"
+L["Swap Position"] = "交換位置"
+L["When enabled, the title bar will be moved to the opposite side of its current position."] = "啟用後，標題列將移動到其當前位置的對側。"
 L["Include set"] = "包含設定"
 L["Include set name in title bar"] = "在標題欄包含設定名稱"
 L["Encounter Timer"] = "首領戰鬥計時器"

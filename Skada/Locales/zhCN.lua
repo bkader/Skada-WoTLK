@@ -181,6 +181,8 @@ L["Animate bar changes smoothly rather than immediately."] = "以动画平滑显
 -- title bar
 L["Title Bar"] = "标题栏"
 L["Enables the title bar."] = "启用标题栏。"
+L["Swap Position"] = "交换位置"
+L["When enabled, the title bar will be moved to the opposite side of its current position."] = "启用后，标题栏将移动到其当前位置的对侧。"
 L["Include set"] = "包括集合"
 L["Include set name in title bar"] = "在标题栏中包括集合名称。"
 L["Encounter Timer"] = "战斗计时器"

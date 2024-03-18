@@ -207,6 +207,8 @@ L["Animate bar changes smoothly rather than immediately."] = true
 -- title bar
 L["Title Bar"] = true
 L["Enables the title bar."] = true
+L["Swap Position"] = true
+L["When enabled, the title bar will be moved to the opposite side of its current position."] = true
 L["Include set"] = true
 L["Include set name in title bar"] = true
 L["Encounter Timer"] = true

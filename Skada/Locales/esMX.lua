@@ -183,6 +183,8 @@ L["Animate bar changes smoothly rather than immediately."] = "Animar barras suav
 -- title bar
 L["Title Bar"] = "Barra de t\195\173tulo"
 L["Enables the title bar."] = "Habilita la barra de t\195\173tulo"
+L["Swap Position"] = "Intercambiar posición"
+L["When enabled, the title bar will be moved to the opposite side of its current position."] = "Cuando est\195\161 habilitado, la barra de t\195\173tulo se mover\195\161 al lado opuesto de su posici\195\179n actual."
 L["Include set"] = "Incluir segmento"
 L["Include set name in title bar"] = "Incluir el nombre del segmento en la barra de t\195\173tulo"
 L["Encounter Timer"] = "Temporizador de encuentro"

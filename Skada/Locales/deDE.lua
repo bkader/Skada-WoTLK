@@ -180,6 +180,8 @@ L["Animate bar changes smoothly rather than immediately."] = "\195\132nderungen 
 -- title bar
 L["Title Bar"] = "Titelleiste"
 L["Enables the title bar."] = "Aktiviert die Titelleiste."
+L["Swap Position"] = "Position tauschen"
+L["When enabled, the title bar will be moved to the opposite side of its current position."] = "Wenn aktiviert, wird die Titelleiste an die gegen\195\188berliegende Seite ihrer aktuellen Position verschoben."
 L["Include set"] = "Segment anzeigen"
 L["Include set name in title bar"] = "Den Namen des Segments in der Titelleiste anzeigen"
 L["Encounter Timer"] = "Begegnungszeit"
