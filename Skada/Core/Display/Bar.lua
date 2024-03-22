@@ -249,6 +249,10 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 		bar.order = nil
 		bar.text = nil
 		bar.win = nil
+		bar.link = nil
+		bar.role = nil
+		bar.spec = nil
+		bar.talent = nil
 
 		bar.iconFrame:SetScript("OnEnter", nil)
 		bar.iconFrame:SetScript("OnLeave", nil)
@@ -568,9 +572,25 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 		local function iconOnEnter(icon)
 			local bar = icon.bar
 			local win = bar.win
-			if bar.link and win and win.bargroup then
+			if win and win.bargroup and (bar.link or bar.role or bar.spec) then
 				Skada:SetTooltipPosition(GameTooltip, win.bargroup, "bar", win)
-				GameTooltip:SetHyperlink(bar.link)
+
+				if bar.link then
+					GameTooltip:SetHyperlink(bar.link)
+					GameTooltip:Show()
+					return
+				end
+
+				GameTooltip:AddLine(bar.text, classcolors.unpack(bar.class))
+				if bar.role and bar.role ~= "NONE" then
+					GameTooltip:AddDoubleLine(L["Role"], L[bar.role], 1, 1, 1)
+				end
+				if bar.spec then
+					GameTooltip:AddDoubleLine(L["Specialization"], L["SPEC_"..bar.spec], 1, 1, 1)
+				end
+				if bar.talent then
+					GameTooltip:AddDoubleLine(L["Talents"], bar.talent, 1, 1, 1)
+				end
 				GameTooltip:Show()
 			end
 		end
@@ -772,6 +792,13 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 									bar.iconFrame:SetScript("OnLeave", GameTooltip_Hide)
 									bar.iconFrame:SetScript("OnMouseDown", iconOnMouseDown)
 								end
+							elseif bargroup:IsIconShown() and (data.role or data.spec or data.talent) then
+								bar.role = data.role
+								bar.spec = data.spec
+								bar.talent = data.talent
+								bar.iconFrame:EnableMouse(true)
+								bar.iconFrame:SetScript("OnEnter", iconOnEnter)
+								bar.iconFrame:SetScript("OnLeave", GameTooltip_Hide)
 							end
 
 							bar:EnableMouse(not db.clickthrough)

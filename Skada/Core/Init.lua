@@ -1976,12 +1976,14 @@ do
 				d.class = actor.class or "ENEMY"
 				d.role = actor.role
 				d.spec = actor.spec
+				d.talent = actor.talent
 				return d
 			end
 
 			d.class = actor.class or "UNKNOWN"
 			d.role = actor.role
 			d.spec = actor.spec
+			d.talent = actor.talent
 
 			if ns.validclass[d.class] then
 				d.text = ns:FormatName(d.label, actor.id)

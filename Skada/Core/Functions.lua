@@ -1327,7 +1327,7 @@ do
 			-- is it me? move on..
 			if actorid == self.userGUID then
 				actor.class = self.userClass
-				actor.spec = GetUnitSpec(self.userGUID)
+				actor.spec, actor.talent = GetUnitSpec(self.userGUID)
 				actor.role = GetUnitRole(self.userGUID)
 			end
 
@@ -1344,7 +1344,7 @@ do
 				if guidToName[actor.class] then
 					actor.class = "PET"
 				else
-					actor.spec = GetUnitSpec(actorid)
+					actor.spec, actor.talent = GetUnitSpec(actorid)
 					actor.role = GetUnitRole(actorid)
 				end
 			end
