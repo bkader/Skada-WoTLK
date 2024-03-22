@@ -1422,14 +1422,13 @@ do
 
 				if data.color then
 					color = data.color
-				elseif Skada.validclass[data.class] then
+				elseif data.class and Skada.validclass[data.class] then
 					color = classcolors(data.class)
 				end
 
 				local title = data.text or data.label
-				if mode.metadata and mode.metadata.showspots then
-					title = format("\124cffffffff%d.\124r %s", nr, title)
-				end
+				title = (data.spellid and data.icon) and format("|T%s:16:16:0:0:64:64:6:58:6:58|t %s", data.icon, title) or title
+				title = (mode.metadata and mode.metadata.showspots) and format("\124cffffffff%d.\124r %s", nr, title) or title
 				tooltip:AddDoubleLine(title, data.valuetext, color.r, color.g, color.b)
 			elseif nr >= maxnr then
 				break -- no need to continue
