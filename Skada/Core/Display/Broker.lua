@@ -19,11 +19,11 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 	if not FONT_FLAGS then
 		FONT_FLAGS = {
 			[""] = L["None"],
-			["OUTLINE"] = L["Outline"],
-			["THICK"] = L["Thick"],
-			["THICKOUTLINE"] = L["Thick outline"],
 			["MONOCHROME"] = L["Monochrome"],
-			["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
+			["OUTLINE"] = L["Outline"],
+			["THICKOUTLINE"] = L["Thick Outline"],
+			["OUTLINEMONOCHROME"] = L["Outline & Monochrome"],
+			["THICKOUTLINEMONOCHROME"] = L["Thick Outline & Monochrome"]
 		}
 		Skada.fontFlags = FONT_FLAGS
 	end
@@ -132,7 +132,7 @@ Skada:RegisterDisplay("Data Text", "mod_broker_desc", function(L, P)
 			frame:SetWidth(p.width or 200)
 			frame:SetPoint("CENTER", 0, 0)
 
-			local title = frame:CreateFontString("frameTitle", 6)
+			local title = frame:CreateFontString("frameTitle", "OVERLAY")
 			title:SetPoint("CENTER", 0, 0)
 			frame.title = title
 

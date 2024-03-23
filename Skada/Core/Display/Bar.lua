@@ -39,11 +39,11 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 	if not FONT_FLAGS then
 		FONT_FLAGS = {
 			[""] = L["None"],
-			["OUTLINE"] = L["Outline"],
-			["THICK"] = L["Thick"],
-			["THICKOUTLINE"] = L["Thick outline"],
 			["MONOCHROME"] = L["Monochrome"],
-			["OUTLINEMONOCHROME"] = L["Outlined monochrome"]
+			["OUTLINE"] = L["Outline"],
+			["THICKOUTLINE"] = L["Thick Outline"],
+			["OUTLINEMONOCHROME"] = L["Outline & Monochrome"],
+			["THICKOUTLINEMONOCHROME"] = L["Thick Outline & Monochrome"]
 		}
 		Skada.fontFlags = FONT_FLAGS
 	end
@@ -164,6 +164,9 @@ Skada:RegisterDisplay("Bar Display", "mod_bar_desc", function(L, P, G, _, _, O)
 			-- fix old oriantation & buttons texture
 			p.barorientation = max(LEFT_TO_RIGHT, min(RIGHT_TO_LEFT, p.barorientation or LEFT_TO_RIGHT))
 			p.title.toolbar = max(1, min(2, p.title.toolbar or 2))
+			p.barfontflags = p.barfontflags == "THICK" and "" or p.barfontflags
+			p.numfontflags = p.numfontflags == "THICK" and "" or p.numfontflags
+			p.title.fontflags = p.title.fontflags == "THICK" and "" or p.title.fontflags
 
 			if not bargroup then
 				bargroup = mod:NewBarGroup(

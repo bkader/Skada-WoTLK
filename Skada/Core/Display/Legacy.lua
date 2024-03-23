@@ -1065,7 +1065,7 @@ Skada:RegisterDisplay("Legacy Bar Display", "mod_bar_desc", function(L, P)
 		end
 
 		function barPrototype:UpdateColor()
-			if not self.colors then return end
+			if not self.colors or not self.colors[1] then return end
 			self.texture:SetVertexColor(self.colors[1], self.colors[2], self.colors[3], self.colors[4] or 1)
 		end
 
